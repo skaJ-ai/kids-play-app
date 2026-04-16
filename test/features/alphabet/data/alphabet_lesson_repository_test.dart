@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -40,6 +41,44 @@ void main() {
     expect(lesson.cards.first.label, '에이, A a');
     expect(lesson.cards.last.symbol, 'B b');
   });
+
+  test(
+    'ships matching public and generated alphabet manifests with a playable first lesson',
+    () async {
+      final publicManifest = File(
+        'assets/public/manifest/alphabet_lessons.json',
+      );
+      final generatedManifest = File(
+        'assets/generated/manifest/alphabet_lessons.json',
+      );
+
+      expect(await publicManifest.exists(), isTrue);
+      expect(await generatedManifest.exists(), isTrue);
+
+      final publicJson =
+          jsonDecode(await publicManifest.readAsString())
+              as Map<String, dynamic>;
+      final generatedJson =
+          jsonDecode(await generatedManifest.readAsString())
+              as Map<String, dynamic>;
+
+      expect(generatedJson, publicJson);
+
+      final lessons = (generatedJson['lessons'] as List<dynamic>)
+          .cast<Map<String, dynamic>>();
+      final firstLesson = lessons.firstWhere(
+        (lesson) => lesson['id'] == 'alphabet_letters_1',
+      );
+      final cards = (firstLesson['cards'] as List<dynamic>)
+          .cast<Map<String, dynamic>>();
+
+      expect(cards, hasLength(greaterThanOrEqualTo(5)));
+      expect(
+        cards.take(5).map((card) => card['symbol']).toList(growable: false),
+        ['A a', 'B b', 'C c', 'D d', 'E e'],
+      );
+    },
+  );
 }
 
 class _FakeAssetBundle extends CachingAssetBundle {

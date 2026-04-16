@@ -5,25 +5,19 @@ import '../../../app/ui/playground_scaffold.dart';
 import '../../../app/ui/tap_cooldown.dart';
 import '../../../app/ui/toy_button.dart';
 import '../../../app/ui/toy_panel.dart';
-import '../../alphabet/data/alphabet_lesson_repository.dart';
-import '../../hangul/data/hangul_lesson_repository.dart';
-import '../../numbers/data/numbers_lesson_repository.dart';
 import '../data/home_catalog_repository.dart';
 import 'category_hub_screen.dart';
+import 'home_category_config.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
     super.key,
     this.catalogRepository,
-    this.hangulLessonRepository,
-    this.alphabetLessonRepository,
-    this.numbersLessonRepository,
+    this.categoryDependencies = const HomeCategoryDependencies(),
   });
 
   final HomeCatalogRepository? catalogRepository;
-  final HangulLessonRepository? hangulLessonRepository;
-  final AlphabetLessonRepository? alphabetLessonRepository;
-  final NumbersLessonRepository? numbersLessonRepository;
+  final HomeCategoryDependencies categoryDependencies;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -174,12 +168,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: _CategoryCard(
                               category: category,
                               compact: compact,
-                              hangulLessonRepository:
-                                  widget.hangulLessonRepository,
-                              alphabetLessonRepository:
-                                  widget.alphabetLessonRepository,
-                              numbersLessonRepository:
-                                  widget.numbersLessonRepository,
+                              categoryDependencies: widget.categoryDependencies,
                             ),
                           ),
                           if (category != categories.last)
@@ -201,20 +190,18 @@ class _HomeScreenState extends State<HomeScreen> {
 class _CategoryCard extends StatelessWidget {
   const _CategoryCard({
     required this.category,
+    required this.categoryDependencies,
     this.compact = false,
-    this.hangulLessonRepository,
-    this.alphabetLessonRepository,
-    this.numbersLessonRepository,
   });
 
   final HomeCategory category;
+  final HomeCategoryDependencies categoryDependencies;
   final bool compact;
-  final HangulLessonRepository? hangulLessonRepository;
-  final AlphabetLessonRepository? alphabetLessonRepository;
-  final NumbersLessonRepository? numbersLessonRepository;
 
   @override
   Widget build(BuildContext context) {
+    final config = HomeCategoryConfig.resolve(category);
+
     return Material(
       color: Colors.transparent,
       child: CooldownInkWell(
@@ -224,9 +211,7 @@ class _CategoryCard extends StatelessWidget {
             MaterialPageRoute<void>(
               builder: (_) => CategoryHubScreen(
                 category: category,
-                hangulLessonRepository: hangulLessonRepository,
-                alphabetLessonRepository: alphabetLessonRepository,
-                numbersLessonRepository: numbersLessonRepository,
+                categoryDependencies: categoryDependencies,
               ),
             ),
           );
@@ -253,7 +238,7 @@ class _CategoryCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(999),
                           ),
                           child: Text(
-                            _badgeTextFor(category.id),
+                            config.badgeText,
                             style: Theme.of(context).textTheme.titleSmall
                                 ?.copyWith(
                                   color: KidPalette.coralDark,
@@ -297,7 +282,7 @@ class _CategoryCard extends StatelessWidget {
                     SizedBox(height: compact ? 6 : 12),
                     Text(
                       compact
-                          ? _compactDescriptionFor(category.id)
+                          ? config.compactDescription
                           : category.description,
                       maxLines: compact ? 1 : 2,
                       overflow: TextOverflow.ellipsis,
@@ -347,7 +332,7 @@ class _CategoryCard extends StatelessWidget {
                     boxShadow: KidShadows.button,
                   ),
                   child: Text(
-                    _stickerFor(category.id),
+                    config.stickerText,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       color: KidPalette.coralDark,
                       fontWeight: FontWeight.w900,
@@ -360,44 +345,5 @@ class _CategoryCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String _badgeTextFor(String categoryId) {
-    switch (categoryId) {
-      case 'hangul':
-        return '가장 먼저';
-      case 'alphabet':
-        return 'ABC';
-      case 'numbers':
-        return '1 2 3';
-      default:
-        return '놀이';
-    }
-  }
-
-  String _stickerFor(String categoryId) {
-    switch (categoryId) {
-      case 'hangul':
-        return '또박또박';
-      case 'alphabet':
-        return 'ABC 놀이';
-      case 'numbers':
-        return '숫자놀이';
-      default:
-        return 'PLAY';
-    }
-  }
-
-  String _compactDescriptionFor(String categoryId) {
-    switch (categoryId) {
-      case 'hangul':
-        return '자음과 모음';
-      case 'alphabet':
-        return '대문자와 소문자';
-      case 'numbers':
-        return '숫자 개념 놀이';
-      default:
-        return category.description;
-    }
   }
 }

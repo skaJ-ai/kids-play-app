@@ -4,40 +4,24 @@ import '../../../app/ui/kid_theme.dart';
 import '../../../app/ui/playground_scaffold.dart';
 import '../../../app/ui/tap_cooldown.dart';
 import '../../../app/ui/toy_panel.dart';
-import '../../alphabet/data/alphabet_lesson_repository.dart';
-import '../../alphabet/presentation/alphabet_learn_screen.dart';
-import '../../alphabet/presentation/alphabet_quiz_screen.dart';
-import '../../hangul/data/hangul_lesson_repository.dart';
-import '../../hangul/presentation/hangul_learn_screen.dart';
-import '../../hangul/presentation/hangul_quiz_screen.dart';
-import '../../numbers/data/numbers_lesson_repository.dart';
-import '../../numbers/presentation/numbers_learn_screen.dart';
-import '../../numbers/presentation/numbers_quiz_screen.dart';
 import '../data/home_catalog_repository.dart';
+import 'home_category_config.dart';
 
 class CategoryHubScreen extends StatelessWidget {
   const CategoryHubScreen({
     super.key,
     required this.category,
-    this.hangulLessonRepository,
-    this.alphabetLessonRepository,
-    this.numbersLessonRepository,
+    this.categoryDependencies = const HomeCategoryDependencies(),
   });
 
   final HomeCategory category;
-  final HangulLessonRepository? hangulLessonRepository;
-  final AlphabetLessonRepository? alphabetLessonRepository;
-  final NumbersLessonRepository? numbersLessonRepository;
+  final HomeCategoryDependencies categoryDependencies;
 
-  bool get _supportsLearnMode => switch (category.id) {
-    'hangul' || 'alphabet' || 'numbers' => true,
-    _ => false,
-  };
+  HomeCategoryConfig get _config => HomeCategoryConfig.resolve(category);
 
-  bool get _supportsGameMode => switch (category.id) {
-    'hangul' || 'alphabet' || 'numbers' => true,
-    _ => false,
-  };
+  bool get _supportsLearnMode => _config.supportsLearnMode;
+
+  bool get _supportsGameMode => _config.supportsGameMode;
 
   @override
   Widget build(BuildContext context) {
@@ -152,51 +136,27 @@ class CategoryHubScreen extends StatelessWidget {
   }
 
   void _openLearnMode(BuildContext context) {
-    Widget? destination;
-
-    switch (category.id) {
-      case 'hangul':
-        destination = HangulLearnScreen(repository: hangulLessonRepository);
-        break;
-      case 'alphabet':
-        destination = AlphabetLearnScreen(repository: alphabetLessonRepository);
-        break;
-      case 'numbers':
-        destination = NumbersLearnScreen(repository: numbersLessonRepository);
-        break;
-    }
-
-    if (destination == null) {
+    final destinationBuilder = _config.learnScreenBuilder;
+    if (destinationBuilder == null) {
       return;
     }
+    final destination = destinationBuilder(categoryDependencies);
 
     Navigator.of(
       context,
-    ).push(MaterialPageRoute<void>(builder: (_) => destination!));
+    ).push(MaterialPageRoute<void>(builder: (_) => destination));
   }
 
   void _openGameMode(BuildContext context) {
-    Widget? destination;
-
-    switch (category.id) {
-      case 'hangul':
-        destination = HangulQuizScreen(repository: hangulLessonRepository);
-        break;
-      case 'alphabet':
-        destination = AlphabetQuizScreen(repository: alphabetLessonRepository);
-        break;
-      case 'numbers':
-        destination = NumbersQuizScreen(repository: numbersLessonRepository);
-        break;
-    }
-
-    if (destination == null) {
+    final destinationBuilder = _config.gameScreenBuilder;
+    if (destinationBuilder == null) {
       return;
     }
+    final destination = destinationBuilder(categoryDependencies);
 
     Navigator.of(
       context,
-    ).push(MaterialPageRoute<void>(builder: (_) => destination!));
+    ).push(MaterialPageRoute<void>(builder: (_) => destination));
   }
 }
 

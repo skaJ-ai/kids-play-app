@@ -7,6 +7,7 @@ import 'package:kids_play_app/features/alphabet/data/alphabet_lesson_repository.
 import 'package:kids_play_app/features/avatar/presentation/avatar_setup_screen.dart';
 import 'package:kids_play_app/features/hangul/data/hangul_lesson_repository.dart';
 import 'package:kids_play_app/features/home/data/home_catalog_repository.dart';
+import 'package:kids_play_app/features/home/presentation/home_category_config.dart';
 import 'package:kids_play_app/features/home/presentation/category_hub_screen.dart';
 import 'package:kids_play_app/features/home/presentation/home_screen.dart';
 import 'package:kids_play_app/features/numbers/data/numbers_lesson_repository.dart';
@@ -111,7 +112,11 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      _buildHangulCategoryHub(repository: _fakeHangulRepository()),
+      _buildHangulCategoryHub(
+        categoryDependencies: HomeCategoryDependencies(
+          hangulLessonRepository: _fakeHangulRepository(),
+        ),
+      ),
     );
 
     await tester.tap(find.text('학습하기'));
@@ -126,7 +131,11 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      _buildHangulCategoryHub(repository: _fakeHangulRepository()),
+      _buildHangulCategoryHub(
+        categoryDependencies: HomeCategoryDependencies(
+          hangulLessonRepository: _fakeHangulRepository(),
+        ),
+      ),
     );
 
     await tester.tap(find.text('게임하기'));
@@ -137,11 +146,41 @@ void main() {
     expect(find.text('1 / 5'), findsOneWidget);
   });
 
+  testWidgets('opens the first hangul learning card from the home flow', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildHomeScreen(
+        categoryDependencies: HomeCategoryDependencies(
+          hangulLessonRepository: _fakeHangulRepository(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('한글'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('한글 놀이터'), findsOneWidget);
+    expect(find.text('곧 만나요'), findsNothing);
+
+    await tester.tap(find.text('학습하기'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('한글 학습'), findsOneWidget);
+    expect(find.text('기역, ㄱ'), findsOneWidget);
+    expect(find.text('다음'), findsOneWidget);
+  });
+
   testWidgets('opens the alphabet learn screen from the home flow', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      _buildHomeScreen(alphabetLessonRepository: _fakeAlphabetRepository()),
+      _buildHomeScreen(
+        categoryDependencies: HomeCategoryDependencies(
+          alphabetLessonRepository: _fakeAlphabetRepository(),
+        ),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -163,7 +202,11 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      _buildAlphabetCategoryHub(repository: _fakeAlphabetRepository()),
+      _buildAlphabetCategoryHub(
+        categoryDependencies: HomeCategoryDependencies(
+          alphabetLessonRepository: _fakeAlphabetRepository(),
+        ),
+      ),
     );
 
     expect(find.text('곧 만나요'), findsNothing);
@@ -180,7 +223,11 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      _buildNumbersCategoryHub(repository: _fakeNumbersRepository()),
+      _buildNumbersCategoryHub(
+        categoryDependencies: HomeCategoryDependencies(
+          numbersLessonRepository: _fakeNumbersRepository(),
+        ),
+      ),
     );
 
     expect(find.text('곧 만나요'), findsNothing);
@@ -197,7 +244,11 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      _buildHomeScreen(numbersLessonRepository: _fakeNumbersRepository()),
+      _buildHomeScreen(
+        categoryDependencies: HomeCategoryDependencies(
+          numbersLessonRepository: _fakeNumbersRepository(),
+        ),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -279,7 +330,9 @@ void main() {
   });
 }
 
-Widget _buildHangulCategoryHub({HangulLessonRepository? repository}) {
+Widget _buildHangulCategoryHub({
+  HomeCategoryDependencies? categoryDependencies,
+}) {
   return MaterialApp(
     home: CategoryHubScreen(
       category: const HomeCategory(
@@ -289,12 +342,15 @@ Widget _buildHangulCategoryHub({HangulLessonRepository? repository}) {
         backgroundColorHex: '#FFE699',
         iconName: 'text_fields_rounded',
       ),
-      hangulLessonRepository: repository,
+      categoryDependencies:
+          categoryDependencies ?? const HomeCategoryDependencies(),
     ),
   );
 }
 
-Widget _buildAlphabetCategoryHub({AlphabetLessonRepository? repository}) {
+Widget _buildAlphabetCategoryHub({
+  HomeCategoryDependencies? categoryDependencies,
+}) {
   return MaterialApp(
     home: CategoryHubScreen(
       category: const HomeCategory(
@@ -304,12 +360,15 @@ Widget _buildAlphabetCategoryHub({AlphabetLessonRepository? repository}) {
         backgroundColorHex: '#B9F4D0',
         iconName: 'abc_rounded',
       ),
-      alphabetLessonRepository: repository,
+      categoryDependencies:
+          categoryDependencies ?? const HomeCategoryDependencies(),
     ),
   );
 }
 
-Widget _buildNumbersCategoryHub({NumbersLessonRepository? repository}) {
+Widget _buildNumbersCategoryHub({
+  HomeCategoryDependencies? categoryDependencies,
+}) {
   return MaterialApp(
     home: CategoryHubScreen(
       category: const HomeCategory(
@@ -319,23 +378,21 @@ Widget _buildNumbersCategoryHub({NumbersLessonRepository? repository}) {
         backgroundColorHex: '#FFC6D9',
         iconName: 'looks_one_rounded',
       ),
-      numbersLessonRepository: repository,
+      categoryDependencies:
+          categoryDependencies ?? const HomeCategoryDependencies(),
     ),
   );
 }
 
 Widget _buildHomeScreen({
   HomeCatalogRepository? catalogRepository,
-  HangulLessonRepository? hangulLessonRepository,
-  AlphabetLessonRepository? alphabetLessonRepository,
-  NumbersLessonRepository? numbersLessonRepository,
+  HomeCategoryDependencies? categoryDependencies,
 }) {
   return MaterialApp(
     home: HomeScreen(
       catalogRepository: catalogRepository ?? _fakeHomeCatalogRepository(),
-      hangulLessonRepository: hangulLessonRepository,
-      alphabetLessonRepository: alphabetLessonRepository,
-      numbersLessonRepository: numbersLessonRepository,
+      categoryDependencies:
+          categoryDependencies ?? const HomeCategoryDependencies(),
     ),
   );
 }
