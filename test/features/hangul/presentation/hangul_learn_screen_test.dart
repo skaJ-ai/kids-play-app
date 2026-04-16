@@ -1,0 +1,150 @@
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:kids_play_app/features/hangul/data/hangul_lesson_repository.dart';
+import 'package:kids_play_app/features/hangul/presentation/hangul_learn_screen.dart';
+
+void main() {
+  testWidgets('shows the first hangul card and advances to the next one', (
+    WidgetTester tester,
+  ) async {
+    final repository = HangulLessonRepository(
+      assetBundle: _FakeAssetBundle({
+        HangulLessonRepository.manifestPath: jsonEncode({
+          'lessons': [
+            {
+              'id': 'basic_consonants_1',
+              'title': '기본 자음 1',
+              'cards': [
+                {
+                  'symbol': 'ㄱ',
+                  'label': '기역, ㄱ',
+                  'hint': '큰 카드로 기역을 천천히 봐요',
+                },
+                {
+                  'symbol': 'ㄴ',
+                  'label': '니은, ㄴ',
+                  'hint': '니은을 손가락으로 콕 눌러봐요',
+                },
+              ],
+            },
+          ],
+        }),
+      }),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: HangulLearnScreen(
+          repository: repository,
+          lessonId: 'basic_consonants_1',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('기본 자음 1'), findsOneWidget);
+    expect(find.text('기역, ㄱ'), findsOneWidget);
+    expect(find.text('1 / 2'), findsOneWidget);
+
+    await tester.tap(find.text('다음'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('니은, ㄴ'), findsOneWidget);
+    expect(find.text('2 / 2'), findsOneWidget);
+  });
+
+  testWidgets('shows a restart button on the last card and loops back to start', (
+    WidgetTester tester,
+  ) async {
+    final repository = HangulLessonRepository(
+      assetBundle: _FakeAssetBundle({
+        HangulLessonRepository.manifestPath: jsonEncode({
+          'lessons': [
+            {
+              'id': 'basic_consonants_1',
+              'title': '기본 자음 1',
+              'cards': [
+                {
+                  'symbol': 'ㄱ',
+                  'label': '기역, ㄱ',
+                  'hint': '큰 카드로 기역을 천천히 봐요',
+                },
+                {
+                  'symbol': 'ㄴ',
+                  'label': '니은, ㄴ',
+                  'hint': '니은을 손가락으로 콕 눌러봐요',
+                },
+              ],
+            },
+          ],
+        }),
+      }),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: HangulLearnScreen(
+          repository: repository,
+          lessonId: 'basic_consonants_1',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('다음'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('처음부터'), findsOneWidget);
+
+    await tester.tap(find.text('처음부터'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('기역, ㄱ'), findsOneWidget);
+    expect(find.text('1 / 2'), findsOneWidget);
+    expect(find.text('다음'), findsOneWidget);
+  });
+
+  testWidgets('shows an error message when the hangul lesson fails to load', (
+    WidgetTester tester,
+  ) async {
+    final repository = HangulLessonRepository(assetBundle: _FakeAssetBundle({}));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: HangulLearnScreen(
+          repository: repository,
+          lessonId: 'basic_consonants_1',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('한글 카드를 불러오지 못했어요.'), findsOneWidget);
+    expect(find.text('다시 시도'), findsOneWidget);
+  });
+}
+
+class _FakeAssetBundle extends CachingAssetBundle {
+  _FakeAssetBundle(this._assets);
+
+  final Map<String, String> _assets;
+
+  @override
+  Future<String> loadString(String key, {bool cache = true}) async {
+    final value = _assets[key];
+    if (value == null) {
+      throw Exception('Missing fake asset for $key');
+    }
+    return value;
+  }
+
+  @override
+  Future<ByteData> load(String key) async {
+    final string = await loadString(key);
+    final bytes = Uint8List.fromList(utf8.encode(string));
+    return ByteData.view(bytes.buffer);
+  }
+}
