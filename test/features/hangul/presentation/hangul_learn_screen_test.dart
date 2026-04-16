@@ -56,6 +56,55 @@ void main() {
     expect(find.text('2 / 2'), findsOneWidget);
   });
 
+  testWidgets('keeps the learn screen stable on a compact landscape phone', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(780, 360);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final repository = HangulLessonRepository(
+      assetBundle: _FakeAssetBundle({
+        HangulLessonRepository.manifestPath: jsonEncode({
+          'lessons': [
+            {
+              'id': 'basic_consonants_1',
+              'title': '기본 자음 1',
+              'cards': [
+                {
+                  'symbol': 'ㄱ',
+                  'label': '기역, ㄱ',
+                  'hint': '큰 카드로 기역을 천천히 봐요',
+                },
+                {
+                  'symbol': 'ㄴ',
+                  'label': '니은, ㄴ',
+                  'hint': '니은을 손가락으로 콕 눌러봐요',
+                },
+              ],
+            },
+          ],
+        }),
+      }),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: HangulLearnScreen(
+          repository: repository,
+          lessonId: 'basic_consonants_1',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('기역, ㄱ'), findsOneWidget);
+  });
+
   testWidgets('shows a restart button on the last card and loops back to start', (
     WidgetTester tester,
   ) async {

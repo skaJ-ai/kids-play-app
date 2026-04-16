@@ -7,6 +7,31 @@ import 'package:kids_play_app/features/hangul/data/hangul_lesson_repository.dart
 import 'package:kids_play_app/features/hangul/presentation/hangul_quiz_screen.dart';
 
 void main() {
+  testWidgets('renders the quiz inside the playful playground shell', (
+    WidgetTester tester,
+  ) async {
+    final repository = HangulLessonRepository(
+      assetBundle: _FakeAssetBundle({
+        HangulLessonRepository.manifestPath: jsonEncode({
+          'lessons': [_basicConsonantsLesson],
+        }),
+      }),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: HangulQuizScreen(
+          repository: repository,
+          lessonId: 'basic_consonants_1',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('playground-background')), findsOneWidget);
+    expect(find.byKey(const Key('quiz-prompt-panel')), findsOneWidget);
+  });
+
   testWidgets('shows the first hangul quiz question with four choices', (
     WidgetTester tester,
   ) async {
@@ -31,10 +56,10 @@ void main() {
     expect(find.text('한글 게임'), findsOneWidget);
     expect(find.text('1 / 5'), findsOneWidget);
     expect(find.text("'ㄱ' 글자를 찾아봐!"), findsOneWidget);
-    expect(find.widgetWithText(FilledButton, 'ㄱ'), findsOneWidget);
-    expect(find.widgetWithText(FilledButton, 'ㄴ'), findsOneWidget);
-    expect(find.widgetWithText(FilledButton, 'ㄷ'), findsOneWidget);
-    expect(find.widgetWithText(FilledButton, 'ㄹ'), findsOneWidget);
+    expect(find.byKey(const Key('quiz-choice-ㄱ')), findsOneWidget);
+    expect(find.byKey(const Key('quiz-choice-ㄴ')), findsOneWidget);
+    expect(find.byKey(const Key('quiz-choice-ㄷ')), findsOneWidget);
+    expect(find.byKey(const Key('quiz-choice-ㄹ')), findsOneWidget);
   });
 
   testWidgets('keeps all four answer choices fully visible on a compact landscape screen', (
@@ -67,7 +92,7 @@ void main() {
 
     final screenBottom = tester.view.physicalSize.height;
     for (final symbol in ['ㄱ', 'ㄴ', 'ㄷ', 'ㄹ']) {
-      final rect = tester.getRect(find.widgetWithText(FilledButton, symbol));
+      final rect = tester.getRect(find.byKey(Key('quiz-choice-$symbol')));
       expect(rect.bottom <= screenBottom, isTrue, reason: '$symbol choice should stay on screen');
     }
   });
@@ -117,15 +142,15 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.widgetWithText(FilledButton, 'ㄱ'));
+    await tester.tap(find.byKey(const Key('quiz-choice-ㄱ')));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, 'ㄴ'));
+    await tester.tap(find.byKey(const Key('quiz-choice-ㄴ')));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, 'ㄷ'));
+    await tester.tap(find.byKey(const Key('quiz-choice-ㄷ')));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, 'ㄹ'));
+    await tester.tap(find.byKey(const Key('quiz-choice-ㄹ')));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, 'ㅁ'));
+    await tester.tap(find.byKey(const Key('quiz-choice-ㅁ')));
     await tester.pumpAndSettle();
 
     expect(find.text('5문제 중 5문제 맞았어요!'), findsOneWidget);

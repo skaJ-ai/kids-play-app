@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kids_play_app/features/hangul/data/hangul_lesson_repository.dart';
 import 'package:kids_play_app/features/home/data/home_catalog_repository.dart';
 import 'package:kids_play_app/features/home/presentation/category_hub_screen.dart';
+import 'package:kids_play_app/features/home/presentation/home_screen.dart';
 import 'package:kids_play_app/main.dart';
 
 void main() {
@@ -14,10 +15,28 @@ void main() {
   ) async {
     await tester.pumpWidget(const KidsPlayApp());
 
+    expect(find.byKey(const Key('playground-background')), findsOneWidget);
     expect(find.byKey(const Key('hero-face-image')), findsOneWidget);
     expect(find.text('승원이의 빵빵 놀이터'), findsOneWidget);
     expect(find.text('플레이하기'), findsOneWidget);
     expect(find.text('빵빵 출발!'), findsOneWidget);
+  });
+
+  testWidgets('keeps the hero screen stable on a compact landscape phone', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(780, 360);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(const KidsPlayApp());
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('플레이하기'), findsOneWidget);
   });
 
   testWidgets('moves from hero screen to category menu when play is tapped', (
@@ -40,6 +59,24 @@ void main() {
     await tester.pumpWidget(_buildHangulCategoryHub());
 
     expect(find.text('한글 놀이터'), findsOneWidget);
+    expect(find.text('학습하기'), findsOneWidget);
+    expect(find.text('게임하기'), findsOneWidget);
+  });
+
+  testWidgets('keeps the category hub stable on a compact landscape phone', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(780, 360);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(_buildHangulCategoryHub());
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
     expect(find.text('학습하기'), findsOneWidget);
     expect(find.text('게임하기'), findsOneWidget);
   });
@@ -97,6 +134,69 @@ void main() {
     expect(find.text('알파벳 놀이터'), findsOneWidget);
     expect(find.text('곧 만나요'), findsNWidgets(2));
     expect(find.text('한글 게임'), findsNothing);
+  });
+
+  testWidgets('shows an error state when home categories fail to load', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      DefaultAssetBundle(
+        bundle: _FailingAssetBundle(),
+        child: const MaterialApp(home: HomeScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('놀이터를 불러오지 못했어요.'), findsOneWidget);
+    expect(find.text('다시 시도'), findsOneWidget);
+  });
+
+  testWidgets('keeps the home screen stable on a compact landscape phone', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(780, 360);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      DefaultAssetBundle(
+        bundle: _FakeAssetBundle({
+          HomeCatalogRepository.manifestPath: jsonEncode({
+            'categories': [
+              {
+                'id': 'hangul',
+                'label': '한글',
+                'description': '자음과 모음을 만나요',
+                'backgroundColor': '#FFE699',
+                'icon': 'text_fields_rounded',
+              },
+              {
+                'id': 'alphabet',
+                'label': '알파벳',
+                'description': '대문자와 소문자를 만나요',
+                'backgroundColor': '#B9F4D0',
+                'icon': 'abc_rounded',
+              },
+              {
+                'id': 'numbers',
+                'label': '숫자',
+                'description': '숫자 놀이를 시작해요',
+                'backgroundColor': '#FFC6D9',
+                'icon': 'looks_one_rounded',
+              },
+            ],
+          }),
+        }),
+        child: const MaterialApp(home: HomeScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('어떤 놀이터로 갈까?'), findsOneWidget);
   });
 }
 
@@ -176,5 +276,17 @@ class _FakeAssetBundle extends CachingAssetBundle {
     final string = await loadString(key);
     final bytes = Uint8List.fromList(utf8.encode(string));
     return ByteData.view(bytes.buffer);
+  }
+}
+
+class _FailingAssetBundle extends CachingAssetBundle {
+  @override
+  Future<String> loadString(String key, {bool cache = true}) async {
+    throw Exception('boom: $key');
+  }
+
+  @override
+  Future<ByteData> load(String key) async {
+    throw Exception('boom: $key');
   }
 }

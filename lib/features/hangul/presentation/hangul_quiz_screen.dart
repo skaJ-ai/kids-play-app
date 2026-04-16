@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/ui/kid_theme.dart';
+import '../../../app/ui/playground_scaffold.dart';
+import '../../../app/ui/toy_button.dart';
+import '../../../app/ui/toy_panel.dart';
 import '../data/hangul_lesson_repository.dart';
 
 class HangulQuizScreen extends StatefulWidget {
@@ -45,198 +49,228 @@ class _HangulQuizScreenState extends State<HangulQuizScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: FutureBuilder<HangulLesson>(
-          future: _lessonFuture,
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return _HangulQuizLoadError(onRetry: _retryLoad);
-            }
+    return PlaygroundScaffold(
+      showRoad: true,
+      child: FutureBuilder<HangulLesson>(
+        future: _lessonFuture,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return _HangulQuizLoadError(onRetry: _retryLoad);
+          }
 
-            if (!snapshot.hasData) {
-              return const Center(child: CircularProgressIndicator());
-            }
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-            final lesson = snapshot.data!;
-            if (lesson.cards.length < 4) {
-              return const Center(child: Text('퀴즈 카드가 아직 부족해요.'));
-            }
+          final lesson = snapshot.data!;
+          if (lesson.cards.length < 4) {
+            return const Center(child: Text('퀴즈 카드가 아직 부족해요.'));
+          }
 
-            if (_isComplete) {
-              return _QuizSummary(
-                totalQuestions: lesson.cards.length,
-                correctCount: _correctCount,
-                onRestart: () => setState(() {
-                  _questionIndex = 0;
-                  _correctCount = 0;
-                  _isComplete = false;
-                }),
-              );
-            }
+          if (_isComplete) {
+            return _QuizSummary(
+              totalQuestions: lesson.cards.length,
+              correctCount: _correctCount,
+              onRestart: () => setState(() {
+                _questionIndex = 0;
+                _correctCount = 0;
+                _isComplete = false;
+              }),
+            );
+          }
 
-            final question = lesson.cards[_questionIndex];
-            final choices = _buildChoices(lesson.cards, _questionIndex);
+          final question = lesson.cards[_questionIndex];
+          final choices = _buildChoices(lesson.cards, _questionIndex);
 
-            return LayoutBuilder(
-              builder: (context, constraints) {
-                final isCompact = constraints.maxHeight < 420;
-                final outerPadding = isCompact ? 16.0 : 24.0;
-                final titleGap = isCompact ? 6.0 : 8.0;
-                final sectionGap = isCompact ? 12.0 : 20.0;
-                final promptLineGap = isCompact ? 8.0 : 12.0;
-                final promptAccentGap = isCompact ? 4.0 : 8.0;
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final isCompact = constraints.maxHeight < 420;
+              final sectionGap = isCompact ? 14.0 : 20.0;
 
-                return Padding(
-                  padding: EdgeInsets.all(outerPadding),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
                     children: [
-                      Text(
-                        '한글 게임',
-                        textAlign: TextAlign.center,
-                        style: (isCompact
-                                ? Theme.of(context).textTheme.titleLarge
-                                : Theme.of(context).textTheme.headlineMedium)
-                            ?.copyWith(
-                              fontWeight: FontWeight.w900,
-                              color: const Color(0xFF184A78),
-                            ),
-                      ),
-                      SizedBox(height: titleGap),
-                      Text(
-                        '${_questionIndex + 1} / ${lesson.cards.length}',
-                        textAlign: TextAlign.center,
-                        style: (isCompact
-                                ? Theme.of(context).textTheme.titleSmall
-                                : Theme.of(context).textTheme.titleMedium)
-                            ?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF35658F),
-                            ),
-                      ),
-                      SizedBox(height: sectionGap),
-                      DecoratedBox(
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFFF6D8),
-                          borderRadius: BorderRadius.circular(isCompact ? 28 : 36),
+                          color: KidPalette.white.withValues(alpha: 0.94),
+                          borderRadius: BorderRadius.circular(999),
+                          boxShadow: KidShadows.panel,
                         ),
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: isCompact ? 16 : 24,
-                            vertical: isCompact ? 18 : 28,
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                '알맞은 글자를 콕 눌러봐!',
-                                textAlign: TextAlign.center,
-                                style: (isCompact
-                                        ? Theme.of(context).textTheme.titleMedium
-                                        : Theme.of(context).textTheme.titleLarge)
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.w800,
-                                      color: const Color(0xFFF06275),
-                                    ),
-                              ),
-                              SizedBox(height: promptLineGap),
-                              Text(
-                                _displayNameFor(question),
-                                textAlign: TextAlign.center,
-                                style: (isCompact
-                                        ? Theme.of(context).textTheme.titleSmall
-                                        : Theme.of(context).textTheme.titleMedium)
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                      color: const Color(0xFF35658F),
-                                    ),
-                              ),
-                              SizedBox(height: promptAccentGap),
-                              Text(
-                                _targetPromptFor(question),
-                                textAlign: TextAlign.center,
-                                style: (isCompact
-                                        ? Theme.of(context).textTheme.titleLarge
-                                        : Theme.of(context).textTheme.headlineSmall)
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.w900,
-                                      color: const Color(0xFF184A78),
-                                    ),
-                              ),
-                            ],
-                          ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.videogame_asset_rounded,
+                              color: KidPalette.navy,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              '한글 게임',
+                              style: Theme.of(context).textTheme.titleSmall
+                                  ?.copyWith(
+                                    color: KidPalette.navy,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                            ),
+                          ],
                         ),
                       ),
-                      SizedBox(height: sectionGap),
-                      Expanded(
-                        child: LayoutBuilder(
-                          builder: (context, gridConstraints) {
-                            const crossAxisCount = 2;
-                            const mainAxisSpacing = 16.0;
-                            const crossAxisSpacing = 16.0;
-                            final rowCount = (choices.length / crossAxisCount).ceil();
-                            final tileWidth =
-                                (gridConstraints.maxWidth - crossAxisSpacing) /
-                                crossAxisCount;
-                            final tileHeight =
-                                (gridConstraints.maxHeight -
-                                    (rowCount - 1) * mainAxisSpacing) /
-                                rowCount;
-                            final childAspectRatio = tileHeight <= 0
-                                ? 1.0
-                                : tileWidth / tileHeight;
-
-                            return GridView.count(
-                              crossAxisCount: crossAxisCount,
-                              mainAxisSpacing: mainAxisSpacing,
-                              crossAxisSpacing: crossAxisSpacing,
-                              childAspectRatio: childAspectRatio,
-                              physics: const NeverScrollableScrollPhysics(),
-                              children: [
-                                for (final choice in choices)
-                                  FilledButton(
-                                    onPressed: () => _selectChoice(
-                                      choice: choice,
-                                      answer: question,
-                                      totalQuestions: lesson.cards.length,
-                                    ),
-                                    style: FilledButton.styleFrom(
-                                      backgroundColor: const Color(0xFF4B98FF),
-                                      foregroundColor: Colors.white,
-                                      padding: EdgeInsets.zero,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(
-                                          isCompact ? 22 : 28,
-                                        ),
-                                      ),
-                                    ),
-                                    child: Center(
-                                      child: FittedBox(
-                                        fit: BoxFit.scaleDown,
-                                        child: Text(
-                                          choice.symbol,
-                                          style: TextStyle(
-                                            fontSize: isCompact ? 60 : 84,
-                                            fontWeight: FontWeight.w900,
-                                            height: 1,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            );
-                          },
+                      const Spacer(),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: KidPalette.white.withValues(alpha: 0.94),
+                          borderRadius: BorderRadius.circular(999),
+                          boxShadow: KidShadows.panel,
+                        ),
+                        child: Text(
+                          '${_questionIndex + 1} / ${lesson.cards.length}',
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            color: KidPalette.coralDark,
+                            fontWeight: FontWeight.w900,
+                          ),
                         ),
                       ),
                     ],
                   ),
-                );
-              },
-            );
-          },
-        ),
+                  SizedBox(height: isCompact ? 14 : 18),
+                  Text(
+                    '알맞은 글자를 찾아보자!',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                  SizedBox(height: isCompact ? 6 : 8),
+                  Text(
+                    '차근차근 보고, 정답을 콕 눌러봐요.',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  SizedBox(height: sectionGap),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: 4,
+                          child: ToyPanel(
+                            key: const Key('quiz-prompt-panel'),
+                            padding: EdgeInsets.all(isCompact ? 14 : 24),
+                            backgroundColor: KidPalette.creamWarm,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: isCompact ? 12 : 14,
+                                    vertical: isCompact ? 6 : 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: KidPalette.white.withValues(alpha: 0.9),
+                                    borderRadius: BorderRadius.circular(999),
+                                  ),
+                                  child: Text(
+                                    '찾아볼 글자',
+                                    style: Theme.of(context).textTheme.titleSmall
+                                        ?.copyWith(
+                                          color: KidPalette.coralDark,
+                                          fontWeight: FontWeight.w900,
+                                        ),
+                                  ),
+                                ),
+                                SizedBox(height: isCompact ? 10 : 18),
+                                Text(
+                                  _displayNameFor(question),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: (isCompact
+                                          ? Theme.of(context).textTheme.titleMedium
+                                          : Theme.of(context).textTheme.headlineSmall)
+                                      ?.copyWith(color: KidPalette.coralDark),
+                                ),
+                                SizedBox(height: isCompact ? 8 : 12),
+                                Text(
+                                  _targetPromptFor(question),
+                                  maxLines: isCompact ? 2 : 3,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: (isCompact
+                                          ? Theme.of(context).textTheme.titleMedium
+                                          : Theme.of(context).textTheme.headlineSmall)
+                                      ?.copyWith(color: KidPalette.navy),
+                                ),
+                                if (!isCompact) ...[
+                                  const SizedBox(height: 18),
+                                  Text(
+                                    '아래 네 개 중에서 정답을 골라봐!',
+                                    style: Theme.of(context).textTheme.titleMedium
+                                        ?.copyWith(color: KidPalette.body),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: isCompact ? 14 : 18),
+                        Expanded(
+                          flex: 5,
+                          child: LayoutBuilder(
+                            builder: (context, gridConstraints) {
+                              const crossAxisCount = 2;
+                              const mainAxisSpacing = 16.0;
+                              const crossAxisSpacing = 16.0;
+                              final rowCount = (choices.length / crossAxisCount)
+                                  .ceil();
+                              final tileWidth =
+                                  (gridConstraints.maxWidth - crossAxisSpacing) /
+                                  crossAxisCount;
+                              final tileHeight =
+                                  (gridConstraints.maxHeight -
+                                      (rowCount - 1) * mainAxisSpacing) /
+                                  rowCount;
+                              final childAspectRatio = tileHeight <= 0
+                                  ? 1.0
+                                  : tileWidth / tileHeight;
+
+                              return GridView.count(
+                                crossAxisCount: crossAxisCount,
+                                mainAxisSpacing: mainAxisSpacing,
+                                crossAxisSpacing: crossAxisSpacing,
+                                childAspectRatio: childAspectRatio,
+                                physics: const NeverScrollableScrollPhysics(),
+                                children: [
+                                  for (var i = 0; i < choices.length; i++)
+                                    _QuizChoiceTile(
+                                      key: Key('quiz-choice-${choices[i].symbol}'),
+                                      symbol: choices[i].symbol,
+                                      compact: isCompact,
+                                      accentIndex: i,
+                                      onTap: () => _selectChoice(
+                                        choice: choices[i],
+                                        answer: question,
+                                        totalQuestions: lesson.cards.length,
+                                      ),
+                                    ),
+                                ],
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
+        },
       ),
     );
   }
@@ -282,6 +316,95 @@ class _HangulQuizScreenState extends State<HangulQuizScreen> {
   }
 }
 
+class _QuizChoiceTile extends StatelessWidget {
+  const _QuizChoiceTile({
+    super.key,
+    required this.symbol,
+    required this.onTap,
+    required this.accentIndex,
+    required this.compact,
+  });
+
+  final String symbol;
+  final VoidCallback onTap;
+  final int accentIndex;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = _paletteFor(accentIndex);
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(colors: palette),
+        borderRadius: BorderRadius.circular(compact ? 26 : 32),
+        boxShadow: KidShadows.button,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(compact ? 26 : 32),
+          onTap: onTap,
+          child: Stack(
+            children: [
+              Positioned(
+                right: 16,
+                top: 16,
+                child: Container(
+                  width: compact ? 30 : 38,
+                  height: compact ? 30 : 38,
+                  decoration: BoxDecoration(
+                    color: KidPalette.white.withValues(alpha: 0.24),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 18,
+                top: 16,
+                child: Text(
+                  '콕!',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: KidPalette.white.withValues(alpha: 0.92),
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              Center(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    symbol,
+                    style: TextStyle(
+                      fontSize: compact ? 66 : 92,
+                      fontWeight: FontWeight.w900,
+                      height: 1,
+                      color: KidPalette.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<Color> _paletteFor(int index) {
+    switch (index % 4) {
+      case 0:
+        return const [KidPalette.blue, KidPalette.blueDark];
+      case 1:
+        return const [KidPalette.coral, KidPalette.coralDark];
+      case 2:
+        return const [KidPalette.mint, KidPalette.mintDark];
+      default:
+        return const [KidPalette.lilac, Color(0xFFA28CF5)];
+    }
+  }
+}
+
 class _QuizSummary extends StatelessWidget {
   const _QuizSummary({
     required this.totalQuestions,
@@ -297,74 +420,46 @@ class _QuizSummary extends StatelessWidget {
   Widget build(BuildContext context) {
     final earnedSticker = correctCount >= (totalQuestions * 0.8).ceil();
 
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            '한글 게임 끝!',
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w900,
-              color: const Color(0xFF184A78),
-            ),
-          ),
-          const SizedBox(height: 24),
-          Expanded(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFF6D8),
-                borderRadius: BorderRadius.circular(36),
+    return Center(
+      child: SizedBox(
+        width: 560,
+        child: ToyPanel(
+          backgroundColor: KidPalette.creamWarm,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '한글 게임 끝!',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headlineMedium,
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      '$totalQuestions문제 중 $correctCount문제 맞았어요!',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w900,
-                        color: const Color(0xFF184A78),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      earnedSticker
-                          ? '자동차 스티커 1개 획득!'
-                          : '한 번 더 하면 스티커를 받을 수 있어!',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: const Color(0xFFF06275),
-                      ),
-                    ),
-                  ],
+              const SizedBox(height: 18),
+              Text(
+                '$totalQuestions문제 중 $correctCount문제 맞았어요!',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: KidPalette.navy,
                 ),
               ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          SizedBox(
-            height: 72,
-            child: FilledButton(
-              onPressed: onRestart,
-              style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF4B98FF),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(28),
-                ),
-                textStyle: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
+              const SizedBox(height: 14),
+              Text(
+                earnedSticker
+                    ? '자동차 스티커 1개 획득!'
+                    : '한 번 더 하면 스티커를 받을 수 있어!',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: KidPalette.coralDark,
                 ),
               ),
-              child: const Text('다시하기'),
-            ),
+              const SizedBox(height: 22),
+              ToyButton(
+                label: '다시하기',
+                icon: Icons.refresh_rounded,
+                onPressed: onRestart,
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -378,38 +473,27 @@ class _HangulQuizLoadError extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              '한글 게임을 불러오지 못했어요.',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w900,
-                color: const Color(0xFF184A78),
-              ),
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              height: 64,
-              child: FilledButton(
-                onPressed: onRetry,
-                style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF4B98FF),
-                  foregroundColor: Colors.white,
-                  textStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24),
-                  ),
+      child: SizedBox(
+        width: 520,
+        child: ToyPanel(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '한글 게임을 불러오지 못했어요.',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: KidPalette.navy,
                 ),
-                child: const Text('다시 시도'),
               ),
-            ),
-          ],
+              const SizedBox(height: 20),
+              ToyButton(
+                label: '다시 시도',
+                icon: Icons.refresh_rounded,
+                onPressed: onRetry,
+              ),
+            ],
+          ),
         ),
       ),
     );

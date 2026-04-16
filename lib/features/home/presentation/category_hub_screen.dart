@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/ui/kid_theme.dart';
+import '../../../app/ui/playground_scaffold.dart';
+import '../../../app/ui/toy_panel.dart';
 import '../../hangul/data/hangul_lesson_repository.dart';
 import '../../hangul/presentation/hangul_learn_screen.dart';
 import '../../hangul/presentation/hangul_quiz_screen.dart';
@@ -20,52 +23,98 @@ class CategoryHubScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
+    return PlaygroundScaffold(
+      showRoad: true,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxHeight < 360;
+
+          return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: compact ? 12 : 16,
+                      vertical: compact ? 8 : 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: KidPalette.white.withValues(alpha: 0.94),
+                      borderRadius: BorderRadius.circular(999),
+                      boxShadow: KidShadows.panel,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          category.icon,
+                          color: KidPalette.navy,
+                          size: compact ? 18 : 24,
+                        ),
+                        SizedBox(width: compact ? 6 : 8),
+                        Text(
+                          compact ? category.label : '${category.label} 준비완료',
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            color: KidPalette.navy,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Spacer(),
+                  if (!compact)
+                    Text(
+                      _supportsGameMode ? '배우고 바로 퀴즈!' : '곧 더 많이 열려요',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: KidPalette.coralDark,
+                      ),
+                    ),
+                ],
+              ),
+              SizedBox(height: compact ? 12 : 18),
               Text(
                 '${category.label} 놀이터',
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w900,
-                  color: const Color(0xFF184A78),
-                ),
+                style: compact
+                    ? Theme.of(context).textTheme.headlineSmall
+                    : Theme.of(context).textTheme.headlineMedium,
               ),
-              const SizedBox(height: 16),
-              Text(
-                category.description,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: const Color(0xFF35658F),
-                  fontWeight: FontWeight.w700,
+              if (!compact) ...[
+                const SizedBox(height: 10),
+                Text(
+                  category.description,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
-              ),
-              const SizedBox(height: 24),
+              ],
+              SizedBox(height: compact ? 14 : 22),
               Expanded(
                 child: Row(
                   children: [
                     Expanded(
-                      child: _ModeButton(
+                      child: _ModeCard(
                         title: '학습하기',
                         subtitle: _supportsLearnMode ? '큰 카드로 천천히 익혀요' : '곧 만나요',
-                        color: const Color(0xFFFFE699),
+                        sticker: 'LEARN',
+                        color: KidPalette.yellow,
                         icon: Icons.menu_book_rounded,
+                        compact: compact,
                         onTap: _supportsLearnMode
                             ? () => _openLearnMode(context)
                             : null,
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    SizedBox(width: compact ? 12 : 18),
                     Expanded(
-                      child: _ModeButton(
+                      child: _ModeCard(
                         title: '게임하기',
                         subtitle: _supportsGameMode ? '퀴즈로 신나게 맞혀요' : '곧 만나요',
-                        color: const Color(0xFFB9F4D0),
+                        sticker: _supportsGameMode ? 'QUIZ' : 'SOON',
+                        color: KidPalette.mint,
                         icon: Icons.videogame_asset_rounded,
+                        compact: compact,
                         onTap: _supportsGameMode
                             ? () => _openGameMode(context)
                             : null,
@@ -75,8 +124,8 @@ class CategoryHubScreen extends StatelessWidget {
                 ),
               ),
             ],
-          ),
-        ),
+          );
+        },
       ),
     );
   }
@@ -88,7 +137,6 @@ class CategoryHubScreen extends StatelessWidget {
           builder: (_) => HangulLearnScreen(repository: hangulLessonRepository),
         ),
       );
-      return;
     }
   }
 
@@ -99,70 +147,138 @@ class CategoryHubScreen extends StatelessWidget {
           builder: (_) => HangulQuizScreen(repository: hangulLessonRepository),
         ),
       );
-      return;
     }
   }
 }
 
-class _ModeButton extends StatelessWidget {
-  const _ModeButton({
+class _ModeCard extends StatelessWidget {
+  const _ModeCard({
     required this.title,
     required this.subtitle,
+    required this.sticker,
     required this.color,
     required this.icon,
+    this.compact = false,
     this.onTap,
   });
 
   final String title;
   final String subtitle;
+  final String sticker;
   final Color color;
   final IconData icon;
+  final bool compact;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final isEnabled = onTap != null;
+    final enabled = onTap != null;
 
     return Opacity(
-      opacity: isEnabled ? 1 : 0.55,
+      opacity: enabled ? 1 : 0.62,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(32),
+          borderRadius: BorderRadius.circular(34),
           onTap: onTap,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(32),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final isCompact = compact || constraints.maxHeight < 240;
+
+              return Stack(
                 children: [
-                  Icon(icon, size: 72, color: const Color(0xFF184A78)),
-                  const SizedBox(height: 16),
-                  Text(
-                    title,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w900,
-                      color: const Color(0xFF184A78),
+                  Positioned.fill(
+                    child: ToyPanel(
+                      padding: EdgeInsets.all(isCompact ? 14 : 24),
+                      backgroundColor: color,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (!isCompact) const Spacer() else const SizedBox(height: 8),
+                          Container(
+                            width: isCompact ? 60 : 86,
+                            height: isCompact ? 60 : 86,
+                            decoration: BoxDecoration(
+                              color: KidPalette.white.withValues(alpha: 0.9),
+                              shape: BoxShape.circle,
+                              boxShadow: KidShadows.panel,
+                            ),
+                            child: Icon(
+                              icon,
+                              size: isCompact ? 32 : 46,
+                              color: KidPalette.navy,
+                            ),
+                          ),
+                          SizedBox(height: isCompact ? 10 : 18),
+                          Text(
+                            title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: (isCompact
+                                    ? Theme.of(context).textTheme.titleLarge
+                                    : Theme.of(context).textTheme.headlineSmall)
+                                ?.copyWith(
+                                  color: KidPalette.navy,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                          ),
+                          SizedBox(height: isCompact ? 6 : 10),
+                          Text(
+                            subtitle,
+                            maxLines: isCompact ? 2 : 3,
+                            overflow: TextOverflow.ellipsis,
+                            style: (isCompact
+                                    ? Theme.of(context).textTheme.titleSmall
+                                    : Theme.of(context).textTheme.titleMedium)
+                                ?.copyWith(
+                                  color: KidPalette.navy,
+                                ),
+                          ),
+                          const Spacer(),
+                          Text(
+                            enabled ? '눌러서 시작' : '준비 중',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: (isCompact
+                                    ? Theme.of(context).textTheme.titleSmall
+                                    : Theme.of(context).textTheme.titleMedium)
+                                ?.copyWith(
+                                  color: KidPalette.coralDark,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  Text(
-                    subtitle,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF2E628F),
+                  Positioned(
+                    top: isCompact ? 10 : 14,
+                    right: isCompact ? 10 : 16,
+                    child: Transform.rotate(
+                      angle: 0.08,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isCompact ? 10 : 12,
+                          vertical: isCompact ? 6 : 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: KidPalette.white.withValues(alpha: 0.95),
+                          borderRadius: BorderRadius.circular(isCompact ? 12 : 16),
+                          boxShadow: KidShadows.button,
+                        ),
+                        child: Text(
+                          sticker,
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            color: KidPalette.coralDark,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ],
-              ),
-            ),
+              );
+            },
           ),
         ),
       ),
