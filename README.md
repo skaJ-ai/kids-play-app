@@ -23,3 +23,4 @@
 - 상세 기획/결정 메모: `.hermes/plans/2026-04-16_155236-seungwon-kids-play-app-discovery.md`
 - 구현 계획: `.hermes/plans/2026-04-16_160812-seungwon-kids-play-app-implementation-plan.md`
 - 자산 파이프라인: `docs/asset-pipeline.md`
+- 히어로 얼굴 자산 가이드: `docs/hero-face-asset-spec.md`
