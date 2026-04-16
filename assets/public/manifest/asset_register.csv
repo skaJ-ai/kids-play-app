@@ -1,0 +1,6 @@
+asset_id,relative_path,type,current_variant,source,license,private,ship_ok,notes
+hero_face,images/hero/hero_face.png,image,placeholder,internal,owned,false,true,Replace with local private face asset for trusted family builds
+hero_bg_car,images/hero/hero_bg_car.webp,image,placeholder,internal,owned,false,true,Hero background car scene placeholder
+hangul_intro_prompt,audio/voice/prompts/hangul_intro.ogg,audio,placeholder,internal,owned,false,true,Hangul category prompt placeholder
+tap_sfx,audio/sfx/tap.ogg,audio,placeholder,internal,owned,false,true,Tap feedback sound placeholder
+drive_loop_01,audio/music/drive_loop_01.ogg,audio,placeholder,internal,owned,false,true,Looping BGM placeholder

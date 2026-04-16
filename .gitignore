@@ -1,0 +1,40 @@
+# Flutter / Dart
+.dart_tool/
+.packages
+.pub/
+build/
+
+# Flutter generated
+.flutter-plugins
+.flutter-plugins-dependencies
+.metadata
+
+# Android / IDE
+android/.gradle/
+android/local.properties
+*.iml
+.idea/
+.vscode/
+
+# macOS / Linux junk
+.DS_Store
+Thumbs.db
+
+# Local/private overrides
+assets/local_private/*
+!assets/local_private/.keep
+
+# Generated build assets
+assets/generated/*
+!assets/generated/.keep
+
+# Raw/private/licensed sources
+asset_sources/private/*
+!asset_sources/private/.keep
+asset_sources/licensed/*
+!asset_sources/licensed/.keep
+
+# Temporary media exports
+*.psd
+*.xcf
+*.wav
