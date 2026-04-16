@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'kid_theme.dart';
+import 'tap_cooldown.dart';
 
 class ToyButton extends StatelessWidget {
   const ToyButton({
@@ -10,6 +11,7 @@ class ToyButton extends StatelessWidget {
     this.onPressed,
     this.height = 76,
     this.colors = const [KidPalette.blue, KidPalette.blueDark],
+    this.cooldown = const Duration(milliseconds: 350),
   });
 
   final String label;
@@ -17,6 +19,7 @@ class ToyButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final double height;
   final List<Color> colors;
+  final Duration cooldown;
 
   @override
   Widget build(BuildContext context) {
@@ -32,8 +35,9 @@ class ToyButton extends StatelessWidget {
         ),
         child: Material(
           color: Colors.transparent,
-          child: InkWell(
+          child: CooldownInkWell(
             borderRadius: BorderRadius.circular(28),
+            cooldown: cooldown,
             onTap: onPressed,
             child: SizedBox(
               height: height,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/ui/kid_theme.dart';
 import '../../../app/ui/playground_scaffold.dart';
+import '../../../app/ui/tap_cooldown.dart';
 import '../../../app/ui/toy_panel.dart';
 import '../../hangul/data/hangul_lesson_repository.dart';
 import '../../hangul/presentation/hangul_learn_screen.dart';
@@ -178,7 +179,7 @@ class _ModeCard extends StatelessWidget {
       opacity: enabled ? 1 : 0.62,
       child: Material(
         color: Colors.transparent,
-        child: InkWell(
+        child: CooldownInkWell(
           borderRadius: BorderRadius.circular(34),
           onTap: onTap,
           child: LayoutBuilder(

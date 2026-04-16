@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/services/app_services.dart';
+import '../../../app/ui/audio_prompt_panel.dart';
 import '../../../app/ui/kid_theme.dart';
 import '../../../app/ui/playground_scaffold.dart';
 import '../../../app/ui/toy_button.dart';
@@ -22,7 +24,15 @@ class HangulLearnScreen extends StatefulWidget {
 
 class _HangulLearnScreenState extends State<HangulLearnScreen> {
   late Future<HangulLesson> _lessonFuture;
+  late AppServices _services;
   int _currentCardIndex = 0;
+  String? _lastPromptKey;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _services = AppServicesScope.of(context);
+  }
 
   @override
   void initState() {
@@ -39,8 +49,46 @@ class _HangulLearnScreenState extends State<HangulLearnScreen> {
   void _retryLoad() {
     setState(() {
       _currentCardIndex = 0;
+      _lastPromptKey = null;
       _lessonFuture = _loadLesson();
     });
+  }
+
+  Future<void> _replayPrompt(HangulCard card) async {
+    await _speakIfEnabled(card.label);
+  }
+
+  Future<void> _speakIfEnabled(String text) async {
+    final snapshot = await _services.progressStore.loadSnapshot();
+    if (!snapshot.voicePromptsEnabled) {
+      return;
+    }
+    await _services.speechCueService.speak(text, locale: 'ko-KR');
+  }
+
+  void _queuePrompt(HangulCard card) {
+    final promptKey = '${widget.lessonId}:${card.symbol}:$_currentCardIndex';
+    if (_lastPromptKey == promptKey) {
+      return;
+    }
+    _lastPromptKey = promptKey;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      _replayPrompt(card);
+    });
+  }
+
+  Future<void> _moveToCard(HangulLesson lesson, int nextIndex) async {
+    final boundedIndex = nextIndex.clamp(0, lesson.cards.length - 1);
+    setState(() {
+      _currentCardIndex = boundedIndex;
+    });
+    await _services.progressStore.recordLessonIndex(
+      lessonId: 'hangul:${widget.lessonId}',
+      lastViewedIndex: boundedIndex,
+    );
   }
 
   @override
@@ -68,6 +116,7 @@ class _HangulLearnScreenState extends State<HangulLearnScreen> {
 
           final card = lesson.cards[_currentCardIndex];
           final isLastCard = _currentCardIndex == lesson.cards.length - 1;
+          _queuePrompt(card);
 
           return LayoutBuilder(
             builder: (context, constraints) {
@@ -139,7 +188,7 @@ class _HangulLearnScreenState extends State<HangulLearnScreen> {
                   if (!compact) ...[
                     const SizedBox(height: 8),
                     Text(
-                      '큰 글자를 먼저 보고, 이름도 천천히 따라 말해봐요.',
+                      '큰 글자를 보고, 스피커를 눌러 이름도 따라 말해봐요.',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
@@ -175,43 +224,22 @@ class _HangulLearnScreenState extends State<HangulLearnScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              ToyPanel(
-                                padding: EdgeInsets.all(compact ? 12 : 24),
-                                backgroundColor: KidPalette.white.withValues(alpha: 0.94),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      '이름',
-                                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                        color: KidPalette.coralDark,
-                                        fontWeight: FontWeight.w900,
-                                      ),
-                                    ),
-                                    SizedBox(height: compact ? 6 : 10),
-                                    Text(
-                                      card.label,
-                                      maxLines: compact ? 2 : 3,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: (compact
-                                              ? Theme.of(context).textTheme.titleLarge
-                                              : Theme.of(context).textTheme.headlineSmall)
-                                          ?.copyWith(
-                                            color: KidPalette.navy,
-                                          ),
-                                    ),
-                                  ],
-                                ),
+                              AudioPromptPanel(
+                                badge: '이름 듣기',
+                                title: card.label,
+                                subtitle: compact
+                                    ? '스피커를 눌러 다시 들어봐요.'
+                                    : '스피커를 누르면 이름을 다시 들을 수 있어요.',
+                                onReplay: () => _replayPrompt(card),
+                                compact: compact,
                               ),
-                              SizedBox(height: compact ? 8 : 16),
+                              SizedBox(height: compact ? 6 : 14),
                               Expanded(
                                 child: ToyPanel(
                                   padding: EdgeInsets.all(compact ? 12 : 24),
                                   backgroundColor: KidPalette.lilac.withValues(alpha: 0.75),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
-                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
                                         compact ? '천천히!' : '천천히 해봐!',
@@ -222,36 +250,36 @@ class _HangulLearnScreenState extends State<HangulLearnScreen> {
                                               color: KidPalette.coralDark,
                                             ),
                                       ),
-                                      SizedBox(height: compact ? 8 : 14),
-                                      Text(
-                                        card.hint,
-                                        maxLines: compact ? 2 : 4,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: (compact
-                                                ? Theme.of(context).textTheme.titleSmall
-                                                : Theme.of(context).textTheme.titleMedium)
-                                            ?.copyWith(
-                                              color: KidPalette.navy,
-                                            ),
+                                      SizedBox(height: compact ? 6 : 12),
+                                      Expanded(
+                                        child: SingleChildScrollView(
+                                          physics: const NeverScrollableScrollPhysics(),
+                                          child: Text(
+                                            card.hint,
+                                            maxLines: compact ? 3 : 4,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: (compact
+                                                    ? Theme.of(context).textTheme.titleSmall
+                                                    : Theme.of(context).textTheme.titleMedium)
+                                                ?.copyWith(color: KidPalette.navy),
+                                          ),
+                                        ),
                                       ),
                                     ],
                                   ),
                                 ),
                               ),
-                              SizedBox(height: compact ? 8 : 16),
+                              SizedBox(height: compact ? 6 : 14),
                               ToyButton(
                                 label: isLastCard ? '처음부터' : '다음',
                                 icon: isLastCard
                                     ? Icons.refresh_rounded
                                     : Icons.arrow_forward_rounded,
-                                height: compact ? 54 : 76,
-                                onPressed: () => setState(() {
-                                  if (isLastCard) {
-                                    _currentCardIndex = 0;
-                                    return;
-                                  }
-                                  _currentCardIndex += 1;
-                                }),
+                                height: compact ? 50 : 72,
+                                onPressed: () => _moveToCard(
+                                  lesson,
+                                  isLastCard ? 0 : _currentCardIndex + 1,
+                                ),
                               ),
                             ],
                           ),

@@ -14,7 +14,7 @@ void main() {
   testWidgets('shows hero screen with app title, hero face, and play button', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const KidsPlayApp());
+    await tester.pumpWidget(KidsPlayApp());
 
     expect(find.byKey(const Key('playground-background')), findsOneWidget);
     expect(find.byKey(const Key('hero-face-image')), findsOneWidget);
@@ -33,7 +33,7 @@ void main() {
       tester.view.resetDevicePixelRatio();
     });
 
-    await tester.pumpWidget(const KidsPlayApp());
+    await tester.pumpWidget(KidsPlayApp());
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
@@ -43,7 +43,7 @@ void main() {
   testWidgets('opens the avatar setup screen after five taps on the hero face', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const KidsPlayApp());
+    await tester.pumpWidget(KidsPlayApp());
 
     final heroEntry = find.byKey(const Key('hero-face-parent-entry'));
     expect(heroEntry, findsOneWidget);
@@ -65,7 +65,7 @@ void main() {
   testWidgets('moves from hero screen to category menu when play is tapped', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const KidsPlayApp());
+    await tester.pumpWidget(KidsPlayApp());
 
     await tester.tap(find.text('플레이하기'));
     await tester.pumpAndSettle();

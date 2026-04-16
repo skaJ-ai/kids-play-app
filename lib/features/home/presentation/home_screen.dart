@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/ui/kid_theme.dart';
 import '../../../app/ui/playground_scaffold.dart';
+import '../../../app/ui/tap_cooldown.dart';
 import '../../../app/ui/toy_button.dart';
 import '../../../app/ui/toy_panel.dart';
 import '../data/home_catalog_repository.dart';
@@ -182,7 +183,7 @@ class _CategoryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
-      child: InkWell(
+      child: CooldownInkWell(
         borderRadius: BorderRadius.circular(34),
         onTap: () {
           Navigator.of(context).push(

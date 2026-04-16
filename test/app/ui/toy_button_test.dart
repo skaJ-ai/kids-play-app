@@ -31,6 +31,41 @@ void main() {
     expect(taps, 1);
   });
 
+  testWidgets('ignores rapid repeated taps during cooldown', (
+    WidgetTester tester,
+  ) async {
+    var taps = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: ToyButton(
+              label: '플레이하기',
+              icon: Icons.play_arrow_rounded,
+              cooldown: const Duration(milliseconds: 350),
+              onPressed: () => taps += 1,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final button = find.byType(ToyButton);
+    await tester.tap(button);
+    await tester.pump();
+    await tester.tap(button);
+    await tester.pump();
+
+    expect(taps, 1);
+
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.tap(button);
+    await tester.pump();
+
+    expect(taps, 2);
+  });
+
   testWidgets('stays stable with a longer label in a narrow width', (
     WidgetTester tester,
   ) async {
