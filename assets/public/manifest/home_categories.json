@@ -1,0 +1,25 @@
+{
+  "categories": [
+    {
+      "id": "hangul",
+      "label": "한글",
+      "description": "자음과 모음을 만나요",
+      "backgroundColor": "#FFE699",
+      "icon": "text_fields_rounded"
+    },
+    {
+      "id": "alphabet",
+      "label": "알파벳",
+      "description": "대문자와 소문자를 만나요",
+      "backgroundColor": "#B9F4D0",
+      "icon": "abc_rounded"
+    },
+    {
+      "id": "numbers",
+      "label": "숫자",
+      "description": "숫자 놀이를 시작해요",
+      "backgroundColor": "#FFC6D9",
+      "icon": "looks_one_rounded"
+    }
+  ]
+}

@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../data/home_catalog_repository.dart';
+
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final cards = const [
-      _CategoryCardData('한글', Color(0xFFFFE699), Icons.text_fields_rounded),
-      _CategoryCardData('알파벳', Color(0xFFB9F4D0), Icons.abc_rounded),
-      _CategoryCardData('숫자', Color(0xFFFFC6D9), Icons.looks_one_rounded),
-    ];
+    final repository = HomeCatalogRepository(
+      assetBundle: DefaultAssetBundle.of(context),
+    );
 
     return Scaffold(
       body: SafeArea(
@@ -28,13 +28,24 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               Expanded(
-                child: Row(
-                  children: [
-                    for (final card in cards) ...[
-                      Expanded(child: _CategoryCard(data: card)),
-                      if (card != cards.last) const SizedBox(width: 16),
-                    ],
-                  ],
+                child: FutureBuilder<List<HomeCategory>>(
+                  future: repository.loadCategories(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    final categories = snapshot.data!;
+                    return Row(
+                      children: [
+                        for (final category in categories) ...[
+                          Expanded(child: _CategoryCard(category: category)),
+                          if (category != categories.last)
+                            const SizedBox(width: 16),
+                        ],
+                      ],
+                    );
+                  },
                 ),
               ),
             ],
@@ -46,15 +57,15 @@ class HomeScreen extends StatelessWidget {
 }
 
 class _CategoryCard extends StatelessWidget {
-  const _CategoryCard({required this.data});
+  const _CategoryCard({required this.category});
 
-  final _CategoryCardData data;
+  final HomeCategory category;
 
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: data.color,
+        color: category.backgroundColor,
         borderRadius: BorderRadius.circular(32),
       ),
       child: Padding(
@@ -62,20 +73,20 @@ class _CategoryCard extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(data.icon, size: 72, color: const Color(0xFF184A78)),
+            Icon(category.icon, size: 72, color: const Color(0xFF184A78)),
             const SizedBox(height: 16),
             Text(
-              data.label,
+              category.label,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w900,
                 color: const Color(0xFF184A78),
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
-              '학습 / 게임',
+            Text(
+              category.description,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
                 color: Color(0xFF2E628F),
@@ -86,12 +97,4 @@ class _CategoryCard extends StatelessWidget {
       ),
     );
   }
-}
-
-class _CategoryCardData {
-  const _CategoryCardData(this.label, this.color, this.icon);
-
-  final String label;
-  final Color color;
-  final IconData icon;
 }
