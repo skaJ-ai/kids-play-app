@@ -51,4 +51,30 @@ void main() {
     expect(find.text('학습하기'), findsOneWidget);
     expect(find.text('게임하기'), findsOneWidget);
   });
+
+  testWidgets('opens the first hangul learning card from the category hub', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: CategoryHubScreen(
+          category: const HomeCategory(
+            id: 'hangul',
+            label: '한글',
+            description: '자음과 모음을 만나요',
+            backgroundColorHex: '#FFE699',
+            iconName: 'text_fields_rounded',
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('학습하기'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.text('한글 학습'), findsOneWidget);
+    expect(find.text('기역, ㄱ'), findsOneWidget);
+    expect(find.text('다음'), findsOneWidget);
+  });
 }
