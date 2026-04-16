@@ -70,7 +70,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('한글 게임'), findsOneWidget);
-    expect(find.text('기역, ㄱ을 찾아봐!'), findsOneWidget);
+    expect(find.text("'ㄱ' 글자를 찾아봐!"), findsOneWidget);
     expect(find.text('1 / 5'), findsOneWidget);
   });
 

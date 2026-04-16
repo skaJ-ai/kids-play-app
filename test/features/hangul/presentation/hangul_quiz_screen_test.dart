@@ -30,11 +30,70 @@ void main() {
 
     expect(find.text('한글 게임'), findsOneWidget);
     expect(find.text('1 / 5'), findsOneWidget);
-    expect(find.text('기역, ㄱ을 찾아봐!'), findsOneWidget);
+    expect(find.text("'ㄱ' 글자를 찾아봐!"), findsOneWidget);
     expect(find.widgetWithText(FilledButton, 'ㄱ'), findsOneWidget);
     expect(find.widgetWithText(FilledButton, 'ㄴ'), findsOneWidget);
     expect(find.widgetWithText(FilledButton, 'ㄷ'), findsOneWidget);
     expect(find.widgetWithText(FilledButton, 'ㄹ'), findsOneWidget);
+  });
+
+  testWidgets('keeps all four answer choices fully visible on a compact landscape screen', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(780, 360);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final repository = HangulLessonRepository(
+      assetBundle: _FakeAssetBundle({
+        HangulLessonRepository.manifestPath: jsonEncode({
+          'lessons': [_basicConsonantsLesson],
+        }),
+      }),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: HangulQuizScreen(
+          repository: repository,
+          lessonId: 'basic_consonants_1',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final screenBottom = tester.view.physicalSize.height;
+    for (final symbol in ['ㄱ', 'ㄴ', 'ㄷ', 'ㄹ']) {
+      final rect = tester.getRect(find.widgetWithText(FilledButton, symbol));
+      expect(rect.bottom <= screenBottom, isTrue, reason: '$symbol choice should stay on screen');
+    }
+  });
+
+  testWidgets('shows a clearer target prompt without combining a standalone consonant with the particle', (
+    WidgetTester tester,
+  ) async {
+    final repository = HangulLessonRepository(
+      assetBundle: _FakeAssetBundle({
+        HangulLessonRepository.manifestPath: jsonEncode({
+          'lessons': [_basicConsonantsLesson],
+        }),
+      }),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: HangulQuizScreen(
+          repository: repository,
+          lessonId: 'basic_consonants_1',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text("'ㄱ' 글자를 찾아봐!"), findsOneWidget);
   });
 
   testWidgets('shows a sticker reward summary after finishing the quiz', (

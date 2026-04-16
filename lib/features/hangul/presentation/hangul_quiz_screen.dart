@@ -78,96 +78,162 @@ class _HangulQuizScreenState extends State<HangulQuizScreen> {
             final question = lesson.cards[_questionIndex];
             final choices = _buildChoices(lesson.cards, _questionIndex);
 
-            return Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    '한글 게임',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w900,
-                      color: const Color(0xFF184A78),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '${_questionIndex + 1} / ${lesson.cards.length}',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF35658F),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFF6D8),
-                      borderRadius: BorderRadius.circular(36),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 28,
-                      ),
-                      child: Column(
-                        children: [
-                          Text(
-                            '알맞은 글자를 콕 눌러봐!',
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.titleLarge
-                                ?.copyWith(
-                                  fontWeight: FontWeight.w800,
-                                  color: const Color(0xFFF06275),
-                                ),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            '${question.label}을 찾아봐!',
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.headlineSmall
-                                ?.copyWith(
-                                  fontWeight: FontWeight.w900,
-                                  color: const Color(0xFF184A78),
-                                ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Expanded(
-                    child: GridView.count(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 16,
-                      crossAxisSpacing: 16,
-                      childAspectRatio: 2.1,
-                      physics: const NeverScrollableScrollPhysics(),
-                      children: [
-                        for (final choice in choices)
-                          FilledButton(
-                            onPressed: () => _selectChoice(
-                              choice: choice,
-                              answer: question,
-                              totalQuestions: lesson.cards.length,
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                final isCompact = constraints.maxHeight < 420;
+                final outerPadding = isCompact ? 16.0 : 24.0;
+                final titleGap = isCompact ? 6.0 : 8.0;
+                final sectionGap = isCompact ? 12.0 : 20.0;
+                final promptLineGap = isCompact ? 8.0 : 12.0;
+                final promptAccentGap = isCompact ? 4.0 : 8.0;
+
+                return Padding(
+                  padding: EdgeInsets.all(outerPadding),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        '한글 게임',
+                        textAlign: TextAlign.center,
+                        style: (isCompact
+                                ? Theme.of(context).textTheme.titleLarge
+                                : Theme.of(context).textTheme.headlineMedium)
+                            ?.copyWith(
+                              fontWeight: FontWeight.w900,
+                              color: const Color(0xFF184A78),
                             ),
-                            style: FilledButton.styleFrom(
-                              backgroundColor: const Color(0xFF4B98FF),
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(28),
+                      ),
+                      SizedBox(height: titleGap),
+                      Text(
+                        '${_questionIndex + 1} / ${lesson.cards.length}',
+                        textAlign: TextAlign.center,
+                        style: (isCompact
+                                ? Theme.of(context).textTheme.titleSmall
+                                : Theme.of(context).textTheme.titleMedium)
+                            ?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF35658F),
+                            ),
+                      ),
+                      SizedBox(height: sectionGap),
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFF6D8),
+                          borderRadius: BorderRadius.circular(isCompact ? 28 : 36),
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isCompact ? 16 : 24,
+                            vertical: isCompact ? 18 : 28,
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                '알맞은 글자를 콕 눌러봐!',
+                                textAlign: TextAlign.center,
+                                style: (isCompact
+                                        ? Theme.of(context).textTheme.titleMedium
+                                        : Theme.of(context).textTheme.titleLarge)
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.w800,
+                                      color: const Color(0xFFF06275),
+                                    ),
                               ),
-                              textStyle: Theme.of(context).textTheme.displaySmall
-                                  ?.copyWith(fontWeight: FontWeight.w900),
-                            ),
-                            child: Text(choice.symbol),
+                              SizedBox(height: promptLineGap),
+                              Text(
+                                _displayNameFor(question),
+                                textAlign: TextAlign.center,
+                                style: (isCompact
+                                        ? Theme.of(context).textTheme.titleSmall
+                                        : Theme.of(context).textTheme.titleMedium)
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      color: const Color(0xFF35658F),
+                                    ),
+                              ),
+                              SizedBox(height: promptAccentGap),
+                              Text(
+                                _targetPromptFor(question),
+                                textAlign: TextAlign.center,
+                                style: (isCompact
+                                        ? Theme.of(context).textTheme.titleLarge
+                                        : Theme.of(context).textTheme.headlineSmall)
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.w900,
+                                      color: const Color(0xFF184A78),
+                                    ),
+                              ),
+                            ],
                           ),
-                      ],
-                    ),
+                        ),
+                      ),
+                      SizedBox(height: sectionGap),
+                      Expanded(
+                        child: LayoutBuilder(
+                          builder: (context, gridConstraints) {
+                            const crossAxisCount = 2;
+                            const mainAxisSpacing = 16.0;
+                            const crossAxisSpacing = 16.0;
+                            final rowCount = (choices.length / crossAxisCount).ceil();
+                            final tileWidth =
+                                (gridConstraints.maxWidth - crossAxisSpacing) /
+                                crossAxisCount;
+                            final tileHeight =
+                                (gridConstraints.maxHeight -
+                                    (rowCount - 1) * mainAxisSpacing) /
+                                rowCount;
+                            final childAspectRatio = tileHeight <= 0
+                                ? 1.0
+                                : tileWidth / tileHeight;
+
+                            return GridView.count(
+                              crossAxisCount: crossAxisCount,
+                              mainAxisSpacing: mainAxisSpacing,
+                              crossAxisSpacing: crossAxisSpacing,
+                              childAspectRatio: childAspectRatio,
+                              physics: const NeverScrollableScrollPhysics(),
+                              children: [
+                                for (final choice in choices)
+                                  FilledButton(
+                                    onPressed: () => _selectChoice(
+                                      choice: choice,
+                                      answer: question,
+                                      totalQuestions: lesson.cards.length,
+                                    ),
+                                    style: FilledButton.styleFrom(
+                                      backgroundColor: const Color(0xFF4B98FF),
+                                      foregroundColor: Colors.white,
+                                      padding: EdgeInsets.zero,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          isCompact ? 22 : 28,
+                                        ),
+                                      ),
+                                    ),
+                                    child: Center(
+                                      child: FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: Text(
+                                          choice.symbol,
+                                          style: TextStyle(
+                                            fontSize: isCompact ? 60 : 84,
+                                            fontWeight: FontWeight.w900,
+                                            height: 1,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                );
+              },
             );
           },
         ),
@@ -205,6 +271,14 @@ class _HangulQuizScreenState extends State<HangulQuizScreen> {
     final choices = rotatedDistractors.take(3).toList(growable: true);
     choices.insert(questionIndex % 4, answer);
     return choices;
+  }
+
+  String _displayNameFor(HangulCard question) {
+    return question.label.split(',').first.trim();
+  }
+
+  String _targetPromptFor(HangulCard question) {
+    return "'${question.symbol}' 글자를 찾아봐!";
   }
 }
 
