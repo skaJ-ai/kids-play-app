@@ -7,6 +7,10 @@ name: Build Android APK
       - main
     paths:
       - '.github/workflows/build-apk.yml'
+      - 'README.md'
+      - 'handoff.md'
+      - 'docs/**'
+      - 'scripts/**'
       - 'android/**'
       - 'assets/**'
       - 'lib/**'
@@ -47,9 +51,8 @@ jobs:
 
       - name: Prepare generated assets
         run: |
-          rm -rf assets/generated
-          mkdir -p assets/generated
-          cp -r assets/public/. assets/generated/
+          chmod +x ./scripts/prepare_assets.sh
+          ./scripts/prepare_assets.sh
 
       - name: Install dependencies
         run: flutter pub get
