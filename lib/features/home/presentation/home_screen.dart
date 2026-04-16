@@ -5,11 +5,25 @@ import '../../../app/ui/playground_scaffold.dart';
 import '../../../app/ui/tap_cooldown.dart';
 import '../../../app/ui/toy_button.dart';
 import '../../../app/ui/toy_panel.dart';
+import '../../alphabet/data/alphabet_lesson_repository.dart';
+import '../../hangul/data/hangul_lesson_repository.dart';
+import '../../numbers/data/numbers_lesson_repository.dart';
 import '../data/home_catalog_repository.dart';
 import 'category_hub_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({
+    super.key,
+    this.catalogRepository,
+    this.hangulLessonRepository,
+    this.alphabetLessonRepository,
+    this.numbersLessonRepository,
+  });
+
+  final HomeCatalogRepository? catalogRepository;
+  final HangulLessonRepository? hangulLessonRepository;
+  final AlphabetLessonRepository? alphabetLessonRepository;
+  final NumbersLessonRepository? numbersLessonRepository;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -25,9 +39,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<List<HomeCategory>> _loadCategories() {
-    return HomeCatalogRepository(
-      assetBundle: DefaultAssetBundle.of(context),
-    ).loadCategories();
+    return (widget.catalogRepository ??
+            HomeCatalogRepository(assetBundle: DefaultAssetBundle.of(context)))
+        .loadCategories();
   }
 
   void _retryLoad() {
@@ -70,10 +84,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         SizedBox(width: compact ? 6 : 8),
                         Text(
                           '세 가지 놀이터',
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            color: KidPalette.navy,
-                            fontWeight: FontWeight.w900,
-                          ),
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                color: KidPalette.navy,
+                                fontWeight: FontWeight.w900,
+                              ),
                         ),
                       ],
                     ),
@@ -120,14 +135,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                 Text(
                                   '놀이터를 불러오지 못했어요.',
                                   textAlign: TextAlign.center,
-                                  style: Theme.of(context).textTheme.headlineSmall
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineSmall
                                       ?.copyWith(color: KidPalette.navy),
                                 ),
                                 const SizedBox(height: 20),
                                 Text(
                                   '다시 불러오면 바로 놀러갈 수 있어요.',
                                   textAlign: TextAlign.center,
-                                  style: Theme.of(context).textTheme.titleMedium,
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.titleMedium,
                                 ),
                                 const SizedBox(height: 20),
                                 ToyButton(
@@ -155,6 +174,12 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: _CategoryCard(
                               category: category,
                               compact: compact,
+                              hangulLessonRepository:
+                                  widget.hangulLessonRepository,
+                              alphabetLessonRepository:
+                                  widget.alphabetLessonRepository,
+                              numbersLessonRepository:
+                                  widget.numbersLessonRepository,
                             ),
                           ),
                           if (category != categories.last)
@@ -174,10 +199,19 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class _CategoryCard extends StatelessWidget {
-  const _CategoryCard({required this.category, this.compact = false});
+  const _CategoryCard({
+    required this.category,
+    this.compact = false,
+    this.hangulLessonRepository,
+    this.alphabetLessonRepository,
+    this.numbersLessonRepository,
+  });
 
   final HomeCategory category;
   final bool compact;
+  final HangulLessonRepository? hangulLessonRepository;
+  final AlphabetLessonRepository? alphabetLessonRepository;
+  final NumbersLessonRepository? numbersLessonRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -188,7 +222,12 @@ class _CategoryCard extends StatelessWidget {
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute<void>(
-              builder: (_) => CategoryHubScreen(category: category),
+              builder: (_) => CategoryHubScreen(
+                category: category,
+                hangulLessonRepository: hangulLessonRepository,
+                alphabetLessonRepository: alphabetLessonRepository,
+                numbersLessonRepository: numbersLessonRepository,
+              ),
             ),
           );
         },
@@ -215,14 +254,18 @@ class _CategoryCard extends StatelessWidget {
                           ),
                           child: Text(
                             _badgeTextFor(category.id),
-                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              color: KidPalette.coralDark,
-                              fontWeight: FontWeight.w900,
-                            ),
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(
+                                  color: KidPalette.coralDark,
+                                  fontWeight: FontWeight.w900,
+                                ),
                           ),
                         ),
                       ),
-                    if (!compact) const Spacer() else const SizedBox(height: 10),
+                    if (!compact)
+                      const Spacer()
+                    else
+                      const SizedBox(height: 10),
                     Container(
                       width: compact ? 50 : 92,
                       height: compact ? 50 : 92,
@@ -242,23 +285,27 @@ class _CategoryCard extends StatelessWidget {
                       category.label,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: (compact
-                              ? Theme.of(context).textTheme.titleMedium
-                              : Theme.of(context).textTheme.headlineSmall)
-                          ?.copyWith(
-                            color: KidPalette.navy,
-                            fontWeight: FontWeight.w900,
-                          ),
+                      style:
+                          (compact
+                                  ? Theme.of(context).textTheme.titleMedium
+                                  : Theme.of(context).textTheme.headlineSmall)
+                              ?.copyWith(
+                                color: KidPalette.navy,
+                                fontWeight: FontWeight.w900,
+                              ),
                     ),
                     SizedBox(height: compact ? 6 : 12),
                     Text(
-                      compact ? _compactDescriptionFor(category.id) : category.description,
+                      compact
+                          ? _compactDescriptionFor(category.id)
+                          : category.description,
                       maxLines: compact ? 1 : 2,
                       overflow: TextOverflow.ellipsis,
-                      style: (compact
-                              ? Theme.of(context).textTheme.titleSmall
-                              : Theme.of(context).textTheme.titleMedium)
-                          ?.copyWith(color: KidPalette.navy),
+                      style:
+                          (compact
+                                  ? Theme.of(context).textTheme.titleSmall
+                                  : Theme.of(context).textTheme.titleMedium)
+                              ?.copyWith(color: KidPalette.navy),
                     ),
                     if (!compact) ...[
                       const Spacer(),
@@ -266,10 +313,11 @@ class _CategoryCard extends StatelessWidget {
                         children: [
                           Text(
                             '들어가기',
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: KidPalette.navy,
-                              fontWeight: FontWeight.w900,
-                            ),
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(
+                                  color: KidPalette.navy,
+                                  fontWeight: FontWeight.w900,
+                                ),
                           ),
                           const SizedBox(width: 8),
                           const Icon(

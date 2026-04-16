@@ -4,9 +4,15 @@ import '../../../app/ui/kid_theme.dart';
 import '../../../app/ui/playground_scaffold.dart';
 import '../../../app/ui/tap_cooldown.dart';
 import '../../../app/ui/toy_panel.dart';
+import '../../alphabet/data/alphabet_lesson_repository.dart';
+import '../../alphabet/presentation/alphabet_learn_screen.dart';
+import '../../alphabet/presentation/alphabet_quiz_screen.dart';
 import '../../hangul/data/hangul_lesson_repository.dart';
 import '../../hangul/presentation/hangul_learn_screen.dart';
 import '../../hangul/presentation/hangul_quiz_screen.dart';
+import '../../numbers/data/numbers_lesson_repository.dart';
+import '../../numbers/presentation/numbers_learn_screen.dart';
+import '../../numbers/presentation/numbers_quiz_screen.dart';
 import '../data/home_catalog_repository.dart';
 
 class CategoryHubScreen extends StatelessWidget {
@@ -14,13 +20,24 @@ class CategoryHubScreen extends StatelessWidget {
     super.key,
     required this.category,
     this.hangulLessonRepository,
+    this.alphabetLessonRepository,
+    this.numbersLessonRepository,
   });
 
   final HomeCategory category;
   final HangulLessonRepository? hangulLessonRepository;
+  final AlphabetLessonRepository? alphabetLessonRepository;
+  final NumbersLessonRepository? numbersLessonRepository;
 
-  bool get _supportsLearnMode => category.id == 'hangul';
-  bool get _supportsGameMode => category.id == 'hangul';
+  bool get _supportsLearnMode => switch (category.id) {
+    'hangul' || 'alphabet' || 'numbers' => true,
+    _ => false,
+  };
+
+  bool get _supportsGameMode => switch (category.id) {
+    'hangul' || 'alphabet' || 'numbers' => true,
+    _ => false,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -56,10 +73,11 @@ class CategoryHubScreen extends StatelessWidget {
                         SizedBox(width: compact ? 6 : 8),
                         Text(
                           compact ? category.label : '${category.label} 준비완료',
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            color: KidPalette.navy,
-                            fontWeight: FontWeight.w900,
-                          ),
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                color: KidPalette.navy,
+                                fontWeight: FontWeight.w900,
+                              ),
                         ),
                       ],
                     ),
@@ -97,7 +115,9 @@ class CategoryHubScreen extends StatelessWidget {
                     Expanded(
                       child: _ModeCard(
                         title: '학습하기',
-                        subtitle: _supportsLearnMode ? '큰 카드로 천천히 익혀요' : '곧 만나요',
+                        subtitle: _supportsLearnMode
+                            ? '큰 카드로 천천히 익혀요'
+                            : '곧 만나요',
                         sticker: 'LEARN',
                         color: KidPalette.yellow,
                         icon: Icons.menu_book_rounded,
@@ -132,23 +152,51 @@ class CategoryHubScreen extends StatelessWidget {
   }
 
   void _openLearnMode(BuildContext context) {
-    if (category.id == 'hangul') {
-      Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => HangulLearnScreen(repository: hangulLessonRepository),
-        ),
-      );
+    Widget? destination;
+
+    switch (category.id) {
+      case 'hangul':
+        destination = HangulLearnScreen(repository: hangulLessonRepository);
+        break;
+      case 'alphabet':
+        destination = AlphabetLearnScreen(repository: alphabetLessonRepository);
+        break;
+      case 'numbers':
+        destination = NumbersLearnScreen(repository: numbersLessonRepository);
+        break;
     }
+
+    if (destination == null) {
+      return;
+    }
+
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute<void>(builder: (_) => destination!));
   }
 
   void _openGameMode(BuildContext context) {
-    if (category.id == 'hangul') {
-      Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => HangulQuizScreen(repository: hangulLessonRepository),
-        ),
-      );
+    Widget? destination;
+
+    switch (category.id) {
+      case 'hangul':
+        destination = HangulQuizScreen(repository: hangulLessonRepository);
+        break;
+      case 'alphabet':
+        destination = AlphabetQuizScreen(repository: alphabetLessonRepository);
+        break;
+      case 'numbers':
+        destination = NumbersQuizScreen(repository: numbersLessonRepository);
+        break;
     }
+
+    if (destination == null) {
+      return;
+    }
+
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute<void>(builder: (_) => destination!));
   }
 }
 
@@ -195,7 +243,10 @@ class _ModeCard extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (!isCompact) const Spacer() else const SizedBox(height: 8),
+                          if (!isCompact)
+                            const Spacer()
+                          else
+                            const SizedBox(height: 8),
                           Container(
                             width: isCompact ? 60 : 86,
                             height: isCompact ? 60 : 86,
@@ -215,38 +266,45 @@ class _ModeCard extends StatelessWidget {
                             title,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: (isCompact
-                                    ? Theme.of(context).textTheme.titleLarge
-                                    : Theme.of(context).textTheme.headlineSmall)
-                                ?.copyWith(
-                                  color: KidPalette.navy,
-                                  fontWeight: FontWeight.w900,
-                                ),
+                            style:
+                                (isCompact
+                                        ? Theme.of(context).textTheme.titleLarge
+                                        : Theme.of(
+                                            context,
+                                          ).textTheme.headlineSmall)
+                                    ?.copyWith(
+                                      color: KidPalette.navy,
+                                      fontWeight: FontWeight.w900,
+                                    ),
                           ),
                           SizedBox(height: isCompact ? 6 : 10),
                           Text(
                             subtitle,
                             maxLines: isCompact ? 2 : 3,
                             overflow: TextOverflow.ellipsis,
-                            style: (isCompact
-                                    ? Theme.of(context).textTheme.titleSmall
-                                    : Theme.of(context).textTheme.titleMedium)
-                                ?.copyWith(
-                                  color: KidPalette.navy,
-                                ),
+                            style:
+                                (isCompact
+                                        ? Theme.of(context).textTheme.titleSmall
+                                        : Theme.of(
+                                            context,
+                                          ).textTheme.titleMedium)
+                                    ?.copyWith(color: KidPalette.navy),
                           ),
                           const Spacer(),
                           Text(
                             enabled ? '눌러서 시작' : '준비 중',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: (isCompact
-                                    ? Theme.of(context).textTheme.titleSmall
-                                    : Theme.of(context).textTheme.titleMedium)
-                                ?.copyWith(
-                                  color: KidPalette.coralDark,
-                                  fontWeight: FontWeight.w900,
-                                ),
+                            style:
+                                (isCompact
+                                        ? Theme.of(context).textTheme.titleSmall
+                                        : Theme.of(
+                                            context,
+                                          ).textTheme.titleMedium)
+                                    ?.copyWith(
+                                      color: KidPalette.coralDark,
+                                      fontWeight: FontWeight.w900,
+                                    ),
                           ),
                         ],
                       ),
@@ -264,15 +322,18 @@ class _ModeCard extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: KidPalette.white.withValues(alpha: 0.95),
-                          borderRadius: BorderRadius.circular(isCompact ? 12 : 16),
+                          borderRadius: BorderRadius.circular(
+                            isCompact ? 12 : 16,
+                          ),
                           boxShadow: KidShadows.button,
                         ),
                         child: Text(
                           sticker,
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            color: KidPalette.coralDark,
-                            fontWeight: FontWeight.w900,
-                          ),
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                color: KidPalette.coralDark,
+                                fontWeight: FontWeight.w900,
+                              ),
                         ),
                       ),
                     ),
