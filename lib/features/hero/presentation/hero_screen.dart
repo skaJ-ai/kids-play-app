@@ -36,17 +36,13 @@ class HeroScreen extends StatelessWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Container(
-                            width: 132,
-                            height: 132,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFFD86E),
-                              borderRadius: BorderRadius.circular(40),
-                            ),
-                            child: const Icon(
-                              Icons.directions_car_rounded,
-                              size: 72,
-                              color: Color(0xFF1E4A7A),
+                          SizedBox(
+                            width: 148,
+                            height: 148,
+                            child: Image.asset(
+                              'assets/generated/images/hero/hero_face.png',
+                              key: const Key('hero-face-image'),
+                              fit: BoxFit.contain,
                             ),
                           ),
                           const SizedBox(height: 24),

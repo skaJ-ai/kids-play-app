@@ -19,6 +19,9 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/generated/images/
-    - assets/generated/audio/
+    - assets/generated/images/hero/
+    - assets/generated/images/categories/
+    - assets/generated/audio/voice/prompts/
+    - assets/generated/audio/sfx/
+    - assets/generated/audio/music/
     - assets/generated/manifest/
