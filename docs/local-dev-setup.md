@@ -6,15 +6,16 @@
 ## 현재 이 머신에서 확인된 상태
 
 2026-04-16 기준:
-- Flutter 미설치
-- Java 미설치
-- Android SDK 미확인
+- Flutter 3.41.6 설치 완료 (`/home/openc/sdk/flutter`)
+- Java 17 설치 완료
+- Android SDK 36.0.0 설치 및 `flutter doctor` Android toolchain 정상 확인
 
 확인 명령:
 
 ```bash
 flutter --version
 java -version
+flutter doctor -v
 ```
 
 ## 권장 버전
