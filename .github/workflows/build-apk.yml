@@ -45,6 +45,12 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Prepare generated assets
+        run: |
+          rm -rf assets/generated
+          mkdir -p assets/generated
+          cp -r assets/public/. assets/generated/
+
       - name: Install dependencies
         run: flutter pub get
 
