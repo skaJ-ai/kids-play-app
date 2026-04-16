@@ -23,12 +23,14 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Flutter
+      - name: Set up Flutter (latest stable)
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.4'
           channel: stable
           cache: true
+
+      - name: Flutter version info
+        run: flutter --version
 
       # rsync is not always available; plain cp works fine for this repo
       - name: Prepare generated assets
@@ -39,6 +41,9 @@ jobs:
 
       - name: Flutter pub get
         run: flutter pub get
+
+      - name: Accept Android SDK licenses
+        run: yes | flutter doctor --android-licenses || true
 
       - name: Run tests
         run: flutter test
