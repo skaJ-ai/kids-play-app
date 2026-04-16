@@ -4,10 +4,32 @@ import '../../../app/ui/kid_theme.dart';
 import '../../../app/ui/playground_scaffold.dart';
 import '../../../app/ui/toy_button.dart';
 import '../../../app/ui/toy_panel.dart';
+import '../../avatar/presentation/avatar_setup_screen.dart';
 import '../../home/presentation/home_screen.dart';
 
-class HeroScreen extends StatelessWidget {
+class HeroScreen extends StatefulWidget {
   const HeroScreen({super.key});
+
+  @override
+  State<HeroScreen> createState() => _HeroScreenState();
+}
+
+class _HeroScreenState extends State<HeroScreen> {
+  int _parentTapCount = 0;
+
+  Future<void> _handleHeroFaceTap() async {
+    _parentTapCount += 1;
+    if (_parentTapCount < 5) {
+      return;
+    }
+
+    _parentTapCount = 0;
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => const AvatarSetupScreen(),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -145,19 +167,23 @@ class HeroScreen extends StatelessWidget {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Container(
-                              width: compact ? 118 : 190,
-                              height: compact ? 118 : 190,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: KidPalette.white.withValues(alpha: 0.9),
-                                boxShadow: KidShadows.panel,
-                              ),
-                              padding: EdgeInsets.all(compact ? 14 : 18),
-                              child: Image.asset(
-                                'assets/generated/images/hero/hero_face.png',
-                                key: const Key('hero-face-image'),
-                                fit: BoxFit.contain,
+                            GestureDetector(
+                              key: const Key('hero-face-parent-entry'),
+                              onTap: _handleHeroFaceTap,
+                              child: Container(
+                                width: compact ? 118 : 190,
+                                height: compact ? 118 : 190,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: KidPalette.white.withValues(alpha: 0.9),
+                                  boxShadow: KidShadows.panel,
+                                ),
+                                padding: EdgeInsets.all(compact ? 14 : 18),
+                                child: Image.asset(
+                                  'assets/generated/images/hero/hero_face.png',
+                                  key: const Key('hero-face-image'),
+                                  fit: BoxFit.contain,
+                                ),
                               ),
                             ),
                             SizedBox(height: compact ? 12 : 18),

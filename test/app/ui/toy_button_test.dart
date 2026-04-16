@@ -30,4 +30,29 @@ void main() {
 
     expect(taps, 1);
   });
+
+  testWidgets('stays stable with a longer label in a narrow width', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox(
+              width: 240,
+              child: ToyButton(
+                label: '나중에 이어서 하기',
+                icon: Icons.check_circle_rounded,
+                onPressed: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('나중에 이어서 하기'), findsOneWidget);
+  });
 }

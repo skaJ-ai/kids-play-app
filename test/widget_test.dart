@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kids_play_app/features/avatar/presentation/avatar_setup_screen.dart';
 import 'package:kids_play_app/features/hangul/data/hangul_lesson_repository.dart';
 import 'package:kids_play_app/features/home/data/home_catalog_repository.dart';
 import 'package:kids_play_app/features/home/presentation/category_hub_screen.dart';
@@ -37,6 +38,28 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(find.text('플레이하기'), findsOneWidget);
+  });
+
+  testWidgets('opens the avatar setup screen after five taps on the hero face', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const KidsPlayApp());
+
+    final heroEntry = find.byKey(const Key('hero-face-parent-entry'));
+    expect(heroEntry, findsOneWidget);
+
+    for (var i = 0; i < 4; i++) {
+      await tester.tap(heroEntry);
+      await tester.pump();
+    }
+
+    expect(find.byType(AvatarSetupScreen), findsNothing);
+
+    await tester.tap(heroEntry);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AvatarSetupScreen), findsOneWidget);
+    expect(find.text('표정 카드 만들기'), findsOneWidget);
   });
 
   testWidgets('moves from hero screen to category menu when play is tapped', (

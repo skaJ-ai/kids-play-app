@@ -37,19 +37,25 @@ class ToyButton extends StatelessWidget {
             onTap: onPressed,
             child: SizedBox(
               height: height,
-              child: Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     if (icon != null) ...[
-                      Icon(icon, color: KidPalette.white, size: 30),
-                      const SizedBox(width: 12),
+                      Icon(icon, color: KidPalette.white, size: 28),
+                      const SizedBox(width: 10),
                     ],
-                    Text(
-                      label,
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: KidPalette.white,
-                        fontWeight: FontWeight.w900,
+                    Flexible(
+                      child: Text(
+                        label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          color: KidPalette.white,
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                     ),
                   ],
