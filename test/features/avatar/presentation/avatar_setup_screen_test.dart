@@ -29,6 +29,146 @@ void main() {
   });
 
   testWidgets(
+    'shows the scoped confusion summary for the most confusing lesson and tie breaks by metadata order',
+    (WidgetTester tester) async {
+      final progressStore = MemoryProgressStore(
+        const AppProgressSnapshot(
+          stickerCount: 4,
+          lessons: {
+            'alphabet:alphabet_letters_1': LessonProgress(
+              bestScore: 4,
+              totalQuestions: 5,
+              lastViewedIndex: 3,
+              recentMistakes: ['A a', 'B b'],
+            ),
+            'hangul:basic_consonants_1': LessonProgress(
+              bestScore: 3,
+              totalQuestions: 5,
+              lastViewedIndex: 1,
+              recentMistakes: ['ㄱ', 'ㄴ'],
+            ),
+            'numbers:numbers_count_1': LessonProgress(
+              bestScore: 5,
+              totalQuestions: 5,
+              lastViewedIndex: 4,
+              recentMistakes: ['1'],
+            ),
+          },
+        ),
+      );
+
+      await tester.pumpWidget(
+        _wrapWithServices(
+          progressStore: progressStore,
+          child: const AvatarSetupScreen(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final summaryPanel = find.byKey(const Key('parent-summary-panel'));
+      expect(summaryPanel, findsOneWidget);
+      expect(
+        find.descendant(
+          of: summaryPanel,
+          matching: find.byKey(const Key('parent-summary-confusion-callout')),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: summaryPanel,
+          matching: find.byKey(const Key('parent-summary-confusion-category')),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: summaryPanel,
+          matching: find.text('한글 차고'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: summaryPanel,
+          matching: find.byKey(const Key('parent-summary-confusion-lesson')),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: summaryPanel,
+          matching: find.text('기본 자음 1'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: summaryPanel,
+          matching: find.text('지금은 헷갈린 세트가 없어요.'),
+        ),
+        findsNothing,
+      );
+    },
+  );
+
+  testWidgets(
+    'shows calm fallback copy when there are no recent mistakes to summarize',
+    (WidgetTester tester) async {
+      final progressStore = MemoryProgressStore(
+        const AppProgressSnapshot(
+          stickerCount: 1,
+          lessons: {
+            'hangul:basic_consonants_1': LessonProgress(
+              bestScore: 5,
+              totalQuestions: 5,
+              lastViewedIndex: 4,
+            ),
+            'numbers:numbers_count_1': LessonProgress(
+              bestScore: 4,
+              totalQuestions: 5,
+              lastViewedIndex: 2,
+              recentMistakes: [],
+            ),
+          },
+        ),
+      );
+
+      await tester.pumpWidget(
+        _wrapWithServices(
+          progressStore: progressStore,
+          child: const AvatarSetupScreen(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final summaryPanel = find.byKey(const Key('parent-summary-panel'));
+      expect(summaryPanel, findsOneWidget);
+      expect(
+        find.descendant(
+          of: summaryPanel,
+          matching: find.byKey(const Key('parent-summary-confusion-fallback')),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: summaryPanel,
+          matching: find.text('지금은 헷갈린 세트가 없어요.'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: summaryPanel,
+          matching: find.byKey(const Key('parent-summary-confusion-lesson')),
+        ),
+        findsNothing,
+      );
+    },
+  );
+
+  testWidgets(
     'shows detailed lesson controls and lets parent adjust progress',
     (WidgetTester tester) async {
       final progressStore = MemoryProgressStore(
@@ -66,11 +206,29 @@ void main() {
         ),
         findsOneWidget,
       );
-      expect(find.text('기본 자음 1'), findsOneWidget);
-      expect(find.text('최근 헷갈린 글자'), findsNWidgets(2));
-      expect(find.text('ㄴ'), findsOneWidget);
-      expect(find.text('ㄷ'), findsOneWidget);
-      expect(find.text('3 / 5'), findsOneWidget);
+      final hangulLessonCard = find.byKey(
+        const Key('lesson-card-hangul:basic_consonants_1'),
+      );
+      expect(
+        find.descendant(of: hangulLessonCard, matching: find.text('기본 자음 1')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: hangulLessonCard, matching: find.text('최근 헷갈린 글자')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: hangulLessonCard, matching: find.text('ㄴ')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: hangulLessonCard, matching: find.text('ㄷ')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: hangulLessonCard, matching: find.text('3 / 5')),
+        findsOneWidget,
+      );
 
       final backButton = find.byKey(
         const Key('lesson-back-hangul:basic_consonants_1'),
@@ -79,7 +237,10 @@ void main() {
       await tester.tap(backButton);
       await tester.pumpAndSettle();
 
-      expect(find.text('2 / 5'), findsOneWidget);
+      expect(
+        find.descendant(of: hangulLessonCard, matching: find.text('2 / 5')),
+        findsOneWidget,
+      );
 
       final clearMistakesButton = find.byKey(
         const Key('lesson-clear-mistakes-hangul:basic_consonants_1'),
@@ -88,9 +249,18 @@ void main() {
       await tester.tap(clearMistakesButton);
       await tester.pumpAndSettle();
 
-      expect(find.text('최근 헷갈림 없음'), findsNWidgets(2));
-      expect(find.text('ㄴ'), findsNothing);
-      expect(find.text('ㄷ'), findsNothing);
+      expect(
+        find.descendant(of: hangulLessonCard, matching: find.text('최근 헷갈림 없음')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: hangulLessonCard, matching: find.text('ㄴ')),
+        findsNothing,
+      );
+      expect(
+        find.descendant(of: hangulLessonCard, matching: find.text('ㄷ')),
+        findsNothing,
+      );
     },
   );
 

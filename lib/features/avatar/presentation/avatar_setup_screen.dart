@@ -401,8 +401,10 @@ class _ParentSummaryPanel extends StatelessWidget {
         .expand((lesson) => lesson.recentMistakes)
         .toSet()
         .length;
+    final mostConfusingLesson = _mostConfusingLessonMetadataFor(snapshot);
 
     return ToyPanel(
+      key: const Key('parent-summary-panel'),
       backgroundColor: KidPalette.white.withValues(alpha: 0.95),
       padding: EdgeInsets.all(compact ? 14 : 18),
       child: Column(
@@ -436,6 +438,74 @@ class _ParentSummaryPanel extends StatelessWidget {
                 color: KidPalette.lilac,
               ),
             ],
+          ),
+          SizedBox(height: compact ? 10 : 12),
+          Container(
+            key: const Key('parent-summary-confusion-callout'),
+            width: double.infinity,
+            padding: EdgeInsets.all(compact ? 12 : 14),
+            decoration: BoxDecoration(
+              color: KidPalette.white.withValues(alpha: 0.72),
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(
+                color: KidPalette.navy.withValues(alpha: 0.12),
+              ),
+            ),
+            child: mostConfusingLesson == null
+                ? Text(
+                    '지금은 헷갈린 세트가 없어요.',
+                    key: const Key('parent-summary-confusion-fallback'),
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: KidPalette.navy,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.lightbulb_rounded,
+                            color: KidPalette.coralDark,
+                            size: compact ? 18 : 20,
+                          ),
+                          SizedBox(width: compact ? 6 : 8),
+                          Expanded(
+                            child: Text(
+                              '다음에 먼저 같이 보면 좋아요.',
+                              style: Theme.of(context).textTheme.titleSmall
+                                  ?.copyWith(
+                                    color: KidPalette.navy,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: compact ? 8 : 10),
+                      Wrap(
+                        spacing: compact ? 10 : 12,
+                        runSpacing: compact ? 10 : 12,
+                        children: [
+                          KeyedSubtree(
+                            key: const Key('parent-summary-confusion-category'),
+                            child: _LessonMetricChip(
+                              label: '카테고리',
+                              value: mostConfusingLesson.categoryLabel,
+                            ),
+                          ),
+                          KeyedSubtree(
+                            key: const Key('parent-summary-confusion-lesson'),
+                            child: _LessonMetricChip(
+                              label: '세트',
+                              value: mostConfusingLesson.title,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
           ),
         ],
       ),
@@ -1292,6 +1362,35 @@ _LessonMetadata _lessonMetadataFor(String lessonId) {
     color: KidPalette.navy,
     sortOrder: 99,
   );
+}
+
+_LessonMetadata? _mostConfusingLessonMetadataFor(AppProgressSnapshot snapshot) {
+  final lessonsWithMistakes = snapshot.lessons.entries
+      .where((entry) => entry.value.recentMistakes.isNotEmpty)
+      .toList(growable: false);
+  if (lessonsWithMistakes.isEmpty) {
+    return null;
+  }
+
+  lessonsWithMistakes.sort((a, b) {
+    final mistakeCompare = b.value.recentMistakes.length.compareTo(
+      a.value.recentMistakes.length,
+    );
+    if (mistakeCompare != 0) {
+      return mistakeCompare;
+    }
+
+    final leftMetadata = _lessonMetadataFor(a.key);
+    final rightMetadata = _lessonMetadataFor(b.key);
+    final sortCompare = leftMetadata.sortOrder.compareTo(rightMetadata.sortOrder);
+    if (sortCompare != 0) {
+      return sortCompare;
+    }
+
+    return a.key.compareTo(b.key);
+  });
+
+  return _lessonMetadataFor(lessonsWithMistakes.first.key);
 }
 
 String _fallbackCategoryLabel(String categoryKey) {
