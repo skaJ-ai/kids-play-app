@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/services/app_services.dart';
-import '../../../app/ui/audio_prompt_panel.dart';
 import '../../../app/ui/kid_theme.dart';
 import '../../../app/ui/play_feedback_layer.dart';
 import '../../../app/ui/play_choice_card.dart';
+import '../../../app/ui/play_prompt_panel.dart';
 import '../../../app/ui/playground_scaffold.dart';
 import '../../../app/ui/toy_button.dart';
 import '../../../app/ui/toy_panel.dart';
@@ -246,117 +246,16 @@ class _HangulQuizScreenState extends State<HangulQuizScreen> {
                         children: [
                           Expanded(
                             flex: 4,
-                            child: isTight
-                                ? _TightQuizPromptPanel(
-                                    displayName: _displayNameFor(question),
-                                    prompt: _targetPromptFor(question),
-                                    symbol: question.symbol,
-                                    onReplay: () => _replayQuestion(question),
-                                  )
-                                : Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    children: [
-                                      AudioPromptPanel(
-                                        key: const Key('quiz-prompt-panel'),
-                                        badge: '문제 듣기',
-                                        title: _targetPromptFor(question),
-                                        subtitle: isCompact
-                                            ? '스피커를 눌러 다시 들어봐요.'
-                                            : '스피커를 누르면 문제를 다시 들을 수 있어요.',
-                                        onReplay: () =>
-                                            _replayQuestion(question),
-                                        compact: isCompact,
-                                      ),
-                                      SizedBox(height: isCompact ? 10 : 14),
-                                      Expanded(
-                                        child: ToyPanel(
-                                          padding: EdgeInsets.all(
-                                            isCompact ? 14 : 24,
-                                          ),
-                                          backgroundColor: KidPalette.white
-                                              .withValues(alpha: 0.94),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Container(
-                                                padding: EdgeInsets.symmetric(
-                                                  horizontal: isCompact
-                                                      ? 12
-                                                      : 14,
-                                                  vertical: isCompact ? 6 : 8,
-                                                ),
-                                                decoration: BoxDecoration(
-                                                  color: KidPalette.creamWarm,
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                        999,
-                                                      ),
-                                                ),
-                                                child: Text(
-                                                  '찾아볼 글자',
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .titleSmall
-                                                      ?.copyWith(
-                                                        color: KidPalette
-                                                            .coralDark,
-                                                        fontWeight:
-                                                            FontWeight.w900,
-                                                      ),
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                height: isCompact ? 8 : 12,
-                                              ),
-                                              Text(
-                                                _displayNameFor(question),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                style:
-                                                    (isCompact
-                                                            ? Theme.of(context)
-                                                                  .textTheme
-                                                                  .titleSmall
-                                                            : Theme.of(context)
-                                                                  .textTheme
-                                                                  .titleMedium)
-                                                        ?.copyWith(
-                                                          color: KidPalette
-                                                              .coralDark,
-                                                          fontWeight:
-                                                              FontWeight.w900,
-                                                        ),
-                                              ),
-                                              SizedBox(
-                                                height: isCompact ? 6 : 10,
-                                              ),
-                                              Expanded(
-                                                child: Center(
-                                                  child: FittedBox(
-                                                    fit: BoxFit.scaleDown,
-                                                    child: Text(
-                                                      question.symbol,
-                                                      style: TextStyle(
-                                                        fontSize: isCompact
-                                                            ? 86
-                                                            : 118,
-                                                        fontWeight:
-                                                            FontWeight.w900,
-                                                        color: KidPalette.navy,
-                                                        height: 1,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                            child: PlayPromptPanel(
+                              key: const Key('quiz-prompt-panel'),
+                              displayName: _displayNameFor(question),
+                              prompt: _targetPromptFor(question),
+                              symbol: question.symbol,
+                              targetLabel: '찾아볼 글자',
+                              onReplay: () => _replayQuestion(question),
+                              compact: isCompact,
+                              tight: isTight,
+                            ),
                           ),
                           SizedBox(width: isTight ? 10 : (isCompact ? 14 : 18)),
                           Expanded(
@@ -528,98 +427,6 @@ class _HangulQuizScreenState extends State<HangulQuizScreen> {
 
   String _targetPromptFor(HangulCard question) {
     return "'${question.symbol}' 글자를 찾아봐!";
-  }
-}
-
-class _TightQuizPromptPanel extends StatelessWidget {
-  const _TightQuizPromptPanel({
-    required this.displayName,
-    required this.prompt,
-    required this.symbol,
-    required this.onReplay,
-  });
-
-  final String displayName;
-  final String prompt;
-  final String symbol;
-  final VoidCallback onReplay;
-
-  @override
-  Widget build(BuildContext context) {
-    return ToyPanel(
-      key: const Key('quiz-prompt-panel'),
-      padding: const EdgeInsets.all(12),
-      backgroundColor: KidPalette.creamWarm,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  prompt,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: KidPalette.navy,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(18),
-                  onTap: onReplay,
-                  child: Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: KidPalette.white.withValues(alpha: 0.92),
-                      borderRadius: BorderRadius.circular(18),
-                      boxShadow: KidShadows.button,
-                    ),
-                    child: const Icon(
-                      Icons.volume_up_rounded,
-                      color: KidPalette.coralDark,
-                      size: 24,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            displayName,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              color: KidPalette.coralDark,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Expanded(
-            child: Center(
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  symbol,
-                  style: const TextStyle(
-                    fontSize: 72,
-                    fontWeight: FontWeight.w900,
-                    color: KidPalette.navy,
-                    height: 1,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }
 
