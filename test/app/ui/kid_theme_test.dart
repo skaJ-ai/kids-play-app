@@ -133,6 +133,129 @@ void main() {
     },
   );
 
+  test('KidShadowTokens snapshots caller-owned lists as unmodifiable', () {
+    final buttonPrimary = <BoxShadow>[
+      const BoxShadow(
+        color: Color(0x11182230),
+        blurRadius: 18,
+        offset: Offset(0, 8),
+      ),
+    ];
+    final buttonSecondary = <BoxShadow>[
+      const BoxShadow(
+        color: Color(0x22182230),
+        blurRadius: 12,
+        offset: Offset(0, 6),
+      ),
+    ];
+    final panel = <BoxShadow>[
+      const BoxShadow(
+        color: Color(0x33182230),
+        blurRadius: 20,
+        offset: Offset(0, 10),
+      ),
+    ];
+
+    final tokens = KidShadowTokens(
+      buttonPrimary: buttonPrimary,
+      buttonSecondary: buttonSecondary,
+      panel: panel,
+    );
+
+    buttonPrimary.add(
+      const BoxShadow(
+        color: Color(0x44182230),
+        blurRadius: 6,
+        offset: Offset(0, 2),
+      ),
+    );
+    buttonSecondary.clear();
+    panel[0] = const BoxShadow(
+      color: Color(0x55182230),
+      blurRadius: 8,
+      offset: Offset(0, 3),
+    );
+
+    expect(tokens.buttonPrimary, hasLength(1));
+    expect(tokens.buttonSecondary, hasLength(1));
+    expect(tokens.panel.single.color, const Color(0x33182230));
+    expect(
+      () => tokens.buttonPrimary.add(
+        const BoxShadow(
+          color: Color(0x66182230),
+          blurRadius: 4,
+          offset: Offset(0, 1),
+        ),
+      ),
+      throwsUnsupportedError,
+    );
+  });
+
+  test('KidShadowTokens copyWith and lerp keep frozen shadow snapshots', () {
+    final replacementPrimary = <BoxShadow>[
+      const BoxShadow(
+        color: Color(0x111B4FA7),
+        blurRadius: 22,
+        offset: Offset(0, 10),
+      ),
+    ];
+    final copied = KidShadowTokens.defaults.copyWith(
+      buttonPrimary: replacementPrimary,
+    );
+
+    replacementPrimary.add(
+      const BoxShadow(
+        color: Color(0x221B4FA7),
+        blurRadius: 10,
+        offset: Offset(0, 4),
+      ),
+    );
+
+    final lerped =
+        KidShadowTokens(
+          panel: <BoxShadow>[
+            const BoxShadow(
+              color: Color(0x14182230),
+              blurRadius: 18,
+              offset: Offset(0, 8),
+            ),
+          ],
+        ).lerp(
+          KidShadowTokens(
+            panel: <BoxShadow>[
+              const BoxShadow(
+                color: Color(0x24182230),
+                blurRadius: 24,
+                offset: Offset(0, 12),
+              ),
+            ],
+          ),
+          0.5,
+        );
+
+    expect(copied.buttonPrimary, hasLength(1));
+    expect(
+      () => copied.buttonPrimary.add(
+        const BoxShadow(
+          color: Color(0x331B4FA7),
+          blurRadius: 6,
+          offset: Offset(0, 2),
+        ),
+      ),
+      throwsUnsupportedError,
+    );
+    expect(
+      () => lerped.panel.add(
+        const BoxShadow(
+          color: Color(0x34182230),
+          blurRadius: 5,
+          offset: Offset(0, 2),
+        ),
+      ),
+      throwsUnsupportedError,
+    );
+  });
+
   test('buildKidTheme exposes the kid chrome token defaults', () {
     final theme = buildKidTheme();
     final layout = theme.extension<KidLayoutTheme>();

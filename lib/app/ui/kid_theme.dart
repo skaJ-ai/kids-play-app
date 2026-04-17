@@ -428,13 +428,23 @@ class KidPanelChromeTokens {
 
 @immutable
 class KidShadowTokens {
-  const KidShadowTokens({
+  KidShadowTokens({
+    List<BoxShadow> buttonPrimary = KidShadows.button,
+    List<BoxShadow> buttonSecondary = KidShadows.buttonSoft,
+    List<BoxShadow> panel = KidShadows.panel,
+  }) : this._(
+         buttonPrimary: List<BoxShadow>.unmodifiable(buttonPrimary),
+         buttonSecondary: List<BoxShadow>.unmodifiable(buttonSecondary),
+         panel: List<BoxShadow>.unmodifiable(panel),
+       );
+
+  const KidShadowTokens._({
     this.buttonPrimary = KidShadows.button,
     this.buttonSecondary = KidShadows.buttonSoft,
     this.panel = KidShadows.panel,
   });
 
-  static const defaults = KidShadowTokens();
+  static const defaults = KidShadowTokens._();
 
   final List<BoxShadow> buttonPrimary;
   final List<BoxShadow> buttonSecondary;

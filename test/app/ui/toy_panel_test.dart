@@ -218,7 +218,7 @@ void main() {
       final customLayout = KidLayoutTheme(
         button: KidLayoutTheme.defaults.button,
         panel: KidLayoutTheme.defaults.panel,
-        chrome: const KidChromeTokens(
+        chrome: KidChromeTokens(
           button: KidButtonChromeTokens(),
           panel: KidPanelChromeTokens(),
           shadows: KidShadowTokens(panel: customPanelShadows),
