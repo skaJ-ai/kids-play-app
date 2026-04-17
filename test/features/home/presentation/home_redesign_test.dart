@@ -9,6 +9,31 @@ import 'package:kids_play_app/features/home/presentation/category_hub_screen.dar
 import 'package:kids_play_app/features/home/presentation/home_screen.dart';
 
 void main() {
+  testWidgets('roomy home shows polished driving copy and accurate CTA', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(960, 460);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: HomeScreen(catalogRepository: _fakeHomeCatalogRepository()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('오늘은 어디로 달릴까?'), findsOneWidget);
+    expect(find.text('마음에 드는 차고를 누르고 놀이를 골라요.'), findsOneWidget);
+    expect(find.text('놀이 고르기'), findsNWidgets(3));
+    expect(find.text('차고 열기'), findsNothing);
+    expect(find.text('바로 출발'), findsNothing);
+  });
+
   testWidgets('compact home hides roomy helper copy and uses compact labels', (
     WidgetTester tester,
   ) async {

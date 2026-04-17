@@ -78,16 +78,22 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               SizedBox(height: compact ? 12 : 18),
               Text(
-                '어떤 차고로 갈까?',
+                compact ? '어떤 차고로 갈까?' : '오늘은 어디로 달릴까?',
                 textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: compact
                     ? theme.textTheme.headlineSmall
                     : theme.textTheme.headlineMedium,
               ),
               SizedBox(height: compact ? 6 : 10),
               Text(
-                '좋아하는 차고를 콕 눌러요.',
+                compact
+                    ? '좋아하는 차고를 콕 눌러요.'
+                    : '마음에 드는 차고를 누르고 놀이를 골라요.',
                 textAlign: TextAlign.center,
+                maxLines: compact ? 1 : 2,
+                overflow: TextOverflow.ellipsis,
                 style: compact
                     ? theme.textTheme.titleSmall
                     : theme.textTheme.titleMedium,
@@ -271,7 +277,7 @@ class _CategoryCard extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      '차고 열기',
+                      '놀이 고르기',
                       style: theme.textTheme.titleMedium?.copyWith(
                         color: accentColor,
                         fontWeight: FontWeight.w900,
