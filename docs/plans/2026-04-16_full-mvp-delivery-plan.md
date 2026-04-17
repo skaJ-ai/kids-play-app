@@ -2,6 +2,22 @@
 
 > For Hermes: execute this plan incrementally with small commits, keep GitHub Actions generating an APK artifact after each meaningful slice, and verify every feature with tests/analyze/build before pushing.
 
+## Status update
+
+완료된 slice
+- Slice 0 — docs + CI alignment
+- Slice 1 — toddler interaction foundation
+- Slice 2 — persistence + parent controls foundation
+- Slice 3 — alphabet playable MVP
+- Slice 4 — numbers playable MVP
+- Slice 5 — audio-first prompt layer
+- Slice 6 — end-to-end polish의 home/category/hub garage UI 정리, 보호자 기본 진도 제어, 오답 다시 풀기 진입까지
+
+남은 확장 후보
+- 해금 수동 제어 / 보호자 고급 운영
+- 실제 표정 사진 업로드/크롭
+- richer reward / 효과음 / 배경음악 polish
+
 ## Goal
 
 현재 한글 MVP 상태의 `승원이의 빵빵 놀이터`를, 사용자가 다음날 순차적으로 확인할 수 있는 end-to-end toddler-ready APK로 확장한다.

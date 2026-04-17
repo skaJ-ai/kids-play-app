@@ -121,6 +121,38 @@ void main() {
     expect(find.text("'ㄱ' 글자를 찾아봐!"), findsOneWidget);
   });
 
+  testWidgets('can replay only recent mistake questions when mistake symbols are provided', (
+    WidgetTester tester,
+  ) async {
+    final repository = HangulLessonRepository(
+      assetBundle: _FakeAssetBundle({
+        HangulLessonRepository.manifestPath: jsonEncode({
+          'lessons': [_basicConsonantsLesson],
+        }),
+      }),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: HangulQuizScreen(
+          repository: repository,
+          lessonId: 'basic_consonants_1',
+          mistakeSymbols: const ['ㄴ', 'ㄹ'],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('1 / 2'), findsOneWidget);
+    expect(find.text("'ㄴ' 글자를 찾아봐!"), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('quiz-choice-ㄴ')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('2 / 2'), findsOneWidget);
+    expect(find.text("'ㄹ' 글자를 찾아봐!"), findsOneWidget);
+  });
+
   testWidgets('shows a sticker reward summary after finishing the quiz', (
     WidgetTester tester,
   ) async {

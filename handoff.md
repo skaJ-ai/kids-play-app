@@ -19,82 +19,72 @@
 - local: `/home/openc/kids-play-app`
 - remote: `git@github.com:skaJ-ai/kids-play-app.git`
 
-현재 기준 최신 커밋
-- `e39d3dd` `ci: prepare generated assets in apk workflow`
+최근 기능 커밋
+- `4cc5bb2` `feat(parent): add lesson progress controls`
+- `eb7aaf5` `feat(ui): polish garage home flow`
 
 현재 이미 동작하는 것
 - landscape 고정 + immersive full-screen
-- hero / home / category hub
-- 한글 학습 1세트
-- 한글 퀴즈 1세트
-- compact landscape 대응
-- 보호자용 아바타 표정 셸 화면
+- hero / home / category hub garage flow
+- 한글 / 알파벳 / 숫자 학습 1세트씩
+- 한글 / 알파벳 / 숫자 퀴즈 1세트씩
+- compact landscape 대응 + 회귀 테스트
+- toddler-safe tap cooldown / 즉시 피드백 오버레이
+- 음성 cue / 다시 듣기 버튼
+- shared_preferences 기반 progress / settings / sticker 저장
+- 보호자 메뉴의 진행 요약, 음성/효과 토글, 세트별 진도 조절, 오답 다시 풀기, 오답 비우기, 앱 종료/리셋
 - GitHub Actions APK 빌드
 
-현재 부족한 것
-- 알파벳 playable flow 없음
-- 숫자 playable flow 없음
-- audio-first UX 부족
-- tap debounce 없음
-- 로컬 progress / settings 저장 없음
-- 보호자 메뉴 기능이 표정 셸 수준에 머물러 있음
+아직 남은 확장 후보
+- 해금 수동 제어 / 더 세밀한 보호자 운영 기능
+- 실제 표정 사진 업로드/크롭 파이프라인
+- richer reward / 효과음 / 배경음악 polish
 
 ---
 
-## 이번 구현 라운드의 목표
-
-이번 라운드는 아래를 끝까지 만드는 것을 목표로 진행합니다.
+## 이번 라운드까지 완료된 범위
 
 ### 1. 문서/CI 정합성
-- README 최신화
-- handoff 최신화
-- 구체 구현 계획 문서 추가
-- docs/script 변경만으로도 Actions APK가 생성되도록 workflow 정리
+- docs/script 변경도 APK workflow에 포함되도록 정리됨
+- README / handoff / 구현 계획 문서는 계속 최신화 중
 
 ### 2. toddler interaction foundation
-- 공통 탭 쿨타임/연타 방지
-- quiz 정답/오답 피드백 dwell + 자동 진행
-- 보호자 설정/진도용 로컬 저장소
-- 음성 cue 서비스 골격
+- 공통 탭 쿨타임/연타 방지 적용
+- quiz 정답/오답 피드백 dwell + 자동 진행 적용
+- 보호자 설정/진도용 로컬 저장소 적용
+- 음성 cue 서비스 적용
 
 ### 3. 카테고리 확장
-- 알파벳 학습 / 게임
-- 숫자 학습 / 게임
-- 홈의 3개 카테고리가 모두 실제 플레이 가능하도록 연결
+- 알파벳 학습 / 게임 구현 완료
+- 숫자 학습 / 게임 구현 완료
+- 홈의 3개 카테고리가 모두 실제 플레이 가능하도록 연결 완료
 
 ### 4. 보호자 기능 확장
-- 스티커/점수/진도 요약
-- 소리 설정
-- 오답 복습 진입점
-- 앱 종료/리셋 최소 기능
+- 스티커/점수/진도 요약 제공
+- 소리 설정 제공
+- 세트별 진도 앞뒤 조절 제공
+- 세트별 오답 다시 풀기 제공
+- 세트별 최근 오답 비우기 제공
+- 앱 종료/리셋 최소 운영 기능 제공
 
-### 5. 검증
-- `flutter test`
-- `flutter analyze`
-- `flutter build apk --release --target-platform android-arm64`
-- GitHub Actions success + artifact 확인
+### 5. 최근 UI polish
+- hero / home / category hub를 garage tone으로 재정렬
+- compact landscape 360px 높이에서 overflow 없이 보이도록 조정
 
 ---
 
-## 구현 기준 / BM 반영 사항
+## 검증 결과
 
-BM으로 반영할 기준
-- toddler-safe tap-only UX
-- 큰 터치 영역
-- 눌렀을 때 즉시 반응하는 시각 피드백
-- 마구 눌러도 멈추지 않는 debounce 방어
-- 오디오 퍼스트 구조
-- 세트 완료 시 짧고 강한 보상 피드백
+최근 코드 기준 검증 완료
+- `/home/openc/sdk/flutter/bin/flutter test`
+- `/home/openc/sdk/flutter/bin/flutter analyze`
+- `/home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64`
 
-에셋/소스 방향
-- 이미지: Flaticon / Freepik / Pixabay 계열 무료 소스 우선
-- 음성: Clova Dubbing / Edge TTS 계열 참고
-- 효과음: Freesound 계열 참고
-- 폰트: Noonnu 계열 둥근 폰트 참고
+로컬 APK
+- `build/app/outputs/flutter-apk/app-release.apk`
 
-현재 스택 선택
-- 구현은 Flutter 유지
-- 참고 앱/오픈소스는 UX/로직/BM 용도로 해석하고 Flutter에 맞게 재구현
+GitHub Actions artifact
+- `kids-play-app-arm64-v8a-release`
 
 ---
 
@@ -145,14 +135,16 @@ artifact
 
 ---
 
-## 다음 작업자가 놓치면 안 되는 포인트
+## 다음 작업자가 바로 이어갈 포인트
 
+우선순위 추천
+1. 해금 수동 제어 / 보호자 고급 운영
+2. 실제 표정 사진 업로드/크롭
+3. richer reward / 효과음 / 배경음악 polish
+4. 오답 다시 풀기 결과를 별도 통계/보상과 연결
+
+주의
 - 이 앱은 데모가 아니라 실제 아이가 눌러보는 앱이다.
 - generic한 Flutter 샘플 느낌이면 실패다.
-- 하지만 지금 단계에서는 디자인만이 아니라 실제 playable flow 완성이 중요하다.
-- 즉, 이번 라운드의 핵심은
-  1) toddler interaction foundation
-  2) 3개 카테고리 playable 연결
-  3) parent 기능 최소 완성
-  4) APK deliverability 유지
-이다.
+- compact landscape 회귀를 깨지 않는 것이 중요하다.
+- 변경 후에는 항상 test / analyze / release apk까지 확인하는 것이 안전하다.

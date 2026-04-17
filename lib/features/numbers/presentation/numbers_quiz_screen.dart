@@ -15,10 +15,12 @@ class NumbersQuizScreen extends StatefulWidget {
     super.key,
     this.repository,
     this.lessonId = 'numbers_count_1',
+    this.mistakeSymbols,
   });
 
   final NumbersLessonRepository? repository;
   final String lessonId;
+  final List<String>? mistakeSymbols;
 
   @override
   State<NumbersQuizScreen> createState() => _NumbersQuizScreenState();
@@ -114,9 +116,14 @@ class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
             return const Center(child: Text('퀴즈 카드가 아직 부족해요.'));
           }
 
+          final quizCards = _resolvedQuizCards(lesson.cards);
+          if (quizCards.isEmpty) {
+            return const Center(child: Text('다시 풀 오답이 없어요.'));
+          }
+
           if (_isComplete) {
             return _QuizSummary(
-              totalQuestions: lesson.cards.length,
+              totalQuestions: quizCards.length,
               correctCount: _correctCount,
               onRestart: () => setState(() {
                 _questionIndex = 0;
@@ -131,8 +138,8 @@ class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
             );
           }
 
-          final question = lesson.cards[_questionIndex];
-          final choices = _buildChoices(lesson.cards, _questionIndex);
+          final question = quizCards[_questionIndex];
+          final choices = _buildChoices(lesson.cards, question, _questionIndex);
           _queuePrompt(question);
 
           return LayoutBuilder(
@@ -193,7 +200,7 @@ class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
                               boxShadow: KidShadows.panel,
                             ),
                             child: Text(
-                              '${_questionIndex + 1} / ${lesson.cards.length}',
+                              '${_questionIndex + 1} / ${quizCards.length}',
                               style: Theme.of(context).textTheme.titleSmall
                                   ?.copyWith(
                                     color: KidPalette.coralDark,
@@ -401,7 +408,7 @@ class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
                                           onTap: () => _selectChoice(
                                             choice: choices[i],
                                             answer: question,
-                                            totalQuestions: lesson.cards.length,
+                                            totalQuestions: quizCards.length,
                                           ),
                                         ),
                                     ],
@@ -499,8 +506,11 @@ class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
     });
   }
 
-  List<NumbersCard> _buildChoices(List<NumbersCard> cards, int questionIndex) {
-    final answer = cards[questionIndex];
+  List<NumbersCard> _buildChoices(
+    List<NumbersCard> cards,
+    NumbersCard answer,
+    int questionIndex,
+  ) {
     final distractors = cards
         .where((card) => card.symbol != answer.symbol)
         .toList();
@@ -514,6 +524,17 @@ class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
     final choices = rotatedDistractors.take(3).toList(growable: true);
     choices.insert(questionIndex % 4, answer);
     return choices;
+  }
+
+  List<NumbersCard> _resolvedQuizCards(List<NumbersCard> cards) {
+    final symbols = widget.mistakeSymbols;
+    if (symbols == null || symbols.isEmpty) {
+      return cards;
+    }
+
+    return cards
+        .where((card) => symbols.contains(card.symbol))
+        .toList(growable: false);
   }
 
   String _displayNameFor(NumbersCard question) {

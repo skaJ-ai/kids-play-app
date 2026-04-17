@@ -72,6 +72,38 @@ void main() {
     }
   });
 
+  testWidgets('can replay only recent alphabet mistake questions when mistake symbols are provided', (
+    WidgetTester tester,
+  ) async {
+    final repository = AlphabetLessonRepository(
+      assetBundle: _FakeAssetBundle({
+        AlphabetLessonRepository.manifestPath: jsonEncode({
+          'lessons': [_alphabetLesson],
+        }),
+      }),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: AlphabetQuizScreen(
+          repository: repository,
+          lessonId: 'alphabet_letters_1',
+          mistakeSymbols: const ['B b', 'D d'],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('1 / 2'), findsOneWidget);
+    expect(find.text("'B b' 글자를 찾아봐!"), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('quiz-choice-B b')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('2 / 2'), findsOneWidget);
+    expect(find.text("'D d' 글자를 찾아봐!"), findsOneWidget);
+  });
+
   testWidgets('shows a sticker reward summary after finishing the alphabet quiz', (
     WidgetTester tester,
   ) async {

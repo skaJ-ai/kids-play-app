@@ -81,6 +81,50 @@ void main() {
     expect(find.text('ㄷ'), findsNothing);
   });
 
+  testWidgets('opens a lesson retry flow from the parent controls when recent mistakes exist', (
+    WidgetTester tester,
+  ) async {
+    final progressStore = MemoryProgressStore(
+      const AppProgressSnapshot(
+        lessons: {
+          'hangul:basic_consonants_1': LessonProgress(
+            bestScore: 4,
+            totalQuestions: 5,
+            lastViewedIndex: 2,
+            recentMistakes: ['ㄴ', 'ㄷ'],
+          ),
+        },
+      ),
+    );
+
+    await tester.pumpWidget(
+      _wrapWithServices(
+        progressStore: progressStore,
+        child: AvatarSetupScreen(
+          onOpenLessonRetry: (context, lessonId, mistakes) {
+            return Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => Scaffold(
+                  body: Text('$lessonId:${mistakes.join(',')}'),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final retryButton = find.byKey(
+      const Key('lesson-retry-mistakes-hangul:basic_consonants_1'),
+    );
+    await tester.scrollUntilVisible(retryButton, 120);
+    await tester.tap(retryButton);
+    await tester.pumpAndSettle();
+
+    expect(find.text('hangul:basic_consonants_1:ㄴ,ㄷ'), findsOneWidget);
+  });
+
   testWidgets('keeps the avatar setup screen stable on a compact landscape phone', (
     WidgetTester tester,
   ) async {

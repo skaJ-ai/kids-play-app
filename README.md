@@ -15,52 +15,29 @@
 ## 현재 구현 범위
 
 이미 구현된 것
-- hero → home → category hub 흐름
-- kid-friendly 공통 디자인 시스템
-- 한글 학습 카드 1세트
-- 한글 4지선다 퀴즈 1세트
-- compact landscape 대응 테스트
-- 보호자용 아바타 표정 셸 화면
+- hero → home → category hub의 garage flow
+- 한글 / 알파벳 / 숫자 학습 카드 1세트씩
+- 한글 / 알파벳 / 숫자 4지선다 퀴즈 1세트씩
+- compact landscape 대응 UI와 회귀 테스트
+- toddler-safe tap cooldown / 연타 방지
+- 정답/오답 즉시 피드백 오버레이
+- 음성 cue + 문제 다시 듣기 버튼
+- shared_preferences 기반 진도 / 오답 / 스티커 / 설정 저장
+- 보호자 메뉴의 진행 요약, 음성/효과 토글, 세트별 진도 조절, 오답 다시 풀기, 오답 비우기, 리셋, 종료
 - GitHub Actions APK 빌드 파이프라인
 
-아직 확장 중인 것
-- 알파벳 playable flow
-- 숫자 playable flow
-- audio-first prompt 시스템
-- toddler-safe tap cooldown / debounce
-- 로컬 진도/오답/보상 저장
-- 보호자 메뉴 기능 확장
+다음 확장 후보
+- 해금 수동 제어 / 더 세밀한 보호자 운영 기능
+- 실제 표정 사진 업로드/크롭 파이프라인
+- richer reward / 효과음 / 배경음악 polish
 
-## 이번 라운드의 구현 목표
+## 현재 앱 흐름
 
-이 라운드는 아래 순서로 끝까지 진행합니다.
-
-1. 문서/CI 정합성 업데이트
-- README / handoff / 구현 계획 문서 최신화
-- docs/script 변경만으로도 Actions APK가 생성되도록 워크플로 정리
-
-2. toddler interaction foundation
-- 공통 탭 쿨타임/연타 방지
-- 정답/오답 즉시 피드백 오버레이
-- 로컬 progress/settings 저장소
-- 음성 cue 서비스 골격
-
-3. 카테고리 end-to-end 확장
-- 알파벳 학습/게임 활성화
-- 숫자 학습/게임 활성화
-- 카테고리 허브에서 3개 카테고리 모두 실제 진입 가능하게 연결
-
-4. 보호자 기능 강화
-- 진도/보상 요약
-- 소리 설정
-- 최근 오답 복습 진입점
-- 앱 종료/리셋 등 최소 운영 기능
-
-5. 최종 검증
-- flutter test
-- flutter analyze
-- flutter build apk --release --target-platform android-arm64
-- GitHub Actions 성공 + APK artifact 확인
+1. 히어로 화면에서 출발
+2. 홈 차고에서 한글 / 알파벳 / 숫자 선택
+3. 카테고리 차고에서 배우기 / 퀴즈 진입
+4. 세트 완료 시 점수와 스티커 저장
+5. 보호자 메뉴에서 진행 요약, 세트별 진도 조절, 오답 다시 풀기
 
 ## 실행 방법
 

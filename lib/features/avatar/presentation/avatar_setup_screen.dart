@@ -7,10 +7,21 @@ import '../../../app/ui/kid_theme.dart';
 import '../../../app/ui/playground_scaffold.dart';
 import '../../../app/ui/toy_button.dart';
 import '../../../app/ui/toy_panel.dart';
+import '../../alphabet/presentation/alphabet_quiz_screen.dart';
+import '../../hangul/presentation/hangul_quiz_screen.dart';
+import '../../numbers/presentation/numbers_quiz_screen.dart';
 import '../domain/avatar_expression.dart';
 
+typedef LessonRetryRouteOpener = Future<void> Function(
+  BuildContext context,
+  String lessonId,
+  List<String> mistakes,
+);
+
 class AvatarSetupScreen extends StatefulWidget {
-  const AvatarSetupScreen({super.key});
+  const AvatarSetupScreen({super.key, this.onOpenLessonRetry});
+
+  final LessonRetryRouteOpener? onOpenLessonRetry;
 
   @override
   State<AvatarSetupScreen> createState() => _AvatarSetupScreenState();
@@ -94,6 +105,27 @@ class _AvatarSetupScreenState extends State<AvatarSetupScreen> {
       recentMistakes: const [],
     );
     await _refreshSnapshot();
+  }
+
+  Future<void> _openLessonRetry(String lessonId, List<String> mistakes) async {
+    if (mistakes.isEmpty) {
+      return;
+    }
+
+    final opener = widget.onOpenLessonRetry;
+    if (opener != null) {
+      await opener(context, lessonId, mistakes);
+      return;
+    }
+
+    final destination = _buildLessonRetryScreen(lessonId, mistakes);
+    if (destination == null || !mounted) {
+      return;
+    }
+
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute<void>(builder: (_) => destination));
   }
 
   Future<void> _exitApp() async {
@@ -205,6 +237,7 @@ class _AvatarSetupScreenState extends State<AvatarSetupScreen> {
                             snapshot: progress,
                             onAdjustLessonIndex: _adjustLessonIndex,
                             onClearLessonMistakes: _clearLessonMistakes,
+                            onOpenLessonRetry: _openLessonRetry,
                           ),
                           SizedBox(height: compact ? 10 : 14),
                           ToyPanel(
@@ -379,6 +412,10 @@ typedef _LessonIndexAdjustCallback = Future<void> Function(
   int delta,
 );
 typedef _LessonActionCallback = Future<void> Function(String lessonId);
+typedef _LessonRetryCallback = Future<void> Function(
+  String lessonId,
+  List<String> mistakes,
+);
 
 class _ParentLessonManagementPanel extends StatelessWidget {
   const _ParentLessonManagementPanel({
@@ -386,12 +423,14 @@ class _ParentLessonManagementPanel extends StatelessWidget {
     required this.snapshot,
     required this.onAdjustLessonIndex,
     required this.onClearLessonMistakes,
+    required this.onOpenLessonRetry,
   });
 
   final bool compact;
   final AppProgressSnapshot snapshot;
   final _LessonIndexAdjustCallback onAdjustLessonIndex;
   final _LessonActionCallback onClearLessonMistakes;
+  final _LessonRetryCallback onOpenLessonRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -437,6 +476,7 @@ class _ParentLessonManagementPanel extends StatelessWidget {
                 progress: snapshot.progressFor(lessonIds[i]),
                 onAdjustLessonIndex: onAdjustLessonIndex,
                 onClearLessonMistakes: onClearLessonMistakes,
+                onOpenLessonRetry: onOpenLessonRetry,
               ),
               if (i != lessonIds.length - 1)
                 SizedBox(height: compact ? 10 : 12),
@@ -456,6 +496,7 @@ class _LessonManagementCard extends StatelessWidget {
     required this.progress,
     required this.onAdjustLessonIndex,
     required this.onClearLessonMistakes,
+    required this.onOpenLessonRetry,
   });
 
   final bool compact;
@@ -464,6 +505,7 @@ class _LessonManagementCard extends StatelessWidget {
   final LessonProgress progress;
   final _LessonIndexAdjustCallback onAdjustLessonIndex;
   final _LessonActionCallback onClearLessonMistakes;
+  final _LessonRetryCallback onOpenLessonRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -585,6 +627,15 @@ class _LessonManagementCard extends StatelessWidget {
                 color: metadata.color,
                 onPressed: progress.lastViewedIndex < metadata.cardCount - 1
                     ? () => onAdjustLessonIndex(lessonId, 1)
+                    : null,
+              ),
+              _ParentMiniActionButton(
+                key: Key('lesson-retry-mistakes-$lessonId'),
+                label: '오답 다시',
+                icon: Icons.refresh_rounded,
+                color: KidPalette.blue,
+                onPressed: progress.recentMistakes.isNotEmpty
+                    ? () => onOpenLessonRetry(lessonId, progress.recentMistakes)
                     : null,
               ),
               _ParentMiniActionButton(
@@ -924,4 +975,27 @@ String _fallbackCategoryLabel(String categoryKey) {
     default:
       return '기타 차고';
   }
+}
+
+Widget? _buildLessonRetryScreen(String lessonId, List<String> mistakes) {
+  final lessonKey = lessonId.split(':').last;
+  if (lessonId.startsWith('hangul:')) {
+    return HangulQuizScreen(
+      lessonId: lessonKey,
+      mistakeSymbols: mistakes,
+    );
+  }
+  if (lessonId.startsWith('alphabet:')) {
+    return AlphabetQuizScreen(
+      lessonId: lessonKey,
+      mistakeSymbols: mistakes,
+    );
+  }
+  if (lessonId.startsWith('numbers:')) {
+    return NumbersQuizScreen(
+      lessonId: lessonKey,
+      mistakeSymbols: mistakes,
+    );
+  }
+  return null;
 }
