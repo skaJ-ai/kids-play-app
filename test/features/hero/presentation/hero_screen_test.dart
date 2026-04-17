@@ -128,7 +128,7 @@ void main() {
   );
 
   testWidgets(
-    'switches the hero cta density between roomy and compact layouts',
+    'switches the hero cta density and rendered height between roomy and compact layouts',
     (WidgetTester tester) async {
       tester.view.physicalSize = const Size(1200, 720);
       tester.view.devicePixelRatio = 1.0;
@@ -137,18 +137,27 @@ void main() {
         tester.view.resetDevicePixelRatio();
       });
 
-      await tester.pumpWidget(_buildHeroScreen());
+      final theme = buildKidTheme();
+      final layout = theme.extension<KidLayoutTheme>();
+
+      expect(layout, isNotNull);
+      expect(layout!.button.regular.height, 56);
+      expect(layout.button.compact.height, 48);
+
+      await tester.pumpWidget(_buildHeroScreen(theme: theme));
       await tester.pumpAndSettle();
 
       expect(_heroStartButton(tester).density, ToyButtonDensity.regular);
       expect(_heroStartButton(tester).height, isNull);
+      expect(_heroStartButtonHeight(tester), layout.button.regular.height);
 
       tester.view.physicalSize = const Size(780, 360);
-      await tester.pumpWidget(_buildHeroScreen());
+      await tester.pumpWidget(_buildHeroScreen(theme: theme));
       await tester.pumpAndSettle();
 
       expect(_heroStartButton(tester).density, ToyButtonDensity.compact);
       expect(_heroStartButton(tester).height, isNull);
+      expect(_heroStartButtonHeight(tester), layout.button.compact.height);
     },
   );
 
@@ -355,7 +364,25 @@ void _expectPanelGeometryForText(
 }
 
 ToyButton _heroStartButton(WidgetTester tester) {
-  return tester.widget<ToyButton>(find.widgetWithText(ToyButton, '놀이 시작'));
+  return tester.widget<ToyButton>(_heroStartButtonFinder());
+}
+
+double _heroStartButtonHeight(WidgetTester tester) {
+  final sizedBox = tester.widget<SizedBox>(
+    find.descendant(
+      of: _heroStartButtonFinder(),
+      matching: find.byWidgetPredicate(
+        (Widget widget) =>
+            widget is SizedBox && widget.height != null && widget.width == null,
+      ),
+    ),
+  );
+
+  return sizedBox.height!;
+}
+
+Finder _heroStartButtonFinder() {
+  return find.widgetWithText(ToyButton, '놀이 시작');
 }
 
 GestureDetector _heroFaceDetector(WidgetTester tester) {

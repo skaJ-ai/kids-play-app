@@ -8,12 +8,12 @@ void main() {
     final layout = theme.extension<KidLayoutTheme>();
 
     expect(layout, isNotNull);
-    expect(layout!.button.regular.height, 60);
+    expect(layout!.button.regular.height, 56);
     expect(layout.button.regular.horizontalPadding, 16);
     expect(layout.button.regular.iconGap, 10);
     expect(layout.button.regular.iconChipSize, 34);
     expect(layout.button.regular.iconSize, 18);
-    expect(layout.button.regular.labelFontSize, 19);
+    expect(layout.button.regular.labelFontSize, 18);
     expect(layout.button.regular.labelFontWeight, FontWeight.w700);
     expect(layout.button.regular.labelLetterSpacing, 0);
     expect(layout.button.regular.labelHeight, 1.1);
@@ -24,12 +24,12 @@ void main() {
     expect(layout.button.regular.highlightHorizontalInset, 14);
     expect(layout.button.regular.highlightHeight, 10);
     expect(layout.button.regular.iconChipRadius, 13);
-    expect(layout.button.compact.height, 52);
+    expect(layout.button.compact.height, 48);
     expect(layout.button.compact.horizontalPadding, 14);
     expect(layout.button.compact.iconGap, 8);
     expect(layout.button.compact.iconChipSize, 30);
     expect(layout.button.compact.iconSize, 16);
-    expect(layout.button.compact.labelFontSize, 17);
+    expect(layout.button.compact.labelFontSize, 16);
     expect(layout.button.compact.labelFontWeight, FontWeight.w700);
     expect(layout.button.compact.labelLetterSpacing, 0);
     expect(layout.button.compact.labelHeight, 1.1);

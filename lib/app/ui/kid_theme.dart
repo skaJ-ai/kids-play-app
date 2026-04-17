@@ -596,12 +596,12 @@ class KidLayoutTheme extends ThemeExtension<KidLayoutTheme> {
   static const defaults = KidLayoutTheme(
     button: KidButtonTokens(
       regular: KidButtonDensityTokens(
-        height: 60,
+        height: 56,
         horizontalPadding: 16,
         iconGap: 10,
         iconChipSize: 34,
         iconSize: 18,
-        labelFontSize: 19,
+        labelFontSize: 18,
         labelFontWeight: FontWeight.w700,
         labelLetterSpacing: 0,
         labelHeight: 1.1,
@@ -614,12 +614,12 @@ class KidLayoutTheme extends ThemeExtension<KidLayoutTheme> {
         iconChipRadius: 13,
       ),
       compact: KidButtonDensityTokens(
-        height: 52,
+        height: 48,
         horizontalPadding: 14,
         iconGap: 8,
         iconChipSize: 30,
         iconSize: 16,
-        labelFontSize: 17,
+        labelFontSize: 16,
         labelFontWeight: FontWeight.w700,
         labelLetterSpacing: 0,
         labelHeight: 1.1,
