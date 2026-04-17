@@ -408,6 +408,28 @@ void main() {
     expect(layout.chrome.panel.shellGradientWhiteBlendAmount, 0.34);
   });
 
+  test('KidButtonChromeTokens exposes secondary border alpha tokens', () {
+    final layout = buildKidTheme().extension<KidLayoutTheme>();
+
+    expect(layout, isNotNull);
+    expect(layout!.chrome.button.secondaryBorderAlpha, 0.82);
+    expect(layout.chrome.button.secondaryIconChipBorderAlpha, 0.72);
+
+    final preserved = layout.chrome.button.copyWith(primaryBorderAlpha: 0.44);
+    const updated = KidButtonChromeTokens(
+      secondaryBorderAlpha: 0.64,
+      secondaryIconChipBorderAlpha: 0.48,
+    );
+
+    expect(preserved.secondaryBorderAlpha, 0.82);
+    expect(preserved.secondaryIconChipBorderAlpha, 0.72);
+    expect(layout.chrome.button.lerp(updated, 1).secondaryBorderAlpha, 0.64);
+    expect(
+      layout.chrome.button.lerp(updated, 1).secondaryIconChipBorderAlpha,
+      0.48,
+    );
+  });
+
   test(
     'KidButtonChromeTokens keeps disabled blend amounts in copyWith and lerp',
     () {

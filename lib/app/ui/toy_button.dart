@@ -69,7 +69,7 @@ class ToyButton extends StatelessWidget {
     final foregroundColor = primaryTone ? KidPalette.white : KidPalette.navy;
     final borderColor = primaryTone
         ? KidPalette.white.withValues(alpha: chromeTokens.primaryBorderAlpha)
-        : KidPalette.stroke;
+        : KidPalette.stroke.withValues(alpha: chromeTokens.secondaryBorderAlpha);
     final boxShadow = primaryTone
         ? shadowTokens.buttonPrimary
         : shadowTokens.buttonSecondary;
@@ -82,7 +82,9 @@ class ToyButton extends StatelessWidget {
         ? KidPalette.white.withValues(
             alpha: chromeTokens.primaryIconChipBorderAlpha,
           )
-        : KidPalette.stroke;
+        : KidPalette.stroke.withValues(
+            alpha: chromeTokens.secondaryIconChipBorderAlpha,
+          );
     final chipSize = densityTokens.iconChipSize;
     final iconSize = densityTokens.iconSize;
     final baseLabelStyle =

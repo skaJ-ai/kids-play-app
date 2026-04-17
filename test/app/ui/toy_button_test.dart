@@ -589,6 +589,53 @@ void main() {
     );
   });
 
+  testWidgets('reads secondary chrome alpha overrides from kid theme tokens', (
+    WidgetTester tester,
+  ) async {
+    const secondaryBorderAlpha = 0.61;
+    const secondaryIconChipBorderAlpha = 0.39;
+    final customLayout = KidLayoutTheme(
+      button: KidLayoutTheme.defaults.button,
+      panel: KidLayoutTheme.defaults.panel,
+      chrome: const KidChromeTokens(
+        button: KidButtonChromeTokens(
+          secondaryBorderAlpha: secondaryBorderAlpha,
+          secondaryIconChipBorderAlpha: secondaryIconChipBorderAlpha,
+        ),
+        panel: KidPanelChromeTokens(),
+      ),
+    );
+
+    await tester.pumpWidget(
+      _buildTestApp(
+        ToyButton(
+          label: '보조 토큰 버튼',
+          icon: Icons.settings_rounded,
+          tone: ToyButtonTone.secondary,
+          onPressed: () {},
+        ),
+        theme: buildKidTheme().copyWith(extensions: [customLayout]),
+      ),
+    );
+
+    final decoration = _buttonDecoration(tester, find.byType(ToyButton));
+    final border = decoration.border! as Border;
+    final chip = tester.widget<Container>(
+      _buttonIconChipFinder(find.byType(ToyButton), Icons.settings_rounded),
+    );
+    final chipDecoration = chip.decoration! as BoxDecoration;
+    final chipBorder = chipDecoration.border! as Border;
+
+    expect(
+      border.top.color,
+      KidPalette.stroke.withValues(alpha: secondaryBorderAlpha),
+    );
+    expect(
+      chipBorder.top.color,
+      KidPalette.stroke.withValues(alpha: secondaryIconChipBorderAlpha),
+    );
+  });
+
   testWidgets('reads disabled opacity from kid theme chrome tokens', (
     WidgetTester tester,
   ) async {
@@ -779,7 +826,12 @@ void main() {
     final icon = tester.widget<Icon>(find.byIcon(Icons.settings_rounded));
 
     expect(gradient.colors, const [KidPalette.cream, KidPalette.creamWarm]);
-    expect(border.top.color, KidPalette.stroke);
+    expect(
+      border.top.color,
+      KidPalette.stroke.withValues(
+        alpha: customLayout.chrome.button.secondaryBorderAlpha,
+      ),
+    );
     expect(border.top.width, customLayout.button.regular.secondaryBorderWidth);
     expect(decoration.boxShadow, KidShadows.buttonSoft);
     expect(label.style?.color, KidPalette.navy);

@@ -335,7 +335,9 @@ class KidButtonChromeTokens {
     this.primaryIconChipAlpha = 0.18,
     this.primaryIconChipBorderAlpha = 0.12,
     this.primaryHighlightAlpha = 0.22,
+    this.secondaryBorderAlpha = 0.82,
     this.secondaryIconChipAlpha = 0.88,
+    this.secondaryIconChipBorderAlpha = 0.72,
     this.secondaryHighlightAlpha = 0.14,
     this.primaryDisabledGradientBlendAmount = 0.36,
     this.secondaryDisabledGradientBlendAmount = 0.16,
@@ -346,7 +348,9 @@ class KidButtonChromeTokens {
   final double primaryIconChipAlpha;
   final double primaryIconChipBorderAlpha;
   final double primaryHighlightAlpha;
+  final double secondaryBorderAlpha;
   final double secondaryIconChipAlpha;
+  final double secondaryIconChipBorderAlpha;
   final double secondaryHighlightAlpha;
   final double primaryDisabledGradientBlendAmount;
   final double secondaryDisabledGradientBlendAmount;
@@ -357,7 +361,9 @@ class KidButtonChromeTokens {
     double? primaryIconChipAlpha,
     double? primaryIconChipBorderAlpha,
     double? primaryHighlightAlpha,
+    double? secondaryBorderAlpha,
     double? secondaryIconChipAlpha,
+    double? secondaryIconChipBorderAlpha,
     double? secondaryHighlightAlpha,
     double? primaryDisabledGradientBlendAmount,
     double? secondaryDisabledGradientBlendAmount,
@@ -370,8 +376,11 @@ class KidButtonChromeTokens {
           primaryIconChipBorderAlpha ?? this.primaryIconChipBorderAlpha,
       primaryHighlightAlpha:
           primaryHighlightAlpha ?? this.primaryHighlightAlpha,
+      secondaryBorderAlpha: secondaryBorderAlpha ?? this.secondaryBorderAlpha,
       secondaryIconChipAlpha:
           secondaryIconChipAlpha ?? this.secondaryIconChipAlpha,
+      secondaryIconChipBorderAlpha:
+          secondaryIconChipBorderAlpha ?? this.secondaryIconChipBorderAlpha,
       secondaryHighlightAlpha:
           secondaryHighlightAlpha ?? this.secondaryHighlightAlpha,
       primaryDisabledGradientBlendAmount:
@@ -406,6 +415,9 @@ class KidButtonChromeTokens {
             t,
           ) ??
           primaryHighlightAlpha,
+      secondaryBorderAlpha:
+          ui.lerpDouble(secondaryBorderAlpha, other.secondaryBorderAlpha, t) ??
+          secondaryBorderAlpha,
       secondaryIconChipAlpha:
           ui.lerpDouble(
             secondaryIconChipAlpha,
@@ -413,6 +425,13 @@ class KidButtonChromeTokens {
             t,
           ) ??
           secondaryIconChipAlpha,
+      secondaryIconChipBorderAlpha:
+          ui.lerpDouble(
+            secondaryIconChipBorderAlpha,
+            other.secondaryIconChipBorderAlpha,
+            t,
+          ) ??
+          secondaryIconChipBorderAlpha,
       secondaryHighlightAlpha:
           ui.lerpDouble(
             secondaryHighlightAlpha,
