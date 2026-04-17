@@ -25,6 +25,7 @@ class NumbersLearnScreen extends StatefulWidget {
 class _NumbersLearnScreenState extends State<NumbersLearnScreen> {
   late Future<NumbersLesson> _lessonFuture;
   late AppServices _services;
+  bool _didLoadLesson = false;
   int _currentCardIndex = 0;
   String? _lastPromptKey;
 
@@ -32,18 +33,31 @@ class _NumbersLearnScreenState extends State<NumbersLearnScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _services = AppServicesScope.of(context);
+    if (!_didLoadLesson) {
+      _didLoadLesson = true;
+      _lessonFuture = _loadLesson();
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    _lessonFuture = _loadLesson();
   }
 
-  Future<NumbersLesson> _loadLesson() {
-    return (widget.repository ?? NumbersLessonRepository()).loadLesson(
-      widget.lessonId,
-    );
+  Future<NumbersLesson> _loadLesson() async {
+    final lesson = await (widget.repository ?? NumbersLessonRepository())
+        .loadLesson(widget.lessonId);
+    if (lesson.cards.isEmpty) {
+      _currentCardIndex = 0;
+      return lesson;
+    }
+
+    final snapshot = await _services.progressStore.loadSnapshot();
+    final savedIndex = snapshot
+        .progressFor('numbers:${widget.lessonId}')
+        .lastViewedIndex;
+    _currentCardIndex = savedIndex.clamp(0, lesson.cards.length - 1);
+    return lesson;
   }
 
   void _retryLoad() {

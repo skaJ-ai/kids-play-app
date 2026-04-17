@@ -25,6 +25,7 @@ class AlphabetLearnScreen extends StatefulWidget {
 class _AlphabetLearnScreenState extends State<AlphabetLearnScreen> {
   late Future<AlphabetLesson> _lessonFuture;
   late AppServices _services;
+  bool _didLoadLesson = false;
   int _currentCardIndex = 0;
   String? _lastPromptKey;
 
@@ -32,18 +33,31 @@ class _AlphabetLearnScreenState extends State<AlphabetLearnScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _services = AppServicesScope.of(context);
+    if (!_didLoadLesson) {
+      _didLoadLesson = true;
+      _lessonFuture = _loadLesson();
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    _lessonFuture = _loadLesson();
   }
 
-  Future<AlphabetLesson> _loadLesson() {
-    return (widget.repository ?? AlphabetLessonRepository()).loadLesson(
-      widget.lessonId,
-    );
+  Future<AlphabetLesson> _loadLesson() async {
+    final lesson = await (widget.repository ?? AlphabetLessonRepository())
+        .loadLesson(widget.lessonId);
+    if (lesson.cards.isEmpty) {
+      _currentCardIndex = 0;
+      return lesson;
+    }
+
+    final snapshot = await _services.progressStore.loadSnapshot();
+    final savedIndex = snapshot
+        .progressFor('alphabet:${widget.lessonId}')
+        .lastViewedIndex;
+    _currentCardIndex = savedIndex.clamp(0, lesson.cards.length - 1);
+    return lesson;
   }
 
   void _retryLoad() {
@@ -148,10 +162,11 @@ class _AlphabetLearnScreenState extends State<AlphabetLearnScreen> {
                             SizedBox(width: compact ? 6 : 8),
                             Text(
                               '알파벳 학습',
-                              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                color: KidPalette.navy,
-                                fontWeight: FontWeight.w900,
-                              ),
+                              style: Theme.of(context).textTheme.titleSmall
+                                  ?.copyWith(
+                                    color: KidPalette.navy,
+                                    fontWeight: FontWeight.w900,
+                                  ),
                             ),
                           ],
                         ),
@@ -169,10 +184,11 @@ class _AlphabetLearnScreenState extends State<AlphabetLearnScreen> {
                         ),
                         child: Text(
                           '${_currentCardIndex + 1} / ${lesson.cards.length}',
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            color: KidPalette.coralDark,
-                            fontWeight: FontWeight.w900,
-                          ),
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                color: KidPalette.coralDark,
+                                fontWeight: FontWeight.w900,
+                              ),
                         ),
                       ),
                     ],
@@ -207,7 +223,9 @@ class _AlphabetLearnScreenState extends State<AlphabetLearnScreen> {
                                 fit: BoxFit.scaleDown,
                                 child: Text(
                                   card.symbol,
-                                  style: Theme.of(context).textTheme.displayLarge
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .displayLarge
                                       ?.copyWith(
                                         fontSize: compact ? 136 : 180,
                                         fontWeight: FontWeight.w900,
@@ -237,31 +255,47 @@ class _AlphabetLearnScreenState extends State<AlphabetLearnScreen> {
                               Expanded(
                                 child: ToyPanel(
                                   padding: EdgeInsets.all(compact ? 12 : 24),
-                                  backgroundColor: KidPalette.lilac.withValues(alpha: 0.75),
+                                  backgroundColor: KidPalette.lilac.withValues(
+                                    alpha: 0.75,
+                                  ),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         compact ? '천천히!' : '천천히 해봐!',
-                                        style: (compact
-                                                ? Theme.of(context).textTheme.titleMedium
-                                                : Theme.of(context).textTheme.titleLarge)
-                                            ?.copyWith(
-                                              color: KidPalette.coralDark,
-                                            ),
+                                        style:
+                                            (compact
+                                                    ? Theme.of(
+                                                        context,
+                                                      ).textTheme.titleMedium
+                                                    : Theme.of(
+                                                        context,
+                                                      ).textTheme.titleLarge)
+                                                ?.copyWith(
+                                                  color: KidPalette.coralDark,
+                                                ),
                                       ),
                                       SizedBox(height: compact ? 6 : 12),
                                       Expanded(
                                         child: SingleChildScrollView(
-                                          physics: const NeverScrollableScrollPhysics(),
+                                          physics:
+                                              const NeverScrollableScrollPhysics(),
                                           child: Text(
                                             card.hint,
                                             maxLines: compact ? 3 : 4,
                                             overflow: TextOverflow.ellipsis,
-                                            style: (compact
-                                                    ? Theme.of(context).textTheme.titleSmall
-                                                    : Theme.of(context).textTheme.titleMedium)
-                                                ?.copyWith(color: KidPalette.navy),
+                                            style:
+                                                (compact
+                                                        ? Theme.of(
+                                                            context,
+                                                          ).textTheme.titleSmall
+                                                        : Theme.of(context)
+                                                              .textTheme
+                                                              .titleMedium)
+                                                    ?.copyWith(
+                                                      color: KidPalette.navy,
+                                                    ),
                                           ),
                                         ),
                                       ),
@@ -315,9 +349,9 @@ class _AlphabetLoadError extends StatelessWidget {
               Text(
                 message,
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: KidPalette.navy,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.headlineSmall?.copyWith(color: KidPalette.navy),
               ),
               const SizedBox(height: 20),
               ToyButton(

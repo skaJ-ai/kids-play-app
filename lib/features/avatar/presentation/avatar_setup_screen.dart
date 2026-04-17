@@ -7,16 +7,17 @@ import '../../../app/ui/kid_theme.dart';
 import '../../../app/ui/playground_scaffold.dart';
 import '../../../app/ui/toy_button.dart';
 import '../../../app/ui/toy_panel.dart';
-import '../../alphabet/presentation/alphabet_quiz_screen.dart';
-import '../../hangul/presentation/hangul_quiz_screen.dart';
-import '../../numbers/presentation/numbers_quiz_screen.dart';
+import '../../alphabet/presentation/alphabet_learn_screen.dart';
+import '../../hangul/presentation/hangul_learn_screen.dart';
+import '../../numbers/presentation/numbers_learn_screen.dart';
 import '../domain/avatar_expression.dart';
 
-typedef LessonRetryRouteOpener = Future<void> Function(
-  BuildContext context,
-  String lessonId,
-  List<String> mistakes,
-);
+typedef LessonRetryRouteOpener =
+    Future<void> Function(
+      BuildContext context,
+      String lessonId,
+      List<String> mistakes,
+    );
 
 class AvatarSetupScreen extends StatefulWidget {
   const AvatarSetupScreen({super.key, this.onOpenLessonRetry});
@@ -47,9 +48,9 @@ class _AvatarSetupScreenState extends State<AvatarSetupScreen> {
   }
 
   Future<void> _toggleVoicePrompts(bool enabled) async {
-    await AppServicesScope.of(context).progressStore.setVoicePromptsEnabled(
-      enabled,
-    );
+    await AppServicesScope.of(
+      context,
+    ).progressStore.setVoicePromptsEnabled(enabled);
     await _refreshSnapshot();
   }
 
@@ -112,6 +113,19 @@ class _AvatarSetupScreenState extends State<AvatarSetupScreen> {
       return;
     }
 
+    final services = AppServicesScope.of(context);
+    final snapshot = await services.progressStore.loadSnapshot();
+    final current = snapshot.progressFor(lessonId);
+    final reviewIndex = _lessonMetadataFor(lessonId).reviewStartIndexFor(
+      mistakes.first,
+      fallbackIndex: current.lastViewedIndex,
+    );
+    await services.progressStore.recordLessonIndex(
+      lessonId: lessonId,
+      lastViewedIndex: reviewIndex,
+    );
+    await _refreshSnapshot();
+
     final opener = widget.onOpenLessonRetry;
     if (opener != null) {
       await opener(context, lessonId, mistakes);
@@ -166,10 +180,11 @@ class _AvatarSetupScreenState extends State<AvatarSetupScreen> {
                         SizedBox(width: compact ? 6 : 8),
                         Text(
                           '부모 설정',
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            color: KidPalette.navy,
-                            fontWeight: FontWeight.w900,
-                          ),
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                color: KidPalette.navy,
+                                fontWeight: FontWeight.w900,
+                              ),
                         ),
                       ],
                     ),
@@ -207,21 +222,27 @@ class _AvatarSetupScreenState extends State<AvatarSetupScreen> {
                 child: FutureBuilder<AppProgressSnapshot>(
                   future: _snapshotFuture,
                   builder: (context, snapshot) {
-                    final progress = snapshot.data ?? const AppProgressSnapshot();
+                    final progress =
+                        snapshot.data ?? const AppProgressSnapshot();
                     return SingleChildScrollView(
                       child: Column(
                         children: [
                           ToyPanel(
-                            backgroundColor: KidPalette.white.withValues(alpha: 0.95),
+                            backgroundColor: KidPalette.white.withValues(
+                              alpha: 0.95,
+                            ),
                             padding: EdgeInsets.all(compact ? 14 : 20),
                             child: Wrap(
                               spacing: compact ? 10 : 14,
                               runSpacing: compact ? 10 : 14,
                               children: [
-                                for (final expression in AvatarExpression.values)
+                                for (final expression
+                                    in AvatarExpression.values)
                                   SizedBox(
                                     width: compact ? 206 : 220,
-                                    child: _ExpressionCard(expression: expression),
+                                    child: _ExpressionCard(
+                                      expression: expression,
+                                    ),
                                   ),
                               ],
                             ),
@@ -241,7 +262,9 @@ class _AvatarSetupScreenState extends State<AvatarSetupScreen> {
                           ),
                           SizedBox(height: compact ? 10 : 14),
                           ToyPanel(
-                            backgroundColor: KidPalette.lilac.withValues(alpha: 0.72),
+                            backgroundColor: KidPalette.lilac.withValues(
+                              alpha: 0.72,
+                            ),
                             padding: EdgeInsets.all(compact ? 14 : 18),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -351,10 +374,7 @@ class _AvatarSetupScreenState extends State<AvatarSetupScreen> {
 }
 
 class _ParentSummaryPanel extends StatelessWidget {
-  const _ParentSummaryPanel({
-    required this.compact,
-    required this.snapshot,
-  });
+  const _ParentSummaryPanel({required this.compact, required this.snapshot});
 
   final bool compact;
   final AppProgressSnapshot snapshot;
@@ -407,15 +427,11 @@ class _ParentSummaryPanel extends StatelessWidget {
   }
 }
 
-typedef _LessonIndexAdjustCallback = Future<void> Function(
-  String lessonId,
-  int delta,
-);
+typedef _LessonIndexAdjustCallback =
+    Future<void> Function(String lessonId, int delta);
 typedef _LessonActionCallback = Future<void> Function(String lessonId);
-typedef _LessonRetryCallback = Future<void> Function(
-  String lessonId,
-  List<String> mistakes,
-);
+typedef _LessonRetryCallback =
+    Future<void> Function(String lessonId, List<String> mistakes);
 
 class _ParentLessonManagementPanel extends StatelessWidget {
   const _ParentLessonManagementPanel({
@@ -462,9 +478,9 @@ class _ParentLessonManagementPanel extends StatelessWidget {
             lessonIds.isEmpty
                 ? '아직 기록된 세트가 없어요. 놀이를 시작하면 여기서 진도를 조절할 수 있어요.'
                 : '카드 진도를 앞뒤로 옮기고, 헷갈린 글자를 바로 정리할 수 있어요.',
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              color: KidPalette.navy,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(color: KidPalette.navy),
           ),
           if (lessonIds.isNotEmpty) ...[
             SizedBox(height: compact ? 10 : 14),
@@ -509,7 +525,10 @@ class _LessonManagementCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currentStep = (progress.lastViewedIndex + 1).clamp(1, metadata.cardCount);
+    final currentStep = (progress.lastViewedIndex + 1).clamp(
+      1,
+      metadata.cardCount,
+    );
     final bestScoreLabel = progress.totalQuestions > 0
         ? '${progress.bestScore} / ${progress.totalQuestions}'
         : '아직 기록 없음';
@@ -559,10 +578,7 @@ class _LessonManagementCard extends StatelessWidget {
                 label: '학습 진도',
                 value: '$currentStep / ${metadata.cardCount}',
               ),
-              _LessonMetricChip(
-                label: '최고 점수',
-                value: bestScoreLabel,
-              ),
+              _LessonMetricChip(label: '최고 점수', value: bestScoreLabel),
             ],
           ),
           SizedBox(height: compact ? 10 : 12),
@@ -577,9 +593,9 @@ class _LessonManagementCard extends StatelessWidget {
           if (progress.recentMistakes.isEmpty)
             Text(
               '최근 헷갈림 없음',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                color: KidPalette.body,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall?.copyWith(color: KidPalette.body),
             )
           else
             Wrap(
@@ -631,7 +647,7 @@ class _LessonManagementCard extends StatelessWidget {
               ),
               _ParentMiniActionButton(
                 key: Key('lesson-retry-mistakes-$lessonId'),
-                label: '오답 다시',
+                label: '헷갈림 다시 보기',
                 icon: Icons.refresh_rounded,
                 color: KidPalette.blue,
                 onPressed: progress.recentMistakes.isNotEmpty
@@ -790,7 +806,10 @@ class _ExpressionCard extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: KidPalette.white.withValues(alpha: 0.85),
                       borderRadius: BorderRadius.circular(999),
@@ -836,18 +855,18 @@ class _ExpressionCard extends StatelessWidget {
                             textAlign: TextAlign.center,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              color: KidPalette.navy,
-                              fontWeight: FontWeight.w800,
-                            ),
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(
+                                  color: KidPalette.navy,
+                                  fontWeight: FontWeight.w800,
+                                ),
                           ),
                           const SizedBox(height: 6),
                           Text(
                             '아직 넣지 않았어요',
                             textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: KidPalette.body,
-                            ),
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: KidPalette.body),
                           ),
                         ],
                       )
@@ -873,17 +892,17 @@ class _ExpressionCard extends StatelessWidget {
                                   expression.shortPrompt,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
-                                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    color: KidPalette.navy,
-                                    fontWeight: FontWeight.w800,
-                                  ),
+                                  style: Theme.of(context).textTheme.titleSmall
+                                      ?.copyWith(
+                                        color: KidPalette.navy,
+                                        fontWeight: FontWeight.w800,
+                                      ),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
                                   '아직 넣지 않았어요',
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: KidPalette.body,
-                                  ),
+                                  style: Theme.of(context).textTheme.bodyMedium
+                                      ?.copyWith(color: KidPalette.body),
                                 ),
                               ],
                             ),
@@ -907,6 +926,7 @@ class _LessonMetadata {
     required this.cardCount,
     required this.color,
     required this.sortOrder,
+    this.cardSymbols = const [],
   });
 
   final String lessonId;
@@ -915,6 +935,23 @@ class _LessonMetadata {
   final int cardCount;
   final Color color;
   final int sortOrder;
+  final List<String> cardSymbols;
+
+  int reviewStartIndexFor(String symbol, {int fallbackIndex = 0}) {
+    if (cardCount <= 0) {
+      return 0;
+    }
+
+    final normalizedSymbol = symbol.trim();
+    final matchIndex = cardSymbols.indexWhere(
+      (candidate) => candidate == normalizedSymbol,
+    );
+    if (matchIndex >= 0) {
+      return matchIndex;
+    }
+
+    return fallbackIndex.clamp(0, cardCount - 1).toInt();
+  }
 }
 
 const List<_LessonMetadata> _knownLessonMetadata = [
@@ -925,6 +962,7 @@ const List<_LessonMetadata> _knownLessonMetadata = [
     cardCount: 5,
     color: KidPalette.yellowDark,
     sortOrder: 0,
+    cardSymbols: ['ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ'],
   ),
   _LessonMetadata(
     lessonId: 'alphabet:alphabet_letters_1',
@@ -933,6 +971,7 @@ const List<_LessonMetadata> _knownLessonMetadata = [
     cardCount: 5,
     color: KidPalette.blue,
     sortOrder: 1,
+    cardSymbols: ['A a', 'B b', 'C c', 'D d', 'E e'],
   ),
   _LessonMetadata(
     lessonId: 'numbers:numbers_count_1',
@@ -941,6 +980,7 @@ const List<_LessonMetadata> _knownLessonMetadata = [
     cardCount: 5,
     color: KidPalette.coralDark,
     sortOrder: 2,
+    cardSymbols: ['1', '2', '3', '4', '5'],
   ),
 ];
 
@@ -980,22 +1020,13 @@ String _fallbackCategoryLabel(String categoryKey) {
 Widget? _buildLessonRetryScreen(String lessonId, List<String> mistakes) {
   final lessonKey = lessonId.split(':').last;
   if (lessonId.startsWith('hangul:')) {
-    return HangulQuizScreen(
-      lessonId: lessonKey,
-      mistakeSymbols: mistakes,
-    );
+    return HangulLearnScreen(lessonId: lessonKey);
   }
   if (lessonId.startsWith('alphabet:')) {
-    return AlphabetQuizScreen(
-      lessonId: lessonKey,
-      mistakeSymbols: mistakes,
-    );
+    return AlphabetLearnScreen(lessonId: lessonKey);
   }
   if (lessonId.startsWith('numbers:')) {
-    return NumbersQuizScreen(
-      lessonId: lessonKey,
-      mistakeSymbols: mistakes,
-    );
+    return NumbersLearnScreen(lessonId: lessonKey);
   }
   return null;
 }

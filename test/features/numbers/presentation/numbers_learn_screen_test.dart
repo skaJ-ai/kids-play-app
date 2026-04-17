@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kids_play_app/app/services/app_services.dart';
+import 'package:kids_play_app/app/services/progress_store.dart';
+import 'package:kids_play_app/app/services/speech_cue_service.dart';
 import 'package:kids_play_app/features/numbers/data/numbers_lesson_repository.dart';
 import 'package:kids_play_app/features/numbers/presentation/numbers_learn_screen.dart';
 
@@ -41,6 +44,40 @@ void main() {
 
     expect(find.text('둘, 2'), findsOneWidget);
     expect(find.text('2 / 5'), findsOneWidget);
+  });
+
+  testWidgets('resumes from the saved numbers lesson progress', (
+    WidgetTester tester,
+  ) async {
+    final repository = NumbersLessonRepository(
+      assetBundle: _FakeAssetBundle({
+        NumbersLessonRepository.manifestPath: jsonEncode({
+          'lessons': [_numbersLesson],
+        }),
+      }),
+    );
+    final progressStore = MemoryProgressStore(
+      const AppProgressSnapshot(
+        lessons: {
+          'numbers:numbers_count_1': LessonProgress(lastViewedIndex: 3),
+        },
+      ),
+    );
+
+    await tester.pumpWidget(
+      _wrapWithServices(
+        progressStore: progressStore,
+        child: NumbersLearnScreen(
+          repository: repository,
+          lessonId: 'numbers_count_1',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('넷, 4'), findsOneWidget);
+    expect(find.text('4 / 5'), findsOneWidget);
+    expect(find.text('하나, 1'), findsNothing);
   });
 
   testWidgets(
@@ -130,4 +167,19 @@ class _FakeAssetBundle extends CachingAssetBundle {
     final bytes = Uint8List.fromList(utf8.encode(string));
     return ByteData.view(bytes.buffer);
   }
+}
+
+Widget _wrapWithServices({
+  required ProgressStore progressStore,
+  required Widget child,
+}) {
+  return MaterialApp(
+    home: AppServicesScope(
+      services: AppServices(
+        progressStore: progressStore,
+        speechCueService: NoopSpeechCueService(),
+      ),
+      child: child,
+    ),
+  );
 }
