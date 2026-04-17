@@ -19,6 +19,7 @@ void main() {
     expect(layout.button.regular.labelHeight, 1.1);
     expect(layout.button.regular.primaryBorderWidth, 1.2);
     expect(layout.button.regular.secondaryBorderWidth, 1.1);
+    expect(layout.button.regular.radius, 24);
     expect(layout.button.regular.highlightHorizontalInset, 14);
     expect(layout.button.regular.highlightHeight, 10);
     expect(layout.button.regular.iconChipRadius, 13);
@@ -33,6 +34,7 @@ void main() {
     expect(layout.button.compact.labelHeight, 1.1);
     expect(layout.button.compact.primaryBorderWidth, 1.1);
     expect(layout.button.compact.secondaryBorderWidth, 1.0);
+    expect(layout.button.compact.radius, 22);
     expect(layout.button.compact.highlightHorizontalInset, 12);
     expect(layout.button.compact.highlightHeight, 8);
     expect(layout.button.compact.iconChipRadius, 11);
@@ -130,6 +132,54 @@ void main() {
       expect(afterSwitch.labelFontWeight, explicit.labelFontWeight);
       expect(afterSwitch.labelLetterSpacing, explicit.labelLetterSpacing);
       expect(afterSwitch.labelHeight, explicit.labelHeight);
+    },
+  );
+
+  test(
+    'button radius tokens expose defaults and keep nullable fallback discrete during lerp',
+    () {
+      final layout = buildKidTheme().extension<KidLayoutTheme>();
+      expect(layout, isNotNull);
+      expect(layout!.button.regular.radius, 24);
+      expect(layout.button.compact.radius, 22);
+
+      const inherited = KidButtonDensityTokens(
+        height: 60,
+        horizontalPadding: 16,
+        iconGap: 10,
+        iconChipSize: 34,
+        iconSize: 18,
+        labelFontSize: 19,
+      );
+      const explicit = KidButtonDensityTokens(
+        height: 52,
+        horizontalPadding: 14,
+        iconGap: 8,
+        iconChipSize: 30,
+        iconSize: 16,
+        labelFontSize: 17,
+        radius: 22,
+      );
+
+      final beforeSwitch = inherited.lerp(explicit, 0.49);
+      final afterSwitch = inherited.lerp(explicit, 0.5);
+      final beforeDrop = explicit.lerp(inherited, 0.49);
+      final afterDrop = explicit.lerp(inherited, 0.5);
+
+      expect(beforeSwitch.radius, isNull);
+      expect(afterSwitch.radius, explicit.radius);
+      expect(beforeDrop.radius, explicit.radius);
+      expect(afterDrop.radius, isNull);
+
+      final preservedRadius = KidLayoutTheme.defaults.button.regular.copyWith(
+        height: 88,
+      );
+      final clearedRadius = KidLayoutTheme.defaults.button.regular.copyWith(
+        height: 88,
+        clearRadius: true,
+      );
+      expect(preservedRadius.radius, 24);
+      expect(clearedRadius.radius, isNull);
     },
   );
 

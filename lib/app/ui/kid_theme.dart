@@ -58,6 +58,7 @@ class KidButtonDensityTokens {
     this.labelHeight,
     this.primaryBorderWidth = 1.3,
     this.secondaryBorderWidth = 1.2,
+    this.radius,
     this.highlightHeight = 12,
     this.highlightHorizontalInset = 16,
     this.iconChipRadius = 14,
@@ -74,6 +75,7 @@ class KidButtonDensityTokens {
   final double? labelHeight;
   final double primaryBorderWidth;
   final double secondaryBorderWidth;
+  final double? radius;
   final double highlightHeight;
   final double highlightHorizontalInset;
   final double iconChipRadius;
@@ -90,10 +92,14 @@ class KidButtonDensityTokens {
     double? labelHeight,
     double? primaryBorderWidth,
     double? secondaryBorderWidth,
+    double? radius,
+    bool clearRadius = false,
     double? highlightHeight,
     double? highlightHorizontalInset,
     double? iconChipRadius,
   }) {
+    assert(!clearRadius || radius == null);
+
     return KidButtonDensityTokens(
       height: height ?? this.height,
       horizontalPadding: horizontalPadding ?? this.horizontalPadding,
@@ -106,6 +112,7 @@ class KidButtonDensityTokens {
       labelHeight: labelHeight ?? this.labelHeight,
       primaryBorderWidth: primaryBorderWidth ?? this.primaryBorderWidth,
       secondaryBorderWidth: secondaryBorderWidth ?? this.secondaryBorderWidth,
+      radius: clearRadius ? null : radius ?? this.radius,
       highlightHeight: highlightHeight ?? this.highlightHeight,
       highlightHorizontalInset:
           highlightHorizontalInset ?? this.highlightHorizontalInset,
@@ -144,6 +151,10 @@ class KidButtonDensityTokens {
       secondaryBorderWidth:
           ui.lerpDouble(secondaryBorderWidth, other.secondaryBorderWidth, t) ??
           secondaryBorderWidth,
+      radius: radius == null || other.radius == null
+          ? (t < 0.5 ? radius : other.radius)
+          : ui.lerpDouble(radius, other.radius, t) ??
+                (t < 0.5 ? radius : other.radius),
       highlightHeight:
           ui.lerpDouble(highlightHeight, other.highlightHeight, t) ??
           highlightHeight,
@@ -546,6 +557,7 @@ class KidLayoutTheme extends ThemeExtension<KidLayoutTheme> {
         labelHeight: 1.1,
         primaryBorderWidth: 1.2,
         secondaryBorderWidth: 1.1,
+        radius: 24,
         highlightHeight: 10,
         highlightHorizontalInset: 14,
         iconChipRadius: 13,
@@ -562,6 +574,7 @@ class KidLayoutTheme extends ThemeExtension<KidLayoutTheme> {
         labelHeight: 1.1,
         primaryBorderWidth: 1.1,
         secondaryBorderWidth: 1.0,
+        radius: 22,
         highlightHeight: 8,
         highlightHorizontalInset: 12,
         iconChipRadius: 11,

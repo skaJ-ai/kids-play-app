@@ -46,7 +46,9 @@ class ToyButton extends StatelessWidget {
     final chromeTokens = layout.chrome.button;
     final shadowTokens = layout.chrome.shadows;
     final effectiveHeight = height ?? densityTokens.height;
-    final borderRadius = BorderRadius.circular(effectiveHeight / 2);
+    final borderRadius = BorderRadius.circular(
+      densityTokens.radius ?? (effectiveHeight / 2),
+    );
     final primaryTone = tone == ToyButtonTone.primary;
     final baseColors = primaryTone
         ? colors

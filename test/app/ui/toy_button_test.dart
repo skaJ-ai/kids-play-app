@@ -428,6 +428,99 @@ void main() {
     );
   });
 
+  testWidgets(
+    'uses themed button radius tokens for regular and compact buttons',
+    (WidgetTester tester) async {
+      final customLayout = KidLayoutTheme(
+        button: KidButtonTokens(
+          regular: KidLayoutTheme.defaults.button.regular.copyWith(radius: 18),
+          compact: KidLayoutTheme.defaults.button.compact.copyWith(radius: 14),
+        ),
+        panel: KidLayoutTheme.defaults.panel,
+      );
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ToyButton(
+                key: const Key('regular-radius-button'),
+                label: '둥근 기본 버튼',
+                icon: Icons.play_arrow_rounded,
+                onPressed: () {},
+              ),
+              const SizedBox(height: 12),
+              ToyButton(
+                key: const Key('compact-radius-button'),
+                label: '둥근 조밀 버튼',
+                icon: Icons.star_rounded,
+                density: ToyButtonDensity.compact,
+                onPressed: () {},
+              ),
+            ],
+          ),
+          theme: buildKidTheme().copyWith(extensions: [customLayout]),
+        ),
+      );
+
+      expect(
+        _buttonBorderRadius(
+          tester,
+          find.byKey(const Key('regular-radius-button')),
+        ),
+        18,
+      );
+      expect(
+        _buttonBorderRadius(
+          tester,
+          find.byKey(const Key('compact-radius-button')),
+        ),
+        14,
+      );
+    },
+  );
+
+  testWidgets(
+    'falls back to pill button radius when taller layouts clear the themed radius',
+    (WidgetTester tester) async {
+      final customLayout = KidLayoutTheme(
+        button: KidButtonTokens(
+          regular: KidLayoutTheme.defaults.button.regular.copyWith(
+            height: 70,
+            clearRadius: true,
+          ),
+          compact: KidLayoutTheme.defaults.button.compact,
+        ),
+        panel: KidLayoutTheme.defaults.panel,
+      );
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          ToyButton(
+            key: const Key('pill-radius-button'),
+            label: '알약 버튼',
+            icon: Icons.check_circle_rounded,
+            onPressed: () {},
+          ),
+          theme: buildKidTheme().copyWith(extensions: [customLayout]),
+        ),
+      );
+
+      expect(
+        _buttonHeight(tester, find.byKey(const Key('pill-radius-button'))),
+        70,
+      );
+      expect(
+        _buttonBorderRadius(
+          tester,
+          find.byKey(const Key('pill-radius-button')),
+        ),
+        35,
+      );
+    },
+  );
+
   testWidgets('reads chrome alpha overrides from kid theme tokens', (
     WidgetTester tester,
   ) async {
@@ -688,6 +781,13 @@ double _buttonBorderWidth(WidgetTester tester, Finder finder) {
   final border = _buttonDecoration(tester, finder).border! as Border;
 
   return border.top.width;
+}
+
+double _buttonBorderRadius(WidgetTester tester, Finder finder) {
+  final borderRadius =
+      _buttonDecoration(tester, finder).borderRadius! as BorderRadius;
+
+  return borderRadius.topLeft.x;
 }
 
 double _buttonHighlightHeight(WidgetTester tester, Finder finder) {

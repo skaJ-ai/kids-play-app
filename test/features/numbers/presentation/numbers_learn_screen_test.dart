@@ -6,6 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kids_play_app/app/services/app_services.dart';
 import 'package:kids_play_app/app/services/progress_store.dart';
 import 'package:kids_play_app/app/services/speech_cue_service.dart';
+import 'package:kids_play_app/app/ui/kid_theme.dart';
+import 'package:kids_play_app/app/ui/toy_button.dart';
 import 'package:kids_play_app/features/numbers/data/numbers_lesson_repository.dart';
 import 'package:kids_play_app/features/numbers/presentation/numbers_learn_screen.dart';
 
@@ -78,6 +80,41 @@ void main() {
     expect(find.text('넷, 4'), findsOneWidget);
     expect(find.text('4 / 5'), findsOneWidget);
     expect(find.text('하나, 1'), findsNothing);
+  });
+
+  testWidgets('propagates themed regular button radius to the 다음 action', (
+    WidgetTester tester,
+  ) async {
+    final repository = NumbersLessonRepository(
+      assetBundle: _FakeAssetBundle({
+        NumbersLessonRepository.manifestPath: jsonEncode({
+          'lessons': [_numbersLesson],
+        }),
+      }),
+    );
+    final customLayout = KidLayoutTheme(
+      button: KidButtonTokens(
+        regular: KidLayoutTheme.defaults.button.regular.copyWith(radius: 18),
+        compact: KidLayoutTheme.defaults.button.compact,
+      ),
+      panel: KidLayoutTheme.defaults.panel,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildKidTheme().copyWith(extensions: [customLayout]),
+        home: NumbersLearnScreen(
+          repository: repository,
+          lessonId: 'numbers_count_1',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      _toyButtonBorderRadius(tester, find.widgetWithText(ToyButton, '다음')),
+      18,
+    );
   });
 
   testWidgets(
@@ -182,4 +219,27 @@ Widget _wrapWithServices({
       child: child,
     ),
   );
+}
+
+double _toyButtonBorderRadius(WidgetTester tester, Finder finder) {
+  final decoratedBox = tester.widget<DecoratedBox>(
+    find.descendant(
+      of: finder,
+      matching: find.byWidgetPredicate((Widget widget) {
+        if (widget is! DecoratedBox) {
+          return false;
+        }
+
+        final decoration = widget.decoration;
+        return decoration is BoxDecoration &&
+            decoration.gradient != null &&
+            decoration.border != null &&
+            decoration.boxShadow != null;
+      }),
+    ),
+  );
+  final borderRadius =
+      (decoratedBox.decoration as BoxDecoration).borderRadius! as BorderRadius;
+
+  return borderRadius.topLeft.x;
 }
