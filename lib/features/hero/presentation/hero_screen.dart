@@ -84,7 +84,7 @@ class _HeroScreenState extends State<HeroScreen> {
                     ),
                     SizedBox(height: compact ? 10 : 18),
                     Text(
-                      '승원이 자동차 놀이방',
+                      '승원이의 빵빵 놀이터',
                       style: compact
                           ? theme.textTheme.headlineSmall
                           : theme.textTheme.headlineLarge,
@@ -104,7 +104,7 @@ class _HeroScreenState extends State<HeroScreen> {
                         maxWidth: compact ? 320 : 420,
                       ),
                       child: Text(
-                        '한글·ABC·숫자를 차분하게 눌러요.',
+                        '한글 · 알파벳 · 숫자 놀이를 골라요.',
                         maxLines: compact ? 1 : 2,
                         overflow: TextOverflow.ellipsis,
                         style: compact
@@ -174,7 +174,7 @@ class _HeroScreenState extends State<HeroScreen> {
                     SizedBox(
                       width: compact ? 196 : 244,
                       child: ToyButton(
-                        label: '출발하기',
+                        label: '놀이 시작',
                         icon: Icons.arrow_forward_rounded,
                         height: compact ? 56 : 72,
                         onPressed: () {

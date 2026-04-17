@@ -21,10 +21,10 @@ void main() {
 
       expect(find.byKey(const Key('playground-background')), findsOneWidget);
       expect(find.byKey(const Key('hero-face-image')), findsOneWidget);
-      expect(find.text('승원이 자동차 놀이방'), findsOneWidget);
+      expect(find.text('승원이의 빵빵 놀이터'), findsOneWidget);
       expect(find.text('오늘의 드라이브'), findsOneWidget);
       expect(find.text('차 타고 출발!'), findsOneWidget);
-      expect(find.text('출발하기'), findsOneWidget);
+      expect(find.text('놀이 시작'), findsOneWidget);
     },
   );
 
@@ -42,7 +42,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
-    expect(find.text('출발하기'), findsOneWidget);
+    expect(find.text('놀이 시작'), findsOneWidget);
   });
 
   testWidgets(
@@ -73,7 +73,7 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(KidsPlayApp());
 
-      await tester.tap(find.text('출발하기'));
+      await tester.tap(find.text('놀이 시작'));
       await tester.pumpAndSettle();
 
       expect(find.text('어떤 차고로 갈까?'), findsOneWidget);
