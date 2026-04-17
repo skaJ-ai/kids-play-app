@@ -38,6 +38,9 @@ class _HeroScreenState extends State<HeroScreen> {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final compact = constraints.maxHeight <= 360;
+          final panelDensity = compact
+              ? ToyPanelDensity.compact
+              : ToyPanelDensity.regular;
           final sectionGap = compact ? 8.0 : 18.0;
           final featureItems = [
             (Icons.touch_app_rounded, '혼자 톡 눌러요', KidPalette.blue),
@@ -115,8 +118,8 @@ class _HeroScreenState extends State<HeroScreen> {
                     SizedBox(height: sectionGap),
                     Expanded(
                       child: ToyPanel(
+                        density: panelDensity,
                         tone: ToyPanelTone.airy,
-                        padding: EdgeInsets.all(compact ? 10 : 18),
                         child: LayoutBuilder(
                           builder: (context, panelConstraints) {
                             final superCompact =
@@ -174,8 +177,11 @@ class _HeroScreenState extends State<HeroScreen> {
                       child: ToyButton(
                         label: '놀이 시작',
                         icon: Icons.arrow_forward_rounded,
-                        height: compact ? 56 : 72,
+                        density: compact
+                            ? ToyButtonDensity.compact
+                            : ToyButtonDensity.regular,
                         onPressed: () {
+                          _parentTapCount = 0;
                           Navigator.of(context).push(
                             MaterialPageRoute<void>(
                               builder: (_) => const HomeScreen(),
@@ -191,8 +197,8 @@ class _HeroScreenState extends State<HeroScreen> {
               Expanded(
                 flex: 5,
                 child: ToyPanel(
+                  density: panelDensity,
                   tone: ToyPanelTone.warm,
-                  padding: EdgeInsets.all(compact ? 16 : 22),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
