@@ -130,7 +130,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('숫자 게임을 불러오지 못했어요.'), findsOneWidget);
+    expect(find.text('숫자 카드를 불러오지 못했어요.'), findsOneWidget);
     expect(find.text('다시 시도'), findsOneWidget);
   });
 }

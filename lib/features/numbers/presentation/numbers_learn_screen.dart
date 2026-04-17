@@ -114,7 +114,7 @@ class _NumbersLearnScreenState extends State<NumbersLearnScreen> {
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return _NumbersLoadError(
-              message: '숫자 게임을 불러오지 못했어요.',
+              message: '숫자 카드를 불러오지 못했어요.',
               onRetry: _retryLoad,
             );
           }
