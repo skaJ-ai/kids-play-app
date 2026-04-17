@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/services/app_services.dart';
-import '../../../app/ui/answer_feedback_overlay.dart';
 import '../../../app/ui/audio_prompt_panel.dart';
 import '../../../app/ui/kid_theme.dart';
+import '../../../app/ui/play_feedback_layer.dart';
 import '../../../app/ui/playground_scaffold.dart';
 import '../../../app/ui/tap_cooldown.dart';
 import '../../../app/ui/toy_button.dart';
@@ -151,282 +151,267 @@ class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
               final headerVerticalPadding = isCompact ? 6.0 : 10.0;
               final headerIconSize = isCompact ? 18.0 : 24.0;
 
-              return Stack(
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: headerHorizontalPadding,
-                              vertical: headerVerticalPadding,
-                            ),
-                            decoration: BoxDecoration(
-                              color: KidPalette.white.withValues(alpha: 0.94),
-                              borderRadius: BorderRadius.circular(999),
-                              boxShadow: KidShadows.panel,
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.videogame_asset_rounded,
-                                  color: KidPalette.navy,
-                                  size: headerIconSize,
-                                ),
-                                SizedBox(width: isCompact ? 6 : 8),
-                                Text(
-                                  '숫자 게임',
-                                  style: Theme.of(context).textTheme.titleSmall
-                                      ?.copyWith(
-                                        color: KidPalette.navy,
-                                        fontWeight: FontWeight.w900,
-                                      ),
-                                ),
-                              ],
-                            ),
+              return PlayFeedbackLayer(
+                visible: _feedbackVisible,
+                correct: _feedbackCorrect,
+                compact: isCompact,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: headerHorizontalPadding,
+                            vertical: headerVerticalPadding,
                           ),
-                          const Spacer(),
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: headerHorizontalPadding,
-                              vertical: headerVerticalPadding,
-                            ),
-                            decoration: BoxDecoration(
-                              color: KidPalette.white.withValues(alpha: 0.94),
-                              borderRadius: BorderRadius.circular(999),
-                              boxShadow: KidShadows.panel,
-                            ),
-                            child: Text(
-                              '${_questionIndex + 1} / ${quizCards.length}',
-                              style: Theme.of(context).textTheme.titleSmall
-                                  ?.copyWith(
-                                    color: KidPalette.coralDark,
-                                    fontWeight: FontWeight.w900,
-                                  ),
-                            ),
+                          decoration: BoxDecoration(
+                            color: KidPalette.white.withValues(alpha: 0.94),
+                            borderRadius: BorderRadius.circular(999),
+                            boxShadow: KidShadows.panel,
                           ),
-                        ],
-                      ),
-                      SizedBox(height: isTight ? 8 : (isCompact ? 12 : 18)),
-                      Text(
-                        '알맞은 숫자를 찾아보자!',
-                        textAlign: TextAlign.center,
-                        style:
-                            (isTight
-                                    ? Theme.of(context).textTheme.titleLarge
-                                    : (isCompact
-                                          ? Theme.of(
-                                              context,
-                                            ).textTheme.headlineSmall
-                                          : Theme.of(
-                                              context,
-                                            ).textTheme.headlineMedium))
-                                ?.copyWith(color: KidPalette.navy),
-                      ),
-                      if (!isTight) ...[
-                        SizedBox(height: isCompact ? 4 : 8),
-                        Text(
-                          '차근차근 보고, 맞는 숫자를 콕 눌러봐요.',
-                          textAlign: TextAlign.center,
-                          style:
-                              (isCompact
-                                      ? Theme.of(context).textTheme.titleSmall
-                                      : Theme.of(context).textTheme.titleMedium)
-                                  ?.copyWith(color: KidPalette.body),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.videogame_asset_rounded,
+                                color: KidPalette.navy,
+                                size: headerIconSize,
+                              ),
+                              SizedBox(width: isCompact ? 6 : 8),
+                              Text(
+                                '숫자 게임',
+                                style: Theme.of(context).textTheme.titleSmall
+                                    ?.copyWith(
+                                      color: KidPalette.navy,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Spacer(),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: headerHorizontalPadding,
+                            vertical: headerVerticalPadding,
+                          ),
+                          decoration: BoxDecoration(
+                            color: KidPalette.white.withValues(alpha: 0.94),
+                            borderRadius: BorderRadius.circular(999),
+                            boxShadow: KidShadows.panel,
+                          ),
+                          child: Text(
+                            '${_questionIndex + 1} / ${quizCards.length}',
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(
+                                  color: KidPalette.coralDark,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                          ),
                         ),
                       ],
-                      SizedBox(height: sectionGap),
-                      Expanded(
-                        child: Row(
-                          children: [
-                            Expanded(
-                              flex: 4,
-                              child: isTight
-                                  ? _TightQuizPromptPanel(
-                                      displayName: _displayNameFor(question),
-                                      prompt: _targetPromptFor(question),
-                                      symbol: question.symbol,
-                                      onReplay: () => _replayQuestion(question),
-                                    )
-                                  : Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.stretch,
-                                      children: [
-                                        AudioPromptPanel(
-                                          key: const Key('quiz-prompt-panel'),
-                                          badge: '문제 듣기',
-                                          title: _targetPromptFor(question),
-                                          subtitle: isCompact
-                                              ? '스피커를 눌러 다시 들어봐요.'
-                                              : '스피커를 누르면 문제를 다시 들을 수 있어요.',
-                                          onReplay: () =>
-                                              _replayQuestion(question),
-                                          compact: isCompact,
-                                        ),
-                                        SizedBox(height: isCompact ? 10 : 14),
-                                        Expanded(
-                                          child: ToyPanel(
-                                            padding: EdgeInsets.all(
-                                              isCompact ? 14 : 24,
-                                            ),
-                                            backgroundColor: KidPalette.white
-                                                .withValues(alpha: 0.94),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Container(
-                                                  padding: EdgeInsets.symmetric(
-                                                    horizontal: isCompact
-                                                        ? 12
-                                                        : 14,
-                                                    vertical: isCompact ? 6 : 8,
-                                                  ),
-                                                  decoration: BoxDecoration(
-                                                    color: KidPalette.creamWarm,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          999,
-                                                        ),
-                                                  ),
-                                                  child: Text(
-                                                    '찾아볼 숫자',
-                                                    style: Theme.of(context)
-                                                        .textTheme
-                                                        .titleSmall
+                    ),
+                    SizedBox(height: isTight ? 8 : (isCompact ? 12 : 18)),
+                    Text(
+                      '알맞은 숫자를 찾아보자!',
+                      textAlign: TextAlign.center,
+                      style:
+                          (isTight
+                                  ? Theme.of(context).textTheme.titleLarge
+                                  : (isCompact
+                                        ? Theme.of(
+                                            context,
+                                          ).textTheme.headlineSmall
+                                        : Theme.of(
+                                            context,
+                                          ).textTheme.headlineMedium))
+                              ?.copyWith(color: KidPalette.navy),
+                    ),
+                    if (!isTight) ...[
+                      SizedBox(height: isCompact ? 4 : 8),
+                      Text(
+                        '차근차근 보고, 맞는 숫자를 콕 눌러봐요.',
+                        textAlign: TextAlign.center,
+                        style:
+                            (isCompact
+                                    ? Theme.of(context).textTheme.titleSmall
+                                    : Theme.of(context).textTheme.titleMedium)
+                                ?.copyWith(color: KidPalette.body),
+                      ),
+                    ],
+                    SizedBox(height: sectionGap),
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 4,
+                            child: isTight
+                                ? _TightQuizPromptPanel(
+                                    displayName: _displayNameFor(question),
+                                    prompt: _targetPromptFor(question),
+                                    symbol: question.symbol,
+                                    onReplay: () => _replayQuestion(question),
+                                  )
+                                : Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      AudioPromptPanel(
+                                        key: const Key('quiz-prompt-panel'),
+                                        badge: '문제 듣기',
+                                        title: _targetPromptFor(question),
+                                        subtitle: isCompact
+                                            ? '스피커를 눌러 다시 들어봐요.'
+                                            : '스피커를 누르면 문제를 다시 들을 수 있어요.',
+                                        onReplay: () =>
+                                            _replayQuestion(question),
+                                        compact: isCompact,
+                                      ),
+                                      SizedBox(height: isCompact ? 10 : 14),
+                                      Expanded(
+                                        child: ToyPanel(
+                                          padding: EdgeInsets.all(
+                                            isCompact ? 14 : 24,
+                                          ),
+                                          backgroundColor: KidPalette.white
+                                              .withValues(alpha: 0.94),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Container(
+                                                padding: EdgeInsets.symmetric(
+                                                  horizontal: isCompact
+                                                      ? 12
+                                                      : 14,
+                                                  vertical: isCompact ? 6 : 8,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: KidPalette.creamWarm,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                        999,
+                                                      ),
+                                                ),
+                                                child: Text(
+                                                  '찾아볼 숫자',
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .titleSmall
+                                                      ?.copyWith(
+                                                        color: KidPalette
+                                                            .coralDark,
+                                                        fontWeight:
+                                                            FontWeight.w900,
+                                                      ),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                height: isCompact ? 8 : 12,
+                                              ),
+                                              Text(
+                                                _displayNameFor(question),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style:
+                                                    (isCompact
+                                                            ? Theme.of(context)
+                                                                  .textTheme
+                                                                  .titleSmall
+                                                            : Theme.of(context)
+                                                                  .textTheme
+                                                                  .titleMedium)
                                                         ?.copyWith(
                                                           color: KidPalette
                                                               .coralDark,
                                                           fontWeight:
                                                               FontWeight.w900,
                                                         ),
-                                                  ),
-                                                ),
-                                                SizedBox(
-                                                  height: isCompact ? 8 : 12,
-                                                ),
-                                                Text(
-                                                  _displayNameFor(question),
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  style:
-                                                      (isCompact
-                                                              ? Theme.of(
-                                                                      context,
-                                                                    )
-                                                                    .textTheme
-                                                                    .titleSmall
-                                                              : Theme.of(
-                                                                      context,
-                                                                    )
-                                                                    .textTheme
-                                                                    .titleMedium)
-                                                          ?.copyWith(
-                                                            color: KidPalette
-                                                                .coralDark,
-                                                            fontWeight:
-                                                                FontWeight.w900,
-                                                          ),
-                                                ),
-                                                SizedBox(
-                                                  height: isCompact ? 6 : 10,
-                                                ),
-                                                Expanded(
-                                                  child: Center(
-                                                    child: FittedBox(
-                                                      fit: BoxFit.scaleDown,
-                                                      child: Text(
-                                                        question.symbol,
-                                                        style: TextStyle(
-                                                          fontSize: isCompact
-                                                              ? 86
-                                                              : 118,
-                                                          fontWeight:
-                                                              FontWeight.w900,
-                                                          color:
-                                                              KidPalette.navy,
-                                                          height: 1,
-                                                        ),
+                                              ),
+                                              SizedBox(
+                                                height: isCompact ? 6 : 10,
+                                              ),
+                                              Expanded(
+                                                child: Center(
+                                                  child: FittedBox(
+                                                    fit: BoxFit.scaleDown,
+                                                    child: Text(
+                                                      question.symbol,
+                                                      style: TextStyle(
+                                                        fontSize: isCompact
+                                                            ? 86
+                                                            : 118,
+                                                        fontWeight:
+                                                            FontWeight.w900,
+                                                        color: KidPalette.navy,
+                                                        height: 1,
                                                       ),
                                                     ),
                                                   ),
                                                 ),
-                                              ],
-                                            ),
+                                              ),
+                                            ],
                                           ),
                                         ),
-                                      ],
-                                    ),
-                            ),
-                            SizedBox(
-                              width: isTight ? 10 : (isCompact ? 14 : 18),
-                            ),
-                            Expanded(
-                              flex: 5,
-                              child: LayoutBuilder(
-                                builder: (context, gridConstraints) {
-                                  const crossAxisCount = 2;
-                                  final mainAxisSpacing = isTight ? 12.0 : 16.0;
-                                  final crossAxisSpacing = isTight
-                                      ? 12.0
-                                      : 16.0;
-                                  final rowCount =
-                                      (choices.length / crossAxisCount).ceil();
-                                  final tileWidth =
-                                      (gridConstraints.maxWidth -
-                                          crossAxisSpacing) /
-                                      crossAxisCount;
-                                  final tileHeight =
-                                      (gridConstraints.maxHeight -
-                                          (rowCount - 1) * mainAxisSpacing) /
-                                      rowCount;
-                                  final childAspectRatio = tileHeight <= 0
-                                      ? 1.0
-                                      : tileWidth / tileHeight;
-
-                                  return GridView.count(
-                                    crossAxisCount: crossAxisCount,
-                                    mainAxisSpacing: mainAxisSpacing,
-                                    crossAxisSpacing: crossAxisSpacing,
-                                    childAspectRatio: childAspectRatio,
-                                    physics:
-                                        const NeverScrollableScrollPhysics(),
-                                    children: [
-                                      for (var i = 0; i < choices.length; i++)
-                                        _QuizChoiceTile(
-                                          key: Key(
-                                            'quiz-choice-${choices[i].symbol}',
-                                          ),
-                                          symbol: choices[i].symbol,
-                                          compact: isCompact,
-                                          accentIndex: i,
-                                          disabled: _isResolvingChoice,
-                                          onTap: () => _selectChoice(
-                                            choice: choices[i],
-                                            answer: question,
-                                            totalQuestions: quizCards.length,
-                                          ),
-                                        ),
+                                      ),
                                     ],
-                                  );
-                                },
-                              ),
+                                  ),
+                          ),
+                          SizedBox(width: isTight ? 10 : (isCompact ? 14 : 18)),
+                          Expanded(
+                            flex: 5,
+                            child: LayoutBuilder(
+                              builder: (context, gridConstraints) {
+                                const crossAxisCount = 2;
+                                final mainAxisSpacing = isTight ? 12.0 : 16.0;
+                                final crossAxisSpacing = isTight ? 12.0 : 16.0;
+                                final rowCount =
+                                    (choices.length / crossAxisCount).ceil();
+                                final tileWidth =
+                                    (gridConstraints.maxWidth -
+                                        crossAxisSpacing) /
+                                    crossAxisCount;
+                                final tileHeight =
+                                    (gridConstraints.maxHeight -
+                                        (rowCount - 1) * mainAxisSpacing) /
+                                    rowCount;
+                                final childAspectRatio = tileHeight <= 0
+                                    ? 1.0
+                                    : tileWidth / tileHeight;
+
+                                return GridView.count(
+                                  crossAxisCount: crossAxisCount,
+                                  mainAxisSpacing: mainAxisSpacing,
+                                  crossAxisSpacing: crossAxisSpacing,
+                                  childAspectRatio: childAspectRatio,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  children: [
+                                    for (var i = 0; i < choices.length; i++)
+                                      _QuizChoiceTile(
+                                        key: Key(
+                                          'quiz-choice-${choices[i].symbol}',
+                                        ),
+                                        symbol: choices[i].symbol,
+                                        compact: isCompact,
+                                        accentIndex: i,
+                                        disabled: _isResolvingChoice,
+                                        onTap: () => _selectChoice(
+                                          choice: choices[i],
+                                          answer: question,
+                                          totalQuestions: quizCards.length,
+                                        ),
+                                      ),
+                                  ],
+                                );
+                              },
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  AnswerFeedbackOverlay(
-                    visible: _feedbackVisible,
-                    correct: _feedbackCorrect,
-                    compact: isCompact,
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               );
             },
           );
