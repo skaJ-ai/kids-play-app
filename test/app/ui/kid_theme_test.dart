@@ -317,6 +317,8 @@ void main() {
     expect(layout.chrome.button.primaryHighlightAlpha, 0.22);
     expect(layout.chrome.button.secondaryIconChipAlpha, 0.88);
     expect(layout.chrome.button.secondaryHighlightAlpha, 0.14);
+    expect(layout.chrome.button.primaryDisabledGradientBlendAmount, 0.36);
+    expect(layout.chrome.button.secondaryDisabledGradientBlendAmount, 0.16);
     expect(layout.chrome.button.disabledOpacity, 0.58);
     expect(layout.chrome.panel.strokeBorderAlpha, 0.88);
     expect(layout.chrome.panel.customBorderAlpha, 0.72);
@@ -324,6 +326,37 @@ void main() {
     expect(layout.chrome.panel.airyBackgroundAlpha, 0.94);
     expect(layout.chrome.panel.shellGradientWhiteBlendAmount, 0.34);
   });
+
+  test(
+    'KidButtonChromeTokens keeps disabled blend amounts in copyWith and lerp',
+    () {
+      const base = KidButtonChromeTokens(
+        primaryDisabledGradientBlendAmount: 0.36,
+        secondaryDisabledGradientBlendAmount: 0.16,
+      );
+      const other = KidButtonChromeTokens(
+        primaryDisabledGradientBlendAmount: 0.64,
+        secondaryDisabledGradientBlendAmount: 0.28,
+      );
+
+      final updated = base.copyWith(
+        primaryDisabledGradientBlendAmount: 0.52,
+        secondaryDisabledGradientBlendAmount: 0.22,
+      );
+      final lerped = base.lerp(other, 1);
+
+      expect(updated.primaryDisabledGradientBlendAmount, 0.52);
+      expect(updated.secondaryDisabledGradientBlendAmount, 0.22);
+      expect(
+        lerped.primaryDisabledGradientBlendAmount,
+        other.primaryDisabledGradientBlendAmount,
+      );
+      expect(
+        lerped.secondaryDisabledGradientBlendAmount,
+        other.secondaryDisabledGradientBlendAmount,
+      );
+    },
+  );
 
   test('buildKidTheme defines a calmer supporting label hierarchy', () {
     final theme = buildKidTheme();

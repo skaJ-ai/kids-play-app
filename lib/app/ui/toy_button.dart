@@ -60,7 +60,9 @@ class ToyButton extends StatelessWidget {
                 (color) => Color.lerp(
                   color,
                   KidPalette.body,
-                  primaryTone ? 0.36 : 0.16,
+                  primaryTone
+                      ? chromeTokens.primaryDisabledGradientBlendAmount
+                      : chromeTokens.secondaryDisabledGradientBlendAmount,
                 )!,
               )
               .toList(growable: false);

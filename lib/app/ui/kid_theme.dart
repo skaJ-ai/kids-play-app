@@ -313,6 +313,8 @@ class KidButtonChromeTokens {
     this.primaryHighlightAlpha = 0.22,
     this.secondaryIconChipAlpha = 0.88,
     this.secondaryHighlightAlpha = 0.14,
+    this.primaryDisabledGradientBlendAmount = 0.36,
+    this.secondaryDisabledGradientBlendAmount = 0.16,
     this.disabledOpacity = 0.58,
   });
 
@@ -322,6 +324,8 @@ class KidButtonChromeTokens {
   final double primaryHighlightAlpha;
   final double secondaryIconChipAlpha;
   final double secondaryHighlightAlpha;
+  final double primaryDisabledGradientBlendAmount;
+  final double secondaryDisabledGradientBlendAmount;
   final double disabledOpacity;
 
   KidButtonChromeTokens copyWith({
@@ -331,6 +335,8 @@ class KidButtonChromeTokens {
     double? primaryHighlightAlpha,
     double? secondaryIconChipAlpha,
     double? secondaryHighlightAlpha,
+    double? primaryDisabledGradientBlendAmount,
+    double? secondaryDisabledGradientBlendAmount,
     double? disabledOpacity,
   }) {
     return KidButtonChromeTokens(
@@ -344,6 +350,12 @@ class KidButtonChromeTokens {
           secondaryIconChipAlpha ?? this.secondaryIconChipAlpha,
       secondaryHighlightAlpha:
           secondaryHighlightAlpha ?? this.secondaryHighlightAlpha,
+      primaryDisabledGradientBlendAmount:
+          primaryDisabledGradientBlendAmount ??
+          this.primaryDisabledGradientBlendAmount,
+      secondaryDisabledGradientBlendAmount:
+          secondaryDisabledGradientBlendAmount ??
+          this.secondaryDisabledGradientBlendAmount,
       disabledOpacity: disabledOpacity ?? this.disabledOpacity,
     );
   }
@@ -384,6 +396,20 @@ class KidButtonChromeTokens {
             t,
           ) ??
           secondaryHighlightAlpha,
+      primaryDisabledGradientBlendAmount:
+          ui.lerpDouble(
+            primaryDisabledGradientBlendAmount,
+            other.primaryDisabledGradientBlendAmount,
+            t,
+          ) ??
+          primaryDisabledGradientBlendAmount,
+      secondaryDisabledGradientBlendAmount:
+          ui.lerpDouble(
+            secondaryDisabledGradientBlendAmount,
+            other.secondaryDisabledGradientBlendAmount,
+            t,
+          ) ??
+          secondaryDisabledGradientBlendAmount,
       disabledOpacity:
           ui.lerpDouble(disabledOpacity, other.disabledOpacity, t) ??
           disabledOpacity,

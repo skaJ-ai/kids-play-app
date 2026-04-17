@@ -595,6 +595,67 @@ void main() {
     expect(_buttonOpacity(tester, find.byType(ToyButton)), 0.23);
   });
 
+  testWidgets('reads disabled blend amounts from kid theme chrome tokens', (
+    WidgetTester tester,
+  ) async {
+    const primaryBlendAmount = 0.68;
+    const secondaryBlendAmount = 0.34;
+    final customLayout = KidLayoutTheme(
+      button: KidLayoutTheme.defaults.button,
+      panel: KidLayoutTheme.defaults.panel,
+      chrome: const KidChromeTokens(
+        button: KidButtonChromeTokens(
+          primaryDisabledGradientBlendAmount: primaryBlendAmount,
+          secondaryDisabledGradientBlendAmount: secondaryBlendAmount,
+        ),
+        panel: KidPanelChromeTokens(),
+      ),
+    );
+
+    await tester.pumpWidget(
+      _buildTestApp(
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ToyButton(
+              key: const Key('disabled-primary-button'),
+              label: '비활성 기본 버튼',
+            ),
+            const SizedBox(height: 12),
+            ToyButton(
+              key: const Key('disabled-secondary-button'),
+              label: '비활성 보조 버튼',
+              tone: ToyButtonTone.secondary,
+            ),
+          ],
+        ),
+        theme: buildKidTheme().copyWith(extensions: [customLayout]),
+      ),
+    );
+
+    final primaryGradient =
+        _buttonDecoration(
+              tester,
+              find.byKey(const Key('disabled-primary-button')),
+            ).gradient!
+            as LinearGradient;
+    final secondaryGradient =
+        _buttonDecoration(
+              tester,
+              find.byKey(const Key('disabled-secondary-button')),
+            ).gradient!
+            as LinearGradient;
+
+    expect(primaryGradient.colors, [
+      Color.lerp(KidPalette.blue, KidPalette.body, primaryBlendAmount)!,
+      Color.lerp(KidPalette.blueDark, KidPalette.body, primaryBlendAmount)!,
+    ]);
+    expect(secondaryGradient.colors, [
+      Color.lerp(KidPalette.cream, KidPalette.body, secondaryBlendAmount)!,
+      Color.lerp(KidPalette.creamWarm, KidPalette.body, secondaryBlendAmount)!,
+    ]);
+  });
+
   testWidgets('reads primary shadow overrides from kid theme tokens', (
     WidgetTester tester,
   ) async {
