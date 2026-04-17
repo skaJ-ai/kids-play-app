@@ -8,7 +8,7 @@ class ToyPanel extends StatelessWidget {
     required this.child,
     this.padding = const EdgeInsets.all(24),
     this.backgroundColor = KidPalette.cream,
-    this.borderColor = KidPalette.white,
+    this.borderColor = KidPalette.stroke,
     this.radius = 32,
   });
 
@@ -20,16 +20,52 @@ class ToyPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: borderColor, width: 2),
-        boxShadow: KidShadows.panel,
-      ),
-      child: Padding(
-        padding: padding,
-        child: child,
+    final resolvedBorder = borderColor.withValues(
+      alpha: borderColor == KidPalette.stroke ? 0.88 : 0.72,
+    );
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(radius),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color.lerp(backgroundColor, KidPalette.white, 0.34)!,
+              backgroundColor,
+            ],
+          ),
+          borderRadius: BorderRadius.circular(radius),
+          border: Border.all(color: resolvedBorder, width: 1.5),
+          boxShadow: KidShadows.panel,
+        ),
+        child: Stack(
+          children: [
+            Positioned(
+              top: 0,
+              left: 20,
+              right: 20,
+              child: IgnorePointer(
+                child: Container(
+                  height: 18,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(999),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        KidPalette.white.withValues(alpha: 0.28),
+                        KidPalette.white.withValues(alpha: 0),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Padding(padding: padding, child: child),
+          ],
+        ),
       ),
     );
   }

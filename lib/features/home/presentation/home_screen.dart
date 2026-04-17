@@ -46,73 +46,50 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return PlaygroundScaffold(
       showRoad: true,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final compact = constraints.maxHeight < 360;
+          final compact = constraints.maxHeight <= 360;
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Row(
                 children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: compact ? 12 : 16,
-                      vertical: compact ? 8 : 10,
-                    ),
-                    decoration: BoxDecoration(
-                      color: KidPalette.white.withValues(alpha: 0.94),
-                      borderRadius: BorderRadius.circular(999),
-                      boxShadow: KidShadows.panel,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.celebration_rounded,
-                          color: KidPalette.coralDark,
-                          size: compact ? 18 : 24,
-                        ),
-                        SizedBox(width: compact ? 6 : 8),
-                        Text(
-                          '세 가지 놀이터',
-                          style: Theme.of(context).textTheme.titleSmall
-                              ?.copyWith(
-                                color: KidPalette.navy,
-                                fontWeight: FontWeight.w900,
-                              ),
-                        ),
-                      ],
-                    ),
+                  _HeaderPill(
+                    icon: Icons.directions_car_filled_rounded,
+                    label: '오늘의 차고',
+                    compact: compact,
                   ),
                   const Spacer(),
                   if (!compact)
                     Text(
-                      '하나씩 크게 눌러봐!',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: KidPalette.coralDark,
+                      '천천히 고르고 출발',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        color: KidPalette.body,
                       ),
                     ),
                 ],
               ),
               SizedBox(height: compact ? 12 : 18),
               Text(
-                '어떤 놀이터로 갈까?',
+                '어떤 차고로 갈까?',
                 textAlign: TextAlign.center,
                 style: compact
-                    ? Theme.of(context).textTheme.headlineSmall
-                    : Theme.of(context).textTheme.headlineMedium,
+                    ? theme.textTheme.headlineSmall
+                    : theme.textTheme.headlineMedium,
               ),
-              if (!compact) ...[
-                const SizedBox(height: 10),
-                Text(
-                  '좋아하는 놀이터를 콕 누르면 바로 시작돼요.',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ],
+              SizedBox(height: compact ? 6 : 10),
+              Text(
+                '좋아하는 차고를 콕 눌러요.',
+                textAlign: TextAlign.center,
+                style: compact
+                    ? theme.textTheme.titleSmall
+                    : theme.textTheme.titleMedium,
+              ),
               SizedBox(height: compact ? 14 : 22),
               Expanded(
                 child: FutureBuilder<List<HomeCategory>>(
@@ -127,24 +104,20 @@ class _HomeScreenState extends State<HomeScreen> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  '놀이터를 불러오지 못했어요.',
+                                  '차고를 불러오지 못했어요.',
                                   textAlign: TextAlign.center,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headlineSmall
+                                  style: theme.textTheme.headlineSmall
                                       ?.copyWith(color: KidPalette.navy),
                                 ),
-                                const SizedBox(height: 20),
+                                const SizedBox(height: 16),
                                 Text(
-                                  '다시 불러오면 바로 놀러갈 수 있어요.',
+                                  '다시 누르면 바로 달릴 수 있어요.',
                                   textAlign: TextAlign.center,
-                                  style: Theme.of(
-                                    context,
-                                  ).textTheme.titleMedium,
+                                  style: theme.textTheme.titleMedium,
                                 ),
                                 const SizedBox(height: 20),
                                 ToyButton(
-                                  label: '다시 시도',
+                                  label: '다시 보기',
                                   icon: Icons.refresh_rounded,
                                   onPressed: _retryLoad,
                                 ),
@@ -200,12 +173,19 @@ class _CategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final config = HomeCategoryConfig.resolve(category);
+    final accentColor = _accentColorForCategory(category);
+    final panelColor = Color.lerp(
+      category.backgroundColor,
+      KidPalette.white,
+      0.52,
+    )!;
 
     return Material(
       color: Colors.transparent,
       child: CooldownInkWell(
-        borderRadius: BorderRadius.circular(34),
+        borderRadius: BorderRadius.circular(36),
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute<void>(
@@ -216,134 +196,189 @@ class _CategoryCard extends StatelessWidget {
             ),
           );
         },
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: ToyPanel(
-                padding: EdgeInsets.all(compact ? 14 : 24),
-                backgroundColor: category.backgroundColor,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (!compact)
-                      Align(
-                        alignment: Alignment.topRight,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: KidPalette.white.withValues(alpha: 0.84),
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Text(
-                            config.badgeText,
-                            style: Theme.of(context).textTheme.titleSmall
-                                ?.copyWith(
-                                  color: KidPalette.coralDark,
-                                  fontWeight: FontWeight.w900,
-                                ),
-                          ),
-                        ),
-                      ),
-                    if (!compact)
-                      const Spacer()
-                    else
-                      const SizedBox(height: 10),
-                    Container(
-                      width: compact ? 50 : 92,
-                      height: compact ? 50 : 92,
-                      decoration: BoxDecoration(
-                        color: KidPalette.white.withValues(alpha: 0.84),
-                        shape: BoxShape.circle,
-                        boxShadow: KidShadows.panel,
-                      ),
-                      child: Icon(
-                        category.icon,
-                        size: compact ? 28 : 50,
-                        color: KidPalette.navy,
-                      ),
-                    ),
-                    SizedBox(height: compact ? 10 : 18),
-                    Text(
-                      category.label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style:
-                          (compact
-                                  ? Theme.of(context).textTheme.titleMedium
-                                  : Theme.of(context).textTheme.headlineSmall)
-                              ?.copyWith(
-                                color: KidPalette.navy,
-                                fontWeight: FontWeight.w900,
-                              ),
-                    ),
-                    SizedBox(height: compact ? 6 : 12),
-                    Text(
-                      compact
-                          ? config.compactDescription
-                          : category.description,
-                      maxLines: compact ? 1 : 2,
-                      overflow: TextOverflow.ellipsis,
-                      style:
-                          (compact
-                                  ? Theme.of(context).textTheme.titleSmall
-                                  : Theme.of(context).textTheme.titleMedium)
-                              ?.copyWith(color: KidPalette.navy),
-                    ),
-                    if (!compact) ...[
-                      const Spacer(),
-                      Row(
-                        children: [
-                          Text(
-                            '들어가기',
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(
-                                  color: KidPalette.navy,
-                                  fontWeight: FontWeight.w900,
-                                ),
-                          ),
-                          const SizedBox(width: 8),
-                          const Icon(
-                            Icons.arrow_forward_rounded,
-                            color: KidPalette.navy,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ],
+        child: ToyPanel(
+          padding: EdgeInsets.all(compact ? 14 : 20),
+          backgroundColor: panelColor,
+          borderColor: KidPalette.white.withValues(alpha: 0.78),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  _CategoryMetaChip(
+                    label: config.stickerText,
+                    textColor: accentColor,
+                    backgroundColor: KidPalette.white.withValues(alpha: 0.76),
+                    compact: compact,
+                  ),
+                  const Spacer(),
+                  _CategoryMetaChip(
+                    label: config.badgeText,
+                    textColor: accentColor,
+                    backgroundColor: accentColor.withValues(alpha: 0.12),
+                    compact: compact,
+                  ),
+                ],
+              ),
+              const Spacer(),
+              Container(
+                width: compact ? 58 : 76,
+                height: compact ? 58 : 76,
+                decoration: BoxDecoration(
+                  color: KidPalette.white.withValues(alpha: 0.88),
+                  borderRadius: BorderRadius.circular(compact ? 18 : 24),
+                  border: Border.all(
+                    color: KidPalette.white.withValues(alpha: 0.72),
+                  ),
+                  boxShadow: KidShadows.panel,
+                ),
+                child: Icon(
+                  category.icon,
+                  size: compact ? 30 : 38,
+                  color: accentColor,
                 ),
               ),
-            ),
-            Positioned(
-              left: compact ? 10 : 14,
-              top: compact ? 10 : 14,
-              child: Transform.rotate(
-                angle: -0.08,
-                child: Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: compact ? 10 : 12,
-                    vertical: compact ? 6 : 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: KidPalette.white.withValues(alpha: 0.95),
-                    borderRadius: BorderRadius.circular(compact ? 12 : 16),
-                    boxShadow: KidShadows.button,
-                  ),
-                  child: Text(
-                    config.stickerText,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: KidPalette.coralDark,
-                      fontWeight: FontWeight.w900,
+              SizedBox(height: compact ? 12 : 16),
+              Text(
+                category.label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style:
+                    (compact
+                            ? theme.textTheme.titleLarge
+                            : theme.textTheme.headlineSmall)
+                        ?.copyWith(
+                          color: KidPalette.navy,
+                          fontWeight: FontWeight.w900,
+                        ),
+              ),
+              SizedBox(height: compact ? 6 : 10),
+              Text(
+                compact ? config.compactDescription : config.homeDescription,
+                maxLines: compact ? 1 : 2,
+                overflow: TextOverflow.ellipsis,
+                style:
+                    (compact
+                            ? theme.textTheme.titleSmall
+                            : theme.textTheme.titleMedium)
+                        ?.copyWith(color: KidPalette.navy),
+              ),
+              if (!compact) ...[
+                const Spacer(),
+                Row(
+                  children: [
+                    Text(
+                      '차고 열기',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: accentColor,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 6),
+                    Icon(
+                      Icons.arrow_forward_rounded,
+                      color: accentColor,
+                      size: 20,
+                    ),
+                  ],
                 ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HeaderPill extends StatelessWidget {
+  const _HeaderPill({
+    required this.icon,
+    required this.label,
+    this.compact = false,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: KidPalette.white.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: KidPalette.stroke),
+        boxShadow: KidShadows.panel,
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: compact ? 12 : 16,
+          vertical: compact ? 8 : 10,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: KidPalette.blue, size: compact ? 18 : 22),
+            SizedBox(width: compact ? 6 : 8),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                color: KidPalette.navy,
+                fontWeight: FontWeight.w900,
               ),
             ),
           ],
         ),
       ),
     );
+  }
+}
+
+class _CategoryMetaChip extends StatelessWidget {
+  const _CategoryMetaChip({
+    required this.label,
+    required this.textColor,
+    required this.backgroundColor,
+    this.compact = false,
+  });
+
+  final String label;
+  final Color textColor;
+  final Color backgroundColor;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 10 : 12,
+        vertical: compact ? 6 : 8,
+      ),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+          color: textColor,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+    );
+  }
+}
+
+Color _accentColorForCategory(HomeCategory category) {
+  switch (category.id) {
+    case 'hangul':
+      return KidPalette.yellowDark;
+    case 'alphabet':
+      return KidPalette.blue;
+    case 'numbers':
+      return KidPalette.coralDark;
+    default:
+      return KidPalette.navy;
   }
 }

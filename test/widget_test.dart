@@ -14,17 +14,19 @@ import 'package:kids_play_app/features/numbers/data/numbers_lesson_repository.da
 import 'package:kids_play_app/main.dart';
 
 void main() {
-  testWidgets('shows hero screen with app title, hero face, and play button', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(KidsPlayApp());
+  testWidgets(
+    'shows hero screen with premium drive-room copy and primary cta',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(KidsPlayApp());
 
-    expect(find.byKey(const Key('playground-background')), findsOneWidget);
-    expect(find.byKey(const Key('hero-face-image')), findsOneWidget);
-    expect(find.text('승원이의 빵빵 놀이터'), findsOneWidget);
-    expect(find.text('플레이하기'), findsOneWidget);
-    expect(find.text('빵빵 출발!'), findsOneWidget);
-  });
+      expect(find.byKey(const Key('playground-background')), findsOneWidget);
+      expect(find.byKey(const Key('hero-face-image')), findsOneWidget);
+      expect(find.text('승원이 자동차 놀이방'), findsOneWidget);
+      expect(find.text('오늘의 드라이브'), findsOneWidget);
+      expect(find.text('차 타고 출발!'), findsOneWidget);
+      expect(find.text('출발하기'), findsOneWidget);
+    },
+  );
 
   testWidgets('keeps the hero screen stable on a compact landscape phone', (
     WidgetTester tester,
@@ -40,7 +42,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
-    expect(find.text('플레이하기'), findsOneWidget);
+    expect(find.text('출발하기'), findsOneWidget);
   });
 
   testWidgets(
@@ -66,28 +68,34 @@ void main() {
     },
   );
 
-  testWidgets('moves from hero screen to category menu when play is tapped', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(KidsPlayApp());
+  testWidgets(
+    'moves from hero screen to the shorter premium category garage menu',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(KidsPlayApp());
 
-    await tester.tap(find.text('플레이하기'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('출발하기'));
+      await tester.pumpAndSettle();
 
-    expect(find.text('어떤 놀이터로 갈까?'), findsOneWidget);
-    expect(find.text('한글'), findsOneWidget);
-    expect(find.text('알파벳'), findsOneWidget);
-    expect(find.text('숫자'), findsOneWidget);
-  });
+      expect(find.text('어떤 차고로 갈까?'), findsOneWidget);
+      expect(find.text('좋아하는 차고를 콕 눌러요.'), findsOneWidget);
+      expect(find.text('한글'), findsOneWidget);
+      expect(find.text('알파벳'), findsOneWidget);
+      expect(find.text('숫자'), findsOneWidget);
+      expect(find.text('자모 소리'), findsOneWidget);
+      expect(find.text('A a B b'), findsOneWidget);
+      expect(find.text('세고 맞혀요'), findsOneWidget);
+    },
+  );
 
-  testWidgets('shows hangul category hub with learn and game buttons', (
+  testWidgets('shows the hangul garage hub with shorter mode labels', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(_buildHangulCategoryHub());
 
-    expect(find.text('한글 놀이터'), findsOneWidget);
-    expect(find.text('학습하기'), findsOneWidget);
-    expect(find.text('게임하기'), findsOneWidget);
+    expect(find.text('한글 차고'), findsOneWidget);
+    expect(find.text('어떻게 놀까?'), findsOneWidget);
+    expect(find.text('배우기'), findsOneWidget);
+    expect(find.text('퀴즈'), findsOneWidget);
   });
 
   testWidgets('keeps the category hub stable on a compact landscape phone', (
@@ -104,8 +112,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
-    expect(find.text('학습하기'), findsOneWidget);
-    expect(find.text('게임하기'), findsOneWidget);
+    expect(find.text('배우기'), findsOneWidget);
+    expect(find.text('퀴즈'), findsOneWidget);
   });
 
   testWidgets('opens the first hangul learning card from the category hub', (
@@ -119,7 +127,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('학습하기'));
+    await tester.tap(find.text('배우기'));
     await tester.pumpAndSettle();
 
     expect(find.text('한글 학습'), findsOneWidget);
@@ -138,7 +146,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('게임하기'));
+    await tester.tap(find.text('퀴즈'));
     await tester.pumpAndSettle();
 
     expect(find.text('한글 게임'), findsOneWidget);
@@ -161,10 +169,10 @@ void main() {
     await tester.tap(find.text('한글'));
     await tester.pumpAndSettle();
 
-    expect(find.text('한글 놀이터'), findsOneWidget);
-    expect(find.text('곧 만나요'), findsNothing);
+    expect(find.text('한글 차고'), findsOneWidget);
+    expect(find.text('준비 중'), findsNothing);
 
-    await tester.tap(find.text('학습하기'));
+    await tester.tap(find.text('배우기'));
     await tester.pumpAndSettle();
 
     expect(find.text('한글 학습'), findsOneWidget);
@@ -187,10 +195,10 @@ void main() {
     await tester.tap(find.text('알파벳'));
     await tester.pumpAndSettle();
 
-    expect(find.text('알파벳 놀이터'), findsOneWidget);
-    expect(find.text('곧 만나요'), findsNothing);
+    expect(find.text('알파벳 차고'), findsOneWidget);
+    expect(find.text('준비 중'), findsNothing);
 
-    await tester.tap(find.text('학습하기'));
+    await tester.tap(find.text('배우기'));
     await tester.pumpAndSettle();
 
     expect(find.text('알파벳 학습'), findsOneWidget);
@@ -209,9 +217,9 @@ void main() {
       ),
     );
 
-    expect(find.text('곧 만나요'), findsNothing);
+    expect(find.text('준비 중'), findsNothing);
 
-    await tester.tap(find.text('게임하기'));
+    await tester.tap(find.text('퀴즈'));
     await tester.pumpAndSettle();
 
     expect(find.text('알파벳 게임'), findsOneWidget);
@@ -230,9 +238,9 @@ void main() {
       ),
     );
 
-    expect(find.text('곧 만나요'), findsNothing);
+    expect(find.text('준비 중'), findsNothing);
 
-    await tester.tap(find.text('학습하기'));
+    await tester.tap(find.text('배우기'));
     await tester.pumpAndSettle();
 
     expect(find.text('숫자 학습'), findsOneWidget);
@@ -255,10 +263,10 @@ void main() {
     await tester.tap(find.text('숫자'));
     await tester.pumpAndSettle();
 
-    expect(find.text('숫자 놀이터'), findsOneWidget);
-    expect(find.text('곧 만나요'), findsNothing);
+    expect(find.text('숫자 차고'), findsOneWidget);
+    expect(find.text('준비 중'), findsNothing);
 
-    await tester.tap(find.text('게임하기'));
+    await tester.tap(find.text('퀴즈'));
     await tester.pumpAndSettle();
 
     expect(find.text('숫자 게임'), findsOneWidget);
@@ -277,8 +285,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('놀이터를 불러오지 못했어요.'), findsOneWidget);
-    expect(find.text('다시 시도'), findsOneWidget);
+    expect(find.text('차고를 불러오지 못했어요.'), findsOneWidget);
+    expect(find.text('다시 보기'), findsOneWidget);
   });
 
   testWidgets('keeps the home screen stable on a compact landscape phone', (
@@ -326,7 +334,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
-    expect(find.text('어떤 놀이터로 갈까?'), findsOneWidget);
+    expect(find.text('어떤 차고로 갈까?'), findsOneWidget);
   });
 }
 

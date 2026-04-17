@@ -31,6 +31,8 @@ class HomeCategoryConfig {
     required this.id,
     required this.badgeText,
     required this.stickerText,
+    required this.homeDescription,
+    required this.hubDescription,
     required this.compactDescription,
     this.learnScreenBuilder,
     this.gameScreenBuilder,
@@ -39,6 +41,8 @@ class HomeCategoryConfig {
   final String id;
   final String badgeText;
   final String stickerText;
+  final String homeDescription;
+  final String hubDescription;
   final String compactDescription;
   final HomeCategoryScreenBuilder? learnScreenBuilder;
   final HomeCategoryScreenBuilder? gameScreenBuilder;
@@ -53,6 +57,8 @@ class HomeCategoryConfig {
           id: category.id,
           badgeText: '놀이',
           stickerText: 'PLAY',
+          homeDescription: category.description,
+          hubDescription: category.description,
           compactDescription: category.description,
         );
   }
@@ -61,25 +67,31 @@ class HomeCategoryConfig {
 final Map<String, HomeCategoryConfig> _knownConfigs = {
   'hangul': HomeCategoryConfig(
     id: 'hangul',
-    badgeText: '가장 먼저',
-    stickerText: '또박또박',
-    compactDescription: '자음과 모음',
+    badgeText: '자모',
+    stickerText: '또박',
+    homeDescription: '자모 소리',
+    hubDescription: '자모 소리를 또박또박 익혀요.',
+    compactDescription: '자모 소리',
     learnScreenBuilder: _buildHangulLearnScreen,
     gameScreenBuilder: _buildHangulQuizScreen,
   ),
   'alphabet': HomeCategoryConfig(
     id: 'alphabet',
     badgeText: 'ABC',
-    stickerText: 'ABC 놀이',
-    compactDescription: '대문자와 소문자',
+    stickerText: 'A a',
+    homeDescription: 'A a B b',
+    hubDescription: 'A부터 차분하게 읽어봐요.',
+    compactDescription: 'A a B b',
     learnScreenBuilder: _buildAlphabetLearnScreen,
     gameScreenBuilder: _buildAlphabetQuizScreen,
   ),
   'numbers': HomeCategoryConfig(
     id: 'numbers',
     badgeText: '1 2 3',
-    stickerText: '숫자놀이',
-    compactDescription: '숫자 개념 놀이',
+    stickerText: '하나둘',
+    homeDescription: '세고 맞혀요',
+    hubDescription: '숫자를 세고 바로 맞혀요.',
+    compactDescription: '세고 맞혀요',
     learnScreenBuilder: _buildNumbersLearnScreen,
     gameScreenBuilder: _buildNumbersQuizScreen,
   ),

@@ -25,85 +25,69 @@ class CategoryHubScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final accentColor = _accentColorForCategory(category);
+
     return PlaygroundScaffold(
       showRoad: true,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final compact = constraints.maxHeight < 360;
+          final compact = constraints.maxHeight <= 360;
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Row(
                 children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: compact ? 12 : 16,
-                      vertical: compact ? 8 : 10,
-                    ),
-                    decoration: BoxDecoration(
-                      color: KidPalette.white.withValues(alpha: 0.94),
-                      borderRadius: BorderRadius.circular(999),
-                      boxShadow: KidShadows.panel,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          category.icon,
-                          color: KidPalette.navy,
-                          size: compact ? 18 : 24,
-                        ),
-                        SizedBox(width: compact ? 6 : 8),
-                        Text(
-                          compact ? category.label : '${category.label} 준비완료',
-                          style: Theme.of(context).textTheme.titleSmall
-                              ?.copyWith(
-                                color: KidPalette.navy,
-                                fontWeight: FontWeight.w900,
-                              ),
-                        ),
-                      ],
-                    ),
+                  _HeaderPill(
+                    icon: category.icon,
+                    label: '${category.label} 차고',
+                    accentColor: accentColor,
+                    compact: compact,
                   ),
                   const Spacer(),
                   if (!compact)
                     Text(
-                      _supportsGameMode ? '배우고 바로 퀴즈!' : '곧 더 많이 열려요',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: KidPalette.coralDark,
+                      _supportsGameMode ? '배우고 바로 출발!' : '천천히 둘러봐요',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        color: KidPalette.body,
                       ),
                     ),
                 ],
               ),
               SizedBox(height: compact ? 12 : 18),
               Text(
-                '${category.label} 놀이터',
+                '어떻게 놀까?',
                 textAlign: TextAlign.center,
                 style: compact
-                    ? Theme.of(context).textTheme.headlineSmall
-                    : Theme.of(context).textTheme.headlineMedium,
+                    ? theme.textTheme.headlineSmall
+                    : theme.textTheme.headlineMedium,
               ),
-              if (!compact) ...[
-                const SizedBox(height: 10),
-                Text(
-                  category.description,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ],
+              SizedBox(height: compact ? 6 : 10),
+              Text(
+                _config.hubDescription,
+                textAlign: TextAlign.center,
+                maxLines: compact ? 2 : 2,
+                overflow: TextOverflow.ellipsis,
+                style: compact
+                    ? theme.textTheme.titleSmall
+                    : theme.textTheme.titleMedium,
+              ),
               SizedBox(height: compact ? 14 : 22),
               Expanded(
                 child: Row(
                   children: [
                     Expanded(
                       child: _ModeCard(
-                        title: '학습하기',
-                        subtitle: _supportsLearnMode
-                            ? '큰 카드로 천천히 익혀요'
-                            : '곧 만나요',
-                        sticker: 'LEARN',
-                        color: KidPalette.yellow,
+                        title: '배우기',
+                        subtitle: _supportsLearnMode ? '큰 카드로 천천히' : '곧 열려요',
+                        tag: '천천히',
+                        backgroundColor: Color.lerp(
+                          KidPalette.yellow,
+                          KidPalette.white,
+                          0.36,
+                        )!,
+                        accentColor: KidPalette.yellowDark,
                         icon: Icons.menu_book_rounded,
                         compact: compact,
                         onTap: _supportsLearnMode
@@ -114,10 +98,15 @@ class CategoryHubScreen extends StatelessWidget {
                     SizedBox(width: compact ? 12 : 18),
                     Expanded(
                       child: _ModeCard(
-                        title: '게임하기',
-                        subtitle: _supportsGameMode ? '퀴즈로 신나게 맞혀요' : '곧 만나요',
-                        sticker: _supportsGameMode ? 'QUIZ' : 'SOON',
-                        color: KidPalette.mint,
+                        title: '퀴즈',
+                        subtitle: _supportsGameMode ? '듣고 바로 맞혀요' : '곧 열려요',
+                        tag: _supportsGameMode ? '도전' : '곧',
+                        backgroundColor: Color.lerp(
+                          KidPalette.blueSoft,
+                          KidPalette.white,
+                          0.12,
+                        )!,
+                        accentColor: KidPalette.blue,
                         icon: Icons.videogame_asset_rounded,
                         compact: compact,
                         onTap: _supportsGameMode
@@ -164,8 +153,9 @@ class _ModeCard extends StatelessWidget {
   const _ModeCard({
     required this.title,
     required this.subtitle,
-    required this.sticker,
-    required this.color,
+    required this.tag,
+    required this.backgroundColor,
+    required this.accentColor,
     required this.icon,
     this.compact = false,
     this.onTap,
@@ -173,137 +163,289 @@ class _ModeCard extends StatelessWidget {
 
   final String title;
   final String subtitle;
-  final String sticker;
-  final Color color;
+  final String tag;
+  final Color backgroundColor;
+  final Color accentColor;
   final IconData icon;
   final bool compact;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final enabled = onTap != null;
 
     return Opacity(
-      opacity: enabled ? 1 : 0.62,
+      opacity: enabled ? 1 : 0.66,
       child: Material(
         color: Colors.transparent,
         child: CooldownInkWell(
-          borderRadius: BorderRadius.circular(34),
+          borderRadius: BorderRadius.circular(36),
           onTap: onTap,
           child: LayoutBuilder(
             builder: (context, constraints) {
               final isCompact = compact || constraints.maxHeight < 240;
+              final isTight = constraints.maxHeight <= 180;
+              final panelPadding = isTight ? 12.0 : (isCompact ? 16.0 : 20.0);
+              final topGap = isTight ? 8.0 : (isCompact ? 12.0 : 18.0);
+              final iconBoxSize = isTight ? 44.0 : (isCompact ? 62.0 : 76.0);
+              final iconSize = isTight ? 24.0 : (isCompact ? 30.0 : 38.0);
+              final titleStyle = isTight
+                  ? theme.textTheme.titleMedium
+                  : (isCompact
+                        ? theme.textTheme.titleLarge
+                        : theme.textTheme.headlineSmall);
+              final subtitleStyle = isTight
+                  ? theme.textTheme.labelLarge
+                  : (isCompact
+                        ? theme.textTheme.titleSmall
+                        : theme.textTheme.titleMedium);
 
-              return Stack(
-                children: [
-                  Positioned.fill(
-                    child: ToyPanel(
-                      padding: EdgeInsets.all(isCompact ? 14 : 24),
-                      backgroundColor: color,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (!isCompact)
-                            const Spacer()
-                          else
-                            const SizedBox(height: 8),
-                          Container(
-                            width: isCompact ? 60 : 86,
-                            height: isCompact ? 60 : 86,
-                            decoration: BoxDecoration(
-                              color: KidPalette.white.withValues(alpha: 0.9),
-                              shape: BoxShape.circle,
-                              boxShadow: KidShadows.panel,
-                            ),
-                            child: Icon(
-                              icon,
-                              size: isCompact ? 32 : 46,
-                              color: KidPalette.navy,
-                            ),
-                          ),
-                          SizedBox(height: isCompact ? 10 : 18),
-                          Text(
-                            title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style:
-                                (isCompact
-                                        ? Theme.of(context).textTheme.titleLarge
-                                        : Theme.of(
-                                            context,
-                                          ).textTheme.headlineSmall)
-                                    ?.copyWith(
-                                      color: KidPalette.navy,
-                                      fontWeight: FontWeight.w900,
-                                    ),
-                          ),
-                          SizedBox(height: isCompact ? 6 : 10),
-                          Text(
-                            subtitle,
-                            maxLines: isCompact ? 2 : 3,
-                            overflow: TextOverflow.ellipsis,
-                            style:
-                                (isCompact
-                                        ? Theme.of(context).textTheme.titleSmall
-                                        : Theme.of(
-                                            context,
-                                          ).textTheme.titleMedium)
-                                    ?.copyWith(color: KidPalette.navy),
-                          ),
-                          const Spacer(),
-                          Text(
-                            enabled ? '눌러서 시작' : '준비 중',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style:
-                                (isCompact
-                                        ? Theme.of(context).textTheme.titleSmall
-                                        : Theme.of(
-                                            context,
-                                          ).textTheme.titleMedium)
-                                    ?.copyWith(
-                                      color: KidPalette.coralDark,
-                                      fontWeight: FontWeight.w900,
-                                    ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    top: isCompact ? 10 : 14,
-                    right: isCompact ? 10 : 16,
-                    child: Transform.rotate(
-                      angle: 0.08,
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isCompact ? 10 : 12,
-                          vertical: isCompact ? 6 : 8,
-                        ),
+              if (isCompact) {
+                return ToyPanel(
+                  padding: const EdgeInsets.all(12),
+                  backgroundColor: backgroundColor,
+                  borderColor: KidPalette.white.withValues(alpha: 0.78),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 44,
+                        height: 44,
                         decoration: BoxDecoration(
-                          color: KidPalette.white.withValues(alpha: 0.95),
-                          borderRadius: BorderRadius.circular(
-                            isCompact ? 12 : 16,
+                          color: KidPalette.white.withValues(alpha: 0.9),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: KidPalette.white.withValues(alpha: 0.72),
                           ),
-                          boxShadow: KidShadows.button,
+                          boxShadow: KidShadows.panel,
                         ),
-                        child: Text(
-                          sticker,
-                          style: Theme.of(context).textTheme.titleSmall
-                              ?.copyWith(
-                                color: KidPalette.coralDark,
+                        child: Icon(icon, size: 24, color: accentColor),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    title,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.textTheme.titleMedium
+                                        ?.copyWith(
+                                          color: KidPalette.navy,
+                                          fontWeight: FontWeight.w900,
+                                        ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                _ModeTag(
+                                  label: tag,
+                                  accentColor: accentColor,
+                                  compact: true,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              subtitle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.labelLarge?.copyWith(
+                                color: KidPalette.navy,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              enabled ? '바로 시작' : '준비 중',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.labelLarge?.copyWith(
+                                color: accentColor,
                                 fontWeight: FontWeight.w900,
                               ),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
+                );
+              }
+
+              return ToyPanel(
+                padding: EdgeInsets.all(panelPadding),
+                backgroundColor: backgroundColor,
+                borderColor: KidPalette.white.withValues(alpha: 0.78),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        _ModeTag(
+                          label: tag,
+                          accentColor: accentColor,
+                          compact: isCompact,
+                        ),
+                        const Spacer(),
+                        Icon(
+                          Icons.arrow_outward_rounded,
+                          color: enabled ? accentColor : KidPalette.body,
+                          size: isTight ? 16 : (isCompact ? 18 : 22),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: topGap),
+                    Container(
+                      width: iconBoxSize,
+                      height: iconBoxSize,
+                      decoration: BoxDecoration(
+                        color: KidPalette.white.withValues(alpha: 0.9),
+                        borderRadius: BorderRadius.circular(
+                          isTight ? 16 : (isCompact ? 18 : 24),
+                        ),
+                        border: Border.all(
+                          color: KidPalette.white.withValues(alpha: 0.72),
+                        ),
+                        boxShadow: KidShadows.panel,
+                      ),
+                      child: Icon(icon, size: iconSize, color: accentColor),
+                    ),
+                    SizedBox(height: isTight ? 8 : topGap),
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: titleStyle?.copyWith(
+                        color: KidPalette.navy,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    SizedBox(height: isTight ? 4 : (isCompact ? 6 : 10)),
+                    Text(
+                      subtitle,
+                      maxLines: isTight ? 1 : (isCompact ? 2 : 3),
+                      overflow: TextOverflow.ellipsis,
+                      style: subtitleStyle?.copyWith(color: KidPalette.navy),
+                    ),
+                    const Spacer(),
+                    Text(
+                      enabled ? '바로 시작' : '준비 중',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style:
+                          (isTight
+                                  ? theme.textTheme.titleSmall
+                                  : (isCompact
+                                        ? theme.textTheme.titleSmall
+                                        : theme.textTheme.titleMedium))
+                              ?.copyWith(
+                                color: accentColor,
+                                fontWeight: FontWeight.w900,
+                              ),
+                    ),
+                  ],
+                ),
               );
             },
           ),
         ),
       ),
     );
+  }
+}
+
+class _HeaderPill extends StatelessWidget {
+  const _HeaderPill({
+    required this.icon,
+    required this.label,
+    required this.accentColor,
+    this.compact = false,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color accentColor;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: KidPalette.white.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: KidPalette.stroke),
+        boxShadow: KidShadows.panel,
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: compact ? 12 : 16,
+          vertical: compact ? 8 : 10,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: accentColor, size: compact ? 18 : 22),
+            SizedBox(width: compact ? 6 : 8),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                color: KidPalette.navy,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ModeTag extends StatelessWidget {
+  const _ModeTag({
+    required this.label,
+    required this.accentColor,
+    this.compact = false,
+  });
+
+  final String label;
+  final Color accentColor;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 10 : 12,
+        vertical: compact ? 6 : 8,
+      ),
+      decoration: BoxDecoration(
+        color: accentColor.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+          color: accentColor,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+    );
+  }
+}
+
+Color _accentColorForCategory(HomeCategory category) {
+  switch (category.id) {
+    case 'hangul':
+      return KidPalette.yellowDark;
+    case 'alphabet':
+      return KidPalette.blue;
+    case 'numbers':
+      return KidPalette.coralDark;
+    default:
+      return KidPalette.navy;
   }
 }
