@@ -40,6 +40,13 @@ abstract final class AppColors {
   static const choiceD = Color(0xFF5DD98D);
   static const choiceDText = navy;
 
+  // ── Tayo blue palette ────────────────────────────────────────
+  static const tayoBlue    = Color(0xFF0094FF);
+  static const tayoDark    = Color(0xFF0060CC);
+  static const tayoLight   = Color(0xFFB8EEFF);
+  static const tayoSuccess = Color(0xFF4CAF50);
+  static const tayoError   = Color(0xFFE53935);
+
   // ── Road decoration ──────────────────────────────────────────
   static const road = Color(0xFF3A3A3A);
   static const roadLine = Color(0xFFFFE040);

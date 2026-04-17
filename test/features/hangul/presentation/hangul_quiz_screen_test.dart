@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kids_play_app/app/services/tts_service.dart';
 import 'package:kids_play_app/features/hangul/data/hangul_lesson_repository.dart';
 import 'package:kids_play_app/features/hangul/presentation/hangul_quiz_screen.dart';
 
@@ -23,6 +24,7 @@ void main() {
         home: HangulQuizScreen(
           repository: repository,
           lessonId: 'basic_consonants_1',
+          ttsService: const NoOpTtsService(),
         ),
       ),
     );
@@ -30,7 +32,7 @@ void main() {
 
     expect(find.text('한글 게임'), findsOneWidget);
     expect(find.text('1 / 5'), findsOneWidget);
-    expect(find.text("'ㄱ' 글자를 찾아봐!"), findsOneWidget);
+    expect(find.byIcon(Icons.volume_up_rounded), findsOneWidget);
     expect(find.widgetWithText(FilledButton, 'ㄱ'), findsOneWidget);
     expect(find.widgetWithText(FilledButton, 'ㄴ'), findsOneWidget);
     expect(find.widgetWithText(FilledButton, 'ㄷ'), findsOneWidget);
@@ -60,6 +62,7 @@ void main() {
         home: HangulQuizScreen(
           repository: repository,
           lessonId: 'basic_consonants_1',
+          ttsService: const NoOpTtsService(),
         ),
       ),
     );
@@ -68,32 +71,9 @@ void main() {
     final screenBottom = tester.view.physicalSize.height;
     for (final symbol in ['ㄱ', 'ㄴ', 'ㄷ', 'ㄹ']) {
       final rect = tester.getRect(find.widgetWithText(FilledButton, symbol));
-      expect(rect.bottom <= screenBottom, isTrue, reason: '$symbol choice should stay on screen');
+      expect(rect.bottom <= screenBottom, isTrue,
+          reason: '$symbol choice should stay on screen');
     }
-  });
-
-  testWidgets('shows a clearer target prompt without combining a standalone consonant with the particle', (
-    WidgetTester tester,
-  ) async {
-    final repository = HangulLessonRepository(
-      assetBundle: _FakeAssetBundle({
-        HangulLessonRepository.manifestPath: jsonEncode({
-          'lessons': [_basicConsonantsLesson],
-        }),
-      }),
-    );
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: HangulQuizScreen(
-          repository: repository,
-          lessonId: 'basic_consonants_1',
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.text("'ㄱ' 글자를 찾아봐!"), findsOneWidget);
   });
 
   testWidgets('shows a sticker reward summary after finishing the quiz', (
@@ -112,20 +92,18 @@ void main() {
         home: HangulQuizScreen(
           repository: repository,
           lessonId: 'basic_consonants_1',
+          ttsService: const NoOpTtsService(),
         ),
       ),
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.widgetWithText(FilledButton, 'ㄱ'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, 'ㄴ'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, 'ㄷ'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, 'ㄹ'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, 'ㅁ'));
+    // Tap the correct answer for each of 5 questions and advance past the 900ms timer
+    for (final symbol in ['ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ']) {
+      await tester.tap(find.widgetWithText(FilledButton, symbol));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1000));
+    }
     await tester.pumpAndSettle();
 
     expect(find.text('5문제 중 5문제 맞았어요!'), findsOneWidget);
@@ -143,6 +121,7 @@ void main() {
         home: HangulQuizScreen(
           repository: repository,
           lessonId: 'basic_consonants_1',
+          ttsService: const NoOpTtsService(),
         ),
       ),
     );

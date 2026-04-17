@@ -1,40 +1,64 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
+import '../../../app/services/tts_service.dart';
 import '../../../app/ui/app_colors.dart';
 import '../data/hangul_lesson_repository.dart';
-
-// Quiz choice colour pairs — (background, foreground)
-const _kChoiceStyles = [
-  (AppColors.choiceA, AppColors.choiceAText),
-  (AppColors.choiceB, AppColors.choiceBText),
-  (AppColors.choiceC, AppColors.choiceCText),
-  (AppColors.choiceD, AppColors.choiceDText),
-];
 
 class HangulQuizScreen extends StatefulWidget {
   const HangulQuizScreen({
     super.key,
     this.repository,
     this.lessonId = 'basic_consonants_1',
+    this.ttsService,
   });
 
   final HangulLessonRepository? repository;
   final String lessonId;
+  final TtsService? ttsService;
 
   @override
   State<HangulQuizScreen> createState() => _HangulQuizScreenState();
 }
 
-class _HangulQuizScreenState extends State<HangulQuizScreen> {
+class _HangulQuizScreenState extends State<HangulQuizScreen>
+    with SingleTickerProviderStateMixin {
+  late final TtsService _tts;
   late Future<HangulLesson> _lessonFuture;
+  late AnimationController _shakeController;
+  late Animation<double> _shakeAnimation;
+
   int _questionIndex = 0;
   int _correctCount = 0;
   bool _isComplete = false;
+  int? _selectedIndex;
+  bool _isCorrect = false;
+  Timer? _advanceTimer;
 
   @override
   void initState() {
     super.initState();
+    _tts = widget.ttsService ?? DeviceTtsService.instance;
     _lessonFuture = _loadLesson();
+    _shakeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+    _shakeAnimation = TweenSequence([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: -8.0), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: -8.0, end: 8.0), weight: 2),
+      TweenSequenceItem(tween: Tween(begin: 8.0, end: -6.0), weight: 2),
+      TweenSequenceItem(tween: Tween(begin: -6.0, end: 6.0), weight: 2),
+      TweenSequenceItem(tween: Tween(begin: 6.0, end: 0.0), weight: 1),
+    ]).animate(_shakeController);
+  }
+
+  @override
+  void dispose() {
+    _advanceTimer?.cancel();
+    _shakeController.dispose();
+    super.dispose();
   }
 
   Future<HangulLesson> _loadLesson() {
@@ -48,14 +72,65 @@ class _HangulQuizScreenState extends State<HangulQuizScreen> {
       _questionIndex = 0;
       _correctCount = 0;
       _isComplete = false;
+      _selectedIndex = null;
       _lessonFuture = _loadLesson();
     });
+  }
+
+  void _speakQuestion(HangulCard card) {
+    final name = card.label.split(',').first.trim();
+    _tts.speak(name);
+  }
+
+  void _selectChoice({
+    required int choiceIndex,
+    required HangulCard choice,
+    required HangulCard answer,
+    required int totalQuestions,
+  }) {
+    if (_selectedIndex != null) return;
+
+    final correct = choice.symbol == answer.symbol;
+    setState(() {
+      _selectedIndex = choiceIndex;
+      _isCorrect = correct;
+    });
+
+    if (correct) {
+      final name = answer.label.split(',').first.trim();
+      _tts.speak(name);
+      _advanceTimer = Timer(const Duration(milliseconds: 900), () {
+        if (!mounted) return;
+        setState(() {
+          _correctCount += 1;
+          _selectedIndex = null;
+          if (_questionIndex == totalQuestions - 1) {
+            _isComplete = true;
+          } else {
+            _questionIndex += 1;
+          }
+        });
+        if (!_isComplete) {
+          _lessonFuture.then((lesson) {
+            _speakQuestion(lesson.cards[_questionIndex]);
+          });
+        }
+      });
+    } else {
+      _shakeController.forward(from: 0).then((_) {
+        if (!mounted) return;
+        setState(() => _selectedIndex = null);
+        _lessonFuture.then((lesson) {
+          _speakQuestion(lesson.cards[_questionIndex]);
+        });
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.cream,
+      backgroundColor: AppColors.tayoLight,
       body: SafeArea(
         child: FutureBuilder<HangulLesson>(
           future: _lessonFuture,
@@ -65,7 +140,7 @@ class _HangulQuizScreenState extends State<HangulQuizScreen> {
             }
             if (!snapshot.hasData) {
               return const Center(
-                child: CircularProgressIndicator(color: AppColors.hangulBottom),
+                child: CircularProgressIndicator(color: AppColors.tayoBlue),
               );
             }
 
@@ -82,6 +157,7 @@ class _HangulQuizScreenState extends State<HangulQuizScreen> {
                   _questionIndex = 0;
                   _correctCount = 0;
                   _isComplete = false;
+                  _selectedIndex = null;
                 }),
               );
             }
@@ -89,44 +165,27 @@ class _HangulQuizScreenState extends State<HangulQuizScreen> {
             final question = lesson.cards[_questionIndex];
             final choices = _buildChoices(lesson.cards, _questionIndex);
 
-            return LayoutBuilder(
-              builder: (context, constraints) {
-                final isCompact = constraints.maxHeight < 420;
-                return _QuizBody(
-                  question: question,
-                  choices: choices,
-                  questionIndex: _questionIndex,
-                  totalQuestions: lesson.cards.length,
-                  isCompact: isCompact,
-                  onChoiceTap: (choice) => _selectChoice(
-                    choice: choice,
-                    answer: question,
-                    totalQuestions: lesson.cards.length,
-                  ),
-                );
-              },
+            return _QuizBody(
+              question: question,
+              choices: choices,
+              questionIndex: _questionIndex,
+              totalQuestions: lesson.cards.length,
+              selectedIndex: _selectedIndex,
+              isCorrect: _isCorrect,
+              shakeAnimation: _shakeAnimation,
+              onSpeakerTap: () => _speakQuestion(question),
+              onChoiceTap: (idx, card) => _selectChoice(
+                choiceIndex: idx,
+                choice: card,
+                answer: question,
+                totalQuestions: lesson.cards.length,
+              ),
+              onFirstBuild: () => _speakQuestion(question),
             );
           },
         ),
       ),
     );
-  }
-
-  void _selectChoice({
-    required HangulCard choice,
-    required HangulCard answer,
-    required int totalQuestions,
-  }) {
-    setState(() {
-      if (choice.symbol == answer.symbol) {
-        _correctCount += 1;
-      }
-      if (_questionIndex == totalQuestions - 1) {
-        _isComplete = true;
-        return;
-      }
-      _questionIndex += 1;
-    });
   }
 
   List<HangulCard> _buildChoices(List<HangulCard> cards, int questionIndex) {
@@ -147,56 +206,76 @@ class _HangulQuizScreenState extends State<HangulQuizScreen> {
 
 // ── Quiz body ──────────────────────────────────────────────────────────────────
 
-class _QuizBody extends StatelessWidget {
+class _QuizBody extends StatefulWidget {
   const _QuizBody({
     required this.question,
     required this.choices,
     required this.questionIndex,
     required this.totalQuestions,
-    required this.isCompact,
+    required this.selectedIndex,
+    required this.isCorrect,
+    required this.shakeAnimation,
+    required this.onSpeakerTap,
     required this.onChoiceTap,
+    required this.onFirstBuild,
   });
 
   final HangulCard question;
   final List<HangulCard> choices;
   final int questionIndex;
   final int totalQuestions;
-  final bool isCompact;
-  final void Function(HangulCard) onChoiceTap;
+  final int? selectedIndex;
+  final bool isCorrect;
+  final Animation<double> shakeAnimation;
+  final VoidCallback onSpeakerTap;
+  final void Function(int index, HangulCard card) onChoiceTap;
+  final VoidCallback onFirstBuild;
 
-  String get _displayName => question.label.split(',').first.trim();
-  String get _targetPrompt => "'${question.symbol}' 글자를 찾아봐!";
+  @override
+  State<_QuizBody> createState() => _QuizBodyState();
+}
+
+class _QuizBodyState extends State<_QuizBody> {
+  bool _firstBuildDone = false;
 
   @override
   Widget build(BuildContext context) {
-    final outerPad = isCompact ? 12.0 : 20.0;
-    final gap = isCompact ? 8.0 : 14.0;
+    if (!_firstBuildDone) {
+      _firstBuildDone = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        widget.onFirstBuild();
+      });
+    }
 
     return Padding(
-      padding: EdgeInsets.all(outerPad),
+      padding: const EdgeInsets.all(12),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Header
           _QuizHeader(
-            questionIndex: questionIndex,
-            totalQuestions: totalQuestions,
-            isCompact: isCompact,
+            questionIndex: widget.questionIndex,
+            totalQuestions: widget.totalQuestions,
           ),
-          SizedBox(height: gap),
-          // Prompt card
-          _PromptCard(
-            displayName: _displayName,
-            targetPrompt: _targetPrompt,
-            isCompact: isCompact,
-          ),
-          SizedBox(height: gap),
-          // Choice grid
+          const SizedBox(height: 10),
           Expanded(
-            child: _ChoiceGrid(
-              choices: choices,
-              isCompact: isCompact,
-              onChoiceTap: onChoiceTap,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Flexible(
+                  flex: 35,
+                  child: _SpeakerCard(onTap: widget.onSpeakerTap),
+                ),
+                const SizedBox(width: 12),
+                Flexible(
+                  flex: 65,
+                  child: _ChoiceGrid(
+                    choices: widget.choices,
+                    selectedIndex: widget.selectedIndex,
+                    isCorrect: widget.isCorrect,
+                    shakeAnimation: widget.shakeAnimation,
+                    onChoiceTap: widget.onChoiceTap,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -205,44 +284,42 @@ class _QuizBody extends StatelessWidget {
   }
 }
 
-// ── Quiz header ────────────────────────────────────────────────────────────────
+// ── Header ─────────────────────────────────────────────────────────────────────
 
 class _QuizHeader extends StatelessWidget {
   const _QuizHeader({
     required this.questionIndex,
     required this.totalQuestions,
-    required this.isCompact,
   });
 
   final int questionIndex;
   final int totalQuestions;
-  final bool isCompact;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
+        const Text(
           '한글 게임',
           style: TextStyle(
-            fontSize: isCompact ? 16 : 22,
+            fontSize: 18,
             fontWeight: FontWeight.w900,
-            color: AppColors.navy,
+            color: AppColors.tayoDark,
           ),
         ),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
           decoration: BoxDecoration(
-            color: AppColors.alphabetBottom.withValues(alpha: 0.18),
+            color: AppColors.tayoBlue.withValues(alpha: 0.18),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
             '${questionIndex + 1} / $totalQuestions',
-            style: TextStyle(
-              fontSize: isCompact ? 13 : 16,
+            style: const TextStyle(
+              fontSize: 15,
               fontWeight: FontWeight.w800,
-              color: AppColors.alphabetBottom,
+              color: AppColors.tayoDark,
             ),
           ),
         ),
@@ -251,83 +328,40 @@ class _QuizHeader extends StatelessWidget {
   }
 }
 
-// ── Prompt card ────────────────────────────────────────────────────────────────
+// ── Speaker card ───────────────────────────────────────────────────────────────
 
-class _PromptCard extends StatelessWidget {
-  const _PromptCard({
-    required this.displayName,
-    required this.targetPrompt,
-    required this.isCompact,
-  });
+class _SpeakerCard extends StatelessWidget {
+  const _SpeakerCard({required this.onTap});
 
-  final String displayName;
-  final String targetPrompt;
-  final bool isCompact;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: isCompact ? 14 : 20,
-        vertical: isCompact ? 10 : 14,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.creamCard,
-        borderRadius: BorderRadius.circular(isCompact ? 18 : 24),
-        border: Border.all(color: AppColors.hangulTop, width: 2.5),
-        boxShadow: const [
-          BoxShadow(
-            color: AppColors.shadowSoft,
-            blurRadius: 10,
-            offset: Offset(0, 4),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [AppColors.tayoBlue, AppColors.tayoDark],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  '알맞은 글자를 콕 눌러봐!',
-                  style: TextStyle(
-                    fontSize: isCompact ? 13 : 15,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.coral,
-                  ),
-                ),
-                SizedBox(height: isCompact ? 3 : 5),
-                Text(
-                  targetPrompt,
-                  style: TextStyle(
-                    fontSize: isCompact ? 15 : 19,
-                    fontWeight: FontWeight.w900,
-                    color: AppColors.navy,
-                  ),
-                ),
-              ],
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.tayoBlue.withValues(alpha: 0.45),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
             ),
+          ],
+        ),
+        child: const Center(
+          child: Icon(
+            Icons.volume_up_rounded,
+            color: Colors.white,
+            size: 72,
           ),
-          Container(
-            width: isCompact ? 40 : 50,
-            height: isCompact ? 40 : 50,
-            decoration: BoxDecoration(
-              color: AppColors.hangulTop.withValues(alpha: 0.4),
-              shape: BoxShape.circle,
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              displayName.isNotEmpty ? displayName[0] : '',
-              style: TextStyle(
-                fontSize: isCompact ? 22 : 28,
-                fontWeight: FontWeight.w900,
-                color: AppColors.navy,
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -338,20 +372,24 @@ class _PromptCard extends StatelessWidget {
 class _ChoiceGrid extends StatelessWidget {
   const _ChoiceGrid({
     required this.choices,
-    required this.isCompact,
+    required this.selectedIndex,
+    required this.isCorrect,
+    required this.shakeAnimation,
     required this.onChoiceTap,
   });
 
   final List<HangulCard> choices;
-  final bool isCompact;
-  final void Function(HangulCard) onChoiceTap;
+  final int? selectedIndex;
+  final bool isCorrect;
+  final Animation<double> shakeAnimation;
+  final void Function(int index, HangulCard card) onChoiceTap;
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         const crossAxisCount = 2;
-        const spacing = 12.0;
+        const spacing = 10.0;
         final rowCount = (choices.length / crossAxisCount).ceil();
         final tileWidth =
             (constraints.maxWidth - spacing) / crossAxisCount;
@@ -370,9 +408,11 @@ class _ChoiceGrid extends StatelessWidget {
             for (int i = 0; i < choices.length; i++)
               _ChoiceTile(
                 card: choices[i],
-                colorIndex: i,
-                isCompact: isCompact,
-                onTap: () => onChoiceTap(choices[i]),
+                index: i,
+                selectedIndex: selectedIndex,
+                isCorrect: isCorrect,
+                shakeAnimation: shakeAnimation,
+                onTap: () => onChoiceTap(i, choices[i]),
               ),
           ],
         );
@@ -384,29 +424,56 @@ class _ChoiceGrid extends StatelessWidget {
 class _ChoiceTile extends StatelessWidget {
   const _ChoiceTile({
     required this.card,
-    required this.colorIndex,
-    required this.isCompact,
+    required this.index,
+    required this.selectedIndex,
+    required this.isCorrect,
+    required this.shakeAnimation,
     required this.onTap,
   });
 
   final HangulCard card;
-  final int colorIndex;
-  final bool isCompact;
+  final int index;
+  final int? selectedIndex;
+  final bool isCorrect;
+  final Animation<double> shakeAnimation;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final (bg, fg) = _kChoiceStyles[colorIndex % _kChoiceStyles.length];
-    return FilledButton(
-      onPressed: onTap,
+    final isSelected = selectedIndex == index;
+    final showCorrect = isSelected && isCorrect;
+    final showWrong = isSelected && !isCorrect;
+
+    Widget tile = FilledButton(
+      onPressed: selectedIndex == null ? onTap : null,
       style: FilledButton.styleFrom(
-        backgroundColor: bg,
-        foregroundColor: fg,
+        backgroundColor: showCorrect
+            ? AppColors.tayoSuccess
+            : showWrong
+                ? AppColors.tayoError
+                : Colors.white,
+        foregroundColor:
+            showCorrect || showWrong ? Colors.white : AppColors.navy,
+        disabledBackgroundColor: showCorrect
+            ? AppColors.tayoSuccess
+            : showWrong
+                ? AppColors.tayoError
+                : Colors.white,
+        disabledForegroundColor:
+            showCorrect || showWrong ? Colors.white : AppColors.navy,
         padding: EdgeInsets.zero,
-        elevation: 6,
+        elevation: 5,
         shadowColor: AppColors.shadowMid,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(isCompact ? 20 : 26),
+          borderRadius: BorderRadius.circular(22),
+          side: BorderSide(
+            color: showCorrect
+                ? AppColors.tayoSuccess
+                : showWrong
+                    ? AppColors.tayoError
+                    : AppColors.tayoBlue.withValues(alpha: 0.3),
+            width: 2.5,
+          ),
         ),
       ),
       child: Center(
@@ -414,8 +481,8 @@ class _ChoiceTile extends StatelessWidget {
           fit: BoxFit.scaleDown,
           child: Text(
             card.symbol,
-            style: TextStyle(
-              fontSize: isCompact ? 60 : 84,
+            style: const TextStyle(
+              fontSize: 80,
               fontWeight: FontWeight.w900,
               height: 1,
             ),
@@ -423,6 +490,19 @@ class _ChoiceTile extends StatelessWidget {
         ),
       ),
     );
+
+    if (showWrong) {
+      tile = AnimatedBuilder(
+        animation: shakeAnimation,
+        builder: (context, child) => Transform.translate(
+          offset: Offset(shakeAnimation.value, 0),
+          child: child,
+        ),
+        child: tile,
+      );
+    }
+
+    return tile;
   }
 }
 
@@ -455,16 +535,16 @@ class _QuizSummary extends StatelessWidget {
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w900,
-              color: AppColors.navy,
+              color: AppColors.tayoDark,
             ),
           ),
           const SizedBox(height: 20),
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: AppColors.creamCard,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(32),
-                border: Border.all(color: AppColors.hangulTop, width: 3),
+                border: Border.all(color: AppColors.tayoBlue, width: 3),
                 boxShadow: const [
                   BoxShadow(
                     color: AppColors.shadowSoft,
@@ -489,19 +569,19 @@ class _QuizSummary extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w900,
-                        color: AppColors.navy,
+                        color: AppColors.tayoDark,
                       ),
                     ),
                     const SizedBox(height: 14),
-                    // Progress bar
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: LinearProgressIndicator(
                         value: ratio,
                         minHeight: 14,
-                        backgroundColor: AppColors.hangulTop.withValues(alpha: 0.3),
+                        backgroundColor:
+                            AppColors.tayoBlue.withValues(alpha: 0.2),
                         valueColor: const AlwaysStoppedAnimation<Color>(
-                          AppColors.hangulBottom,
+                          AppColors.tayoBlue,
                         ),
                       ),
                     ),
@@ -514,7 +594,9 @@ class _QuizSummary extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
-                        color: earnedSticker ? AppColors.coral : AppColors.midBlue,
+                        color: earnedSticker
+                            ? AppColors.tayoSuccess
+                            : AppColors.midBlue,
                       ),
                     ),
                   ],
@@ -527,16 +609,16 @@ class _QuizSummary extends StatelessWidget {
             height: 64,
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFFFFAA00), Color(0xFFFF7043)],
+                colors: [AppColors.tayoBlue, AppColors.tayoDark],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(22),
-              boxShadow: const [
+              boxShadow: [
                 BoxShadow(
-                  color: Color(0x55FF7043),
+                  color: AppColors.tayoBlue.withValues(alpha: 0.4),
                   blurRadius: 14,
-                  offset: Offset(0, 5),
+                  offset: const Offset(0, 5),
                 ),
               ],
             ),
@@ -587,7 +669,7 @@ class _HangulQuizLoadError extends StatelessWidget {
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w900,
-                color: AppColors.navy,
+                color: AppColors.tayoDark,
               ),
             ),
             const SizedBox(height: 24),
@@ -596,7 +678,7 @@ class _HangulQuizLoadError extends StatelessWidget {
               child: FilledButton(
                 onPressed: onRetry,
                 style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.alphabetBottom,
+                  backgroundColor: AppColors.tayoBlue,
                   foregroundColor: Colors.white,
                   textStyle: const TextStyle(
                     fontSize: 18,
