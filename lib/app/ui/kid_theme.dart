@@ -665,39 +665,39 @@ ThemeData buildKidTheme() {
 
   final textTheme = base.textTheme.copyWith(
     displayLarge: const TextStyle(
-      fontSize: 60,
-      fontWeight: FontWeight.w900,
-      letterSpacing: -2.2,
+      fontSize: 56,
+      fontWeight: FontWeight.w800,
+      letterSpacing: -1.6,
       color: KidPalette.navy,
-      height: 0.92,
+      height: 0.98,
     ),
     headlineLarge: const TextStyle(
-      fontSize: 44,
-      fontWeight: FontWeight.w900,
-      letterSpacing: -1.5,
-      color: KidPalette.navy,
-      height: 1.0,
-    ),
-    headlineMedium: const TextStyle(
-      fontSize: 34,
-      fontWeight: FontWeight.w900,
+      fontSize: 40,
+      fontWeight: FontWeight.w800,
       letterSpacing: -1.0,
       color: KidPalette.navy,
-      height: 1.04,
+      height: 1.02,
     ),
-    headlineSmall: const TextStyle(
-      fontSize: 26,
+    headlineMedium: const TextStyle(
+      fontSize: 32,
       fontWeight: FontWeight.w800,
-      letterSpacing: -0.7,
+      letterSpacing: -0.6,
       color: KidPalette.navy,
       height: 1.08,
     ),
-    titleLarge: const TextStyle(
-      fontSize: 22,
-      fontWeight: FontWeight.w800,
-      letterSpacing: -0.5,
+    headlineSmall: const TextStyle(
+      fontSize: 24,
+      fontWeight: FontWeight.w700,
+      letterSpacing: -0.3,
       color: KidPalette.navy,
       height: 1.12,
+    ),
+    titleLarge: const TextStyle(
+      fontSize: 20,
+      fontWeight: FontWeight.w700,
+      letterSpacing: -0.2,
+      color: KidPalette.navy,
+      height: 1.18,
     ),
     titleMedium: const TextStyle(
       fontSize: 17,
@@ -732,11 +732,11 @@ ThemeData buildKidTheme() {
       height: 1.25,
     ),
     labelLarge: const TextStyle(
-      fontSize: 13,
+      fontSize: 14,
       fontWeight: FontWeight.w700,
-      letterSpacing: 0,
+      letterSpacing: -0.1,
       color: KidPalette.navy,
-      height: 1.12,
+      height: 1.15,
     ),
     labelMedium: const TextStyle(
       fontSize: 12,
