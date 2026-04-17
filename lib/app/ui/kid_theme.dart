@@ -217,6 +217,7 @@ class KidPanelDensityTokens {
     required this.padding,
     required this.radius,
     required this.borderWidth,
+    this.highlightTopInset = 0,
     required this.highlightHeight,
     required this.highlightHorizontalInset,
     required this.insetRadius,
@@ -225,6 +226,7 @@ class KidPanelDensityTokens {
   final EdgeInsets padding;
   final double radius;
   final double borderWidth;
+  final double highlightTopInset;
   final double highlightHeight;
   final double highlightHorizontalInset;
   final double insetRadius;
@@ -233,6 +235,7 @@ class KidPanelDensityTokens {
     EdgeInsets? padding,
     double? radius,
     double? borderWidth,
+    double? highlightTopInset,
     double? highlightHeight,
     double? highlightHorizontalInset,
     double? insetRadius,
@@ -241,6 +244,7 @@ class KidPanelDensityTokens {
       padding: padding ?? this.padding,
       radius: radius ?? this.radius,
       borderWidth: borderWidth ?? this.borderWidth,
+      highlightTopInset: highlightTopInset ?? this.highlightTopInset,
       highlightHeight: highlightHeight ?? this.highlightHeight,
       highlightHorizontalInset:
           highlightHorizontalInset ?? this.highlightHorizontalInset,
@@ -254,6 +258,9 @@ class KidPanelDensityTokens {
       radius: ui.lerpDouble(radius, other.radius, t) ?? radius,
       borderWidth:
           ui.lerpDouble(borderWidth, other.borderWidth, t) ?? borderWidth,
+      highlightTopInset:
+          ui.lerpDouble(highlightTopInset, other.highlightTopInset, t) ??
+          highlightTopInset,
       highlightHeight:
           ui.lerpDouble(highlightHeight, other.highlightHeight, t) ??
           highlightHeight,
@@ -620,6 +627,7 @@ class KidLayoutTheme extends ThemeExtension<KidLayoutTheme> {
         padding: EdgeInsets.all(20),
         radius: 30,
         borderWidth: 1.4,
+        highlightTopInset: 0,
         highlightHeight: 16,
         highlightHorizontalInset: 18,
         insetRadius: 22,
@@ -628,6 +636,7 @@ class KidLayoutTheme extends ThemeExtension<KidLayoutTheme> {
         padding: EdgeInsets.all(12),
         radius: 28,
         borderWidth: 1.3,
+        highlightTopInset: 0,
         highlightHeight: 14,
         highlightHorizontalInset: 16,
         insetRadius: 16,
@@ -636,6 +645,7 @@ class KidLayoutTheme extends ThemeExtension<KidLayoutTheme> {
         padding: EdgeInsets.all(10),
         radius: 22,
         borderWidth: 1.2,
+        highlightTopInset: 0,
         highlightHeight: 12,
         highlightHorizontalInset: 14,
         insetRadius: 14,

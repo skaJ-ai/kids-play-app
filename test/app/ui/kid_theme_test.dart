@@ -43,21 +43,51 @@ void main() {
     expect(layout.panel.regular.padding, const EdgeInsets.all(20));
     expect(layout.panel.regular.radius, 30);
     expect(layout.panel.regular.borderWidth, 1.4);
+    expect(layout.panel.regular.highlightTopInset, 0);
     expect(layout.panel.regular.highlightHeight, 16);
     expect(layout.panel.regular.highlightHorizontalInset, 18);
     expect(layout.panel.regular.insetRadius, 22);
     expect(layout.panel.compact.padding, const EdgeInsets.all(12));
     expect(layout.panel.compact.radius, 28);
     expect(layout.panel.compact.borderWidth, 1.3);
+    expect(layout.panel.compact.highlightTopInset, 0);
     expect(layout.panel.compact.highlightHeight, 14);
     expect(layout.panel.compact.highlightHorizontalInset, 16);
     expect(layout.panel.compact.insetRadius, 16);
     expect(layout.panel.tight.padding, const EdgeInsets.all(10));
     expect(layout.panel.tight.radius, 22);
     expect(layout.panel.tight.borderWidth, 1.2);
+    expect(layout.panel.tight.highlightTopInset, 0);
     expect(layout.panel.tight.highlightHeight, 12);
     expect(layout.panel.tight.highlightHorizontalInset, 14);
     expect(layout.panel.tight.insetRadius, 14);
+  });
+
+  test('KidPanelDensityTokens keeps highlightTopInset in copyWith and lerp', () {
+    const base = KidPanelDensityTokens(
+      padding: EdgeInsets.all(20),
+      radius: 30,
+      borderWidth: 1.4,
+      highlightTopInset: 0,
+      highlightHeight: 16,
+      highlightHorizontalInset: 18,
+      insetRadius: 22,
+    );
+    const other = KidPanelDensityTokens(
+      padding: EdgeInsets.all(12),
+      radius: 28,
+      borderWidth: 1.3,
+      highlightTopInset: 6,
+      highlightHeight: 14,
+      highlightHorizontalInset: 16,
+      insetRadius: 16,
+    );
+
+    final updated = base.copyWith(highlightTopInset: 3);
+    final lerped = base.lerp(other, 1);
+
+    expect(updated.highlightTopInset, 3);
+    expect(lerped.highlightTopInset, other.highlightTopInset);
   });
 
   test(

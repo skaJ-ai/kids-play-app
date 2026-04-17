@@ -35,6 +35,7 @@ class ToyPanel extends StatelessWidget {
     final resolvedPadding = padding ?? densityTokens.padding;
     final resolvedRadius = radius ?? densityTokens.radius;
     final resolvedBorderWidth = densityTokens.borderWidth;
+    final highlightTopInset = densityTokens.highlightTopInset;
     final highlightHeight = densityTokens.highlightHeight;
     final highlightHorizontalInset = densityTokens.highlightHorizontalInset;
     final resolvedTone = tone ?? ToyPanelTone.surface;
@@ -76,7 +77,7 @@ class ToyPanel extends StatelessWidget {
         child: Stack(
           children: [
             Positioned(
-              top: 0,
+              top: highlightTopInset,
               left: highlightHorizontalInset,
               right: highlightHorizontalInset,
               child: IgnorePointer(

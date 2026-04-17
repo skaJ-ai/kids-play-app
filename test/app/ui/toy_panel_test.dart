@@ -17,6 +17,7 @@ void main() {
               padding: EdgeInsets.all(30),
               radius: 40,
               borderWidth: 2,
+              highlightTopInset: 4,
               highlightHeight: 22,
               highlightHorizontalInset: 26,
               insetRadius: 24,
@@ -25,6 +26,7 @@ void main() {
               padding: EdgeInsets.all(18),
               radius: 36,
               borderWidth: 1.25,
+              highlightTopInset: 6,
               highlightHeight: 14,
               highlightHorizontalInset: 12,
               insetRadius: 18,
@@ -33,6 +35,7 @@ void main() {
               padding: EdgeInsets.all(8),
               radius: 20,
               borderWidth: 0.75,
+              highlightTopInset: 2,
               highlightHeight: 10,
               highlightHorizontalInset: 6,
               insetRadius: 16,
@@ -47,6 +50,7 @@ void main() {
           expectedPadding: customLayout.panel.regular.padding,
           expectedRadius: customLayout.panel.regular.radius,
           expectedBorderWidth: customLayout.panel.regular.borderWidth,
+          expectedHighlightTopInset: customLayout.panel.regular.highlightTopInset,
           expectedHighlightHeight: customLayout.panel.regular.highlightHeight,
           expectedHighlightHorizontalInset:
               customLayout.panel.regular.highlightHorizontalInset,
@@ -62,6 +66,7 @@ void main() {
           expectedPadding: customLayout.panel.compact.padding,
           expectedRadius: customLayout.panel.compact.radius,
           expectedBorderWidth: customLayout.panel.compact.borderWidth,
+          expectedHighlightTopInset: customLayout.panel.compact.highlightTopInset,
           expectedHighlightHeight: customLayout.panel.compact.highlightHeight,
           expectedHighlightHorizontalInset:
               customLayout.panel.compact.highlightHorizontalInset,
@@ -77,6 +82,7 @@ void main() {
           expectedPadding: customLayout.panel.tight.padding,
           expectedRadius: customLayout.panel.tight.radius,
           expectedBorderWidth: customLayout.panel.tight.borderWidth,
+          expectedHighlightTopInset: customLayout.panel.tight.highlightTopInset,
           expectedHighlightHeight: customLayout.panel.tight.highlightHeight,
           expectedHighlightHorizontalInset:
               customLayout.panel.tight.highlightHorizontalInset,
@@ -135,6 +141,7 @@ void main() {
         expectedPadding: customPadding,
         expectedRadius: customRadius,
         expectedBorderWidth: defaults.borderWidth,
+        expectedHighlightTopInset: defaults.highlightTopInset,
         expectedHighlightHeight: defaults.highlightHeight,
         expectedHighlightHorizontalInset: defaults.highlightHorizontalInset,
       );
@@ -367,6 +374,7 @@ void _expectResolvedShell(
   required EdgeInsetsGeometry expectedPadding,
   required double expectedRadius,
   required double expectedBorderWidth,
+  required double expectedHighlightTopInset,
   required double expectedHighlightHeight,
   required double expectedHighlightHorizontalInset,
 }) {
@@ -407,6 +415,7 @@ void _expectResolvedShell(
   expect(paddingWidget.padding, expectedPadding);
   expect(clipWidget.borderRadius, BorderRadius.circular(expectedRadius));
   expect(border.top.width, expectedBorderWidth);
+  expect(highlightPositioned.top, expectedHighlightTopInset);
   expect(tester.getSize(highlightFinder).height, expectedHighlightHeight);
   expect(highlightPositioned.left, expectedHighlightHorizontalInset);
   expect(highlightPositioned.right, expectedHighlightHorizontalInset);
