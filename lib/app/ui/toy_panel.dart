@@ -59,7 +59,11 @@ class ToyPanel extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color.lerp(resolvedBackgroundColor, KidPalette.white, 0.34)!,
+            Color.lerp(
+              resolvedBackgroundColor,
+              KidPalette.white,
+              chromeTokens.shellGradientWhiteBlendAmount,
+            )!,
             resolvedBackgroundColor,
           ],
         ),

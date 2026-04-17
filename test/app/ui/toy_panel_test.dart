@@ -192,6 +192,33 @@ void main() {
       );
     });
 
+    testWidgets('reads shell gradient blend overrides from kid theme tokens', (
+      WidgetTester tester,
+    ) async {
+      const customBackgroundColor = Color(0xFF9AC7FF);
+      const customBlendAmount = 0.72;
+      final customLayout = KidLayoutTheme.defaults.copyWith(
+        chrome: KidLayoutTheme.defaults.chrome.copyWith(
+          panel: KidLayoutTheme.defaults.chrome.panel.copyWith(
+            shellGradientWhiteBlendAmount: customBlendAmount,
+          ),
+        ),
+      );
+
+      await _pumpToyPanel(
+        tester,
+        backgroundColor: customBackgroundColor,
+        theme: buildKidTheme().copyWith(extensions: [customLayout]),
+      );
+
+      _expectResolvedColors(
+        tester,
+        expectedBackgroundColor: customBackgroundColor,
+        expectedBorderColor: KidPalette.stroke,
+        expectedShellGradientWhiteBlendAmount: customBlendAmount,
+      );
+    });
+
     testWidgets('reads chrome alpha overrides from kid theme tokens', (
       WidgetTester tester,
     ) async {
@@ -389,12 +416,17 @@ void _expectResolvedColors(
   WidgetTester tester, {
   required Color expectedBackgroundColor,
   required Color expectedBorderColor,
+  double expectedShellGradientWhiteBlendAmount = 0.34,
 }) {
   final decoration = _panelDecoration(tester, find.byType(ToyPanel));
   final gradient = decoration.gradient! as LinearGradient;
   final border = decoration.border! as Border;
   final expectedGradientColors = [
-    Color.lerp(expectedBackgroundColor, KidPalette.white, 0.34)!,
+    Color.lerp(
+      expectedBackgroundColor,
+      KidPalette.white,
+      expectedShellGradientWhiteBlendAmount,
+    )!,
     expectedBackgroundColor,
   ];
   final expectedResolvedBorderColor = expectedBorderColor.withValues(

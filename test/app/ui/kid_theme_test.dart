@@ -272,6 +272,7 @@ void main() {
     expect(layout.chrome.panel.customBorderAlpha, 0.72);
     expect(layout.chrome.panel.highlightAlpha, 0.28);
     expect(layout.chrome.panel.airyBackgroundAlpha, 0.94);
+    expect(layout.chrome.panel.shellGradientWhiteBlendAmount, 0.34);
   });
 
   test('buildKidTheme defines a calmer supporting label hierarchy', () {
