@@ -1,33 +1,34 @@
-import 'dart:convert';
-
 import 'package:flutter/services.dart';
 
+import '../../lesson/data/lesson_content_loader.dart';
+import '../../lesson/domain/lesson.dart';
+
+/// Category-aware facade kept for existing callers while the generic
+/// [LessonContentLoader] serves as the real data layer. See Phase 2 of the
+/// product-overhaul master plan; this shim will be removed in Phase 5.
 class AlphabetLessonRepository {
   AlphabetLessonRepository({AssetBundle? assetBundle})
-    : _assetBundle = assetBundle ?? rootBundle;
+    : contentLoader = ManifestLessonContentLoader(
+        manifestPath: manifestPath,
+        assetBundle: assetBundle,
+      );
 
   static const manifestPath = 'assets/generated/manifest/alphabet_lessons.json';
 
-  final AssetBundle _assetBundle;
+  final ManifestLessonContentLoader contentLoader;
 
   Future<AlphabetLesson> loadLesson(String lessonId) async {
-    final lessons = await loadLessons();
-    return lessons.firstWhere(
-      (lesson) => lesson.id == lessonId,
-      orElse: () => throw StateError('Missing alphabet lesson: $lessonId'),
-    );
+    final lesson = await contentLoader.loadLesson(lessonId);
+    return AlphabetLesson._fromLesson(lesson);
   }
 
   Future<List<AlphabetLesson>> loadLessons() async {
-    final jsonString = await _assetBundle.loadString(manifestPath);
-    final jsonMap = jsonDecode(jsonString) as Map<String, dynamic>;
-    final lessons = (jsonMap['lessons'] as List<dynamic>? ?? const [])
-        .cast<Map<String, dynamic>>();
-    return lessons
-        .map(AlphabetLesson.fromJson)
-        .toList(growable: false);
+    final lessons = await contentLoader.loadLessons();
+    return lessons.map(AlphabetLesson._fromLesson).toList(growable: false);
   }
 }
+
+typedef AlphabetCard = LessonItem;
 
 class AlphabetLesson {
   const AlphabetLesson({
@@ -36,38 +37,15 @@ class AlphabetLesson {
     required this.cards,
   });
 
-  factory AlphabetLesson.fromJson(Map<String, dynamic> json) {
-    final cards = (json['cards'] as List<dynamic>? ?? const [])
-        .cast<Map<String, dynamic>>();
-
+  factory AlphabetLesson._fromLesson(Lesson lesson) {
     return AlphabetLesson(
-      id: json['id'] as String,
-      title: json['title'] as String,
-      cards: cards.map(AlphabetCard.fromJson).toList(growable: false),
+      id: lesson.id,
+      title: lesson.title,
+      cards: lesson.items,
     );
   }
 
   final String id;
   final String title;
   final List<AlphabetCard> cards;
-}
-
-class AlphabetCard {
-  const AlphabetCard({
-    required this.symbol,
-    required this.label,
-    required this.hint,
-  });
-
-  factory AlphabetCard.fromJson(Map<String, dynamic> json) {
-    return AlphabetCard(
-      symbol: json['symbol'] as String,
-      label: json['label'] as String,
-      hint: json['hint'] as String,
-    );
-  }
-
-  final String symbol;
-  final String label;
-  final String hint;
 }
