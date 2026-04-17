@@ -11,17 +11,21 @@ class AlphabetLessonRepository {
   final AssetBundle _assetBundle;
 
   Future<AlphabetLesson> loadLesson(String lessonId) async {
+    final lessons = await loadLessons();
+    return lessons.firstWhere(
+      (lesson) => lesson.id == lessonId,
+      orElse: () => throw StateError('Missing alphabet lesson: $lessonId'),
+    );
+  }
+
+  Future<List<AlphabetLesson>> loadLessons() async {
     final jsonString = await _assetBundle.loadString(manifestPath);
     final jsonMap = jsonDecode(jsonString) as Map<String, dynamic>;
     final lessons = (jsonMap['lessons'] as List<dynamic>? ?? const [])
         .cast<Map<String, dynamic>>();
-
-    final lessonJson = lessons.firstWhere(
-      (lesson) => lesson['id'] == lessonId,
-      orElse: () => throw StateError('Missing alphabet lesson: $lessonId'),
-    );
-
-    return AlphabetLesson.fromJson(lessonJson);
+    return lessons
+        .map(AlphabetLesson.fromJson)
+        .toList(growable: false);
   }
 }
 

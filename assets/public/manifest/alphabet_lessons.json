@@ -4,31 +4,56 @@
       "id": "alphabet_letters_1",
       "title": "알파벳 1",
       "cards": [
-        {
-          "symbol": "A a",
-          "label": "에이, A a",
-          "hint": "에이를 크게 보고 소리를 따라 말해봐요"
-        },
-        {
-          "symbol": "B b",
-          "label": "비, B b",
-          "hint": "비를 보며 입으로 비 하고 말해봐요"
-        },
-        {
-          "symbol": "C c",
-          "label": "씨, C c",
-          "hint": "씨를 보고 입모양을 동그랗게 해봐요"
-        },
-        {
-          "symbol": "D d",
-          "label": "디, D d",
-          "hint": "디를 보며 손가락으로 천천히 짚어봐요"
-        },
-        {
-          "symbol": "E e",
-          "label": "이, E e",
-          "hint": "이를 보고 환하게 따라 말해봐요"
-        }
+        {"symbol": "A a", "label": "에이, A a", "hint": "에이를 크게 보고 소리를 따라 말해봐요"},
+        {"symbol": "B b", "label": "비, B b", "hint": "비를 보며 입으로 비 하고 말해봐요"},
+        {"symbol": "C c", "label": "씨, C c", "hint": "씨를 보며 동그란 입모양을 해봐요"},
+        {"symbol": "D d", "label": "디, D d", "hint": "디를 보고 손가락으로 천천히 짚어봐요"},
+        {"symbol": "E e", "label": "이, E e", "hint": "이를 보고 환하게 따라 말해봐요"}
+      ]
+    },
+    {
+      "id": "alphabet_letters_2",
+      "title": "알파벳 2",
+      "cards": [
+        {"symbol": "F f", "label": "에프, F f", "hint": "에프를 보며 입으로 에프 하고 따라 말해봐요"},
+        {"symbol": "G g", "label": "지, G g", "hint": "지를 보며 큰 G와 작은 g를 같이 찾아봐요"},
+        {"symbol": "H h", "label": "에이치, H h", "hint": "에이치를 보며 두 기둥 모양을 찾아봐요"},
+        {"symbol": "I i", "label": "아이, I i", "hint": "아이를 보며 점이 있는 작은 i도 찾아봐요"},
+        {"symbol": "J j", "label": "제이, J j", "hint": "제이를 보며 아래로 내려가는 꼬리를 찾아봐요"}
+      ]
+    },
+    {
+      "id": "alphabet_letters_3",
+      "title": "알파벳 3",
+      "cards": [
+        {"symbol": "K k", "label": "케이, K k", "hint": "케이를 보며 옆으로 벌어진 선을 찾아봐요"},
+        {"symbol": "L l", "label": "엘, L l", "hint": "엘을 보며 ㄴ처럼 꺾인 모양을 찾아봐요"},
+        {"symbol": "M m", "label": "엠, M m", "hint": "엠을 보며 산 두 개처럼 생긴 모양을 찾아봐요"},
+        {"symbol": "N n", "label": "엔, N n", "hint": "엔을 보며 기둥 두 개를 이어주는 선을 찾아봐요"},
+        {"symbol": "O o", "label": "오, O o", "hint": "오를 보며 동그란 모양을 크게 따라가봐요"}
+      ]
+    },
+    {
+      "id": "alphabet_letters_4",
+      "title": "알파벳 4",
+      "cards": [
+        {"symbol": "P p", "label": "피, P p", "hint": "피를 보며 둥근 배가 붙은 모양을 찾아봐요"},
+        {"symbol": "Q q", "label": "큐, Q q", "hint": "큐를 보며 동그라미 아래 꼬리를 찾아봐요"},
+        {"symbol": "R r", "label": "알, R r", "hint": "알을 보며 P에서 다리가 나온 모양을 찾아봐요"},
+        {"symbol": "S s", "label": "에스, S s", "hint": "에스를 보며 뱀처럼 구부러진 길을 찾아봐요"},
+        {"symbol": "T t", "label": "티, T t", "hint": "티를 보며 십자처럼 만나는 선을 찾아봐요"}
+      ]
+    },
+    {
+      "id": "alphabet_letters_5",
+      "title": "알파벳 5",
+      "cards": [
+        {"symbol": "U u", "label": "유, U u", "hint": "유를 보며 아래로 둥글게 내려오는 모양을 찾아봐요"},
+        {"symbol": "V v", "label": "브이, V v", "hint": "브이를 보며 뾰족하게 내려오는 모양을 찾아봐요"},
+        {"symbol": "W w", "label": "더블유, W w", "hint": "더블유를 보며 산 두 개가 이어진 모양을 찾아봐요"},
+        {"symbol": "X x", "label": "엑스, X x", "hint": "엑스를 보며 선 두 개가 엇갈린 모양을 찾아봐요"},
+        {"symbol": "Y y", "label": "와이, Y y", "hint": "와이를 보며 위에서 갈라지는 모양을 찾아봐요"},
+        {"symbol": "Z z", "label": "지, Z z", "hint": "지를 보며 번개처럼 꺾인 선을 찾아봐요"}
       ]
     }
   ]

@@ -11,6 +11,7 @@ import '../../numbers/data/numbers_lesson_repository.dart';
 import '../../numbers/presentation/numbers_learn_screen.dart';
 import '../../numbers/presentation/numbers_quiz_screen.dart';
 import '../data/home_catalog_repository.dart';
+import 'lesson_picker_screen.dart';
 
 typedef HomeCategoryScreenBuilder =
     Widget Function(HomeCategoryDependencies dependencies);
@@ -105,25 +106,167 @@ final Map<String, HomeCategoryConfig> _knownConfigs = {
 };
 
 Widget _buildHangulLearnScreen(HomeCategoryDependencies dependencies) {
-  return HangulLearnScreen(repository: dependencies.hangulLessonRepository);
+  final repository = dependencies.hangulLessonRepository ?? HangulLessonRepository();
+  return AsyncLessonPickerScreen(
+    categoryLabel: '한글',
+    modeLabel: '배우기',
+    errorMessage: '한글 세트를 불러오지 못했어요.',
+    emptyMessage: '준비 중인 한글 세트예요.',
+    loadItems: () async {
+      final lessons = await repository.loadLessons();
+      return lessons
+          .map(
+            (lesson) => LessonPickerItem(
+              id: lesson.id,
+              title: lesson.title,
+              preview: lesson.cards.take(3).map((card) => card.symbol).join(' · '),
+              countLabel: '${lesson.cards.length}개',
+              color: Colors.amber.shade700,
+            ),
+          )
+          .toList(growable: false);
+    },
+    buildDestination: (lessonId) {
+      return HangulLearnScreen(repository: repository, lessonId: lessonId);
+    },
+  );
 }
 
 Widget _buildHangulQuizScreen(HomeCategoryDependencies dependencies) {
-  return HangulQuizScreen(repository: dependencies.hangulLessonRepository);
+  final repository = dependencies.hangulLessonRepository ?? HangulLessonRepository();
+  return AsyncLessonPickerScreen(
+    categoryLabel: '한글',
+    modeLabel: '퀴즈',
+    errorMessage: '한글 퀴즈 세트를 불러오지 못했어요.',
+    emptyMessage: '준비 중인 한글 퀴즈 세트예요.',
+    loadItems: () async {
+      final lessons = await repository.loadLessons();
+      return lessons
+          .map(
+            (lesson) => LessonPickerItem(
+              id: lesson.id,
+              title: lesson.title,
+              preview: lesson.cards.take(3).map((card) => card.symbol).join(' · '),
+              countLabel: '${lesson.cards.length}문제',
+              color: Colors.amber.shade700,
+            ),
+          )
+          .toList(growable: false);
+    },
+    buildDestination: (lessonId) {
+      return HangulQuizScreen(repository: repository, lessonId: lessonId);
+    },
+  );
 }
 
 Widget _buildAlphabetLearnScreen(HomeCategoryDependencies dependencies) {
-  return AlphabetLearnScreen(repository: dependencies.alphabetLessonRepository);
+  final repository =
+      dependencies.alphabetLessonRepository ?? AlphabetLessonRepository();
+  return AsyncLessonPickerScreen(
+    categoryLabel: '알파벳',
+    modeLabel: '배우기',
+    errorMessage: '알파벳 세트를 불러오지 못했어요.',
+    emptyMessage: '준비 중인 알파벳 세트예요.',
+    loadItems: () async {
+      final lessons = await repository.loadLessons();
+      return lessons
+          .map(
+            (lesson) => LessonPickerItem(
+              id: lesson.id,
+              title: lesson.title,
+              preview: lesson.cards.take(3).map((card) => card.symbol).join(' · '),
+              countLabel: '${lesson.cards.length}개',
+              color: Colors.lightBlue.shade700,
+            ),
+          )
+          .toList(growable: false);
+    },
+    buildDestination: (lessonId) {
+      return AlphabetLearnScreen(repository: repository, lessonId: lessonId);
+    },
+  );
 }
 
 Widget _buildAlphabetQuizScreen(HomeCategoryDependencies dependencies) {
-  return AlphabetQuizScreen(repository: dependencies.alphabetLessonRepository);
+  final repository =
+      dependencies.alphabetLessonRepository ?? AlphabetLessonRepository();
+  return AsyncLessonPickerScreen(
+    categoryLabel: '알파벳',
+    modeLabel: '퀴즈',
+    errorMessage: '알파벳 퀴즈 세트를 불러오지 못했어요.',
+    emptyMessage: '준비 중인 알파벳 퀴즈 세트예요.',
+    loadItems: () async {
+      final lessons = await repository.loadLessons();
+      return lessons
+          .map(
+            (lesson) => LessonPickerItem(
+              id: lesson.id,
+              title: lesson.title,
+              preview: lesson.cards.take(3).map((card) => card.symbol).join(' · '),
+              countLabel: '${lesson.cards.length}문제',
+              color: Colors.lightBlue.shade700,
+            ),
+          )
+          .toList(growable: false);
+    },
+    buildDestination: (lessonId) {
+      return AlphabetQuizScreen(repository: repository, lessonId: lessonId);
+    },
+  );
 }
 
 Widget _buildNumbersLearnScreen(HomeCategoryDependencies dependencies) {
-  return NumbersLearnScreen(repository: dependencies.numbersLessonRepository);
+  final repository =
+      dependencies.numbersLessonRepository ?? NumbersLessonRepository();
+  return AsyncLessonPickerScreen(
+    categoryLabel: '숫자',
+    modeLabel: '배우기',
+    errorMessage: '숫자 세트를 불러오지 못했어요.',
+    emptyMessage: '준비 중인 숫자 세트예요.',
+    loadItems: () async {
+      final lessons = await repository.loadLessons();
+      return lessons
+          .map(
+            (lesson) => LessonPickerItem(
+              id: lesson.id,
+              title: lesson.title,
+              preview: lesson.cards.take(3).map((card) => card.symbol).join(' · '),
+              countLabel: '${lesson.cards.length}개',
+              color: Colors.pink.shade600,
+            ),
+          )
+          .toList(growable: false);
+    },
+    buildDestination: (lessonId) {
+      return NumbersLearnScreen(repository: repository, lessonId: lessonId);
+    },
+  );
 }
 
 Widget _buildNumbersQuizScreen(HomeCategoryDependencies dependencies) {
-  return NumbersQuizScreen(repository: dependencies.numbersLessonRepository);
+  final repository =
+      dependencies.numbersLessonRepository ?? NumbersLessonRepository();
+  return AsyncLessonPickerScreen(
+    categoryLabel: '숫자',
+    modeLabel: '퀴즈',
+    errorMessage: '숫자 퀴즈 세트를 불러오지 못했어요.',
+    emptyMessage: '준비 중인 숫자 퀴즈 세트예요.',
+    loadItems: () async {
+      final lessons = await repository.loadLessons();
+      return lessons
+          .map(
+            (lesson) => LessonPickerItem(
+              id: lesson.id,
+              title: lesson.title,
+              preview: lesson.cards.take(3).map((card) => card.symbol).join(' · '),
+              countLabel: '${lesson.cards.length}문제',
+              color: Colors.pink.shade600,
+            ),
+          )
+          .toList(growable: false);
+    },
+    buildDestination: (lessonId) {
+      return NumbersQuizScreen(repository: repository, lessonId: lessonId);
+    },
+  );
 }

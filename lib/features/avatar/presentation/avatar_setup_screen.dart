@@ -7,9 +7,9 @@ import '../../../app/ui/kid_theme.dart';
 import '../../../app/ui/playground_scaffold.dart';
 import '../../../app/ui/toy_button.dart';
 import '../../../app/ui/toy_panel.dart';
-import '../../alphabet/presentation/alphabet_learn_screen.dart';
-import '../../hangul/presentation/hangul_learn_screen.dart';
-import '../../numbers/presentation/numbers_learn_screen.dart';
+import '../../alphabet/presentation/alphabet_quiz_screen.dart';
+import '../../hangul/presentation/hangul_quiz_screen.dart';
+import '../../numbers/presentation/numbers_quiz_screen.dart';
 import '../domain/avatar_expression.dart';
 
 typedef LessonRetryRouteOpener =
@@ -125,6 +125,9 @@ class _AvatarSetupScreenState extends State<AvatarSetupScreen> {
       lastViewedIndex: reviewIndex,
     );
     await _refreshSnapshot();
+    if (!mounted) {
+      return;
+    }
 
     final opener = widget.onOpenLessonRetry;
     if (opener != null) {
@@ -133,7 +136,7 @@ class _AvatarSetupScreenState extends State<AvatarSetupScreen> {
     }
 
     final destination = _buildLessonRetryScreen(lessonId, mistakes);
-    if (destination == null || !mounted) {
+    if (destination == null) {
       return;
     }
 
@@ -965,22 +968,130 @@ const List<_LessonMetadata> _knownLessonMetadata = [
     cardSymbols: ['ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ'],
   ),
   _LessonMetadata(
+    lessonId: 'hangul:basic_consonants_2',
+    categoryLabel: '한글 차고',
+    title: '기본 자음 2',
+    cardCount: 5,
+    color: KidPalette.yellowDark,
+    sortOrder: 1,
+    cardSymbols: ['ㅂ', 'ㅅ', 'ㅇ', 'ㅈ', 'ㅊ'],
+  ),
+  _LessonMetadata(
+    lessonId: 'hangul:basic_consonants_3',
+    categoryLabel: '한글 차고',
+    title: '기본 자음 3',
+    cardCount: 4,
+    color: KidPalette.yellowDark,
+    sortOrder: 2,
+    cardSymbols: ['ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'],
+  ),
+  _LessonMetadata(
+    lessonId: 'hangul:tense_consonants_1',
+    categoryLabel: '한글 차고',
+    title: '된소리 1',
+    cardCount: 5,
+    color: KidPalette.yellowDark,
+    sortOrder: 3,
+    cardSymbols: ['ㄲ', 'ㄸ', 'ㅃ', 'ㅆ', 'ㅉ'],
+  ),
+  _LessonMetadata(
+    lessonId: 'hangul:basic_vowels_1',
+    categoryLabel: '한글 차고',
+    title: '기본 모음 1',
+    cardCount: 5,
+    color: KidPalette.yellowDark,
+    sortOrder: 4,
+    cardSymbols: ['ㅏ', 'ㅑ', 'ㅓ', 'ㅕ', 'ㅗ'],
+  ),
+  _LessonMetadata(
+    lessonId: 'hangul:basic_vowels_2',
+    categoryLabel: '한글 차고',
+    title: '기본 모음 2',
+    cardCount: 5,
+    color: KidPalette.yellowDark,
+    sortOrder: 5,
+    cardSymbols: ['ㅛ', 'ㅜ', 'ㅠ', 'ㅡ', 'ㅣ'],
+  ),
+  _LessonMetadata(
     lessonId: 'alphabet:alphabet_letters_1',
     categoryLabel: '알파벳 차고',
     title: '알파벳 1',
     cardCount: 5,
     color: KidPalette.blue,
-    sortOrder: 1,
+    sortOrder: 10,
     cardSymbols: ['A a', 'B b', 'C c', 'D d', 'E e'],
+  ),
+  _LessonMetadata(
+    lessonId: 'alphabet:alphabet_letters_2',
+    categoryLabel: '알파벳 차고',
+    title: '알파벳 2',
+    cardCount: 5,
+    color: KidPalette.blue,
+    sortOrder: 11,
+    cardSymbols: ['F f', 'G g', 'H h', 'I i', 'J j'],
+  ),
+  _LessonMetadata(
+    lessonId: 'alphabet:alphabet_letters_3',
+    categoryLabel: '알파벳 차고',
+    title: '알파벳 3',
+    cardCount: 5,
+    color: KidPalette.blue,
+    sortOrder: 12,
+    cardSymbols: ['K k', 'L l', 'M m', 'N n', 'O o'],
+  ),
+  _LessonMetadata(
+    lessonId: 'alphabet:alphabet_letters_4',
+    categoryLabel: '알파벳 차고',
+    title: '알파벳 4',
+    cardCount: 5,
+    color: KidPalette.blue,
+    sortOrder: 13,
+    cardSymbols: ['P p', 'Q q', 'R r', 'S s', 'T t'],
+  ),
+  _LessonMetadata(
+    lessonId: 'alphabet:alphabet_letters_5',
+    categoryLabel: '알파벳 차고',
+    title: '알파벳 5',
+    cardCount: 6,
+    color: KidPalette.blue,
+    sortOrder: 14,
+    cardSymbols: ['U u', 'V v', 'W w', 'X x', 'Y y', 'Z z'],
   ),
   _LessonMetadata(
     lessonId: 'numbers:numbers_count_1',
     categoryLabel: '숫자 차고',
-    title: '숫자 1',
+    title: '숫자 1부터 5까지',
     cardCount: 5,
     color: KidPalette.coralDark,
-    sortOrder: 2,
+    sortOrder: 20,
     cardSymbols: ['1', '2', '3', '4', '5'],
+  ),
+  _LessonMetadata(
+    lessonId: 'numbers:numbers_count_2',
+    categoryLabel: '숫자 차고',
+    title: '숫자 6부터 10까지',
+    cardCount: 5,
+    color: KidPalette.coralDark,
+    sortOrder: 21,
+    cardSymbols: ['6', '7', '8', '9', '10'],
+  ),
+  _LessonMetadata(
+    lessonId: 'numbers:numbers_count_3',
+    categoryLabel: '숫자 차고',
+    title: '숫자 11부터 15까지',
+    cardCount: 5,
+    color: KidPalette.coralDark,
+    sortOrder: 22,
+    cardSymbols: ['11', '12', '13', '14', '15'],
+  ),
+  _LessonMetadata(
+    lessonId: 'numbers:numbers_count_4',
+    categoryLabel: '숫자 차고',
+    title: '숫자 16부터 20까지',
+    cardCount: 5,
+    color: KidPalette.coralDark,
+    sortOrder: 23,
+    cardSymbols: ['16', '17', '18', '19', '20'],
   ),
 ];
 
@@ -1020,13 +1131,22 @@ String _fallbackCategoryLabel(String categoryKey) {
 Widget? _buildLessonRetryScreen(String lessonId, List<String> mistakes) {
   final lessonKey = lessonId.split(':').last;
   if (lessonId.startsWith('hangul:')) {
-    return HangulLearnScreen(lessonId: lessonKey);
+    return HangulQuizScreen(
+      lessonId: lessonKey,
+      mistakeSymbols: mistakes,
+    );
   }
   if (lessonId.startsWith('alphabet:')) {
-    return AlphabetLearnScreen(lessonId: lessonKey);
+    return AlphabetQuizScreen(
+      lessonId: lessonKey,
+      mistakeSymbols: mistakes,
+    );
   }
   if (lessonId.startsWith('numbers:')) {
-    return NumbersLearnScreen(lessonId: lessonKey);
+    return NumbersQuizScreen(
+      lessonId: lessonKey,
+      mistakeSymbols: mistakes,
+    );
   }
   return null;
 }

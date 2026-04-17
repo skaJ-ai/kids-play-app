@@ -11,17 +11,21 @@ class HangulLessonRepository {
   final AssetBundle _assetBundle;
 
   Future<HangulLesson> loadLesson(String lessonId) async {
+    final lessons = await loadLessons();
+    return lessons.firstWhere(
+      (lesson) => lesson.id == lessonId,
+      orElse: () => throw StateError('Missing hangul lesson: $lessonId'),
+    );
+  }
+
+  Future<List<HangulLesson>> loadLessons() async {
     final jsonString = await _assetBundle.loadString(manifestPath);
     final jsonMap = jsonDecode(jsonString) as Map<String, dynamic>;
     final lessons = (jsonMap['lessons'] as List<dynamic>? ?? const [])
         .cast<Map<String, dynamic>>();
-
-    final lessonJson = lessons.firstWhere(
-      (lesson) => lesson['id'] == lessonId,
-      orElse: () => throw StateError('Missing hangul lesson: $lessonId'),
-    );
-
-    return HangulLesson.fromJson(lessonJson);
+    return lessons
+        .map(HangulLesson.fromJson)
+        .toList(growable: false);
   }
 }
 

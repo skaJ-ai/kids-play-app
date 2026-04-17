@@ -11,7 +11,7 @@
 - Slice 3 — alphabet playable MVP
 - Slice 4 — numbers playable MVP
 - Slice 5 — audio-first prompt layer
-- Slice 6 — end-to-end polish의 home/category/hub garage UI 정리, 보호자 기본 진도 제어, 오답 다시 풀기 진입까지
+- Slice 6 — end-to-end polish의 home/category/hub garage UI 정리, 보호자 기본 진도 제어, 오답 다시 풀기 진입, 다중 lesson/컨텐츠 확장까지
 
 남은 확장 후보
 - 해금 수동 제어 / 보호자 고급 운영
