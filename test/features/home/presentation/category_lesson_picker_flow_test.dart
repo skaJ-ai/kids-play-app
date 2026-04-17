@@ -12,6 +12,7 @@ import 'package:kids_play_app/features/home/data/home_catalog_repository.dart';
 import 'package:kids_play_app/features/home/presentation/category_hub_screen.dart';
 import 'package:kids_play_app/features/home/presentation/home_category_config.dart';
 import 'package:kids_play_app/features/numbers/data/numbers_lesson_repository.dart';
+import 'package:kids_play_app/features/numbers/presentation/numbers_learn_screen.dart';
 
 void main() {
   testWidgets(
@@ -150,6 +151,56 @@ void main() {
     expect(find.text('한글 학습'), findsOneWidget);
     expect(find.text('비읍, ㅂ'), findsOneWidget);
   });
+
+  testWidgets(
+    'shows a lesson picker before opening numbers learn when multiple sets exist',
+    (WidgetTester tester) async {
+      final repository = NumbersLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          NumbersLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_numbersLessonOne, _numbersLessonTwo],
+          }),
+        }),
+      );
+      final progressStore = MemoryProgressStore();
+      await progressStore.setLessonUnlocked('numbers:numbers_count_2', true);
+
+      await tester.pumpWidget(
+        _wrapWithServices(
+          progressStore: progressStore,
+          child: CategoryHubScreen(
+            category: const HomeCategory(
+              id: 'numbers',
+              label: '숫자',
+              description: '숫자 놀이를 시작해요',
+              backgroundColorHex: '#FFC6D9',
+              iconName: 'looks_one_rounded',
+            ),
+            categoryDependencies: HomeCategoryDependencies(
+              numbersLessonRepository: repository,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('배우기'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('숫자 학습'), findsNothing);
+      expect(find.text('숫자 1부터 5까지'), findsOneWidget);
+      expect(find.text('숫자 6부터 10까지'), findsOneWidget);
+
+      await tester.tap(
+        find.byKey(const Key('lesson-picker-item-numbers_count_2')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(NumbersLearnScreen), findsOneWidget);
+      expect(find.text('숫자 학습'), findsOneWidget);
+      expect(find.text('여섯, 6'), findsOneWidget);
+    },
+  );
 
   testWidgets(
     'shows a lesson picker before opening numbers quiz when multiple sets exist',
