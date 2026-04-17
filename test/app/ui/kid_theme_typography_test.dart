@@ -52,4 +52,54 @@ void main() {
     expect(textTheme.labelLarge!.height, 1.15);
     expect(textTheme.labelLarge!.color, KidPalette.navy);
   });
+
+  test('buildKidTheme softens the supporting copy hierarchy', () {
+    final textTheme = buildKidTheme().textTheme;
+
+    expect(textTheme.titleMedium, isNotNull);
+    expect(textTheme.titleMedium!.fontSize, 17);
+    expect(textTheme.titleMedium!.fontWeight, FontWeight.w700);
+    expect(textTheme.titleMedium!.letterSpacing, -0.1);
+    expect(textTheme.titleMedium!.height, 1.22);
+    expect(textTheme.titleMedium!.color, KidPalette.navy);
+
+    expect(textTheme.titleSmall, isNotNull);
+    expect(textTheme.titleSmall!.fontSize, 14);
+    expect(textTheme.titleSmall!.fontWeight, FontWeight.w700);
+    expect(textTheme.titleSmall!.letterSpacing, 0);
+    expect(textTheme.titleSmall!.height, 1.20);
+    expect(textTheme.titleSmall!.color, KidPalette.navy);
+
+    expect(textTheme.bodyLarge, isNotNull);
+    expect(textTheme.bodyLarge!.fontSize, 16);
+    expect(textTheme.bodyLarge!.fontWeight, FontWeight.w500);
+    expect(textTheme.bodyLarge!.height, 1.38);
+    expect(textTheme.bodyLarge!.color, KidPalette.body);
+
+    expect(textTheme.bodyMedium, isNotNull);
+    expect(textTheme.bodyMedium!.fontSize, 15);
+    expect(textTheme.bodyMedium!.fontWeight, FontWeight.w400);
+    expect(textTheme.bodyMedium!.height, 1.36);
+    expect(textTheme.bodyMedium!.color, KidPalette.body);
+
+    expect(textTheme.bodySmall, isNotNull);
+    expect(textTheme.bodySmall!.fontSize, 13);
+    expect(textTheme.bodySmall!.fontWeight, FontWeight.w400);
+    expect(textTheme.bodySmall!.height, 1.32);
+    expect(textTheme.bodySmall!.color, KidPalette.body);
+
+    expect(textTheme.labelMedium, isNotNull);
+    expect(textTheme.labelMedium!.fontSize, 12);
+    expect(textTheme.labelMedium!.fontWeight, FontWeight.w600);
+    expect(textTheme.labelMedium!.letterSpacing, 0.05);
+    expect(textTheme.labelMedium!.height, 1.18);
+    expect(textTheme.labelMedium!.color, KidPalette.body);
+
+    expect(textTheme.labelSmall, isNotNull);
+    expect(textTheme.labelSmall!.fontSize, 11);
+    expect(textTheme.labelSmall!.fontWeight, FontWeight.w600);
+    expect(textTheme.labelSmall!.letterSpacing, 0.05);
+    expect(textTheme.labelSmall!.height, 1.16);
+    expect(textTheme.labelSmall!.color, KidPalette.body);
+  });
 }

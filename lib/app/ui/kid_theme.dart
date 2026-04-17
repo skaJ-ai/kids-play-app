@@ -90,8 +90,11 @@ class KidButtonDensityTokens {
     double? iconSize,
     double? labelFontSize,
     FontWeight? labelFontWeight,
+    bool clearLabelFontWeight = false,
     double? labelLetterSpacing,
+    bool clearLabelLetterSpacing = false,
     double? labelHeight,
+    bool clearLabelHeight = false,
     double? primaryBorderWidth,
     double? secondaryBorderWidth,
     double? radius,
@@ -102,6 +105,9 @@ class KidButtonDensityTokens {
     double? iconChipRadius,
   }) {
     assert(!clearRadius || radius == null);
+    assert(!clearLabelFontWeight || labelFontWeight == null);
+    assert(!clearLabelLetterSpacing || labelLetterSpacing == null);
+    assert(!clearLabelHeight || labelHeight == null);
 
     return KidButtonDensityTokens(
       height: height ?? this.height,
@@ -110,9 +116,13 @@ class KidButtonDensityTokens {
       iconChipSize: iconChipSize ?? this.iconChipSize,
       iconSize: iconSize ?? this.iconSize,
       labelFontSize: labelFontSize ?? this.labelFontSize,
-      labelFontWeight: labelFontWeight ?? this.labelFontWeight,
-      labelLetterSpacing: labelLetterSpacing ?? this.labelLetterSpacing,
-      labelHeight: labelHeight ?? this.labelHeight,
+      labelFontWeight: clearLabelFontWeight
+          ? null
+          : labelFontWeight ?? this.labelFontWeight,
+      labelLetterSpacing: clearLabelLetterSpacing
+          ? null
+          : labelLetterSpacing ?? this.labelLetterSpacing,
+      labelHeight: clearLabelHeight ? null : labelHeight ?? this.labelHeight,
       primaryBorderWidth: primaryBorderWidth ?? this.primaryBorderWidth,
       secondaryBorderWidth: secondaryBorderWidth ?? this.secondaryBorderWidth,
       radius: clearRadius ? null : radius ?? this.radius,
@@ -748,33 +758,33 @@ ThemeData buildKidTheme() {
       fontSize: 17,
       fontWeight: FontWeight.w700,
       letterSpacing: -0.1,
-      color: KidPalette.body,
-      height: 1.2,
+      color: KidPalette.navy,
+      height: 1.22,
     ),
     titleSmall: const TextStyle(
       fontSize: 14,
       fontWeight: FontWeight.w700,
       letterSpacing: 0,
-      color: KidPalette.body,
-      height: 1.18,
+      color: KidPalette.navy,
+      height: 1.20,
     ),
     bodyLarge: const TextStyle(
       fontSize: 16,
-      fontWeight: FontWeight.w600,
+      fontWeight: FontWeight.w500,
       color: KidPalette.body,
-      height: 1.3,
+      height: 1.38,
     ),
     bodyMedium: const TextStyle(
       fontSize: 15,
-      fontWeight: FontWeight.w500,
+      fontWeight: FontWeight.w400,
       color: KidPalette.body,
-      height: 1.3,
+      height: 1.36,
     ),
     bodySmall: const TextStyle(
       fontSize: 13,
-      fontWeight: FontWeight.w500,
+      fontWeight: FontWeight.w400,
       color: KidPalette.body,
-      height: 1.25,
+      height: 1.32,
     ),
     labelLarge: const TextStyle(
       fontSize: 14,
@@ -786,16 +796,16 @@ ThemeData buildKidTheme() {
     labelMedium: const TextStyle(
       fontSize: 12,
       fontWeight: FontWeight.w600,
-      letterSpacing: 0,
+      letterSpacing: 0.05,
       color: KidPalette.body,
-      height: 1.2,
+      height: 1.18,
     ),
     labelSmall: const TextStyle(
       fontSize: 11,
       fontWeight: FontWeight.w600,
-      letterSpacing: 0,
+      letterSpacing: 0.05,
       color: KidPalette.body,
-      height: 1.18,
+      height: 1.16,
     ),
   );
 

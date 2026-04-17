@@ -173,6 +173,33 @@ void main() {
   );
 
   test(
+    'KidButtonDensityTokens copyWith can clear typography overrides back to inherited fallback',
+    () {
+      const explicit = KidButtonDensityTokens(
+        height: 60,
+        horizontalPadding: 16,
+        iconGap: 10,
+        iconChipSize: 34,
+        iconSize: 18,
+        labelFontSize: 19,
+        labelFontWeight: FontWeight.w700,
+        labelLetterSpacing: 0,
+        labelHeight: 1.1,
+      );
+
+      final cleared = explicit.copyWith(
+        clearLabelFontWeight: true,
+        clearLabelLetterSpacing: true,
+        clearLabelHeight: true,
+      );
+
+      expect(cleared.labelFontWeight, isNull);
+      expect(cleared.labelLetterSpacing, isNull);
+      expect(cleared.labelHeight, isNull);
+    },
+  );
+
+  test(
     'button radius tokens expose defaults and keep nullable fallback discrete during lerp',
     () {
       final layout = buildKidTheme().extension<KidLayoutTheme>();
@@ -407,18 +434,18 @@ void main() {
 
     expect(textTheme.labelMedium?.fontSize, 12);
     expect(textTheme.labelMedium?.fontWeight, FontWeight.w600);
-    expect(textTheme.labelMedium?.letterSpacing, 0);
+    expect(textTheme.labelMedium?.letterSpacing, 0.05);
     expect(textTheme.labelMedium?.color, KidPalette.body);
-    expect(textTheme.labelMedium?.height, 1.2);
+    expect(textTheme.labelMedium?.height, 1.18);
 
     expect(textTheme.labelSmall?.fontSize, 11);
     expect(textTheme.labelSmall?.fontWeight, FontWeight.w600);
-    expect(textTheme.labelSmall?.letterSpacing, 0);
+    expect(textTheme.labelSmall?.letterSpacing, 0.05);
     expect(textTheme.labelSmall?.color, KidPalette.body);
-    expect(textTheme.labelSmall?.height, 1.18);
+    expect(textTheme.labelSmall?.height, 1.16);
 
-    expect(textTheme.bodyMedium?.fontWeight, FontWeight.w500);
-    expect(textTheme.bodySmall?.fontWeight, FontWeight.w500);
+    expect(textTheme.bodyMedium?.fontWeight, FontWeight.w400);
+    expect(textTheme.bodySmall?.fontWeight, FontWeight.w400);
 
     expect(theme.chipTheme.labelStyle, textTheme.labelLarge);
   });
