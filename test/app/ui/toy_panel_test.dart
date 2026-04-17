@@ -179,6 +179,44 @@ void main() {
       );
     });
 
+    testWidgets('uses lilac tone defaults', (WidgetTester tester) async {
+      await _pumpToyPanel(tester, tone: ToyPanelTone.lilac);
+
+      _expectResolvedColors(
+        tester,
+        expectedBackgroundColor: KidPalette.lilac.withValues(alpha: 0.75),
+        expectedBorderColor: KidPalette.stroke,
+      );
+    });
+
+    testWidgets('reads lilac tone alpha overrides from kid theme tokens', (
+      WidgetTester tester,
+    ) async {
+      const customLilacAlpha = 0.61;
+      final customLayout = KidLayoutTheme(
+        button: KidLayoutTheme.defaults.button,
+        panel: KidLayoutTheme.defaults.panel,
+        chrome: const KidChromeTokens(
+          button: KidButtonChromeTokens(),
+          panel: KidPanelChromeTokens(lilacBackgroundAlpha: customLilacAlpha),
+        ),
+      );
+
+      await _pumpToyPanel(
+        tester,
+        tone: ToyPanelTone.lilac,
+        theme: buildKidTheme().copyWith(extensions: [customLayout]),
+      );
+
+      _expectResolvedColors(
+        tester,
+        expectedBackgroundColor: KidPalette.lilac.withValues(
+          alpha: customLilacAlpha,
+        ),
+        expectedBorderColor: KidPalette.stroke,
+      );
+    });
+
     testWidgets('lets explicit colors override tone defaults', (
       WidgetTester tester,
     ) async {

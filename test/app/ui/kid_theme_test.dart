@@ -63,6 +63,23 @@ void main() {
     expect(layout.panel.tight.insetRadius, 14);
   });
 
+  test(
+    'KidPanelChromeTokens exposes lilac background alpha and keeps it through copyWith and lerp',
+    () {
+      final layout = buildKidTheme().extension<KidLayoutTheme>();
+
+      expect(layout, isNotNull);
+      expect(layout!.chrome.panel.lilacBackgroundAlpha, 0.75);
+
+      final preserved = layout.chrome.panel.copyWith(highlightAlpha: 0.44);
+      const updated = KidPanelChromeTokens(lilacBackgroundAlpha: 0.52);
+
+      expect(preserved.lilacBackgroundAlpha, 0.75);
+      expect(updated.lilacBackgroundAlpha, 0.52);
+      expect(layout.chrome.panel.lerp(updated, 1).lilacBackgroundAlpha, 0.52);
+    },
+  );
+
   test('KidPanelDensityTokens keeps highlightTopInset in copyWith and lerp', () {
     const base = KidPanelDensityTokens(
       padding: EdgeInsets.all(20),

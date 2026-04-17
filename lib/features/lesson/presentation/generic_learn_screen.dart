@@ -225,10 +225,8 @@ class _GenericLearnScreenState extends State<GenericLearnScreen> {
                               SizedBox(height: compact ? 6 : 14),
                               Expanded(
                                 child: ToyPanel(
+                                  tone: ToyPanelTone.lilac,
                                   padding: EdgeInsets.all(compact ? 12 : 24),
-                                  backgroundColor: KidPalette.lilac.withValues(
-                                    alpha: 0.75,
-                                  ),
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,

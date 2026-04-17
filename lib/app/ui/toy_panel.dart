@@ -4,7 +4,7 @@ export 'kid_theme.dart' show ToyPanelDensity;
 
 import 'kid_theme.dart';
 
-enum ToyPanelTone { surface, airy, warm }
+enum ToyPanelTone { surface, airy, warm, lilac }
 
 class ToyPanel extends StatelessWidget {
   const ToyPanel({
@@ -134,6 +134,12 @@ _ToyPanelToneColors _toneColorsFor(
     ),
     ToyPanelTone.warm => const _ToyPanelToneColors(
       backgroundColor: KidPalette.creamWarm,
+      borderColor: KidPalette.stroke,
+    ),
+    ToyPanelTone.lilac => _ToyPanelToneColors(
+      backgroundColor: KidPalette.lilac.withValues(
+        alpha: chromeTokens.lilacBackgroundAlpha,
+      ),
       borderColor: KidPalette.stroke,
     ),
   };

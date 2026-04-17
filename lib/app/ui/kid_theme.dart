@@ -448,6 +448,7 @@ class KidPanelChromeTokens {
     this.customBorderAlpha = 0.72,
     this.highlightAlpha = 0.28,
     this.airyBackgroundAlpha = 0.94,
+    this.lilacBackgroundAlpha = 0.75,
     this.shellGradientWhiteBlendAmount = 0.34,
   });
 
@@ -455,6 +456,7 @@ class KidPanelChromeTokens {
   final double customBorderAlpha;
   final double highlightAlpha;
   final double airyBackgroundAlpha;
+  final double lilacBackgroundAlpha;
   final double shellGradientWhiteBlendAmount;
 
   KidPanelChromeTokens copyWith({
@@ -462,6 +464,7 @@ class KidPanelChromeTokens {
     double? customBorderAlpha,
     double? highlightAlpha,
     double? airyBackgroundAlpha,
+    double? lilacBackgroundAlpha,
     double? shellGradientWhiteBlendAmount,
   }) {
     return KidPanelChromeTokens(
@@ -469,6 +472,7 @@ class KidPanelChromeTokens {
       customBorderAlpha: customBorderAlpha ?? this.customBorderAlpha,
       highlightAlpha: highlightAlpha ?? this.highlightAlpha,
       airyBackgroundAlpha: airyBackgroundAlpha ?? this.airyBackgroundAlpha,
+      lilacBackgroundAlpha: lilacBackgroundAlpha ?? this.lilacBackgroundAlpha,
       shellGradientWhiteBlendAmount:
           shellGradientWhiteBlendAmount ?? this.shellGradientWhiteBlendAmount,
     );
@@ -488,6 +492,9 @@ class KidPanelChromeTokens {
       airyBackgroundAlpha:
           ui.lerpDouble(airyBackgroundAlpha, other.airyBackgroundAlpha, t) ??
           airyBackgroundAlpha,
+      lilacBackgroundAlpha:
+          ui.lerpDouble(lilacBackgroundAlpha, other.lilacBackgroundAlpha, t) ??
+          lilacBackgroundAlpha,
       shellGradientWhiteBlendAmount:
           ui.lerpDouble(
             shellGradientWhiteBlendAmount,
