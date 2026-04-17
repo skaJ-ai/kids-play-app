@@ -67,34 +67,103 @@ void main() {
     expect(taps, 2);
   });
 
-  testWidgets('uses calmer regular and compact densities by default', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(
-      _buildTestApp(
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ToyButton(
-              key: const Key('regular-button'),
-              label: '기본 버튼',
-              onPressed: () {},
-            ),
-            const SizedBox(height: 12),
-            ToyButton(
-              key: const Key('compact-button'),
-              label: '조밀한 버튼',
-              density: ToyButtonDensity.compact,
-              onPressed: () {},
-            ),
-          ],
+  testWidgets(
+    'reads regular and compact default heights from kid theme tokens',
+    (WidgetTester tester) async {
+      final customLayout = KidLayoutTheme(
+        button: KidButtonTokens(
+          regular: KidButtonDensityTokens(height: 72),
+          compact: KidButtonDensityTokens(height: 48),
         ),
-      ),
-    );
+        panel: KidLayoutTheme.defaults.panel,
+      );
 
-    expect(_buttonHeight(tester, find.byKey(const Key('regular-button'))), 64);
-    expect(_buttonHeight(tester, find.byKey(const Key('compact-button'))), 56);
-  });
+      await tester.pumpWidget(
+        _buildTestApp(
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ToyButton(
+                key: const Key('regular-button'),
+                label: '기본 버튼',
+                onPressed: () {},
+              ),
+              const SizedBox(height: 12),
+              ToyButton(
+                key: const Key('compact-button'),
+                label: '조밀한 버튼',
+                density: ToyButtonDensity.compact,
+                onPressed: () {},
+              ),
+            ],
+          ),
+          theme: buildKidTheme().copyWith(extensions: [customLayout]),
+        ),
+      );
+
+      expect(
+        _buttonHeight(tester, find.byKey(const Key('regular-button'))),
+        customLayout.button.regular.height,
+      );
+      expect(
+        _buttonHeight(tester, find.byKey(const Key('compact-button'))),
+        customLayout.button.compact.height,
+      );
+    },
+  );
+
+  testWidgets(
+    'uses density semantics for compact styling when theme heights are overridden',
+    (WidgetTester tester) async {
+      final customLayout = KidLayoutTheme(
+        button: KidButtonTokens(
+          regular: KidButtonDensityTokens(height: 48),
+          compact: KidButtonDensityTokens(height: 72),
+        ),
+        panel: KidLayoutTheme.defaults.panel,
+      );
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ToyButton(
+                key: const Key('regular-density-button'),
+                label: '기본 밀도',
+                icon: Icons.play_arrow_rounded,
+                onPressed: () {},
+              ),
+              const SizedBox(height: 12),
+              ToyButton(
+                key: const Key('compact-density-button'),
+                label: '조밀 밀도',
+                density: ToyButtonDensity.compact,
+                icon: Icons.play_arrow_rounded,
+                onPressed: () {},
+              ),
+            ],
+          ),
+          theme: buildKidTheme().copyWith(extensions: [customLayout]),
+        ),
+      );
+
+      expect(
+        _buttonLabelFontSize(
+          tester,
+          find.byKey(const Key('regular-density-button')),
+        ),
+        22,
+      );
+      expect(
+        _buttonLabelFontSize(
+          tester,
+          find.byKey(const Key('compact-density-button')),
+        ),
+        20,
+      );
+    },
+  );
 
   testWidgets('keeps explicit height overrides ahead of density presets', (
     WidgetTester tester,
@@ -175,9 +244,9 @@ void main() {
   });
 }
 
-Widget _buildTestApp(Widget child) {
+Widget _buildTestApp(Widget child, {ThemeData? theme}) {
   return MaterialApp(
-    theme: buildKidTheme(),
+    theme: theme ?? buildKidTheme(),
     home: Scaffold(body: Center(child: child)),
   );
 }
@@ -194,6 +263,17 @@ double _buttonHeight(WidgetTester tester, Finder finder) {
   );
 
   return sizedBox.height!;
+}
+
+double? _buttonLabelFontSize(WidgetTester tester, Finder finder) {
+  final labelFinder = find.descendant(
+    of: finder,
+    matching: find.byWidgetPredicate(
+      (Widget widget) => widget is Text && widget.data != null,
+    ),
+  );
+  final label = tester.widget<Text>(labelFinder.first);
+  return label.style?.fontSize;
 }
 
 BoxDecoration _buttonDecoration(WidgetTester tester, Finder finder) {

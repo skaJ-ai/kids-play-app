@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 
 class KidPalette {
@@ -38,7 +40,58 @@ class KidShadows {
   ];
 }
 
+enum ToyButtonDensity { regular, compact }
+
 enum ToyPanelDensity { regular, compact, tight }
+
+@immutable
+class KidButtonDensityTokens {
+  const KidButtonDensityTokens({required this.height});
+
+  final double height;
+
+  KidButtonDensityTokens copyWith({double? height}) {
+    return KidButtonDensityTokens(height: height ?? this.height);
+  }
+
+  KidButtonDensityTokens lerp(KidButtonDensityTokens other, double t) {
+    return KidButtonDensityTokens(
+      height: ui.lerpDouble(height, other.height, t) ?? height,
+    );
+  }
+}
+
+@immutable
+class KidButtonTokens {
+  const KidButtonTokens({required this.regular, required this.compact});
+
+  final KidButtonDensityTokens regular;
+  final KidButtonDensityTokens compact;
+
+  KidButtonDensityTokens forDensity(ToyButtonDensity density) {
+    return switch (density) {
+      ToyButtonDensity.regular => regular,
+      ToyButtonDensity.compact => compact,
+    };
+  }
+
+  KidButtonTokens copyWith({
+    KidButtonDensityTokens? regular,
+    KidButtonDensityTokens? compact,
+  }) {
+    return KidButtonTokens(
+      regular: regular ?? this.regular,
+      compact: compact ?? this.compact,
+    );
+  }
+
+  KidButtonTokens lerp(KidButtonTokens other, double t) {
+    return KidButtonTokens(
+      regular: regular.lerp(other.regular, t),
+      compact: compact.lerp(other.compact, t),
+    );
+  }
+}
 
 @immutable
 class KidPanelDensityTokens {
@@ -46,6 +99,61 @@ class KidPanelDensityTokens {
 
   final EdgeInsets padding;
   final double radius;
+
+  KidPanelDensityTokens copyWith({EdgeInsets? padding, double? radius}) {
+    return KidPanelDensityTokens(
+      padding: padding ?? this.padding,
+      radius: radius ?? this.radius,
+    );
+  }
+
+  KidPanelDensityTokens lerp(KidPanelDensityTokens other, double t) {
+    return KidPanelDensityTokens(
+      padding: EdgeInsets.lerp(padding, other.padding, t) ?? padding,
+      radius: ui.lerpDouble(radius, other.radius, t) ?? radius,
+    );
+  }
+}
+
+@immutable
+class KidPanelThemeTokens {
+  const KidPanelThemeTokens({
+    required this.regular,
+    required this.compact,
+    required this.tight,
+  });
+
+  final KidPanelDensityTokens regular;
+  final KidPanelDensityTokens compact;
+  final KidPanelDensityTokens tight;
+
+  KidPanelDensityTokens forDensity(ToyPanelDensity density) {
+    return switch (density) {
+      ToyPanelDensity.regular => regular,
+      ToyPanelDensity.compact => compact,
+      ToyPanelDensity.tight => tight,
+    };
+  }
+
+  KidPanelThemeTokens copyWith({
+    KidPanelDensityTokens? regular,
+    KidPanelDensityTokens? compact,
+    KidPanelDensityTokens? tight,
+  }) {
+    return KidPanelThemeTokens(
+      regular: regular ?? this.regular,
+      compact: compact ?? this.compact,
+      tight: tight ?? this.tight,
+    );
+  }
+
+  KidPanelThemeTokens lerp(KidPanelThemeTokens other, double t) {
+    return KidPanelThemeTokens(
+      regular: regular.lerp(other.regular, t),
+      compact: compact.lerp(other.compact, t),
+      tight: tight.lerp(other.tight, t),
+    );
+  }
 }
 
 class KidPanelTokens {
@@ -75,6 +183,54 @@ class KidPanelTokens {
   }
 }
 
+@immutable
+class KidLayoutTheme extends ThemeExtension<KidLayoutTheme> {
+  const KidLayoutTheme({required this.button, required this.panel});
+
+  static const defaults = KidLayoutTheme(
+    button: KidButtonTokens(
+      regular: KidButtonDensityTokens(height: 64),
+      compact: KidButtonDensityTokens(height: 56),
+    ),
+    panel: KidPanelThemeTokens(
+      regular: KidPanelTokens.regular,
+      compact: KidPanelTokens.compact,
+      tight: KidPanelTokens.tight,
+    ),
+  );
+
+  final KidButtonTokens button;
+  final KidPanelThemeTokens panel;
+
+  @override
+  KidLayoutTheme copyWith({
+    KidButtonTokens? button,
+    KidPanelThemeTokens? panel,
+  }) {
+    return KidLayoutTheme(
+      button: button ?? this.button,
+      panel: panel ?? this.panel,
+    );
+  }
+
+  @override
+  KidLayoutTheme lerp(ThemeExtension<KidLayoutTheme>? other, double t) {
+    if (other is! KidLayoutTheme) {
+      return this;
+    }
+
+    return KidLayoutTheme(
+      button: button.lerp(other.button, t),
+      panel: panel.lerp(other.panel, t),
+    );
+  }
+}
+
+extension KidThemeDataX on ThemeData {
+  KidLayoutTheme get kidLayout =>
+      extension<KidLayoutTheme>() ?? KidLayoutTheme.defaults;
+}
+
 ThemeData buildKidTheme() {
   final base = ThemeData(
     useMaterial3: true,
@@ -95,6 +251,7 @@ ThemeData buildKidTheme() {
 
   return base.copyWith(
     colorScheme: colorScheme,
+    extensions: const <ThemeExtension<dynamic>>[KidLayoutTheme.defaults],
     scaffoldBackgroundColor: KidPalette.skyTop,
     dividerColor: KidPalette.stroke,
     splashColor: KidPalette.white.withValues(alpha: 0.14),

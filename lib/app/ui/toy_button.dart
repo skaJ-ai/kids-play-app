@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 
+export 'kid_theme.dart' show ToyButtonDensity;
+
 import 'kid_theme.dart';
 import 'tap_cooldown.dart';
 
 enum ToyButtonTone { primary, secondary }
 
-enum ToyButtonDensity { regular, compact }
-
 extension on ToyButtonDensity {
-  double get height => switch (this) {
-    ToyButtonDensity.regular => 64,
-    ToyButtonDensity.compact => 56,
-  };
+  KidButtonDensityTokens resolve(KidLayoutTheme layout) {
+    return layout.button.forDensity(this);
+  }
 }
 
 class ToyButton extends StatelessWidget {
@@ -42,8 +41,12 @@ class ToyButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final enabled = onPressed != null;
-    final effectiveHeight = height ?? density.height;
-    final compact = effectiveHeight <= ToyButtonDensity.compact.height;
+    final layout = Theme.of(context).kidLayout;
+    final densityTokens = density.resolve(layout);
+    final effectiveHeight = height ?? densityTokens.height;
+    final compact = height != null
+        ? effectiveHeight <= layout.button.compact.height
+        : density == ToyButtonDensity.compact;
     final borderRadius = BorderRadius.circular(effectiveHeight / 2);
     final primaryTone = tone == ToyButtonTone.primary;
     final baseColors = primaryTone

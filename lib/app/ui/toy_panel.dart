@@ -22,7 +22,7 @@ class ToyPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final densityTokens = KidPanelTokens.forDensity(density);
+    final densityTokens = Theme.of(context).kidLayout.panel.forDensity(density);
     final resolvedPadding = padding ?? densityTokens.padding;
     final resolvedRadius = radius ?? densityTokens.radius;
     final resolvedBorder = borderColor.withValues(

@@ -7,37 +7,58 @@ const _panelChildKey = ValueKey<String>('toy-panel-child');
 
 void main() {
   group('ToyPanel density', () {
-    testWidgets('keeps regular density defaults by default', (
-      WidgetTester tester,
-    ) async {
-      await _pumpToyPanel(tester);
+    testWidgets(
+      'reads regular compact and tight defaults from kid theme tokens',
+      (WidgetTester tester) async {
+        final customLayout = KidLayoutTheme(
+          button: KidLayoutTheme.defaults.button,
+          panel: KidPanelThemeTokens(
+            regular: KidPanelDensityTokens(
+              padding: EdgeInsets.all(30),
+              radius: 40,
+            ),
+            compact: KidPanelDensityTokens(
+              padding: EdgeInsets.all(18),
+              radius: 36,
+            ),
+            tight: KidPanelDensityTokens(
+              padding: EdgeInsets.all(8),
+              radius: 20,
+            ),
+          ),
+        );
+        final theme = buildKidTheme().copyWith(extensions: [customLayout]);
 
-      _expectResolvedShell(
-        tester,
-        expectedPadding: const EdgeInsets.all(24),
-        expectedRadius: 32,
-      );
-    });
+        await _pumpToyPanel(tester, theme: theme);
+        _expectResolvedShell(
+          tester,
+          expectedPadding: customLayout.panel.regular.padding,
+          expectedRadius: customLayout.panel.regular.radius,
+        );
 
-    testWidgets('uses compact density defaults', (WidgetTester tester) async {
-      await _pumpToyPanel(tester, density: ToyPanelDensity.compact);
+        await _pumpToyPanel(
+          tester,
+          density: ToyPanelDensity.compact,
+          theme: theme,
+        );
+        _expectResolvedShell(
+          tester,
+          expectedPadding: customLayout.panel.compact.padding,
+          expectedRadius: customLayout.panel.compact.radius,
+        );
 
-      _expectResolvedShell(
-        tester,
-        expectedPadding: const EdgeInsets.all(14),
-        expectedRadius: 32,
-      );
-    });
-
-    testWidgets('uses tight density defaults', (WidgetTester tester) async {
-      await _pumpToyPanel(tester, density: ToyPanelDensity.tight);
-
-      _expectResolvedShell(
-        tester,
-        expectedPadding: const EdgeInsets.all(12),
-        expectedRadius: 24,
-      );
-    });
+        await _pumpToyPanel(
+          tester,
+          density: ToyPanelDensity.tight,
+          theme: theme,
+        );
+        _expectResolvedShell(
+          tester,
+          expectedPadding: customLayout.panel.tight.padding,
+          expectedRadius: customLayout.panel.tight.radius,
+        );
+      },
+    );
 
     testWidgets('lets explicit padding and radius override density', (
       WidgetTester tester,
@@ -64,8 +85,9 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
+      MaterialApp(
+        theme: buildKidTheme(),
+        home: const Scaffold(
           body: Center(
             child: ToyPanel(child: SizedBox(width: 120, height: 80)),
           ),
@@ -100,9 +122,11 @@ Future<void> _pumpToyPanel(
   ToyPanelDensity density = ToyPanelDensity.regular,
   EdgeInsetsGeometry? padding,
   double? radius,
+  ThemeData? theme,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
+      theme: theme ?? buildKidTheme(),
       home: Scaffold(
         body: Center(
           child: ToyPanel(
