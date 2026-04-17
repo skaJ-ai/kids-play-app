@@ -159,6 +159,46 @@ void main() {
         expectedBorderColor: customBorderColor,
       );
     });
+
+    testWidgets('reads chrome alpha overrides from kid theme tokens', (
+      WidgetTester tester,
+    ) async {
+      const customBorderColor = Color(0xFF345678);
+      final customLayout = KidLayoutTheme(
+        button: KidLayoutTheme.defaults.button,
+        panel: KidLayoutTheme.defaults.panel,
+        chrome: const KidChromeTokens(
+          button: KidButtonChromeTokens(),
+          panel: KidPanelChromeTokens(
+            strokeBorderAlpha: 0.88,
+            customBorderAlpha: 0.43,
+            highlightAlpha: 0.31,
+            airyBackgroundAlpha: 0.66,
+          ),
+        ),
+      );
+
+      await _pumpToyPanel(
+        tester,
+        tone: ToyPanelTone.airy,
+        borderColor: customBorderColor,
+        theme: buildKidTheme().copyWith(extensions: [customLayout]),
+      );
+
+      final decoration = _panelDecoration(tester, find.byType(ToyPanel));
+      final gradient = decoration.gradient! as LinearGradient;
+      final border = decoration.border! as Border;
+      final highlight = tester.widget<Container>(_panelHighlightFinder());
+      final highlightGradient =
+          (highlight.decoration! as BoxDecoration).gradient! as LinearGradient;
+
+      expect(gradient.colors.last, KidPalette.white.withValues(alpha: 0.66));
+      expect(border.top.color, customBorderColor.withValues(alpha: 0.43));
+      expect(
+        highlightGradient.colors.first,
+        KidPalette.white.withValues(alpha: 0.31),
+      );
+    });
   });
 
   testWidgets('keeps the shadowed shell outside the clipped inner layer', (
@@ -318,4 +358,20 @@ BoxDecoration _panelDecoration(WidgetTester tester, Finder finder) {
   );
 
   return decoratedBox.decoration as BoxDecoration;
+}
+
+Finder _panelHighlightFinder() {
+  return find.descendant(
+    of: find.byType(ToyPanel),
+    matching: find.byWidgetPredicate((Widget widget) {
+      if (widget is! Container) {
+        return false;
+      }
+
+      final decoration = widget.decoration;
+      return decoration is BoxDecoration &&
+          decoration.gradient != null &&
+          decoration.border == null;
+    }),
+  );
 }

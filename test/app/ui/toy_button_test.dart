@@ -322,6 +322,58 @@ void main() {
     );
   });
 
+  testWidgets('reads chrome alpha overrides from kid theme tokens', (
+    WidgetTester tester,
+  ) async {
+    final customLayout = KidLayoutTheme(
+      button: KidLayoutTheme.defaults.button,
+      panel: KidLayoutTheme.defaults.panel,
+      chrome: const KidChromeTokens(
+        button: KidButtonChromeTokens(
+          primaryBorderAlpha: 0.41,
+          primaryIconChipAlpha: 0.59,
+          primaryIconChipBorderAlpha: 0.33,
+          primaryHighlightAlpha: 0.67,
+          secondaryIconChipAlpha: 0.88,
+          secondaryHighlightAlpha: 0.14,
+        ),
+        panel: KidPanelChromeTokens(),
+      ),
+    );
+
+    await tester.pumpWidget(
+      _buildTestApp(
+        ToyButton(
+          label: '토큰 버튼',
+          icon: Icons.play_arrow_rounded,
+          onPressed: () {},
+        ),
+        theme: buildKidTheme().copyWith(extensions: [customLayout]),
+      ),
+    );
+
+    final decoration = _buttonDecoration(tester, find.byType(ToyButton));
+    final border = decoration.border! as Border;
+    final chip = tester.widget<Container>(
+      _buttonIconChipFinder(find.byType(ToyButton), Icons.play_arrow_rounded),
+    );
+    final chipDecoration = chip.decoration! as BoxDecoration;
+    final chipBorder = chipDecoration.border! as Border;
+    final highlight = tester.widget<Container>(
+      _buttonHighlightFinder(find.byType(ToyButton)),
+    );
+    final highlightGradient =
+        (highlight.decoration! as BoxDecoration).gradient! as LinearGradient;
+
+    expect(border.top.color, KidPalette.white.withValues(alpha: 0.41));
+    expect(chipDecoration.color, KidPalette.white.withValues(alpha: 0.59));
+    expect(chipBorder.top.color, KidPalette.white.withValues(alpha: 0.33));
+    expect(
+      highlightGradient.colors.first,
+      KidPalette.white.withValues(alpha: 0.67),
+    );
+  });
+
   testWidgets('renders a calmer secondary tone with surface styling', (
     WidgetTester tester,
   ) async {

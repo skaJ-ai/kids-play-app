@@ -28,19 +28,23 @@ class ToyPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final densityTokens = Theme.of(context).kidLayout.panel.forDensity(density);
+    final layout = Theme.of(context).kidLayout;
+    final densityTokens = layout.panel.forDensity(density);
+    final chromeTokens = layout.chrome.panel;
     final resolvedPadding = padding ?? densityTokens.padding;
     final resolvedRadius = radius ?? densityTokens.radius;
     final resolvedBorderWidth = densityTokens.borderWidth;
     final highlightHeight = densityTokens.highlightHeight;
     final highlightHorizontalInset = densityTokens.highlightHorizontalInset;
     final resolvedTone = tone ?? ToyPanelTone.surface;
-    final toneColors = _toneColorsFor(resolvedTone);
+    final toneColors = _toneColorsFor(resolvedTone, chromeTokens);
     final resolvedBackgroundColor =
         backgroundColor ?? toneColors.backgroundColor;
     final resolvedBorderColor = borderColor ?? toneColors.borderColor;
     final resolvedBorder = resolvedBorderColor.withValues(
-      alpha: resolvedBorderColor == KidPalette.stroke ? 0.88 : 0.72,
+      alpha: resolvedBorderColor == KidPalette.stroke
+          ? chromeTokens.strokeBorderAlpha
+          : chromeTokens.customBorderAlpha,
     );
 
     final borderRadius = BorderRadius.circular(resolvedRadius);
@@ -76,7 +80,9 @@ class ToyPanel extends StatelessWidget {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        KidPalette.white.withValues(alpha: 0.28),
+                        KidPalette.white.withValues(
+                          alpha: chromeTokens.highlightAlpha,
+                        ),
                         KidPalette.white.withValues(alpha: 0),
                       ],
                     ),
@@ -102,14 +108,19 @@ class _ToyPanelToneColors {
   final Color borderColor;
 }
 
-_ToyPanelToneColors _toneColorsFor(ToyPanelTone tone) {
+_ToyPanelToneColors _toneColorsFor(
+  ToyPanelTone tone,
+  KidPanelChromeTokens chromeTokens,
+) {
   return switch (tone) {
     ToyPanelTone.surface => const _ToyPanelToneColors(
       backgroundColor: KidPalette.cream,
       borderColor: KidPalette.stroke,
     ),
     ToyPanelTone.airy => _ToyPanelToneColors(
-      backgroundColor: KidPalette.white.withValues(alpha: 0.94),
+      backgroundColor: KidPalette.white.withValues(
+        alpha: chromeTokens.airyBackgroundAlpha,
+      ),
       borderColor: KidPalette.stroke,
     ),
     ToyPanelTone.warm => const _ToyPanelToneColors(

@@ -50,6 +50,23 @@ void main() {
     expect(layout.panel.tight.insetRadius, 16);
   });
 
+  test('buildKidTheme exposes the kid chrome token defaults', () {
+    final theme = buildKidTheme();
+    final layout = theme.extension<KidLayoutTheme>();
+
+    expect(layout, isNotNull);
+    expect(layout!.chrome.button.primaryBorderAlpha, 0.16);
+    expect(layout.chrome.button.primaryIconChipAlpha, 0.18);
+    expect(layout.chrome.button.primaryIconChipBorderAlpha, 0.12);
+    expect(layout.chrome.button.primaryHighlightAlpha, 0.22);
+    expect(layout.chrome.button.secondaryIconChipAlpha, 0.88);
+    expect(layout.chrome.button.secondaryHighlightAlpha, 0.14);
+    expect(layout.chrome.panel.strokeBorderAlpha, 0.88);
+    expect(layout.chrome.panel.customBorderAlpha, 0.72);
+    expect(layout.chrome.panel.highlightAlpha, 0.28);
+    expect(layout.chrome.panel.airyBackgroundAlpha, 0.94);
+  });
+
   test('buildKidTheme defines a calmer supporting label hierarchy', () {
     final theme = buildKidTheme();
     final textTheme = theme.textTheme;

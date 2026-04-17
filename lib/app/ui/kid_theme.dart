@@ -269,8 +269,168 @@ class KidPanelTokens {
 }
 
 @immutable
+class KidButtonChromeTokens {
+  const KidButtonChromeTokens({
+    this.primaryBorderAlpha = 0.16,
+    this.primaryIconChipAlpha = 0.18,
+    this.primaryIconChipBorderAlpha = 0.12,
+    this.primaryHighlightAlpha = 0.22,
+    this.secondaryIconChipAlpha = 0.88,
+    this.secondaryHighlightAlpha = 0.14,
+  });
+
+  final double primaryBorderAlpha;
+  final double primaryIconChipAlpha;
+  final double primaryIconChipBorderAlpha;
+  final double primaryHighlightAlpha;
+  final double secondaryIconChipAlpha;
+  final double secondaryHighlightAlpha;
+
+  KidButtonChromeTokens copyWith({
+    double? primaryBorderAlpha,
+    double? primaryIconChipAlpha,
+    double? primaryIconChipBorderAlpha,
+    double? primaryHighlightAlpha,
+    double? secondaryIconChipAlpha,
+    double? secondaryHighlightAlpha,
+  }) {
+    return KidButtonChromeTokens(
+      primaryBorderAlpha: primaryBorderAlpha ?? this.primaryBorderAlpha,
+      primaryIconChipAlpha: primaryIconChipAlpha ?? this.primaryIconChipAlpha,
+      primaryIconChipBorderAlpha:
+          primaryIconChipBorderAlpha ?? this.primaryIconChipBorderAlpha,
+      primaryHighlightAlpha:
+          primaryHighlightAlpha ?? this.primaryHighlightAlpha,
+      secondaryIconChipAlpha:
+          secondaryIconChipAlpha ?? this.secondaryIconChipAlpha,
+      secondaryHighlightAlpha:
+          secondaryHighlightAlpha ?? this.secondaryHighlightAlpha,
+    );
+  }
+
+  KidButtonChromeTokens lerp(KidButtonChromeTokens other, double t) {
+    return KidButtonChromeTokens(
+      primaryBorderAlpha:
+          ui.lerpDouble(primaryBorderAlpha, other.primaryBorderAlpha, t) ??
+          primaryBorderAlpha,
+      primaryIconChipAlpha:
+          ui.lerpDouble(primaryIconChipAlpha, other.primaryIconChipAlpha, t) ??
+          primaryIconChipAlpha,
+      primaryIconChipBorderAlpha:
+          ui.lerpDouble(
+            primaryIconChipBorderAlpha,
+            other.primaryIconChipBorderAlpha,
+            t,
+          ) ??
+          primaryIconChipBorderAlpha,
+      primaryHighlightAlpha:
+          ui.lerpDouble(
+            primaryHighlightAlpha,
+            other.primaryHighlightAlpha,
+            t,
+          ) ??
+          primaryHighlightAlpha,
+      secondaryIconChipAlpha:
+          ui.lerpDouble(
+            secondaryIconChipAlpha,
+            other.secondaryIconChipAlpha,
+            t,
+          ) ??
+          secondaryIconChipAlpha,
+      secondaryHighlightAlpha:
+          ui.lerpDouble(
+            secondaryHighlightAlpha,
+            other.secondaryHighlightAlpha,
+            t,
+          ) ??
+          secondaryHighlightAlpha,
+    );
+  }
+}
+
+@immutable
+class KidPanelChromeTokens {
+  const KidPanelChromeTokens({
+    this.strokeBorderAlpha = 0.88,
+    this.customBorderAlpha = 0.72,
+    this.highlightAlpha = 0.28,
+    this.airyBackgroundAlpha = 0.94,
+  });
+
+  final double strokeBorderAlpha;
+  final double customBorderAlpha;
+  final double highlightAlpha;
+  final double airyBackgroundAlpha;
+
+  KidPanelChromeTokens copyWith({
+    double? strokeBorderAlpha,
+    double? customBorderAlpha,
+    double? highlightAlpha,
+    double? airyBackgroundAlpha,
+  }) {
+    return KidPanelChromeTokens(
+      strokeBorderAlpha: strokeBorderAlpha ?? this.strokeBorderAlpha,
+      customBorderAlpha: customBorderAlpha ?? this.customBorderAlpha,
+      highlightAlpha: highlightAlpha ?? this.highlightAlpha,
+      airyBackgroundAlpha: airyBackgroundAlpha ?? this.airyBackgroundAlpha,
+    );
+  }
+
+  KidPanelChromeTokens lerp(KidPanelChromeTokens other, double t) {
+    return KidPanelChromeTokens(
+      strokeBorderAlpha:
+          ui.lerpDouble(strokeBorderAlpha, other.strokeBorderAlpha, t) ??
+          strokeBorderAlpha,
+      customBorderAlpha:
+          ui.lerpDouble(customBorderAlpha, other.customBorderAlpha, t) ??
+          customBorderAlpha,
+      highlightAlpha:
+          ui.lerpDouble(highlightAlpha, other.highlightAlpha, t) ??
+          highlightAlpha,
+      airyBackgroundAlpha:
+          ui.lerpDouble(airyBackgroundAlpha, other.airyBackgroundAlpha, t) ??
+          airyBackgroundAlpha,
+    );
+  }
+}
+
+@immutable
+class KidChromeTokens {
+  const KidChromeTokens({
+    this.button = const KidButtonChromeTokens(),
+    this.panel = const KidPanelChromeTokens(),
+  });
+
+  static const defaults = KidChromeTokens();
+
+  final KidButtonChromeTokens button;
+  final KidPanelChromeTokens panel;
+
+  KidChromeTokens copyWith({
+    KidButtonChromeTokens? button,
+    KidPanelChromeTokens? panel,
+  }) {
+    return KidChromeTokens(
+      button: button ?? this.button,
+      panel: panel ?? this.panel,
+    );
+  }
+
+  KidChromeTokens lerp(KidChromeTokens other, double t) {
+    return KidChromeTokens(
+      button: button.lerp(other.button, t),
+      panel: panel.lerp(other.panel, t),
+    );
+  }
+}
+
+@immutable
 class KidLayoutTheme extends ThemeExtension<KidLayoutTheme> {
-  const KidLayoutTheme({required this.button, required this.panel});
+  const KidLayoutTheme({
+    required this.button,
+    required this.panel,
+    this.chrome = KidChromeTokens.defaults,
+  });
 
   static const defaults = KidLayoutTheme(
     button: KidButtonTokens(
@@ -327,16 +487,23 @@ class KidLayoutTheme extends ThemeExtension<KidLayoutTheme> {
         insetRadius: 16,
       ),
     ),
+    chrome: KidChromeTokens.defaults,
   );
 
   final KidButtonTokens button;
   final KidPanelTokens panel;
+  final KidChromeTokens chrome;
 
   @override
-  KidLayoutTheme copyWith({KidButtonTokens? button, KidPanelTokens? panel}) {
+  KidLayoutTheme copyWith({
+    KidButtonTokens? button,
+    KidPanelTokens? panel,
+    KidChromeTokens? chrome,
+  }) {
     return KidLayoutTheme(
       button: button ?? this.button,
       panel: panel ?? this.panel,
+      chrome: chrome ?? this.chrome,
     );
   }
 
@@ -349,6 +516,7 @@ class KidLayoutTheme extends ThemeExtension<KidLayoutTheme> {
     return KidLayoutTheme(
       button: button.lerp(other.button, t),
       panel: panel.lerp(other.panel, t),
+      chrome: chrome.lerp(other.chrome, t),
     );
   }
 }

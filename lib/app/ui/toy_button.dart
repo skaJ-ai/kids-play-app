@@ -43,6 +43,7 @@ class ToyButton extends StatelessWidget {
     final enabled = onPressed != null;
     final layout = Theme.of(context).kidLayout;
     final densityTokens = density.resolve(layout);
+    final chromeTokens = layout.chrome.button;
     final effectiveHeight = height ?? densityTokens.height;
     final borderRadius = BorderRadius.circular(effectiveHeight / 2);
     final primaryTone = tone == ToyButtonTone.primary;
@@ -62,14 +63,18 @@ class ToyButton extends StatelessWidget {
               .toList(growable: false);
     final foregroundColor = primaryTone ? KidPalette.white : KidPalette.navy;
     final borderColor = primaryTone
-        ? KidPalette.white.withValues(alpha: 0.16)
+        ? KidPalette.white.withValues(alpha: chromeTokens.primaryBorderAlpha)
         : KidPalette.stroke;
     final boxShadow = primaryTone ? KidShadows.button : KidShadows.buttonSoft;
     final chipColor = primaryTone
-        ? KidPalette.white.withValues(alpha: 0.18)
-        : KidPalette.white.withValues(alpha: 0.88);
+        ? KidPalette.white.withValues(alpha: chromeTokens.primaryIconChipAlpha)
+        : KidPalette.white.withValues(
+            alpha: chromeTokens.secondaryIconChipAlpha,
+          );
     final chipBorderColor = primaryTone
-        ? KidPalette.white.withValues(alpha: 0.12)
+        ? KidPalette.white.withValues(
+            alpha: chromeTokens.primaryIconChipBorderAlpha,
+          )
         : KidPalette.stroke;
     final chipSize = densityTokens.iconChipSize;
     final iconSize = densityTokens.iconSize;
@@ -117,7 +122,9 @@ class ToyButton extends StatelessWidget {
                       end: Alignment.bottomCenter,
                       colors: [
                         KidPalette.white.withValues(
-                          alpha: primaryTone ? 0.22 : 0.14,
+                          alpha: primaryTone
+                              ? chromeTokens.primaryHighlightAlpha
+                              : chromeTokens.secondaryHighlightAlpha,
                         ),
                         KidPalette.white.withValues(alpha: 0),
                       ],
