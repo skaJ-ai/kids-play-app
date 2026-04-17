@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+export 'kid_theme.dart' show ToyPanelDensity;
+
 import 'kid_theme.dart';
 
 class ToyPanel extends StatelessWidget {
@@ -25,6 +27,9 @@ class ToyPanel extends StatelessWidget {
     final densityTokens = Theme.of(context).kidLayout.panel.forDensity(density);
     final resolvedPadding = padding ?? densityTokens.padding;
     final resolvedRadius = radius ?? densityTokens.radius;
+    final resolvedBorderWidth = densityTokens.borderWidth;
+    final highlightHeight = densityTokens.highlightHeight;
+    final highlightHorizontalInset = densityTokens.highlightHorizontalInset;
     final resolvedBorder = borderColor.withValues(
       alpha: borderColor == KidPalette.stroke ? 0.88 : 0.72,
     );
@@ -42,7 +47,7 @@ class ToyPanel extends StatelessWidget {
           ],
         ),
         borderRadius: borderRadius,
-        border: Border.all(color: resolvedBorder, width: 1.5),
+        border: Border.all(color: resolvedBorder, width: resolvedBorderWidth),
         boxShadow: KidShadows.panel,
       ),
       child: ClipRRect(
@@ -51,11 +56,11 @@ class ToyPanel extends StatelessWidget {
           children: [
             Positioned(
               top: 0,
-              left: 20,
-              right: 20,
+              left: highlightHorizontalInset,
+              right: highlightHorizontalInset,
               child: IgnorePointer(
                 child: Container(
-                  height: 18,
+                  height: highlightHeight,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(999),
                     gradient: LinearGradient(

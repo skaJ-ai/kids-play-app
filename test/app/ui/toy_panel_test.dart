@@ -12,18 +12,27 @@ void main() {
       (WidgetTester tester) async {
         final customLayout = KidLayoutTheme(
           button: KidLayoutTheme.defaults.button,
-          panel: KidPanelThemeTokens(
+          panel: KidPanelTokens(
             regular: KidPanelDensityTokens(
               padding: EdgeInsets.all(30),
               radius: 40,
+              borderWidth: 2,
+              highlightHeight: 22,
+              highlightHorizontalInset: 26,
             ),
             compact: KidPanelDensityTokens(
               padding: EdgeInsets.all(18),
               radius: 36,
+              borderWidth: 1.25,
+              highlightHeight: 14,
+              highlightHorizontalInset: 12,
             ),
             tight: KidPanelDensityTokens(
               padding: EdgeInsets.all(8),
               radius: 20,
+              borderWidth: 0.75,
+              highlightHeight: 10,
+              highlightHorizontalInset: 6,
             ),
           ),
         );
@@ -34,6 +43,10 @@ void main() {
           tester,
           expectedPadding: customLayout.panel.regular.padding,
           expectedRadius: customLayout.panel.regular.radius,
+          expectedBorderWidth: customLayout.panel.regular.borderWidth,
+          expectedHighlightHeight: customLayout.panel.regular.highlightHeight,
+          expectedHighlightHorizontalInset:
+              customLayout.panel.regular.highlightHorizontalInset,
         );
 
         await _pumpToyPanel(
@@ -45,6 +58,10 @@ void main() {
           tester,
           expectedPadding: customLayout.panel.compact.padding,
           expectedRadius: customLayout.panel.compact.radius,
+          expectedBorderWidth: customLayout.panel.compact.borderWidth,
+          expectedHighlightHeight: customLayout.panel.compact.highlightHeight,
+          expectedHighlightHorizontalInset:
+              customLayout.panel.compact.highlightHorizontalInset,
         );
 
         await _pumpToyPanel(
@@ -56,6 +73,10 @@ void main() {
           tester,
           expectedPadding: customLayout.panel.tight.padding,
           expectedRadius: customLayout.panel.tight.radius,
+          expectedBorderWidth: customLayout.panel.tight.borderWidth,
+          expectedHighlightHeight: customLayout.panel.tight.highlightHeight,
+          expectedHighlightHorizontalInset:
+              customLayout.panel.tight.highlightHorizontalInset,
         );
       },
     );
@@ -65,6 +86,7 @@ void main() {
     ) async {
       const customPadding = EdgeInsets.symmetric(horizontal: 10, vertical: 8);
       const customRadius = 40.0;
+      final defaults = KidLayoutTheme.defaults.panel.tight;
 
       await _pumpToyPanel(
         tester,
@@ -77,6 +99,9 @@ void main() {
         tester,
         expectedPadding: customPadding,
         expectedRadius: customRadius,
+        expectedBorderWidth: defaults.borderWidth,
+        expectedHighlightHeight: defaults.highlightHeight,
+        expectedHighlightHorizontalInset: defaults.highlightHorizontalInset,
       );
     });
   });
@@ -145,6 +170,9 @@ void _expectResolvedShell(
   WidgetTester tester, {
   required EdgeInsetsGeometry expectedPadding,
   required double expectedRadius,
+  required double expectedBorderWidth,
+  required double expectedHighlightHeight,
+  required double expectedHighlightHorizontalInset,
 }) {
   final panelFinder = find.byType(ToyPanel);
   final paddingFinder = find.ancestor(
@@ -155,13 +183,55 @@ void _expectResolvedShell(
     of: panelFinder,
     matching: find.byType(ClipRRect),
   );
+  final decoration = _panelDecoration(tester, panelFinder);
+  final border = decoration.border! as Border;
+  final highlightFinder = find.descendant(
+    of: panelFinder,
+    matching: find.byWidgetPredicate(
+      (Widget widget) =>
+          widget is Container && widget.decoration is BoxDecoration,
+    ),
+  );
+  final highlightPositionedFinder = find.ancestor(
+    of: highlightFinder,
+    matching: find.byType(Positioned),
+  );
 
   expect(paddingFinder, findsOneWidget);
   expect(clipFinder, findsOneWidget);
+  expect(highlightFinder, findsOneWidget);
+  expect(highlightPositionedFinder, findsOneWidget);
 
   final paddingWidget = tester.widget<Padding>(paddingFinder);
   final clipWidget = tester.widget<ClipRRect>(clipFinder);
+  final highlightPositioned = tester.widget<Positioned>(
+    highlightPositionedFinder,
+  );
 
   expect(paddingWidget.padding, expectedPadding);
   expect(clipWidget.borderRadius, BorderRadius.circular(expectedRadius));
+  expect(border.top.width, expectedBorderWidth);
+  expect(tester.getSize(highlightFinder).height, expectedHighlightHeight);
+  expect(highlightPositioned.left, expectedHighlightHorizontalInset);
+  expect(highlightPositioned.right, expectedHighlightHorizontalInset);
+}
+
+BoxDecoration _panelDecoration(WidgetTester tester, Finder finder) {
+  final decoratedBox = tester.widget<DecoratedBox>(
+    find.descendant(
+      of: finder,
+      matching: find.byWidgetPredicate((Widget widget) {
+        if (widget is! DecoratedBox) {
+          return false;
+        }
+
+        final decoration = widget.decoration;
+        return decoration is BoxDecoration &&
+            decoration.border != null &&
+            decoration.boxShadow?.isNotEmpty == true;
+      }),
+    ),
+  );
+
+  return decoratedBox.decoration as BoxDecoration;
 }

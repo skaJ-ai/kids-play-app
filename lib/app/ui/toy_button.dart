@@ -44,9 +44,6 @@ class ToyButton extends StatelessWidget {
     final layout = Theme.of(context).kidLayout;
     final densityTokens = density.resolve(layout);
     final effectiveHeight = height ?? densityTokens.height;
-    final compact = height != null
-        ? effectiveHeight <= layout.button.compact.height
-        : density == ToyButtonDensity.compact;
     final borderRadius = BorderRadius.circular(effectiveHeight / 2);
     final primaryTone = tone == ToyButtonTone.primary;
     final baseColors = primaryTone
@@ -74,15 +71,21 @@ class ToyButton extends StatelessWidget {
     final chipBorderColor = primaryTone
         ? KidPalette.white.withValues(alpha: 0.12)
         : KidPalette.stroke;
-    final chipSize = compact ? 32.0 : 36.0;
-    final iconSize = compact ? 18.0 : 20.0;
+    final chipSize = densityTokens.iconChipSize;
+    final iconSize = densityTokens.iconSize;
+    final borderWidth = primaryTone
+        ? densityTokens.primaryBorderWidth
+        : densityTokens.secondaryBorderWidth;
+    final highlightInset = densityTokens.highlightInset;
+    final highlightHeight = densityTokens.highlightHeight;
+    final chipRadius = densityTokens.iconChipRadius;
     final labelStyle =
         (Theme.of(context).textTheme.titleLarge ??
                 const TextStyle(fontSize: 22, fontWeight: FontWeight.w800))
             .copyWith(
               color: foregroundColor,
               fontWeight: FontWeight.w800,
-              fontSize: compact ? 20 : null,
+              fontSize: densityTokens.labelFontSize,
             );
 
     return Opacity(
@@ -95,21 +98,18 @@ class ToyButton extends StatelessWidget {
             colors: buttonColors,
           ),
           borderRadius: borderRadius,
-          border: Border.all(
-            color: borderColor,
-            width: primaryTone ? 1.3 : 1.2,
-          ),
+          border: Border.all(color: borderColor, width: borderWidth),
           boxShadow: boxShadow,
         ),
         child: Stack(
           children: [
             Positioned(
               top: 1,
-              left: 16,
-              right: 16,
+              left: highlightInset,
+              right: highlightInset,
               child: IgnorePointer(
                 child: Container(
-                  height: 12,
+                  height: highlightHeight,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(999),
                     gradient: LinearGradient(
@@ -136,7 +136,7 @@ class ToyButton extends StatelessWidget {
                   height: effectiveHeight,
                   child: Padding(
                     padding: EdgeInsets.symmetric(
-                      horizontal: compact ? 16 : 18,
+                      horizontal: densityTokens.horizontalPadding,
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -147,7 +147,7 @@ class ToyButton extends StatelessWidget {
                             height: chipSize,
                             decoration: BoxDecoration(
                               color: chipColor,
-                              borderRadius: BorderRadius.circular(14),
+                              borderRadius: BorderRadius.circular(chipRadius),
                               border: Border.all(color: chipBorderColor),
                             ),
                             child: Icon(
@@ -156,7 +156,7 @@ class ToyButton extends StatelessWidget {
                               size: iconSize,
                             ),
                           ),
-                          SizedBox(width: compact ? 10 : 12),
+                          SizedBox(width: densityTokens.iconGap),
                         ],
                         Flexible(
                           child: Text(

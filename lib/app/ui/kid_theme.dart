@@ -46,17 +46,87 @@ enum ToyPanelDensity { regular, compact, tight }
 
 @immutable
 class KidButtonDensityTokens {
-  const KidButtonDensityTokens({required this.height});
+  const KidButtonDensityTokens({
+    required this.height,
+    required this.horizontalPadding,
+    required this.iconGap,
+    required this.iconChipSize,
+    required this.iconSize,
+    required this.labelFontSize,
+    required this.primaryBorderWidth,
+    required this.secondaryBorderWidth,
+    required this.highlightInset,
+    required this.highlightHeight,
+    required this.iconChipRadius,
+  });
 
   final double height;
+  final double horizontalPadding;
+  final double iconGap;
+  final double iconChipSize;
+  final double iconSize;
+  final double labelFontSize;
+  final double primaryBorderWidth;
+  final double secondaryBorderWidth;
+  final double highlightInset;
+  final double highlightHeight;
+  final double iconChipRadius;
 
-  KidButtonDensityTokens copyWith({double? height}) {
-    return KidButtonDensityTokens(height: height ?? this.height);
+  KidButtonDensityTokens copyWith({
+    double? height,
+    double? horizontalPadding,
+    double? iconGap,
+    double? iconChipSize,
+    double? iconSize,
+    double? labelFontSize,
+    double? primaryBorderWidth,
+    double? secondaryBorderWidth,
+    double? highlightInset,
+    double? highlightHeight,
+    double? iconChipRadius,
+  }) {
+    return KidButtonDensityTokens(
+      height: height ?? this.height,
+      horizontalPadding: horizontalPadding ?? this.horizontalPadding,
+      iconGap: iconGap ?? this.iconGap,
+      iconChipSize: iconChipSize ?? this.iconChipSize,
+      iconSize: iconSize ?? this.iconSize,
+      labelFontSize: labelFontSize ?? this.labelFontSize,
+      primaryBorderWidth: primaryBorderWidth ?? this.primaryBorderWidth,
+      secondaryBorderWidth: secondaryBorderWidth ?? this.secondaryBorderWidth,
+      highlightInset: highlightInset ?? this.highlightInset,
+      highlightHeight: highlightHeight ?? this.highlightHeight,
+      iconChipRadius: iconChipRadius ?? this.iconChipRadius,
+    );
   }
 
   KidButtonDensityTokens lerp(KidButtonDensityTokens other, double t) {
     return KidButtonDensityTokens(
       height: ui.lerpDouble(height, other.height, t) ?? height,
+      horizontalPadding:
+          ui.lerpDouble(horizontalPadding, other.horizontalPadding, t) ??
+          horizontalPadding,
+      iconGap: ui.lerpDouble(iconGap, other.iconGap, t) ?? iconGap,
+      iconChipSize:
+          ui.lerpDouble(iconChipSize, other.iconChipSize, t) ?? iconChipSize,
+      iconSize: ui.lerpDouble(iconSize, other.iconSize, t) ?? iconSize,
+      labelFontSize:
+          ui.lerpDouble(labelFontSize, other.labelFontSize, t) ?? labelFontSize,
+      primaryBorderWidth:
+          ui.lerpDouble(primaryBorderWidth, other.primaryBorderWidth, t) ??
+          primaryBorderWidth,
+      secondaryBorderWidth:
+          ui.lerpDouble(secondaryBorderWidth, other.secondaryBorderWidth, t) ??
+          secondaryBorderWidth,
+      highlightInset:
+          ui.lerpDouble(highlightInset, other.highlightInset, t) ??
+          highlightInset,
+      highlightHeight:
+          ui.lerpDouble(highlightHeight, other.highlightHeight, t) ??
+          highlightHeight,
+      iconChipRadius:
+          ui.lerpDouble(iconChipRadius, other.iconChipRadius, t) ??
+          iconChipRadius,
     );
   }
 }
@@ -95,15 +165,34 @@ class KidButtonTokens {
 
 @immutable
 class KidPanelDensityTokens {
-  const KidPanelDensityTokens({required this.padding, required this.radius});
+  const KidPanelDensityTokens({
+    required this.padding,
+    required this.radius,
+    required this.borderWidth,
+    required this.highlightHeight,
+    required this.highlightHorizontalInset,
+  });
 
   final EdgeInsets padding;
   final double radius;
+  final double borderWidth;
+  final double highlightHeight;
+  final double highlightHorizontalInset;
 
-  KidPanelDensityTokens copyWith({EdgeInsets? padding, double? radius}) {
+  KidPanelDensityTokens copyWith({
+    EdgeInsets? padding,
+    double? radius,
+    double? borderWidth,
+    double? highlightHeight,
+    double? highlightHorizontalInset,
+  }) {
     return KidPanelDensityTokens(
       padding: padding ?? this.padding,
       radius: radius ?? this.radius,
+      borderWidth: borderWidth ?? this.borderWidth,
+      highlightHeight: highlightHeight ?? this.highlightHeight,
+      highlightHorizontalInset:
+          highlightHorizontalInset ?? this.highlightHorizontalInset,
     );
   }
 
@@ -111,13 +200,25 @@ class KidPanelDensityTokens {
     return KidPanelDensityTokens(
       padding: EdgeInsets.lerp(padding, other.padding, t) ?? padding,
       radius: ui.lerpDouble(radius, other.radius, t) ?? radius,
+      borderWidth:
+          ui.lerpDouble(borderWidth, other.borderWidth, t) ?? borderWidth,
+      highlightHeight:
+          ui.lerpDouble(highlightHeight, other.highlightHeight, t) ??
+          highlightHeight,
+      highlightHorizontalInset:
+          ui.lerpDouble(
+            highlightHorizontalInset,
+            other.highlightHorizontalInset,
+            t,
+          ) ??
+          highlightHorizontalInset,
     );
   }
 }
 
 @immutable
-class KidPanelThemeTokens {
-  const KidPanelThemeTokens({
+class KidPanelTokens {
+  const KidPanelTokens({
     required this.regular,
     required this.compact,
     required this.tight,
@@ -135,51 +236,24 @@ class KidPanelThemeTokens {
     };
   }
 
-  KidPanelThemeTokens copyWith({
+  KidPanelTokens copyWith({
     KidPanelDensityTokens? regular,
     KidPanelDensityTokens? compact,
     KidPanelDensityTokens? tight,
   }) {
-    return KidPanelThemeTokens(
+    return KidPanelTokens(
       regular: regular ?? this.regular,
       compact: compact ?? this.compact,
       tight: tight ?? this.tight,
     );
   }
 
-  KidPanelThemeTokens lerp(KidPanelThemeTokens other, double t) {
-    return KidPanelThemeTokens(
+  KidPanelTokens lerp(KidPanelTokens other, double t) {
+    return KidPanelTokens(
       regular: regular.lerp(other.regular, t),
       compact: compact.lerp(other.compact, t),
       tight: tight.lerp(other.tight, t),
     );
-  }
-}
-
-class KidPanelTokens {
-  const KidPanelTokens._();
-
-  static const regular = KidPanelDensityTokens(
-    padding: EdgeInsets.all(24),
-    radius: 32,
-  );
-
-  static const compact = KidPanelDensityTokens(
-    padding: EdgeInsets.all(14),
-    radius: 32,
-  );
-
-  static const tight = KidPanelDensityTokens(
-    padding: EdgeInsets.all(12),
-    radius: 24,
-  );
-
-  static KidPanelDensityTokens forDensity(ToyPanelDensity density) {
-    return switch (density) {
-      ToyPanelDensity.regular => regular,
-      ToyPanelDensity.compact => compact,
-      ToyPanelDensity.tight => tight,
-    };
   }
 }
 
@@ -189,24 +263,63 @@ class KidLayoutTheme extends ThemeExtension<KidLayoutTheme> {
 
   static const defaults = KidLayoutTheme(
     button: KidButtonTokens(
-      regular: KidButtonDensityTokens(height: 64),
-      compact: KidButtonDensityTokens(height: 56),
+      regular: KidButtonDensityTokens(
+        height: 64,
+        horizontalPadding: 18,
+        iconGap: 12,
+        iconChipSize: 36,
+        iconSize: 20,
+        labelFontSize: 22,
+        primaryBorderWidth: 1.3,
+        secondaryBorderWidth: 1.2,
+        highlightInset: 16,
+        highlightHeight: 12,
+        iconChipRadius: 14,
+      ),
+      compact: KidButtonDensityTokens(
+        height: 56,
+        horizontalPadding: 16,
+        iconGap: 10,
+        iconChipSize: 32,
+        iconSize: 18,
+        labelFontSize: 20,
+        primaryBorderWidth: 1.2,
+        secondaryBorderWidth: 1.1,
+        highlightInset: 14,
+        highlightHeight: 10,
+        iconChipRadius: 12,
+      ),
     ),
-    panel: KidPanelThemeTokens(
-      regular: KidPanelTokens.regular,
-      compact: KidPanelTokens.compact,
-      tight: KidPanelTokens.tight,
+    panel: KidPanelTokens(
+      regular: KidPanelDensityTokens(
+        padding: EdgeInsets.all(24),
+        radius: 32,
+        borderWidth: 1.5,
+        highlightHeight: 18,
+        highlightHorizontalInset: 20,
+      ),
+      compact: KidPanelDensityTokens(
+        padding: EdgeInsets.all(14),
+        radius: 32,
+        borderWidth: 1.4,
+        highlightHeight: 16,
+        highlightHorizontalInset: 18,
+      ),
+      tight: KidPanelDensityTokens(
+        padding: EdgeInsets.all(12),
+        radius: 24,
+        borderWidth: 1.3,
+        highlightHeight: 14,
+        highlightHorizontalInset: 16,
+      ),
     ),
   );
 
   final KidButtonTokens button;
-  final KidPanelThemeTokens panel;
+  final KidPanelTokens panel;
 
   @override
-  KidLayoutTheme copyWith({
-    KidButtonTokens? button,
-    KidPanelThemeTokens? panel,
-  }) {
+  KidLayoutTheme copyWith({KidButtonTokens? button, KidPanelTokens? panel}) {
     return KidLayoutTheme(
       button: button ?? this.button,
       panel: panel ?? this.panel,

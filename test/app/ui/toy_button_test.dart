@@ -68,12 +68,36 @@ void main() {
   });
 
   testWidgets(
-    'reads regular and compact default heights from kid theme tokens',
+    'reads regular and compact layout metrics from kid theme tokens',
     (WidgetTester tester) async {
       final customLayout = KidLayoutTheme(
         button: KidButtonTokens(
-          regular: KidButtonDensityTokens(height: 72),
-          compact: KidButtonDensityTokens(height: 48),
+          regular: KidButtonDensityTokens(
+            height: 72,
+            horizontalPadding: 26,
+            iconGap: 14,
+            iconChipSize: 40,
+            iconSize: 24,
+            labelFontSize: 28,
+            primaryBorderWidth: 1.6,
+            secondaryBorderWidth: 1.25,
+            highlightInset: 22,
+            highlightHeight: 15,
+            iconChipRadius: 18,
+          ),
+          compact: KidButtonDensityTokens(
+            height: 48,
+            horizontalPadding: 12,
+            iconGap: 6,
+            iconChipSize: 28,
+            iconSize: 16,
+            labelFontSize: 18,
+            primaryBorderWidth: 1.15,
+            secondaryBorderWidth: 0.95,
+            highlightInset: 11,
+            highlightHeight: 9,
+            iconChipRadius: 10,
+          ),
         ),
         panel: KidLayoutTheme.defaults.panel,
       );
@@ -86,12 +110,14 @@ void main() {
               ToyButton(
                 key: const Key('regular-button'),
                 label: '기본 버튼',
+                icon: Icons.play_arrow_rounded,
                 onPressed: () {},
               ),
               const SizedBox(height: 12),
               ToyButton(
                 key: const Key('compact-button'),
                 label: '조밀한 버튼',
+                icon: Icons.star_rounded,
                 density: ToyButtonDensity.compact,
                 onPressed: () {},
               ),
@@ -106,61 +132,112 @@ void main() {
         customLayout.button.regular.height,
       );
       expect(
+        _buttonPadding(tester, find.byKey(const Key('regular-button'))),
+        const EdgeInsets.symmetric(horizontal: 26),
+      );
+      expect(
+        _buttonIconChipSize(
+          tester,
+          find.byKey(const Key('regular-button')),
+          Icons.play_arrow_rounded,
+        ),
+        customLayout.button.regular.iconChipSize,
+      );
+      expect(
+        _buttonIconGapWidth(tester, find.byKey(const Key('regular-button'))),
+        customLayout.button.regular.iconGap,
+      );
+      expect(
+        _buttonIconSize(
+          tester,
+          find.byKey(const Key('regular-button')),
+          Icons.play_arrow_rounded,
+        ),
+        customLayout.button.regular.iconSize,
+      );
+      expect(
+        _buttonLabelFontSize(
+          tester,
+          find.byKey(const Key('regular-button')),
+          '기본 버튼',
+        ),
+        customLayout.button.regular.labelFontSize,
+      );
+      expect(
+        _buttonBorderWidth(tester, find.byKey(const Key('regular-button'))),
+        customLayout.button.regular.primaryBorderWidth,
+      );
+      expect(
+        _buttonHighlightInset(tester, find.byKey(const Key('regular-button'))),
+        customLayout.button.regular.highlightInset,
+      );
+      expect(
+        _buttonHighlightHeight(tester, find.byKey(const Key('regular-button'))),
+        customLayout.button.regular.highlightHeight,
+      );
+      expect(
+        _buttonChipRadius(
+          tester,
+          find.byKey(const Key('regular-button')),
+          Icons.play_arrow_rounded,
+        ),
+        customLayout.button.regular.iconChipRadius,
+      );
+      expect(
         _buttonHeight(tester, find.byKey(const Key('compact-button'))),
         customLayout.button.compact.height,
       );
-    },
-  );
-
-  testWidgets(
-    'uses density semantics for compact styling when theme heights are overridden',
-    (WidgetTester tester) async {
-      final customLayout = KidLayoutTheme(
-        button: KidButtonTokens(
-          regular: KidButtonDensityTokens(height: 48),
-          compact: KidButtonDensityTokens(height: 72),
-        ),
-        panel: KidLayoutTheme.defaults.panel,
-      );
-
-      await tester.pumpWidget(
-        _buildTestApp(
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ToyButton(
-                key: const Key('regular-density-button'),
-                label: '기본 밀도',
-                icon: Icons.play_arrow_rounded,
-                onPressed: () {},
-              ),
-              const SizedBox(height: 12),
-              ToyButton(
-                key: const Key('compact-density-button'),
-                label: '조밀 밀도',
-                density: ToyButtonDensity.compact,
-                icon: Icons.play_arrow_rounded,
-                onPressed: () {},
-              ),
-            ],
-          ),
-          theme: buildKidTheme().copyWith(extensions: [customLayout]),
-        ),
-      );
-
       expect(
-        _buttonLabelFontSize(
+        _buttonPadding(tester, find.byKey(const Key('compact-button'))),
+        const EdgeInsets.symmetric(horizontal: 12),
+      );
+      expect(
+        _buttonIconChipSize(
           tester,
-          find.byKey(const Key('regular-density-button')),
+          find.byKey(const Key('compact-button')),
+          Icons.star_rounded,
         ),
-        22,
+        customLayout.button.compact.iconChipSize,
+      );
+      expect(
+        _buttonIconGapWidth(tester, find.byKey(const Key('compact-button'))),
+        customLayout.button.compact.iconGap,
+      );
+      expect(
+        _buttonIconSize(
+          tester,
+          find.byKey(const Key('compact-button')),
+          Icons.star_rounded,
+        ),
+        customLayout.button.compact.iconSize,
       );
       expect(
         _buttonLabelFontSize(
           tester,
-          find.byKey(const Key('compact-density-button')),
+          find.byKey(const Key('compact-button')),
+          '조밀한 버튼',
         ),
-        20,
+        customLayout.button.compact.labelFontSize,
+      );
+      expect(
+        _buttonBorderWidth(tester, find.byKey(const Key('compact-button'))),
+        customLayout.button.compact.primaryBorderWidth,
+      );
+      expect(
+        _buttonHighlightInset(tester, find.byKey(const Key('compact-button'))),
+        customLayout.button.compact.highlightInset,
+      );
+      expect(
+        _buttonHighlightHeight(tester, find.byKey(const Key('compact-button'))),
+        customLayout.button.compact.highlightHeight,
+      );
+      expect(
+        _buttonChipRadius(
+          tester,
+          find.byKey(const Key('compact-button')),
+          Icons.star_rounded,
+        ),
+        customLayout.button.compact.iconChipRadius,
       );
     },
   );
@@ -168,19 +245,105 @@ void main() {
   testWidgets('keeps explicit height overrides ahead of density presets', (
     WidgetTester tester,
   ) async {
+    final customLayout = KidLayoutTheme(
+      button: KidButtonTokens(
+        regular: KidButtonDensityTokens(
+          height: 64,
+          horizontalPadding: 18,
+          iconGap: 12,
+          iconChipSize: 36,
+          iconSize: 20,
+          labelFontSize: 22,
+          primaryBorderWidth: 1.3,
+          secondaryBorderWidth: 1.2,
+          highlightInset: 16,
+          highlightHeight: 12,
+          iconChipRadius: 14,
+        ),
+        compact: KidButtonDensityTokens(
+          height: 56,
+          horizontalPadding: 9,
+          iconGap: 5,
+          iconChipSize: 24,
+          iconSize: 14,
+          labelFontSize: 17,
+          primaryBorderWidth: 1.05,
+          secondaryBorderWidth: 0.9,
+          highlightInset: 8,
+          highlightHeight: 7,
+          iconChipRadius: 9,
+        ),
+      ),
+      panel: KidLayoutTheme.defaults.panel,
+    );
+
     await tester.pumpWidget(
       _buildTestApp(
         ToyButton(
           key: const Key('override-button'),
           label: '직접 높이',
+          icon: Icons.check_circle_rounded,
           density: ToyButtonDensity.compact,
           height: 70,
           onPressed: () {},
         ),
+        theme: buildKidTheme().copyWith(extensions: [customLayout]),
       ),
     );
 
     expect(_buttonHeight(tester, find.byKey(const Key('override-button'))), 70);
+    expect(
+      _buttonPadding(tester, find.byKey(const Key('override-button'))),
+      const EdgeInsets.symmetric(horizontal: 9),
+    );
+    expect(
+      _buttonIconChipSize(
+        tester,
+        find.byKey(const Key('override-button')),
+        Icons.check_circle_rounded,
+      ),
+      customLayout.button.compact.iconChipSize,
+    );
+    expect(
+      _buttonIconGapWidth(tester, find.byKey(const Key('override-button'))),
+      customLayout.button.compact.iconGap,
+    );
+    expect(
+      _buttonIconSize(
+        tester,
+        find.byKey(const Key('override-button')),
+        Icons.check_circle_rounded,
+      ),
+      customLayout.button.compact.iconSize,
+    );
+    expect(
+      _buttonLabelFontSize(
+        tester,
+        find.byKey(const Key('override-button')),
+        '직접 높이',
+      ),
+      customLayout.button.compact.labelFontSize,
+    );
+    expect(
+      _buttonBorderWidth(tester, find.byKey(const Key('override-button'))),
+      customLayout.button.compact.primaryBorderWidth,
+    );
+    expect(
+      _buttonHighlightInset(tester, find.byKey(const Key('override-button'))),
+      customLayout.button.compact.highlightInset,
+    );
+    expect(
+      _buttonHighlightHeight(tester, find.byKey(const Key('override-button'))),
+      customLayout.button.compact.highlightHeight,
+    );
+    expect(
+      _buttonChipRadius(
+        tester,
+        find.byKey(const Key('override-button')),
+        Icons.check_circle_rounded,
+      ),
+      customLayout.button.compact.iconChipRadius,
+    );
   });
 
   testWidgets('renders a calmer secondary tone with surface styling', (
@@ -265,17 +428,6 @@ double _buttonHeight(WidgetTester tester, Finder finder) {
   return sizedBox.height!;
 }
 
-double? _buttonLabelFontSize(WidgetTester tester, Finder finder) {
-  final labelFinder = find.descendant(
-    of: finder,
-    matching: find.byWidgetPredicate(
-      (Widget widget) => widget is Text && widget.data != null,
-    ),
-  );
-  final label = tester.widget<Text>(labelFinder.first);
-  return label.style?.fontSize;
-}
-
 BoxDecoration _buttonDecoration(WidgetTester tester, Finder finder) {
   final decoratedBox = tester.widget<DecoratedBox>(
     find.descendant(
@@ -295,4 +447,113 @@ BoxDecoration _buttonDecoration(WidgetTester tester, Finder finder) {
   );
 
   return decoratedBox.decoration as BoxDecoration;
+}
+
+EdgeInsetsGeometry _buttonPadding(WidgetTester tester, Finder finder) {
+  final paddingWidget = tester.widget<Padding>(
+    find.descendant(
+      of: finder,
+      matching: find.byWidgetPredicate(
+        (Widget widget) => widget is Padding && widget.child is Row,
+      ),
+    ),
+  );
+
+  return paddingWidget.padding;
+}
+
+double _buttonIconChipSize(WidgetTester tester, Finder finder, IconData icon) {
+  final chipFinder = find.ancestor(
+    of: find.descendant(of: finder, matching: find.byIcon(icon)),
+    matching: find.byWidgetPredicate(
+      (Widget widget) => widget is Container && widget.child is Icon,
+    ),
+  );
+
+  return tester.getSize(chipFinder).width;
+}
+
+double _buttonIconGapWidth(WidgetTester tester, Finder finder) {
+  final sizedBox = tester.widget<SizedBox>(
+    find.descendant(
+      of: finder,
+      matching: find.byWidgetPredicate(
+        (Widget widget) =>
+            widget is SizedBox && widget.width != null && widget.height == null,
+      ),
+    ),
+  );
+
+  return sizedBox.width!;
+}
+
+double _buttonIconSize(WidgetTester tester, Finder finder, IconData icon) {
+  final iconWidget = tester.widget<Icon>(
+    find.descendant(of: finder, matching: find.byIcon(icon)),
+  );
+
+  return iconWidget.size!;
+}
+
+double _buttonBorderWidth(WidgetTester tester, Finder finder) {
+  final border = _buttonDecoration(tester, finder).border! as Border;
+  return border.top.width;
+}
+
+double _buttonHighlightInset(WidgetTester tester, Finder finder) {
+  final highlightPositioned = tester.widget<Positioned>(
+    find.descendant(
+      of: finder,
+      matching: find.byWidgetPredicate(
+        (Widget widget) =>
+            widget is Positioned &&
+            widget.top == 1 &&
+            widget.child is IgnorePointer,
+      ),
+    ),
+  );
+
+  return highlightPositioned.left!;
+}
+
+double _buttonHighlightHeight(WidgetTester tester, Finder finder) {
+  final highlightPositionedFinder = find.descendant(
+    of: finder,
+    matching: find.byWidgetPredicate(
+      (Widget widget) =>
+          widget is Positioned &&
+          widget.top == 1 &&
+          widget.child is IgnorePointer,
+    ),
+  );
+  final highlightFinder = find.descendant(
+    of: highlightPositionedFinder,
+    matching: find.byWidgetPredicate(
+      (Widget widget) =>
+          widget is Container && widget.decoration is BoxDecoration,
+    ),
+  );
+
+  return tester.getSize(highlightFinder).height;
+}
+
+double _buttonChipRadius(WidgetTester tester, Finder finder, IconData icon) {
+  final chipFinder = find.ancestor(
+    of: find.descendant(of: finder, matching: find.byIcon(icon)),
+    matching: find.byWidgetPredicate(
+      (Widget widget) => widget is Container && widget.child is Icon,
+    ),
+  );
+  final chip = tester.widget<Container>(chipFinder);
+  final decoration = chip.decoration! as BoxDecoration;
+
+  return (decoration.borderRadius! as BorderRadius).topLeft.x;
+}
+
+double _buttonLabelFontSize(WidgetTester tester, Finder finder, String label) {
+  final textWidget = tester.widget<Text>(
+    find.descendant(of: finder, matching: find.text(label)),
+  );
+
+  return textWidget.style!.fontSize!;
 }
