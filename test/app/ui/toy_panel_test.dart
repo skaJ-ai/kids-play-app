@@ -84,6 +84,38 @@ void main() {
       },
     );
 
+    testWidgets(
+      'applies the density insetRadius token to the inner highlight capsule',
+      (WidgetTester tester) async {
+        const compactInsetRadius = 7.0;
+        final defaults = KidLayoutTheme.defaults;
+        final customLayout = KidLayoutTheme(
+          button: defaults.button,
+          panel: KidPanelTokens(
+            regular: defaults.panel.regular,
+            compact: defaults.panel.compact.copyWith(
+              insetRadius: compactInsetRadius,
+            ),
+            tight: defaults.panel.tight,
+          ),
+        );
+
+        await _pumpToyPanel(
+          tester,
+          density: ToyPanelDensity.compact,
+          theme: buildKidTheme().copyWith(extensions: [customLayout]),
+        );
+
+        final highlight = tester.widget<Container>(_panelHighlightFinder());
+        final decoration = highlight.decoration! as BoxDecoration;
+
+        expect(
+          decoration.borderRadius,
+          BorderRadius.circular(compactInsetRadius),
+        );
+      },
+    );
+
     testWidgets('lets explicit padding and radius override density', (
       WidgetTester tester,
     ) async {

@@ -49,6 +49,9 @@ class ToyPanel extends StatelessWidget {
     );
 
     final borderRadius = BorderRadius.circular(resolvedRadius);
+    final highlightBorderRadius = BorderRadius.circular(
+      densityTokens.insetRadius,
+    );
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -76,7 +79,7 @@ class ToyPanel extends StatelessWidget {
                 child: Container(
                   height: highlightHeight,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(999),
+                    borderRadius: highlightBorderRadius,
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
