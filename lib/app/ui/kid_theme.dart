@@ -367,6 +367,97 @@ ThemeData buildKidTheme() {
     shadow: const Color(0x24182230),
   );
 
+  final textTheme = base.textTheme.copyWith(
+    displayLarge: const TextStyle(
+      fontSize: 60,
+      fontWeight: FontWeight.w900,
+      letterSpacing: -2.2,
+      color: KidPalette.navy,
+      height: 0.92,
+    ),
+    headlineLarge: const TextStyle(
+      fontSize: 44,
+      fontWeight: FontWeight.w900,
+      letterSpacing: -1.5,
+      color: KidPalette.navy,
+      height: 1.0,
+    ),
+    headlineMedium: const TextStyle(
+      fontSize: 34,
+      fontWeight: FontWeight.w900,
+      letterSpacing: -1.0,
+      color: KidPalette.navy,
+      height: 1.04,
+    ),
+    headlineSmall: const TextStyle(
+      fontSize: 26,
+      fontWeight: FontWeight.w800,
+      letterSpacing: -0.7,
+      color: KidPalette.navy,
+      height: 1.08,
+    ),
+    titleLarge: const TextStyle(
+      fontSize: 22,
+      fontWeight: FontWeight.w800,
+      letterSpacing: -0.5,
+      color: KidPalette.navy,
+      height: 1.12,
+    ),
+    titleMedium: const TextStyle(
+      fontSize: 18,
+      fontWeight: FontWeight.w700,
+      letterSpacing: -0.2,
+      color: KidPalette.body,
+      height: 1.24,
+    ),
+    titleSmall: const TextStyle(
+      fontSize: 15,
+      fontWeight: FontWeight.w700,
+      letterSpacing: -0.1,
+      color: KidPalette.body,
+      height: 1.2,
+    ),
+    bodyLarge: const TextStyle(
+      fontSize: 17,
+      fontWeight: FontWeight.w600,
+      color: KidPalette.body,
+      height: 1.35,
+    ),
+    bodyMedium: const TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+      color: KidPalette.body,
+      height: 1.35,
+    ),
+    bodySmall: const TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+      color: KidPalette.body,
+      height: 1.3,
+    ),
+    labelLarge: const TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w700,
+      letterSpacing: -0.1,
+      color: KidPalette.navy,
+      height: 1.15,
+    ),
+    labelMedium: const TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 0,
+      color: KidPalette.body,
+      height: 1.2,
+    ),
+    labelSmall: const TextStyle(
+      fontSize: 11,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 0,
+      color: KidPalette.body,
+      height: 1.18,
+    ),
+  );
+
   return base.copyWith(
     colorScheme: colorScheme,
     extensions: const <ThemeExtension<dynamic>>[KidLayoutTheme.defaults],
@@ -374,83 +465,12 @@ ThemeData buildKidTheme() {
     dividerColor: KidPalette.stroke,
     splashColor: KidPalette.white.withValues(alpha: 0.14),
     highlightColor: Colors.transparent,
-    textTheme: base.textTheme.copyWith(
-      displayLarge: const TextStyle(
-        fontSize: 60,
-        fontWeight: FontWeight.w900,
-        letterSpacing: -2.2,
-        color: KidPalette.navy,
-        height: 0.92,
-      ),
-      headlineLarge: const TextStyle(
-        fontSize: 44,
-        fontWeight: FontWeight.w900,
-        letterSpacing: -1.5,
-        color: KidPalette.navy,
-        height: 1.0,
-      ),
-      headlineMedium: const TextStyle(
-        fontSize: 34,
-        fontWeight: FontWeight.w900,
-        letterSpacing: -1.0,
-        color: KidPalette.navy,
-        height: 1.04,
-      ),
-      headlineSmall: const TextStyle(
-        fontSize: 26,
-        fontWeight: FontWeight.w800,
-        letterSpacing: -0.7,
-        color: KidPalette.navy,
-        height: 1.08,
-      ),
-      titleLarge: const TextStyle(
-        fontSize: 22,
-        fontWeight: FontWeight.w800,
-        letterSpacing: -0.5,
-        color: KidPalette.navy,
-        height: 1.12,
-      ),
-      titleMedium: const TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.w700,
-        letterSpacing: -0.2,
-        color: KidPalette.body,
-        height: 1.24,
-      ),
-      titleSmall: const TextStyle(
-        fontSize: 15,
-        fontWeight: FontWeight.w700,
-        letterSpacing: -0.1,
-        color: KidPalette.body,
-        height: 1.2,
-      ),
-      bodyLarge: const TextStyle(
-        fontSize: 17,
-        fontWeight: FontWeight.w600,
-        color: KidPalette.body,
-        height: 1.35,
-      ),
-      bodyMedium: const TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.w600,
-        color: KidPalette.body,
-        height: 1.35,
-      ),
-      bodySmall: const TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.w600,
-        color: KidPalette.body,
-        height: 1.3,
-      ),
-    ),
+    textTheme: textTheme,
     chipTheme: base.chipTheme.copyWith(
       shape: const StadiumBorder(),
       side: BorderSide.none,
       backgroundColor: KidPalette.white.withValues(alpha: 0.88),
-      labelStyle: const TextStyle(
-        color: KidPalette.navy,
-        fontWeight: FontWeight.w800,
-      ),
+      labelStyle: textTheme.labelLarge,
     ),
   );
 }

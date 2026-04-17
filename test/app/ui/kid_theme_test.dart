@@ -46,4 +46,32 @@ void main() {
     expect(layout.panel.tight.highlightHeight, 14);
     expect(layout.panel.tight.highlightHorizontalInset, 16);
   });
+
+  test('buildKidTheme defines a calmer supporting label hierarchy', () {
+    final theme = buildKidTheme();
+    final textTheme = theme.textTheme;
+
+    expect(textTheme.labelLarge?.fontSize, 14);
+    expect(textTheme.labelLarge?.fontWeight, FontWeight.w700);
+    expect(textTheme.labelLarge?.letterSpacing, -0.1);
+    expect(textTheme.labelLarge?.color, KidPalette.navy);
+    expect(textTheme.labelLarge?.height, 1.15);
+
+    expect(textTheme.labelMedium?.fontSize, 12);
+    expect(textTheme.labelMedium?.fontWeight, FontWeight.w600);
+    expect(textTheme.labelMedium?.letterSpacing, 0);
+    expect(textTheme.labelMedium?.color, KidPalette.body);
+    expect(textTheme.labelMedium?.height, 1.2);
+
+    expect(textTheme.labelSmall?.fontSize, 11);
+    expect(textTheme.labelSmall?.fontWeight, FontWeight.w600);
+    expect(textTheme.labelSmall?.letterSpacing, 0);
+    expect(textTheme.labelSmall?.color, KidPalette.body);
+    expect(textTheme.labelSmall?.height, 1.18);
+
+    expect(textTheme.bodyMedium?.fontWeight, FontWeight.w500);
+    expect(textTheme.bodySmall?.fontWeight, FontWeight.w500);
+
+    expect(theme.chipTheme.labelStyle, textTheme.labelLarge);
+  });
 }
