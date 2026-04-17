@@ -1,23 +1,28 @@
 import 'package:flutter/widgets.dart';
 
+import '../audio/audio_service.dart';
 import 'progress_store.dart';
 import 'speech_cue_service.dart';
 
 class AppServices {
   AppServices({
     required this.progressStore,
-    required this.speechCueService,
-  });
+    SpeechCueService? speechCueService,
+    AudioService? audioService,
+  }) : speechCueService = speechCueService ?? NoopSpeechCueService(),
+       audioService =
+           audioService ??
+           FallbackAudioService(
+             speechCueService: speechCueService ?? NoopSpeechCueService(),
+           );
 
   factory AppServices.fallback() {
-    return AppServices(
-      progressStore: MemoryProgressStore(),
-      speechCueService: NoopSpeechCueService(),
-    );
+    return AppServices(progressStore: MemoryProgressStore());
   }
 
   final ProgressStore progressStore;
   final SpeechCueService speechCueService;
+  final AudioService audioService;
 }
 
 class AppServicesScope extends InheritedWidget {
