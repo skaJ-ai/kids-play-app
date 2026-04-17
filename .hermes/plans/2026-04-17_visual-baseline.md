@@ -75,14 +75,27 @@ The answers below came from a structured Q&A, not from Claude's defaults.
   face overlaid on the giraffe's face. Tayocon personalization.
 - One character across all categories — alphabet / hangul / numbers all use
   the same mascot so the child sees themselves as the constant guide.
+- **Chosen base vector:** Freepik ID `37570635` (Cute giraffe driving car,
+  flat isolated style, free-license with attribution).
+  URL: https://kr.freepik.com/free-vector/cute-giraffe-driving-car-cartoon-vector-icon-illustration-animal-transportation-icon-isolated-flat_37570635.htm
+- **Compositing approach:** the giraffe body + car remain as the static
+  base; the child's head (from the 4 pose PNGs) is `Positioned` on top of
+  the giraffe's head region in a Flutter `Stack`. No raster editing of the
+  Freepik asset required.
 
 ### Poses (already committed to main branch as `040ba3b`)
-| State                | Asset                 | Trigger                                  |
-|----------------------|-----------------------|------------------------------------------|
-| idle / listening     | `4_기본.png`          | default, during TTS playback             |
-| correct / happy      | `1_정답.jpg`          | right answer, card tap success           |
-| wrong / surprised    | `2_오답.jpg`          | wrong answer                             |
-| set complete         | `3_미션클리어.jpg`    | `earnedSticker == true` at session end   |
+| State                      | Asset                 | Trigger                                  |
+|----------------------------|-----------------------|------------------------------------------|
+| idle / listening           | `4_기본.png`          | default, during TTS playback             |
+| correct / wink-smile       | `1_정답.jpg`          | right answer, card tap success           |
+| wrong / playful belly-laugh | `2_오답.jpg`         | wrong answer — intentionally joyful, not shaming |
+| set complete / cool-shades  | `3_미션클리어.jpg`    | `earnedSticker == true` at session end   |
+
+**Design note on 오답 face:** the wrong-answer pose is deliberately a
+laughing expression, not sad or surprised. A 2-3yo in pre-reading stage
+should not feel shame for a wrong tap; the traffic light already signals
+correctness, and the mascot's playful laugh keeps the emotional tone
+safe. This is consistent with the no-fail exploration loop (§4).
 
 **Phase 3 asset task:** move from repo-root (commit 040ba3b) into
 `assets/mascot/`, register in `pubspec.yaml`, expose via a `MascotState`
@@ -203,6 +216,9 @@ No GIFs. No Rive. Static PNGs + Flutter motion.
 
 ### Needed for Phase 3
 - Move mascot PNGs into `assets/mascot/` and register in `pubspec.yaml`.
+- Download Freepik `37570635` giraffe-driving-car vector (free, attribution
+  required) → `assets/mascot/giraffe_car.png`. The kid's face PNGs composite
+  over the giraffe's head at runtime.
 - `KCC무럭무럭체.ttf` font file → `assets/fonts/`, wire into
   `KidTypography`.
 - Traffic light asset: can be composed from three colored circles +
