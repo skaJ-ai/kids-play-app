@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kids_play_app/app/ui/kid_theme.dart';
@@ -9,6 +10,7 @@ import 'package:kids_play_app/app/ui/toy_panel.dart';
 import 'package:kids_play_app/features/avatar/presentation/avatar_setup_screen.dart';
 import 'package:kids_play_app/features/hero/presentation/hero_screen.dart';
 import 'package:kids_play_app/features/home/data/home_catalog_repository.dart';
+import 'package:kids_play_app/features/home/presentation/home_screen.dart';
 
 void main() {
   testWidgets('shows branded hero copy and clearer primary cta', (
@@ -28,6 +30,31 @@ void main() {
     expect(find.text('한글 · 알파벳 · 숫자 놀이를 골라요.'), findsOneWidget);
     expect(find.text('놀이 시작'), findsOneWidget);
   });
+
+  testWidgets(
+    'describes the hero face as decoration instead of telling the child to tap it',
+    (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1200, 720);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await tester.pumpWidget(_buildHeroScreen());
+      await tester.pumpAndSettle();
+
+      expect(find.text('웃는 얼굴로 오늘 놀이를 준비했어요.'), findsOneWidget);
+      expect(find.text('얼굴을 누르고 차고를 골라요.'), findsNothing);
+
+      tester.view.physicalSize = const Size(780, 360);
+      await tester.pumpWidget(_buildHeroScreen());
+      await tester.pumpAndSettle();
+
+      expect(find.text('웃으며 출발 준비!'), findsOneWidget);
+      expect(find.text('얼굴 누르고 출발!'), findsNothing);
+    },
+  );
 
   testWidgets(
     'compact landscape hero keeps branded copy visible without layout exceptions',
@@ -101,7 +128,7 @@ void main() {
   );
 
   testWidgets(
-    'uses themed toy button density tokens for the hero cta in roomy and compact layouts',
+    'switches the hero cta density between roomy and compact layouts',
     (WidgetTester tester) async {
       tester.view.physicalSize = const Size(1200, 720);
       tester.view.devicePixelRatio = 1.0;
@@ -122,6 +149,71 @@ void main() {
 
       expect(_heroStartButton(tester).density, ToyButtonDensity.compact);
       expect(_heroStartButton(tester).height, isNull);
+    },
+  );
+
+  testWidgets(
+    'expires hidden parent-entry taps after a short idle gap',
+    (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1200, 720);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await tester.pumpWidget(_buildHeroScreen());
+      await tester.pumpAndSettle();
+
+      for (var i = 0; i < 4; i += 1) {
+        await tester.tap(find.byKey(const Key('hero-face-parent-entry')));
+        await tester.pump();
+      }
+
+      expect(find.byType(AvatarSetupScreen), findsNothing);
+
+      await tester.pump(const Duration(seconds: 3));
+      await tester.tap(find.byKey(const Key('hero-face-parent-entry')));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AvatarSetupScreen), findsNothing);
+
+      for (var i = 0; i < 4; i += 1) {
+        await tester.tap(find.byKey(const Key('hero-face-parent-entry')));
+        await tester.pump();
+      }
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AvatarSetupScreen), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'does not stack the parent screen when the hero face is over-tapped during entry',
+    (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1200, 720);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await tester.pumpWidget(_buildHeroScreen());
+      await tester.pumpAndSettle();
+
+      final heroFaceDetector = _heroFaceDetector(tester);
+      for (var i = 0; i < 10; i += 1) {
+        heroFaceDetector.onTap?.call();
+      }
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AvatarSetupScreen), findsOneWidget);
+
+      Navigator.of(tester.element(find.byType(AvatarSetupScreen))).pop();
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AvatarSetupScreen), findsNothing);
+      expect(find.text('승원이의 빵빵 놀이터'), findsOneWidget);
     },
   );
 
@@ -148,9 +240,9 @@ void main() {
       await tester.tap(find.text('놀이 시작'));
       await tester.pumpAndSettle();
 
-      expect(find.text('오늘은 어디로 달릴까?'), findsOneWidget);
+      expect(find.byType(HomeScreen), findsOneWidget);
 
-      Navigator.of(tester.element(find.text('오늘은 어디로 달릴까?'))).pop();
+      Navigator.of(tester.element(find.byType(HomeScreen))).pop();
       await tester.pumpAndSettle();
 
       expect(find.text('승원이의 빵빵 놀이터'), findsOneWidget);
@@ -168,6 +260,36 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(AvatarSetupScreen), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'keeps the hidden parent-entry face out of accessibility semantics',
+    (WidgetTester tester) async {
+      final semantics = tester.ensureSemantics();
+      tester.view.physicalSize = const Size(1200, 720);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await tester.pumpWidget(_buildHeroScreen());
+      await tester.pumpAndSettle();
+
+      final heroFaceImageSemantics = tester.getSemantics(
+        find.byKey(const Key('hero-face-image')),
+      );
+
+      expect(
+        heroFaceImageSemantics.getSemanticsData().flagsCollection.isImage,
+        isFalse,
+      );
+      expect(
+        heroFaceImageSemantics.getSemanticsData().hasAction(SemanticsAction.tap),
+        isFalse,
+      );
+      semantics.dispose();
     },
   );
 
@@ -234,6 +356,12 @@ void _expectPanelGeometryForText(
 
 ToyButton _heroStartButton(WidgetTester tester) {
   return tester.widget<ToyButton>(find.widgetWithText(ToyButton, '놀이 시작'));
+}
+
+GestureDetector _heroFaceDetector(WidgetTester tester) {
+  return tester.widget<GestureDetector>(
+    find.byKey(const Key('hero-face-parent-entry')),
+  );
 }
 
 ThemeData _buildHeroThemeWithPanelTokens() {

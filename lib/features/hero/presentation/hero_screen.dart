@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../app/ui/kid_theme.dart';
@@ -15,18 +17,52 @@ class HeroScreen extends StatefulWidget {
 }
 
 class _HeroScreenState extends State<HeroScreen> {
+  static const _parentTapResetDelay = Duration(seconds: 2);
+
   int _parentTapCount = 0;
+  bool _isOpeningParentEntry = false;
+  Timer? _parentTapResetTimer;
+
+  void _clearParentEntryProgress() {
+    _parentTapResetTimer?.cancel();
+    _parentTapResetTimer = null;
+    _parentTapCount = 0;
+  }
+
+  void _scheduleParentEntryReset() {
+    _parentTapResetTimer?.cancel();
+    _parentTapResetTimer = Timer(_parentTapResetDelay, () {
+      _parentTapResetTimer = null;
+      _parentTapCount = 0;
+    });
+  }
 
   Future<void> _handleHeroFaceTap() async {
-    _parentTapCount += 1;
-    if (_parentTapCount < 5) {
+    if (_isOpeningParentEntry) {
       return;
     }
 
-    _parentTapCount = 0;
-    await Navigator.of(
-      context,
-    ).push(MaterialPageRoute<void>(builder: (_) => const AvatarSetupScreen()));
+    _parentTapCount += 1;
+    if (_parentTapCount < 5) {
+      _scheduleParentEntryReset();
+      return;
+    }
+
+    _isOpeningParentEntry = true;
+    _clearParentEntryProgress();
+    try {
+      await Navigator.of(
+        context,
+      ).push(MaterialPageRoute<void>(builder: (_) => const AvatarSetupScreen()));
+    } finally {
+      _isOpeningParentEntry = false;
+    }
+  }
+
+  @override
+  void dispose() {
+    _parentTapResetTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -181,7 +217,7 @@ class _HeroScreenState extends State<HeroScreen> {
                             ? ToyButtonDensity.compact
                             : ToyButtonDensity.regular,
                         onPressed: () {
-                          _parentTapCount = 0;
+                          _clearParentEntryProgress();
                           Navigator.of(context).push(
                             MaterialPageRoute<void>(
                               builder: (_) => const HomeScreen(),
@@ -225,6 +261,7 @@ class _HeroScreenState extends State<HeroScreen> {
                       Center(
                         child: GestureDetector(
                           key: const Key('hero-face-parent-entry'),
+                          excludeFromSemantics: true,
                           onTap: _handleHeroFaceTap,
                           child: Container(
                             width: compact ? 112 : 192,
@@ -249,6 +286,7 @@ class _HeroScreenState extends State<HeroScreen> {
                             child: Image.asset(
                               'assets/generated/images/hero/hero_face.png',
                               key: const Key('hero-face-image'),
+                              excludeFromSemantics: true,
                               fit: BoxFit.contain,
                             ),
                           ),
@@ -256,7 +294,7 @@ class _HeroScreenState extends State<HeroScreen> {
                       ),
                       SizedBox(height: compact ? 12 : 18),
                       Text(
-                        compact ? '얼굴 누르고 출발!' : '얼굴을 누르고 차고를 골라요.',
+                        compact ? '웃으며 출발 준비!' : '웃는 얼굴로 오늘 놀이를 준비했어요.',
                         textAlign: TextAlign.center,
                         maxLines: compact ? 1 : 2,
                         overflow: TextOverflow.ellipsis,
