@@ -7,6 +7,7 @@ import 'package:kids_play_app/app/services/app_services.dart';
 import 'package:kids_play_app/app/services/progress_store.dart';
 import 'package:kids_play_app/app/services/speech_cue_service.dart';
 import 'package:kids_play_app/features/alphabet/data/alphabet_lesson_repository.dart';
+import 'package:kids_play_app/features/alphabet/presentation/alphabet_learn_screen.dart';
 import 'package:kids_play_app/features/hangul/data/hangul_lesson_repository.dart';
 import 'package:kids_play_app/features/home/data/home_catalog_repository.dart';
 import 'package:kids_play_app/features/home/presentation/category_hub_screen.dart';
@@ -245,6 +246,59 @@ void main() {
 
       expect(find.text('숫자 게임'), findsOneWidget);
       expect(find.text("'6' 숫자를 찾아봐!"), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'shows a lesson picker before opening alphabet learn when multiple sets exist',
+    (WidgetTester tester) async {
+      final repository = AlphabetLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          AlphabetLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_alphabetLessonOne, _alphabetLessonTwo],
+          }),
+        }),
+      );
+      final progressStore = MemoryProgressStore();
+      await progressStore.setLessonUnlocked(
+        'alphabet:alphabet_letters_2',
+        true,
+      );
+
+      await tester.pumpWidget(
+        _wrapWithServices(
+          progressStore: progressStore,
+          child: CategoryHubScreen(
+            category: const HomeCategory(
+              id: 'alphabet',
+              label: '알파벳',
+              description: '대문자와 소문자를 만나요',
+              backgroundColorHex: '#B9F4D0',
+              iconName: 'abc_rounded',
+            ),
+            categoryDependencies: HomeCategoryDependencies(
+              alphabetLessonRepository: repository,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('배우기'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('알파벳 학습'), findsNothing);
+      expect(find.text('알파벳 1'), findsOneWidget);
+      expect(find.text('알파벳 2'), findsOneWidget);
+
+      await tester.tap(
+        find.byKey(const Key('lesson-picker-item-alphabet_letters_2')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AlphabetLearnScreen), findsOneWidget);
+      expect(find.text('알파벳 학습'), findsOneWidget);
+      expect(find.text('에프, F f'), findsOneWidget);
     },
   );
 
