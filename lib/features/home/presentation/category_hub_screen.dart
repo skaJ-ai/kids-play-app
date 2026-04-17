@@ -6,6 +6,7 @@ import '../../../app/ui/tap_cooldown.dart';
 import '../../../app/ui/toy_panel.dart';
 import '../data/home_catalog_repository.dart';
 import 'home_category_config.dart';
+import 'home_pills.dart';
 
 class CategoryHubScreen extends StatelessWidget {
   const CategoryHubScreen({
@@ -26,7 +27,7 @@ class CategoryHubScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final accentColor = _accentColorForCategory(category);
+    final accentColor = _config.accentColor;
 
     return PlaygroundScaffold(
       showRoad: true,
@@ -39,10 +40,10 @@ class CategoryHubScreen extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  _HeaderPill(
+                  HomeHeaderPill(
                     icon: category.icon,
                     label: '${category.label} 차고',
-                    accentColor: accentColor,
+                    iconColor: accentColor,
                     compact: compact,
                   ),
                   const Spacer(),
@@ -242,9 +243,12 @@ class _ModeCard extends StatelessWidget {
                                   ),
                                 ),
                                 const SizedBox(width: 8),
-                                _ModeTag(
+                                HomeAccentPill(
                                   label: tag,
-                                  accentColor: accentColor,
+                                  textColor: accentColor,
+                                  backgroundColor: accentColor.withValues(
+                                    alpha: 0.12,
+                                  ),
                                   compact: true,
                                 ),
                               ],
@@ -285,9 +289,10 @@ class _ModeCard extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        _ModeTag(
+                        HomeAccentPill(
                           label: tag,
-                          accentColor: accentColor,
+                          textColor: accentColor,
+                          backgroundColor: accentColor.withValues(alpha: 0.12),
                           compact: isCompact,
                         ),
                         const Spacer(),
@@ -355,97 +360,5 @@ class _ModeCard extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class _HeaderPill extends StatelessWidget {
-  const _HeaderPill({
-    required this.icon,
-    required this.label,
-    required this.accentColor,
-    this.compact = false,
-  });
-
-  final IconData icon;
-  final String label;
-  final Color accentColor;
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: KidPalette.white.withValues(alpha: 0.92),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: KidPalette.stroke),
-        boxShadow: KidShadows.panel,
-      ),
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: compact ? 12 : 16,
-          vertical: compact ? 8 : 10,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: accentColor, size: compact ? 18 : 22),
-            SizedBox(width: compact ? 6 : 8),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                color: KidPalette.navy,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ModeTag extends StatelessWidget {
-  const _ModeTag({
-    required this.label,
-    required this.accentColor,
-    this.compact = false,
-  });
-
-  final String label;
-  final Color accentColor;
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: compact ? 10 : 12,
-        vertical: compact ? 6 : 8,
-      ),
-      decoration: BoxDecoration(
-        color: accentColor.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-          color: accentColor,
-          fontWeight: FontWeight.w900,
-        ),
-      ),
-    );
-  }
-}
-
-Color _accentColorForCategory(HomeCategory category) {
-  switch (category.id) {
-    case 'hangul':
-      return KidPalette.yellowDark;
-    case 'alphabet':
-      return KidPalette.blue;
-    case 'numbers':
-      return KidPalette.coralDark;
-    default:
-      return KidPalette.navy;
   }
 }

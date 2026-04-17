@@ -8,6 +8,7 @@ import '../../../app/ui/toy_panel.dart';
 import '../data/home_catalog_repository.dart';
 import 'category_hub_screen.dart';
 import 'home_category_config.dart';
+import 'home_pills.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
@@ -59,9 +60,10 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Row(
                 children: [
-                  _HeaderPill(
+                  HomeHeaderPill(
                     icon: Icons.directions_car_filled_rounded,
                     label: '오늘의 차고',
+                    iconColor: KidPalette.blue,
                     compact: compact,
                   ),
                   const Spacer(),
@@ -175,7 +177,7 @@ class _CategoryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final config = HomeCategoryConfig.resolve(category);
-    final accentColor = _accentColorForCategory(category);
+    final accentColor = config.accentColor;
     final panelColor = Color.lerp(
       category.backgroundColor,
       KidPalette.white,
@@ -205,14 +207,14 @@ class _CategoryCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  _CategoryMetaChip(
+                  HomeAccentPill(
                     label: config.stickerText,
                     textColor: accentColor,
                     backgroundColor: KidPalette.white.withValues(alpha: 0.76),
                     compact: compact,
                   ),
                   const Spacer(),
-                  _CategoryMetaChip(
+                  HomeAccentPill(
                     label: config.badgeText,
                     textColor: accentColor,
                     backgroundColor: accentColor.withValues(alpha: 0.12),
@@ -288,97 +290,5 @@ class _CategoryCard extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class _HeaderPill extends StatelessWidget {
-  const _HeaderPill({
-    required this.icon,
-    required this.label,
-    this.compact = false,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: KidPalette.white.withValues(alpha: 0.92),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: KidPalette.stroke),
-        boxShadow: KidShadows.panel,
-      ),
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: compact ? 12 : 16,
-          vertical: compact ? 8 : 10,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: KidPalette.blue, size: compact ? 18 : 22),
-            SizedBox(width: compact ? 6 : 8),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                color: KidPalette.navy,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CategoryMetaChip extends StatelessWidget {
-  const _CategoryMetaChip({
-    required this.label,
-    required this.textColor,
-    required this.backgroundColor,
-    this.compact = false,
-  });
-
-  final String label;
-  final Color textColor;
-  final Color backgroundColor;
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: compact ? 10 : 12,
-        vertical: compact ? 6 : 8,
-      ),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-          color: textColor,
-          fontWeight: FontWeight.w900,
-        ),
-      ),
-    );
-  }
-}
-
-Color _accentColorForCategory(HomeCategory category) {
-  switch (category.id) {
-    case 'hangul':
-      return KidPalette.yellowDark;
-    case 'alphabet':
-      return KidPalette.blue;
-    case 'numbers':
-      return KidPalette.coralDark;
-    default:
-      return KidPalette.navy;
   }
 }

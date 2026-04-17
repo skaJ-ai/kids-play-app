@@ -12,7 +12,10 @@ class ToyButton extends StatelessWidget {
     this.height = 72,
     this.colors = const [KidPalette.blue, KidPalette.blueDark],
     this.cooldown = const Duration(milliseconds: 350),
-  });
+  }) : assert(
+         colors.length >= 2,
+         'ToyButton.colors must include at least two colors.',
+       );
 
   final String label;
   final IconData? icon;

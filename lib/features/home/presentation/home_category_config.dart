@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/ui/kid_theme.dart';
 import '../../alphabet/data/alphabet_lesson_repository.dart';
 import '../../alphabet/presentation/alphabet_learn_screen.dart';
 import '../../alphabet/presentation/alphabet_quiz_screen.dart';
@@ -29,6 +30,7 @@ class HomeCategoryDependencies {
 class HomeCategoryConfig {
   const HomeCategoryConfig({
     required this.id,
+    required this.accentColor,
     required this.badgeText,
     required this.stickerText,
     required this.homeDescription,
@@ -39,6 +41,7 @@ class HomeCategoryConfig {
   });
 
   final String id;
+  final Color accentColor;
   final String badgeText;
   final String stickerText;
   final String homeDescription;
@@ -55,8 +58,9 @@ class HomeCategoryConfig {
     return _knownConfigs[category.id] ??
         HomeCategoryConfig(
           id: category.id,
+          accentColor: KidPalette.navy,
           badgeText: '놀이',
-          stickerText: 'PLAY',
+          stickerText: '놀이',
           homeDescription: category.description,
           hubDescription: category.description,
           compactDescription: category.description,
@@ -67,6 +71,7 @@ class HomeCategoryConfig {
 final Map<String, HomeCategoryConfig> _knownConfigs = {
   'hangul': HomeCategoryConfig(
     id: 'hangul',
+    accentColor: KidPalette.yellowDark,
     badgeText: '자모',
     stickerText: '또박',
     homeDescription: '자모 소리',
@@ -77,6 +82,7 @@ final Map<String, HomeCategoryConfig> _knownConfigs = {
   ),
   'alphabet': HomeCategoryConfig(
     id: 'alphabet',
+    accentColor: KidPalette.blue,
     badgeText: 'ABC',
     stickerText: 'A a',
     homeDescription: 'A a B b',
@@ -87,6 +93,7 @@ final Map<String, HomeCategoryConfig> _knownConfigs = {
   ),
   'numbers': HomeCategoryConfig(
     id: 'numbers',
+    accentColor: KidPalette.coralDark,
     badgeText: '1 2 3',
     stickerText: '하나둘',
     homeDescription: '세고 맞혀요',

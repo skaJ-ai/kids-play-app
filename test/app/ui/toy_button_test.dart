@@ -90,4 +90,11 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.text('나중에 이어서 하기'), findsOneWidget);
   });
+
+  test('asserts when gradient colors has fewer than two stops', () {
+    expect(
+      () => ToyButton(label: '플레이하기', colors: const <Color>[Colors.blue]),
+      throwsAssertionError,
+    );
+  });
 }

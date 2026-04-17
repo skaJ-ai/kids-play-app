@@ -24,22 +24,24 @@ class ToyPanel extends StatelessWidget {
       alpha: borderColor == KidPalette.stroke ? 0.88 : 0.72,
     );
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(radius),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color.lerp(backgroundColor, KidPalette.white, 0.34)!,
-              backgroundColor,
-            ],
-          ),
-          borderRadius: BorderRadius.circular(radius),
-          border: Border.all(color: resolvedBorder, width: 1.5),
-          boxShadow: KidShadows.panel,
+    final borderRadius = BorderRadius.circular(radius);
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color.lerp(backgroundColor, KidPalette.white, 0.34)!,
+            backgroundColor,
+          ],
         ),
+        borderRadius: borderRadius,
+        border: Border.all(color: resolvedBorder, width: 1.5),
+        boxShadow: KidShadows.panel,
+      ),
+      child: ClipRRect(
+        borderRadius: borderRadius,
         child: Stack(
           children: [
             Positioned(
