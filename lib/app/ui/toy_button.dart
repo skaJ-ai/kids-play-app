@@ -91,7 +91,7 @@ class ToyButton extends StatelessWidget {
     final iconFootprint = icon == null ? 0.0 : chipSize + densityTokens.iconGap;
 
     return Opacity(
-      opacity: enabled ? 1 : 0.58,
+      opacity: enabled ? 1 : chromeTokens.disabledOpacity,
       child: DecoratedBox(
         decoration: BoxDecoration(
           gradient: LinearGradient(

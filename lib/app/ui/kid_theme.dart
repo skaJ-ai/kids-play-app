@@ -308,6 +308,7 @@ class KidButtonChromeTokens {
     this.primaryHighlightAlpha = 0.22,
     this.secondaryIconChipAlpha = 0.88,
     this.secondaryHighlightAlpha = 0.14,
+    this.disabledOpacity = 0.58,
   });
 
   final double primaryBorderAlpha;
@@ -316,6 +317,7 @@ class KidButtonChromeTokens {
   final double primaryHighlightAlpha;
   final double secondaryIconChipAlpha;
   final double secondaryHighlightAlpha;
+  final double disabledOpacity;
 
   KidButtonChromeTokens copyWith({
     double? primaryBorderAlpha,
@@ -324,6 +326,7 @@ class KidButtonChromeTokens {
     double? primaryHighlightAlpha,
     double? secondaryIconChipAlpha,
     double? secondaryHighlightAlpha,
+    double? disabledOpacity,
   }) {
     return KidButtonChromeTokens(
       primaryBorderAlpha: primaryBorderAlpha ?? this.primaryBorderAlpha,
@@ -336,6 +339,7 @@ class KidButtonChromeTokens {
           secondaryIconChipAlpha ?? this.secondaryIconChipAlpha,
       secondaryHighlightAlpha:
           secondaryHighlightAlpha ?? this.secondaryHighlightAlpha,
+      disabledOpacity: disabledOpacity ?? this.disabledOpacity,
     );
   }
 
@@ -375,6 +379,9 @@ class KidButtonChromeTokens {
             t,
           ) ??
           secondaryHighlightAlpha,
+      disabledOpacity:
+          ui.lerpDouble(disabledOpacity, other.disabledOpacity, t) ??
+          disabledOpacity,
     );
   }
 }

@@ -144,6 +144,7 @@ void main() {
     expect(layout.chrome.button.primaryHighlightAlpha, 0.22);
     expect(layout.chrome.button.secondaryIconChipAlpha, 0.88);
     expect(layout.chrome.button.secondaryHighlightAlpha, 0.14);
+    expect(layout.chrome.button.disabledOpacity, 0.58);
     expect(layout.chrome.panel.strokeBorderAlpha, 0.88);
     expect(layout.chrome.panel.customBorderAlpha, 0.72);
     expect(layout.chrome.panel.highlightAlpha, 0.28);

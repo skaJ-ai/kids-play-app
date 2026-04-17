@@ -480,6 +480,28 @@ void main() {
     );
   });
 
+  testWidgets('reads disabled opacity from kid theme chrome tokens', (
+    WidgetTester tester,
+  ) async {
+    final customLayout = KidLayoutTheme(
+      button: KidLayoutTheme.defaults.button,
+      panel: KidLayoutTheme.defaults.panel,
+      chrome: const KidChromeTokens(
+        button: KidButtonChromeTokens(disabledOpacity: 0.23),
+        panel: KidPanelChromeTokens(),
+      ),
+    );
+
+    await tester.pumpWidget(
+      _buildTestApp(
+        ToyButton(label: '비활성 버튼'),
+        theme: buildKidTheme().copyWith(extensions: [customLayout]),
+      ),
+    );
+
+    expect(_buttonOpacity(tester, find.byType(ToyButton)), 0.23);
+  });
+
   testWidgets('renders a calmer secondary tone with surface styling', (
     WidgetTester tester,
   ) async {
@@ -577,6 +599,14 @@ BoxDecoration _buttonDecoration(WidgetTester tester, Finder finder) {
   );
 
   return decoratedBox.decoration as BoxDecoration;
+}
+
+double _buttonOpacity(WidgetTester tester, Finder finder) {
+  final opacityWidget = tester.widget<Opacity>(
+    find.descendant(of: finder, matching: find.byType(Opacity)),
+  );
+
+  return opacityWidget.opacity;
 }
 
 EdgeInsetsGeometry _buttonPadding(WidgetTester tester, Finder finder) {
