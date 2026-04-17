@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+import '../audio/audio_service.dart';
 import 'progress_store.dart';
 import 'speech_cue_service.dart';
 
@@ -7,17 +8,20 @@ class AppServices {
   AppServices({
     required this.progressStore,
     required this.speechCueService,
-  });
+    AudioService? audioService,
+  }) : audioService = audioService ?? NoopAudioService();
 
   factory AppServices.fallback() {
     return AppServices(
       progressStore: MemoryProgressStore(),
       speechCueService: NoopSpeechCueService(),
+      audioService: NoopAudioService(),
     );
   }
 
   final ProgressStore progressStore;
   final SpeechCueService speechCueService;
+  final AudioService audioService;
 }
 
 class AppServicesScope extends InheritedWidget {

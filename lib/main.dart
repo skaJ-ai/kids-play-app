@@ -4,6 +4,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app/app.dart';
+import 'app/audio/tts_fallback_audio_service.dart';
 import 'app/services/app_services.dart';
 import 'app/services/progress_store.dart';
 import 'app/services/speech_cue_service.dart';
@@ -19,9 +20,11 @@ Future<void> main() async {
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
   final preferences = await SharedPreferences.getInstance();
+  final speech = FlutterTtsSpeechCueService(FlutterTts());
   final services = AppServices(
     progressStore: SharedPreferencesProgressStore(preferences),
-    speechCueService: FlutterTtsSpeechCueService(FlutterTts()),
+    speechCueService: speech,
+    audioService: TtsFallbackAudioService(speech: speech),
   );
 
   runApp(KidsPlayApp(services: services));
