@@ -69,15 +69,15 @@ void main() {
   );
 
   testWidgets(
-    'moves from hero screen to the shorter premium category garage menu',
+    'moves from hero screen to the roomy premium category garage menu',
     (WidgetTester tester) async {
       await tester.pumpWidget(KidsPlayApp());
 
       await tester.tap(find.text('놀이 시작'));
       await tester.pumpAndSettle();
 
-      expect(find.text('어떤 차고로 갈까?'), findsOneWidget);
-      expect(find.text('좋아하는 차고를 콕 눌러요.'), findsOneWidget);
+      expect(find.text('오늘은 어디로 달릴까?'), findsOneWidget);
+      expect(find.text('마음에 드는 차고를 누르고 놀이를 골라요.'), findsOneWidget);
       expect(find.text('한글'), findsOneWidget);
       expect(find.text('알파벳'), findsOneWidget);
       expect(find.text('숫자'), findsOneWidget);
