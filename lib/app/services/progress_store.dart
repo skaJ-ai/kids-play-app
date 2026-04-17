@@ -2,6 +2,76 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+class _RecentRewardUnchanged {
+  const _RecentRewardUnchanged();
+}
+
+const _noRecentRewardChange = _RecentRewardUnchanged();
+
+class RecentReward {
+  const RecentReward({
+    required this.kind,
+    required this.amount,
+    required this.lessonId,
+    required this.earnedAt,
+  });
+
+  factory RecentReward.fromJson(Map<String, dynamic> json) {
+    final kind = json['kind'];
+    final amount = json['amount'];
+    final lessonId = json['lessonId'];
+    final earnedAt = json['earnedAt'];
+
+    if (kind is! String || lessonId is! String || earnedAt is! String) {
+      throw const FormatException('Invalid recent reward payload.');
+    }
+
+    final parsedEarnedAt = DateTime.tryParse(earnedAt);
+    if (parsedEarnedAt == null) {
+      throw const FormatException('Invalid recent reward payload.');
+    }
+
+    final parsedAmount = switch (amount) {
+      int value => value,
+      num value when value == value.roundToDouble() => value.toInt(),
+      _ => throw const FormatException('Invalid recent reward payload.'),
+    };
+
+    return RecentReward(
+      kind: kind,
+      amount: parsedAmount,
+      lessonId: lessonId,
+      earnedAt: parsedEarnedAt,
+    );
+  }
+
+  final String kind;
+  final int amount;
+  final String lessonId;
+  final DateTime earnedAt;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'kind': kind,
+      'amount': amount,
+      'lessonId': lessonId,
+      'earnedAt': earnedAt.toIso8601String(),
+    };
+  }
+}
+
+RecentReward? _recentRewardFromJson(Object? json) {
+  if (json is! Map) {
+    return null;
+  }
+
+  try {
+    return RecentReward.fromJson(Map<String, dynamic>.from(json));
+  } catch (_) {
+    return null;
+  }
+}
+
 class LessonProgress {
   const LessonProgress({
     this.bestScore = 0,
@@ -53,6 +123,7 @@ class LessonProgress {
 class AppProgressSnapshot {
   const AppProgressSnapshot({
     this.stickerCount = 0,
+    this.lastEarnedReward,
     this.voicePromptsEnabled = true,
     this.effectsEnabled = true,
     this.unlockedLessonIds = const [],
@@ -61,8 +132,10 @@ class AppProgressSnapshot {
 
   factory AppProgressSnapshot.fromJson(Map<String, dynamic> json) {
     final lessonJson = (json['lessons'] as Map<String, dynamic>? ?? const {});
+    final rewardJson = json['lastEarnedReward'];
     return AppProgressSnapshot(
       stickerCount: json['stickerCount'] as int? ?? 0,
+      lastEarnedReward: _recentRewardFromJson(rewardJson),
       voicePromptsEnabled: json['voicePromptsEnabled'] as bool? ?? true,
       effectsEnabled: json['effectsEnabled'] as bool? ?? true,
       unlockedLessonIds:
@@ -79,6 +152,7 @@ class AppProgressSnapshot {
   }
 
   final int stickerCount;
+  final RecentReward? lastEarnedReward;
   final bool voicePromptsEnabled;
   final bool effectsEnabled;
   final List<String> unlockedLessonIds;
@@ -90,6 +164,7 @@ class AppProgressSnapshot {
 
   AppProgressSnapshot copyWith({
     int? stickerCount,
+    Object? lastEarnedReward = _noRecentRewardChange,
     bool? voicePromptsEnabled,
     bool? effectsEnabled,
     List<String>? unlockedLessonIds,
@@ -97,6 +172,9 @@ class AppProgressSnapshot {
   }) {
     return AppProgressSnapshot(
       stickerCount: stickerCount ?? this.stickerCount,
+      lastEarnedReward: identical(lastEarnedReward, _noRecentRewardChange)
+          ? this.lastEarnedReward
+          : lastEarnedReward as RecentReward?,
       voicePromptsEnabled: voicePromptsEnabled ?? this.voicePromptsEnabled,
       effectsEnabled: effectsEnabled ?? this.effectsEnabled,
       unlockedLessonIds: unlockedLessonIds ?? this.unlockedLessonIds,
@@ -108,6 +186,7 @@ class AppProgressSnapshot {
     return {
       'version': 1,
       'stickerCount': stickerCount,
+      'lastEarnedReward': lastEarnedReward?.toJson(),
       'voicePromptsEnabled': voicePromptsEnabled,
       'effectsEnabled': effectsEnabled,
       'unlockedLessonIds': unlockedLessonIds,
@@ -120,6 +199,13 @@ abstract class ProgressStore {
   Future<AppProgressSnapshot> loadSnapshot();
 
   Future<void> addStickers(int count);
+
+  Future<void> recordRewardEarned({
+    required String kind,
+    required int amount,
+    required String lessonId,
+    required DateTime earnedAt,
+  });
 
   Future<void> recordLessonIndex({
     required String lessonId,
@@ -152,6 +238,23 @@ class MemoryProgressStore implements ProgressStore {
   Future<void> addStickers(int count) async {
     _snapshot = _snapshot.copyWith(
       stickerCount: _snapshot.stickerCount + count,
+    );
+  }
+
+  @override
+  Future<void> recordRewardEarned({
+    required String kind,
+    required int amount,
+    required String lessonId,
+    required DateTime earnedAt,
+  }) async {
+    _snapshot = _snapshot.copyWith(
+      lastEarnedReward: RecentReward(
+        kind: kind,
+        amount: amount,
+        lessonId: lessonId,
+        earnedAt: earnedAt,
+      ),
     );
   }
 
@@ -233,6 +336,25 @@ class SharedPreferencesProgressStore implements ProgressStore {
   Future<void> addStickers(int count) async {
     await _mutate((snapshot) {
       return snapshot.copyWith(stickerCount: snapshot.stickerCount + count);
+    });
+  }
+
+  @override
+  Future<void> recordRewardEarned({
+    required String kind,
+    required int amount,
+    required String lessonId,
+    required DateTime earnedAt,
+  }) async {
+    await _mutate((snapshot) {
+      return snapshot.copyWith(
+        lastEarnedReward: RecentReward(
+          kind: kind,
+          amount: amount,
+          lessonId: lessonId,
+          earnedAt: earnedAt,
+        ),
+      );
     });
   }
 
