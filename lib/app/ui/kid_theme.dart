@@ -59,6 +59,7 @@ class KidButtonDensityTokens {
     this.primaryBorderWidth = 1.3,
     this.secondaryBorderWidth = 1.2,
     this.radius,
+    this.highlightTopInset = 1,
     this.highlightHeight = 12,
     this.highlightHorizontalInset = 16,
     this.iconChipRadius = 14,
@@ -76,6 +77,7 @@ class KidButtonDensityTokens {
   final double primaryBorderWidth;
   final double secondaryBorderWidth;
   final double? radius;
+  final double highlightTopInset;
   final double highlightHeight;
   final double highlightHorizontalInset;
   final double iconChipRadius;
@@ -94,6 +96,7 @@ class KidButtonDensityTokens {
     double? secondaryBorderWidth,
     double? radius,
     bool clearRadius = false,
+    double? highlightTopInset,
     double? highlightHeight,
     double? highlightHorizontalInset,
     double? iconChipRadius,
@@ -113,6 +116,7 @@ class KidButtonDensityTokens {
       primaryBorderWidth: primaryBorderWidth ?? this.primaryBorderWidth,
       secondaryBorderWidth: secondaryBorderWidth ?? this.secondaryBorderWidth,
       radius: clearRadius ? null : radius ?? this.radius,
+      highlightTopInset: highlightTopInset ?? this.highlightTopInset,
       highlightHeight: highlightHeight ?? this.highlightHeight,
       highlightHorizontalInset:
           highlightHorizontalInset ?? this.highlightHorizontalInset,
@@ -155,6 +159,9 @@ class KidButtonDensityTokens {
           ? (t < 0.5 ? radius : other.radius)
           : ui.lerpDouble(radius, other.radius, t) ??
                 (t < 0.5 ? radius : other.radius),
+      highlightTopInset:
+          ui.lerpDouble(highlightTopInset, other.highlightTopInset, t) ??
+          highlightTopInset,
       highlightHeight:
           ui.lerpDouble(highlightHeight, other.highlightHeight, t) ??
           highlightHeight,
@@ -584,6 +591,7 @@ class KidLayoutTheme extends ThemeExtension<KidLayoutTheme> {
         primaryBorderWidth: 1.2,
         secondaryBorderWidth: 1.1,
         radius: 24,
+        highlightTopInset: 1,
         highlightHeight: 10,
         highlightHorizontalInset: 14,
         iconChipRadius: 13,
@@ -601,6 +609,7 @@ class KidLayoutTheme extends ThemeExtension<KidLayoutTheme> {
         primaryBorderWidth: 1.1,
         secondaryBorderWidth: 1.0,
         radius: 22,
+        highlightTopInset: 1,
         highlightHeight: 8,
         highlightHorizontalInset: 12,
         iconChipRadius: 11,

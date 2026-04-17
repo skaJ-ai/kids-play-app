@@ -20,6 +20,7 @@ void main() {
     expect(layout.button.regular.primaryBorderWidth, 1.2);
     expect(layout.button.regular.secondaryBorderWidth, 1.1);
     expect(layout.button.regular.radius, 24);
+    expect(layout.button.regular.highlightTopInset, 1);
     expect(layout.button.regular.highlightHorizontalInset, 14);
     expect(layout.button.regular.highlightHeight, 10);
     expect(layout.button.regular.iconChipRadius, 13);
@@ -35,6 +36,7 @@ void main() {
     expect(layout.button.compact.primaryBorderWidth, 1.1);
     expect(layout.button.compact.secondaryBorderWidth, 1.0);
     expect(layout.button.compact.radius, 22);
+    expect(layout.button.compact.highlightTopInset, 1);
     expect(layout.button.compact.highlightHorizontalInset, 12);
     expect(layout.button.compact.highlightHeight, 8);
     expect(layout.button.compact.iconChipRadius, 11);
@@ -59,7 +61,7 @@ void main() {
   });
 
   test(
-    'KidButtonDensityTokens keeps label typography tokens in copyWith and lerp',
+    'KidButtonDensityTokens keeps highlight and label tokens in copyWith and lerp',
     () {
       const base = KidButtonDensityTokens(
         height: 60,
@@ -71,6 +73,7 @@ void main() {
         labelFontWeight: FontWeight.w700,
         labelLetterSpacing: 0,
         labelHeight: 1.1,
+        highlightTopInset: 1,
       );
       const other = KidButtonDensityTokens(
         height: 52,
@@ -82,21 +85,25 @@ void main() {
         labelFontWeight: FontWeight.w500,
         labelLetterSpacing: 0.4,
         labelHeight: 1.3,
+        highlightTopInset: 3,
       );
 
       final updated = base.copyWith(
         labelFontWeight: FontWeight.w600,
         labelLetterSpacing: 0.2,
         labelHeight: 1.2,
+        highlightTopInset: 2,
       );
       final lerped = base.lerp(other, 1);
 
       expect(updated.labelFontWeight, FontWeight.w600);
       expect(updated.labelLetterSpacing, 0.2);
       expect(updated.labelHeight, 1.2);
+      expect(updated.highlightTopInset, 2);
       expect(lerped.labelFontWeight, other.labelFontWeight);
       expect(lerped.labelLetterSpacing, other.labelLetterSpacing);
       expect(lerped.labelHeight, other.labelHeight);
+      expect(lerped.highlightTopInset, other.highlightTopInset);
     },
   );
 

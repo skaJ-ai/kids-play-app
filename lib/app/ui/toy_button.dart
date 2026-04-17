@@ -118,7 +118,7 @@ class ToyButton extends StatelessWidget {
         child: Stack(
           children: [
             Positioned(
-              top: 1,
+              top: densityTokens.highlightTopInset,
               left: densityTokens.highlightHorizontalInset,
               right: densityTokens.highlightHorizontalInset,
               child: IgnorePointer(

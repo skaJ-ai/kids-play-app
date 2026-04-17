@@ -84,6 +84,7 @@ void main() {
             labelHeight: 1.3,
             primaryBorderWidth: 1.7,
             secondaryBorderWidth: 1.1,
+            highlightTopInset: 3,
             highlightHeight: 14,
             highlightHorizontalInset: 22,
             iconChipRadius: 18,
@@ -100,6 +101,7 @@ void main() {
             labelHeight: 1.15,
             primaryBorderWidth: 0.9,
             secondaryBorderWidth: 0.7,
+            highlightTopInset: 5,
             highlightHeight: 8,
             highlightHorizontalInset: 10,
             iconChipRadius: 9,
@@ -202,6 +204,13 @@ void main() {
         customLayout.button.regular.highlightHeight,
       );
       expect(
+        _buttonHighlightTopInset(
+          tester,
+          find.byKey(const Key('regular-button')),
+        ),
+        customLayout.button.regular.highlightTopInset,
+      );
+      expect(
         _buttonHighlightHorizontalInset(
           tester,
           find.byKey(const Key('regular-button')),
@@ -283,6 +292,13 @@ void main() {
       expect(
         _buttonHighlightHeight(tester, find.byKey(const Key('compact-button'))),
         customLayout.button.compact.highlightHeight,
+      );
+      expect(
+        _buttonHighlightTopInset(
+          tester,
+          find.byKey(const Key('compact-button')),
+        ),
+        customLayout.button.compact.highlightTopInset,
       );
       expect(
         _buttonHighlightHorizontalInset(
@@ -853,6 +869,13 @@ double _buttonBorderRadius(WidgetTester tester, Finder finder) {
 
 double _buttonHighlightHeight(WidgetTester tester, Finder finder) {
   return tester.getSize(_buttonHighlightFinder(finder)).height;
+}
+
+double _buttonHighlightTopInset(WidgetTester tester, Finder finder) {
+  final buttonRect = tester.getRect(_buttonDecorationFinder(finder));
+  final highlightRect = tester.getRect(_buttonHighlightFinder(finder));
+
+  return highlightRect.top - buttonRect.top;
 }
 
 double _buttonHighlightHorizontalInset(WidgetTester tester, Finder finder) {
