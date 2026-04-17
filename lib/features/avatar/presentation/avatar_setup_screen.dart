@@ -87,6 +87,13 @@ class _AvatarSetupScreenState extends State<AvatarSetupScreen> {
     await _refreshSnapshot();
   }
 
+  Future<void> _setLessonUnlocked(String lessonId, bool unlocked) async {
+    await AppServicesScope.of(
+      context,
+    ).progressStore.setLessonUnlocked(lessonId, unlocked);
+    await _refreshSnapshot();
+  }
+
   Future<void> _clearLessonMistakes(String lessonId) async {
     final services = AppServicesScope.of(context);
     final snapshot = await services.progressStore.loadSnapshot();
@@ -264,6 +271,12 @@ class _AvatarSetupScreenState extends State<AvatarSetupScreen> {
                             onOpenLessonRetry: _openLessonRetry,
                           ),
                           SizedBox(height: compact ? 10 : 14),
+                          _ParentLessonUnlockPanel(
+                            compact: compact,
+                            snapshot: progress,
+                            onSetLessonUnlocked: _setLessonUnlocked,
+                          ),
+                          SizedBox(height: compact ? 10 : 14),
                           ToyPanel(
                             backgroundColor: KidPalette.lilac.withValues(
                               alpha: 0.72,
@@ -435,6 +448,8 @@ typedef _LessonIndexAdjustCallback =
 typedef _LessonActionCallback = Future<void> Function(String lessonId);
 typedef _LessonRetryCallback =
     Future<void> Function(String lessonId, List<String> mistakes);
+typedef _LessonUnlockCallback =
+    Future<void> Function(String lessonId, bool unlocked);
 
 class _ParentLessonManagementPanel extends StatelessWidget {
   const _ParentLessonManagementPanel({
@@ -502,6 +517,170 @@ class _ParentLessonManagementPanel extends StatelessWidget {
             ],
           ],
         ],
+      ),
+    );
+  }
+}
+
+class _ParentLessonUnlockPanel extends StatelessWidget {
+  const _ParentLessonUnlockPanel({
+    required this.compact,
+    required this.snapshot,
+    required this.onSetLessonUnlocked,
+  });
+
+  final bool compact;
+  final AppProgressSnapshot snapshot;
+  final _LessonUnlockCallback onSetLessonUnlocked;
+
+  @override
+  Widget build(BuildContext context) {
+    final unlockTargets = _knownLessonMetadata
+        .where((metadata) => !_isDefaultUnlockedLesson(metadata.lessonId))
+        .toList(growable: false);
+
+    return ToyPanel(
+      backgroundColor: KidPalette.white.withValues(alpha: 0.95),
+      padding: EdgeInsets.all(compact ? 14 : 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '다음 세트 미리 열기',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: KidPalette.coralDark,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          SizedBox(height: compact ? 8 : 10),
+          Text(
+            '첫 세트 뒤의 세트들은 부모가 미리 열어둘 수 있어요.',
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(color: KidPalette.navy),
+          ),
+          SizedBox(height: compact ? 10 : 14),
+          for (var i = 0; i < unlockTargets.length; i++) ...[
+            _LessonUnlockCard(
+              compact: compact,
+              metadata: unlockTargets[i],
+              unlocked: _isLessonUnlocked(snapshot, unlockTargets[i].lessonId),
+              onPressed: () =>
+                  onSetLessonUnlocked(unlockTargets[i].lessonId, true),
+            ),
+            if (i != unlockTargets.length - 1)
+              SizedBox(height: compact ? 8 : 10),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _LessonUnlockCard extends StatelessWidget {
+  const _LessonUnlockCard({
+    required this.compact,
+    required this.metadata,
+    required this.unlocked,
+    required this.onPressed,
+  });
+
+  final bool compact;
+  final _LessonMetadata metadata;
+  final bool unlocked;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(compact ? 12 : 14),
+      decoration: BoxDecoration(
+        color: metadata.color.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(22),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  metadata.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: KidPalette.navy,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                SizedBox(height: compact ? 6 : 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _LessonUnlockPill(
+                      label: metadata.categoryLabel,
+                      color: metadata.color,
+                    ),
+                    _LessonUnlockPill(
+                      label: '${metadata.cardCount}개 카드',
+                      color: KidPalette.blue,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          SizedBox(width: compact ? 10 : 12),
+          FilledButton.icon(
+            key: Key('lesson-unlock-${metadata.lessonId}'),
+            onPressed: unlocked ? null : onPressed,
+            style: FilledButton.styleFrom(
+              backgroundColor: unlocked ? KidPalette.mintDark : metadata.color,
+              disabledBackgroundColor: KidPalette.mintDark,
+              foregroundColor: KidPalette.white,
+              disabledForegroundColor: KidPalette.white,
+              padding: EdgeInsets.symmetric(
+                horizontal: compact ? 12 : 14,
+                vertical: compact ? 10 : 12,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
+              ),
+            ),
+            icon: Icon(
+              unlocked ? Icons.lock_open_rounded : Icons.lock_outline_rounded,
+              size: 18,
+            ),
+            label: Text(unlocked ? '열려 있어요' : '잠금 풀기'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LessonUnlockPill extends StatelessWidget {
+  const _LessonUnlockPill({required this.label, required this.color});
+
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: KidPalette.white.withValues(alpha: 0.88),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+          color: color,
+          fontWeight: FontWeight.w900,
+        ),
       ),
     );
   }
@@ -1128,25 +1307,32 @@ String _fallbackCategoryLabel(String categoryKey) {
   }
 }
 
+bool _isDefaultUnlockedLesson(String lessonId) {
+  final categoryPrefix = '${lessonId.split(':').first}:';
+  for (final metadata in _knownLessonMetadata) {
+    if (metadata.lessonId.startsWith(categoryPrefix)) {
+      return metadata.lessonId == lessonId;
+    }
+  }
+  return false;
+}
+
+bool _isLessonUnlocked(AppProgressSnapshot snapshot, String lessonId) {
+  return _isDefaultUnlockedLesson(lessonId) ||
+      snapshot.unlockedLessonIds.contains(lessonId) ||
+      snapshot.lessons.containsKey(lessonId);
+}
+
 Widget? _buildLessonRetryScreen(String lessonId, List<String> mistakes) {
   final lessonKey = lessonId.split(':').last;
   if (lessonId.startsWith('hangul:')) {
-    return HangulQuizScreen(
-      lessonId: lessonKey,
-      mistakeSymbols: mistakes,
-    );
+    return HangulQuizScreen(lessonId: lessonKey, mistakeSymbols: mistakes);
   }
   if (lessonId.startsWith('alphabet:')) {
-    return AlphabetQuizScreen(
-      lessonId: lessonKey,
-      mistakeSymbols: mistakes,
-    );
+    return AlphabetQuizScreen(lessonId: lessonKey, mistakeSymbols: mistakes);
   }
   if (lessonId.startsWith('numbers:')) {
-    return NumbersQuizScreen(
-      lessonId: lessonKey,
-      mistakeSymbols: mistakes,
-    );
+    return NumbersQuizScreen(lessonId: lessonKey, mistakeSymbols: mistakes);
   }
   return null;
 }

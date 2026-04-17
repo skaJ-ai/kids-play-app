@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kids_play_app/app/services/app_services.dart';
+import 'package:kids_play_app/app/services/progress_store.dart';
+import 'package:kids_play_app/app/services/speech_cue_service.dart';
 import 'package:kids_play_app/features/alphabet/data/alphabet_lesson_repository.dart';
 import 'package:kids_play_app/features/hangul/data/hangul_lesson_repository.dart';
 import 'package:kids_play_app/features/home/data/home_catalog_repository.dart';
@@ -11,7 +14,53 @@ import 'package:kids_play_app/features/home/presentation/home_category_config.da
 import 'package:kids_play_app/features/numbers/data/numbers_lesson_repository.dart';
 
 void main() {
-  testWidgets('shows a lesson picker before opening hangul learn when multiple sets exist', (
+  testWidgets(
+    'shows a lesson picker before opening hangul learn when multiple sets exist',
+    (WidgetTester tester) async {
+      final repository = HangulLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          HangulLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_hangulLessonOne, _hangulLessonTwo],
+          }),
+        }),
+      );
+      final progressStore = MemoryProgressStore();
+      await progressStore.setLessonUnlocked('hangul:basic_consonants_2', true);
+
+      await tester.pumpWidget(
+        _wrapWithServices(
+          progressStore: progressStore,
+          child: CategoryHubScreen(
+            category: const HomeCategory(
+              id: 'hangul',
+              label: '한글',
+              description: '자음과 모음을 만나요',
+              backgroundColorHex: '#FFE699',
+              iconName: 'text_fields_rounded',
+            ),
+            categoryDependencies: HomeCategoryDependencies(
+              hangulLessonRepository: repository,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('배우기'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('기본 자음 1'), findsOneWidget);
+      expect(find.text('기본 자음 2'), findsOneWidget);
+
+      await tester.tap(find.text('기본 자음 2'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('한글 학습'), findsOneWidget);
+      expect(find.text('비읍, ㅂ'), findsOneWidget);
+    },
+  );
+
+  testWidgets('shows later hangul sets as locked until a parent unlocks them', (
     WidgetTester tester,
   ) async {
     final repository = HangulLessonRepository(
@@ -21,10 +70,12 @@ void main() {
         }),
       }),
     );
+    final progressStore = MemoryProgressStore();
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: CategoryHubScreen(
+      _wrapWithServices(
+        progressStore: progressStore,
+        child: CategoryHubScreen(
           category: const HomeCategory(
             id: 'hangul',
             label: '한글',
@@ -43,99 +94,157 @@ void main() {
     await tester.tap(find.text('배우기'));
     await tester.pumpAndSettle();
 
-    expect(find.text('기본 자음 1'), findsOneWidget);
-    expect(find.text('기본 자음 2'), findsOneWidget);
+    expect(find.text('잠겨 있어요'), findsOneWidget);
 
-    await tester.tap(find.text('기본 자음 2'));
+    await tester.tap(
+      find.byKey(const Key('lesson-picker-item-basic_consonants_2')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('한글 학습'), findsNothing);
+    expect(find.text('비읍, ㅂ'), findsNothing);
+  });
+
+  testWidgets('opens later hangul sets after a parent unlocks them', (
+    WidgetTester tester,
+  ) async {
+    final repository = HangulLessonRepository(
+      assetBundle: _FakeAssetBundle({
+        HangulLessonRepository.manifestPath: jsonEncode({
+          'lessons': [_hangulLessonOne, _hangulLessonTwo],
+        }),
+      }),
+    );
+    final progressStore = MemoryProgressStore();
+    await progressStore.setLessonUnlocked('hangul:basic_consonants_2', true);
+
+    await tester.pumpWidget(
+      _wrapWithServices(
+        progressStore: progressStore,
+        child: CategoryHubScreen(
+          category: const HomeCategory(
+            id: 'hangul',
+            label: '한글',
+            description: '자음과 모음을 만나요',
+            backgroundColorHex: '#FFE699',
+            iconName: 'text_fields_rounded',
+          ),
+          categoryDependencies: HomeCategoryDependencies(
+            hangulLessonRepository: repository,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('배우기'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('잠겨 있어요'), findsNothing);
+
+    await tester.tap(
+      find.byKey(const Key('lesson-picker-item-basic_consonants_2')),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('한글 학습'), findsOneWidget);
     expect(find.text('비읍, ㅂ'), findsOneWidget);
   });
 
-  testWidgets('shows a lesson picker before opening numbers quiz when multiple sets exist', (
-    WidgetTester tester,
-  ) async {
-    final repository = NumbersLessonRepository(
-      assetBundle: _FakeAssetBundle({
-        NumbersLessonRepository.manifestPath: jsonEncode({
-          'lessons': [_numbersLessonOne, _numbersLessonTwo],
+  testWidgets(
+    'shows a lesson picker before opening numbers quiz when multiple sets exist',
+    (WidgetTester tester) async {
+      final repository = NumbersLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          NumbersLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_numbersLessonOne, _numbersLessonTwo],
+          }),
         }),
-      }),
-    );
+      );
+      final progressStore = MemoryProgressStore();
+      await progressStore.setLessonUnlocked('numbers:numbers_count_2', true);
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: CategoryHubScreen(
-          category: const HomeCategory(
-            id: 'numbers',
-            label: '숫자',
-            description: '숫자 놀이를 시작해요',
-            backgroundColorHex: '#FFC6D9',
-            iconName: 'looks_one_rounded',
-          ),
-          categoryDependencies: HomeCategoryDependencies(
-            numbersLessonRepository: repository,
+      await tester.pumpWidget(
+        _wrapWithServices(
+          progressStore: progressStore,
+          child: CategoryHubScreen(
+            category: const HomeCategory(
+              id: 'numbers',
+              label: '숫자',
+              description: '숫자 놀이를 시작해요',
+              backgroundColorHex: '#FFC6D9',
+              iconName: 'looks_one_rounded',
+            ),
+            categoryDependencies: HomeCategoryDependencies(
+              numbersLessonRepository: repository,
+            ),
           ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.text('퀴즈'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('퀴즈'));
+      await tester.pumpAndSettle();
 
-    expect(find.text('숫자 1부터 5까지'), findsOneWidget);
-    expect(find.text('숫자 6부터 10까지'), findsOneWidget);
+      expect(find.text('숫자 1부터 5까지'), findsOneWidget);
+      expect(find.text('숫자 6부터 10까지'), findsOneWidget);
 
-    await tester.tap(find.text('숫자 6부터 10까지'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('숫자 6부터 10까지'));
+      await tester.pumpAndSettle();
 
-    expect(find.text('숫자 게임'), findsOneWidget);
-    expect(find.text("'6' 숫자를 찾아봐!"), findsOneWidget);
-  });
+      expect(find.text('숫자 게임'), findsOneWidget);
+      expect(find.text("'6' 숫자를 찾아봐!"), findsOneWidget);
+    },
+  );
 
-  testWidgets('shows a lesson picker before opening alphabet quiz when multiple sets exist', (
-    WidgetTester tester,
-  ) async {
-    final repository = AlphabetLessonRepository(
-      assetBundle: _FakeAssetBundle({
-        AlphabetLessonRepository.manifestPath: jsonEncode({
-          'lessons': [_alphabetLessonOne, _alphabetLessonTwo],
+  testWidgets(
+    'shows a lesson picker before opening alphabet quiz when multiple sets exist',
+    (WidgetTester tester) async {
+      final repository = AlphabetLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          AlphabetLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_alphabetLessonOne, _alphabetLessonTwo],
+          }),
         }),
-      }),
-    );
+      );
+      final progressStore = MemoryProgressStore();
+      await progressStore.setLessonUnlocked(
+        'alphabet:alphabet_letters_2',
+        true,
+      );
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: CategoryHubScreen(
-          category: const HomeCategory(
-            id: 'alphabet',
-            label: '알파벳',
-            description: '대문자와 소문자를 만나요',
-            backgroundColorHex: '#B9F4D0',
-            iconName: 'abc_rounded',
-          ),
-          categoryDependencies: HomeCategoryDependencies(
-            alphabetLessonRepository: repository,
+      await tester.pumpWidget(
+        _wrapWithServices(
+          progressStore: progressStore,
+          child: CategoryHubScreen(
+            category: const HomeCategory(
+              id: 'alphabet',
+              label: '알파벳',
+              description: '대문자와 소문자를 만나요',
+              backgroundColorHex: '#B9F4D0',
+              iconName: 'abc_rounded',
+            ),
+            categoryDependencies: HomeCategoryDependencies(
+              alphabetLessonRepository: repository,
+            ),
           ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.text('퀴즈'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('퀴즈'));
+      await tester.pumpAndSettle();
 
-    expect(find.text('알파벳 1'), findsOneWidget);
-    expect(find.text('알파벳 2'), findsOneWidget);
+      expect(find.text('알파벳 1'), findsOneWidget);
+      expect(find.text('알파벳 2'), findsOneWidget);
 
-    await tester.tap(find.text('알파벳 2'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('알파벳 2'));
+      await tester.pumpAndSettle();
 
-    expect(find.text('알파벳 게임'), findsOneWidget);
-    expect(find.text("'F f' 글자를 찾아봐!"), findsOneWidget);
-  });
+      expect(find.text('알파벳 게임'), findsOneWidget);
+      expect(find.text("'F f' 글자를 찾아봐!"), findsOneWidget);
+    },
+  );
 }
 
 const Map<String, dynamic> _hangulLessonOne = {
@@ -230,4 +339,17 @@ class _FakeAssetBundle extends CachingAssetBundle {
     final bytes = Uint8List.fromList(utf8.encode(string));
     return ByteData.view(bytes.buffer);
   }
+}
+
+Widget _wrapWithServices({
+  required ProgressStore progressStore,
+  required Widget child,
+}) {
+  return AppServicesScope(
+    services: AppServices(
+      progressStore: progressStore,
+      speechCueService: NoopSpeechCueService(),
+    ),
+    child: MaterialApp(home: child),
+  );
 }

@@ -55,6 +55,7 @@ class AppProgressSnapshot {
     this.stickerCount = 0,
     this.voicePromptsEnabled = true,
     this.effectsEnabled = true,
+    this.unlockedLessonIds = const [],
     this.lessons = const {},
   });
 
@@ -64,6 +65,10 @@ class AppProgressSnapshot {
       stickerCount: json['stickerCount'] as int? ?? 0,
       voicePromptsEnabled: json['voicePromptsEnabled'] as bool? ?? true,
       effectsEnabled: json['effectsEnabled'] as bool? ?? true,
+      unlockedLessonIds:
+          (json['unlockedLessonIds'] as List<dynamic>? ?? const [])
+              .map((item) => item.toString())
+              .toList(growable: false),
       lessons: lessonJson.map(
         (key, value) => MapEntry(
           key,
@@ -76,6 +81,7 @@ class AppProgressSnapshot {
   final int stickerCount;
   final bool voicePromptsEnabled;
   final bool effectsEnabled;
+  final List<String> unlockedLessonIds;
   final Map<String, LessonProgress> lessons;
 
   LessonProgress progressFor(String lessonId) {
@@ -86,12 +92,14 @@ class AppProgressSnapshot {
     int? stickerCount,
     bool? voicePromptsEnabled,
     bool? effectsEnabled,
+    List<String>? unlockedLessonIds,
     Map<String, LessonProgress>? lessons,
   }) {
     return AppProgressSnapshot(
       stickerCount: stickerCount ?? this.stickerCount,
       voicePromptsEnabled: voicePromptsEnabled ?? this.voicePromptsEnabled,
       effectsEnabled: effectsEnabled ?? this.effectsEnabled,
+      unlockedLessonIds: unlockedLessonIds ?? this.unlockedLessonIds,
       lessons: lessons ?? this.lessons,
     );
   }
@@ -102,6 +110,7 @@ class AppProgressSnapshot {
       'stickerCount': stickerCount,
       'voicePromptsEnabled': voicePromptsEnabled,
       'effectsEnabled': effectsEnabled,
+      'unlockedLessonIds': unlockedLessonIds,
       'lessons': lessons.map((key, value) => MapEntry(key, value.toJson())),
     };
   }
@@ -127,6 +136,8 @@ abstract class ProgressStore {
   Future<void> setVoicePromptsEnabled(bool enabled);
 
   Future<void> setEffectsEnabled(bool enabled);
+
+  Future<void> setLessonUnlocked(String lessonId, bool unlocked);
 
   Future<void> reset();
 }
@@ -191,6 +202,18 @@ class MemoryProgressStore implements ProgressStore {
   @override
   Future<void> setEffectsEnabled(bool enabled) async {
     _snapshot = _snapshot.copyWith(effectsEnabled: enabled);
+  }
+
+  @override
+  Future<void> setLessonUnlocked(String lessonId, bool unlocked) async {
+    final nextIds = _normalizedLessonIds(
+      unlocked
+          ? <String>[..._snapshot.unlockedLessonIds, lessonId]
+          : _snapshot.unlockedLessonIds
+                .where((candidate) => candidate != lessonId)
+                .toList(growable: false),
+    );
+    _snapshot = _snapshot.copyWith(unlockedLessonIds: nextIds);
   }
 
   @override
@@ -282,6 +305,20 @@ class SharedPreferencesProgressStore implements ProgressStore {
   }
 
   @override
+  Future<void> setLessonUnlocked(String lessonId, bool unlocked) async {
+    await _mutate((snapshot) {
+      final nextIds = _normalizedLessonIds(
+        unlocked
+            ? <String>[...snapshot.unlockedLessonIds, lessonId]
+            : snapshot.unlockedLessonIds
+                  .where((candidate) => candidate != lessonId)
+                  .toList(growable: false),
+      );
+      return snapshot.copyWith(unlockedLessonIds: nextIds);
+    });
+  }
+
+  @override
   Future<void> setVoicePromptsEnabled(bool enabled) async {
     await _mutate((snapshot) {
       return snapshot.copyWith(voicePromptsEnabled: enabled);
@@ -308,6 +345,18 @@ List<String> _normalizedMistakes(List<String> mistakes) {
     if (unique.length >= 5) {
       break;
     }
+  }
+  return unique;
+}
+
+List<String> _normalizedLessonIds(List<String> lessonIds) {
+  final unique = <String>[];
+  for (final item in lessonIds) {
+    final normalized = item.trim();
+    if (normalized.isEmpty || unique.contains(normalized)) {
+      continue;
+    }
+    unique.add(normalized);
   }
   return unique;
 }

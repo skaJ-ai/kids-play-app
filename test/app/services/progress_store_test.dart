@@ -20,6 +20,7 @@ void main() {
       totalQuestions: 5,
       recentMistakes: const ['ㄴ', 'ㄷ', 'ㄴ'],
     );
+    await store.setLessonUnlocked('hangul:basic_consonants_2', true);
     await store.addStickers(2);
     await store.setVoicePromptsEnabled(false);
 
@@ -27,8 +28,12 @@ void main() {
 
     expect(snapshot.stickerCount, 2);
     expect(snapshot.voicePromptsEnabled, isFalse);
-    expect(snapshot.progressFor('hangul:basic_consonants_1').lastViewedIndex, 3);
+    expect(
+      snapshot.progressFor('hangul:basic_consonants_1').lastViewedIndex,
+      3,
+    );
     expect(snapshot.progressFor('hangul:basic_consonants_1').bestScore, 4);
+    expect(snapshot.unlockedLessonIds, contains('hangul:basic_consonants_2'));
     expect(
       snapshot.progressFor('hangul:basic_consonants_1').recentMistakes,
       const ['ㄴ', 'ㄷ'],
@@ -49,12 +54,14 @@ void main() {
       totalQuestions: 5,
       recentMistakes: const ['B'],
     );
+    await store.setLessonUnlocked('alphabet:f_to_j', true);
     await store.addStickers(1);
     await store.setEffectsEnabled(false);
 
     final snapshot = await store.loadSnapshot();
     expect(snapshot.stickerCount, 1);
     expect(snapshot.effectsEnabled, isFalse);
+    expect(snapshot.unlockedLessonIds, contains('alphabet:f_to_j'));
     expect(snapshot.progressFor('alphabet:a_to_e').bestScore, 5);
     expect(snapshot.progressFor('alphabet:a_to_e').recentMistakes, const ['B']);
 
@@ -62,6 +69,7 @@ void main() {
     final resetSnapshot = await store.loadSnapshot();
     expect(resetSnapshot.stickerCount, 0);
     expect(resetSnapshot.lessons, isEmpty);
+    expect(resetSnapshot.unlockedLessonIds, isEmpty);
     expect(resetSnapshot.voicePromptsEnabled, isTrue);
   });
 }

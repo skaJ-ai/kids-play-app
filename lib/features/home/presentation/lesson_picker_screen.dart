@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/services/app_services.dart';
+import '../../../app/services/progress_store.dart';
 import '../../../app/ui/kid_theme.dart';
 import '../../../app/ui/playground_scaffold.dart';
 import '../../../app/ui/tap_cooldown.dart';
@@ -12,13 +14,29 @@ class LessonPickerItem {
     required this.preview,
     required this.countLabel,
     required this.color,
-  });
+    String? progressId,
+    this.locked = false,
+  }) : progressId = progressId ?? id;
 
   final String id;
   final String title;
   final String preview;
   final String countLabel;
   final Color color;
+  final String progressId;
+  final bool locked;
+
+  LessonPickerItem copyWith({bool? locked}) {
+    return LessonPickerItem(
+      id: id,
+      title: title,
+      preview: preview,
+      countLabel: countLabel,
+      color: color,
+      progressId: progressId,
+      locked: locked ?? this.locked,
+    );
+  }
 }
 
 class AsyncLessonPickerScreen extends StatefulWidget {
@@ -40,7 +58,8 @@ class AsyncLessonPickerScreen extends StatefulWidget {
   final String emptyMessage;
 
   @override
-  State<AsyncLessonPickerScreen> createState() => _AsyncLessonPickerScreenState();
+  State<AsyncLessonPickerScreen> createState() =>
+      _AsyncLessonPickerScreenState();
 }
 
 class _AsyncLessonPickerScreenState extends State<AsyncLessonPickerScreen> {
@@ -84,27 +103,65 @@ class _AsyncLessonPickerScreenState extends State<AsyncLessonPickerScreen> {
             child: Center(
               child: Text(
                 widget.emptyMessage,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: KidPalette.navy,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.headlineSmall?.copyWith(color: KidPalette.navy),
                 textAlign: TextAlign.center,
               ),
             ),
           );
         }
 
-        if (items.length == 1) {
-          return widget.buildDestination(items.first.id);
-        }
+        return FutureBuilder<AppProgressSnapshot>(
+          future: AppServicesScope.of(context).progressStore.loadSnapshot(),
+          builder: (context, progressSnapshot) {
+            if (progressSnapshot.hasError) {
+              return _LessonPickerError(
+                message: '세트 잠금 정보를 불러오지 못했어요.',
+                onRetry: _retry,
+              );
+            }
 
-        return LessonPickerScreen(
-          categoryLabel: widget.categoryLabel,
-          modeLabel: widget.modeLabel,
-          items: items,
-          buildDestination: widget.buildDestination,
+            if (!progressSnapshot.hasData) {
+              return const PlaygroundScaffold(
+                showRoad: true,
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+
+            final progress = progressSnapshot.data!;
+            final resolvedItems = _resolveLockState(items, progress);
+            if (resolvedItems.length == 1) {
+              return widget.buildDestination(resolvedItems.first.id);
+            }
+
+            return LessonPickerScreen(
+              categoryLabel: widget.categoryLabel,
+              modeLabel: widget.modeLabel,
+              items: resolvedItems,
+              buildDestination: widget.buildDestination,
+            );
+          },
         );
       },
     );
+  }
+
+  List<LessonPickerItem> _resolveLockState(
+    List<LessonPickerItem> items,
+    AppProgressSnapshot progress,
+  ) {
+    final firstProgressId = items.first.progressId;
+    return items
+        .map(
+          (item) => item.copyWith(
+            locked:
+                item.progressId != firstProgressId &&
+                !progress.unlockedLessonIds.contains(item.progressId) &&
+                !progress.lessons.containsKey(item.progressId),
+          ),
+        )
+        .toList(growable: false);
   }
 }
 
@@ -144,9 +201,9 @@ class LessonPickerScreen extends StatelessWidget {
                   if (!compact)
                     Text(
                       '원하는 세트를 골라요',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: KidPalette.body,
-                      ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.titleSmall?.copyWith(color: KidPalette.body),
                     ),
                 ],
               ),
@@ -209,18 +266,28 @@ class _LessonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final panelColor = Color.lerp(item.color, KidPalette.white, 0.72)!;
+    final panelColor = Color.lerp(
+      item.color,
+      KidPalette.white,
+      item.locked ? 0.82 : 0.72,
+    )!;
+    final accentColor = item.locked
+        ? Color.lerp(item.color, KidPalette.body, 0.45)!
+        : item.color;
+    final titleColor = item.locked ? KidPalette.body : KidPalette.navy;
 
     return Material(
       color: Colors.transparent,
       child: CooldownInkWell(
         key: Key('lesson-picker-item-${item.id}'),
         borderRadius: BorderRadius.circular(28),
-        onTap: onTap,
+        onTap: item.locked ? null : onTap,
         child: ToyPanel(
           padding: EdgeInsets.all(compact ? 14 : 18),
           backgroundColor: panelColor,
-          borderColor: KidPalette.white.withValues(alpha: 0.82),
+          borderColor: item.locked
+              ? KidPalette.stroke.withValues(alpha: 0.82)
+              : KidPalette.white.withValues(alpha: 0.82),
           child: Row(
             children: [
               Container(
@@ -232,8 +299,8 @@ class _LessonCard extends StatelessWidget {
                   boxShadow: KidShadows.panel,
                 ),
                 child: Icon(
-                  Icons.auto_stories_rounded,
-                  color: item.color,
+                  item.locked ? Icons.lock_rounded : Icons.auto_stories_rounded,
+                  color: accentColor,
                   size: compact ? 28 : 34,
                 ),
               ),
@@ -246,23 +313,29 @@ class _LessonCard extends StatelessWidget {
                       item.title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: (compact
-                              ? Theme.of(context).textTheme.titleLarge
-                              : Theme.of(context).textTheme.headlineSmall)
-                          ?.copyWith(
-                            color: KidPalette.navy,
-                            fontWeight: FontWeight.w900,
-                          ),
+                      style:
+                          (compact
+                                  ? Theme.of(context).textTheme.titleLarge
+                                  : Theme.of(context).textTheme.headlineSmall)
+                              ?.copyWith(
+                                color: titleColor,
+                                fontWeight: FontWeight.w900,
+                              ),
                     ),
                     SizedBox(height: compact ? 4 : 6),
                     Text(
                       item.preview,
                       maxLines: compact ? 1 : 2,
                       overflow: TextOverflow.ellipsis,
-                      style: (compact
-                              ? Theme.of(context).textTheme.titleSmall
-                              : Theme.of(context).textTheme.titleMedium)
-                          ?.copyWith(color: KidPalette.navy),
+                      style:
+                          (compact
+                                  ? Theme.of(context).textTheme.titleSmall
+                                  : Theme.of(context).textTheme.titleMedium)
+                              ?.copyWith(
+                                color: item.locked
+                                    ? KidPalette.body
+                                    : KidPalette.navy,
+                              ),
                     ),
                   ],
                 ),
@@ -284,17 +357,48 @@ class _LessonCard extends StatelessWidget {
                     child: Text(
                       item.countLabel,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: item.color,
+                        color: accentColor,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
                   ),
                   SizedBox(height: compact ? 8 : 10),
-                  Icon(
-                    Icons.arrow_forward_rounded,
-                    color: item.color,
-                    size: compact ? 22 : 26,
-                  ),
+                  if (item.locked)
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: compact ? 10 : 12,
+                        vertical: compact ? 6 : 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: KidPalette.coral.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.lock_rounded,
+                            color: KidPalette.coralDark,
+                            size: compact ? 14 : 16,
+                          ),
+                          SizedBox(width: compact ? 4 : 6),
+                          Text(
+                            '잠겨 있어요',
+                            style: Theme.of(context).textTheme.labelLarge
+                                ?.copyWith(
+                                  color: KidPalette.coralDark,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                          ),
+                        ],
+                      ),
+                    )
+                  else
+                    Icon(
+                      Icons.arrow_forward_rounded,
+                      color: accentColor,
+                      size: compact ? 22 : 26,
+                    ),
                 ],
               ),
             ],
@@ -333,18 +437,14 @@ class _HeaderPill extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              color: KidPalette.blue,
-              size: compact ? 18 : 22,
-            ),
+            Icon(icon, color: KidPalette.blue, size: compact ? 18 : 22),
             SizedBox(width: compact ? 6 : 8),
             Text(
               label,
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: KidPalette.navy,
-                    fontWeight: FontWeight.w900,
-                  ),
+                color: KidPalette.navy,
+                fontWeight: FontWeight.w900,
+              ),
             ),
           ],
         ),
@@ -373,9 +473,9 @@ class _LessonPickerError extends StatelessWidget {
                 Text(
                   message,
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: KidPalette.navy,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.headlineSmall?.copyWith(color: KidPalette.navy),
                 ),
                 const SizedBox(height: 20),
                 FilledButton.icon(

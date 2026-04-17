@@ -106,7 +106,8 @@ final Map<String, HomeCategoryConfig> _knownConfigs = {
 };
 
 Widget _buildHangulLearnScreen(HomeCategoryDependencies dependencies) {
-  final repository = dependencies.hangulLessonRepository ?? HangulLessonRepository();
+  final repository =
+      dependencies.hangulLessonRepository ?? HangulLessonRepository();
   return AsyncLessonPickerScreen(
     categoryLabel: '한글',
     modeLabel: '배우기',
@@ -118,8 +119,12 @@ Widget _buildHangulLearnScreen(HomeCategoryDependencies dependencies) {
           .map(
             (lesson) => LessonPickerItem(
               id: lesson.id,
+              progressId: 'hangul:${lesson.id}',
               title: lesson.title,
-              preview: lesson.cards.take(3).map((card) => card.symbol).join(' · '),
+              preview: lesson.cards
+                  .take(3)
+                  .map((card) => card.symbol)
+                  .join(' · '),
               countLabel: '${lesson.cards.length}개',
               color: Colors.amber.shade700,
             ),
@@ -133,7 +138,8 @@ Widget _buildHangulLearnScreen(HomeCategoryDependencies dependencies) {
 }
 
 Widget _buildHangulQuizScreen(HomeCategoryDependencies dependencies) {
-  final repository = dependencies.hangulLessonRepository ?? HangulLessonRepository();
+  final repository =
+      dependencies.hangulLessonRepository ?? HangulLessonRepository();
   return AsyncLessonPickerScreen(
     categoryLabel: '한글',
     modeLabel: '퀴즈',
@@ -145,8 +151,12 @@ Widget _buildHangulQuizScreen(HomeCategoryDependencies dependencies) {
           .map(
             (lesson) => LessonPickerItem(
               id: lesson.id,
+              progressId: 'hangul:${lesson.id}',
               title: lesson.title,
-              preview: lesson.cards.take(3).map((card) => card.symbol).join(' · '),
+              preview: lesson.cards
+                  .take(3)
+                  .map((card) => card.symbol)
+                  .join(' · '),
               countLabel: '${lesson.cards.length}문제',
               color: Colors.amber.shade700,
             ),
@@ -173,8 +183,12 @@ Widget _buildAlphabetLearnScreen(HomeCategoryDependencies dependencies) {
           .map(
             (lesson) => LessonPickerItem(
               id: lesson.id,
+              progressId: 'alphabet:${lesson.id}',
               title: lesson.title,
-              preview: lesson.cards.take(3).map((card) => card.symbol).join(' · '),
+              preview: lesson.cards
+                  .take(3)
+                  .map((card) => card.symbol)
+                  .join(' · '),
               countLabel: '${lesson.cards.length}개',
               color: Colors.lightBlue.shade700,
             ),
@@ -201,8 +215,12 @@ Widget _buildAlphabetQuizScreen(HomeCategoryDependencies dependencies) {
           .map(
             (lesson) => LessonPickerItem(
               id: lesson.id,
+              progressId: 'alphabet:${lesson.id}',
               title: lesson.title,
-              preview: lesson.cards.take(3).map((card) => card.symbol).join(' · '),
+              preview: lesson.cards
+                  .take(3)
+                  .map((card) => card.symbol)
+                  .join(' · '),
               countLabel: '${lesson.cards.length}문제',
               color: Colors.lightBlue.shade700,
             ),
@@ -229,8 +247,12 @@ Widget _buildNumbersLearnScreen(HomeCategoryDependencies dependencies) {
           .map(
             (lesson) => LessonPickerItem(
               id: lesson.id,
+              progressId: 'numbers:${lesson.id}',
               title: lesson.title,
-              preview: lesson.cards.take(3).map((card) => card.symbol).join(' · '),
+              preview: lesson.cards
+                  .take(3)
+                  .map((card) => card.symbol)
+                  .join(' · '),
               countLabel: '${lesson.cards.length}개',
               color: Colors.pink.shade600,
             ),
@@ -257,8 +279,12 @@ Widget _buildNumbersQuizScreen(HomeCategoryDependencies dependencies) {
           .map(
             (lesson) => LessonPickerItem(
               id: lesson.id,
+              progressId: 'numbers:${lesson.id}',
               title: lesson.title,
-              preview: lesson.cards.take(3).map((card) => card.symbol).join(' · '),
+              preview: lesson.cards
+                  .take(3)
+                  .map((card) => card.symbol)
+                  .join(' · '),
               countLabel: '${lesson.cards.length}문제',
               color: Colors.pink.shade600,
             ),

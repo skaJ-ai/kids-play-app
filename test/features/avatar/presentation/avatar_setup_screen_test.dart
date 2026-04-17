@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -58,7 +59,13 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('세트별 진도 조절'), findsOneWidget);
-      expect(find.text('한글 차고'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('lesson-card-hangul:basic_consonants_1')),
+          matching: find.text('한글 차고'),
+        ),
+        findsOneWidget,
+      );
       expect(find.text('기본 자음 1'), findsOneWidget);
       expect(find.text('최근 헷갈린 글자'), findsNWidgets(2));
       expect(find.text('ㄴ'), findsOneWidget);
@@ -154,6 +161,54 @@ void main() {
   );
 
   testWidgets(
+    'shows unlock controls for later sets and lets parent unlock one',
+    (WidgetTester tester) async {
+      final progressStore = MemoryProgressStore();
+
+      await tester.pumpWidget(
+        _wrapWithServices(
+          progressStore: progressStore,
+          child: const AvatarSetupScreen(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('첫 세트 뒤의 세트들은 부모가 미리 열어둘 수 있어요.'), findsOneWidget);
+
+      final unlockButton = find.byKey(
+        const Key('lesson-unlock-hangul:basic_consonants_2'),
+      );
+      await tester.scrollUntilVisible(unlockButton, 200);
+      await tester.tap(unlockButton);
+      await tester.pumpAndSettle();
+
+      final snapshot = await progressStore.loadSnapshot();
+      expect(snapshot.unlockedLessonIds, contains('hangul:basic_consonants_2'));
+    },
+  );
+
+  testWidgets('shows unlock controls for all later lessons in the generated manifests', (
+    WidgetTester tester,
+  ) async {
+    final progressStore = MemoryProgressStore();
+
+    await tester.pumpWidget(
+      _wrapWithServices(
+        progressStore: progressStore,
+        child: const AvatarSetupScreen(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    for (final lesson in _generatedManifestLaterLessons()) {
+      final unlockButton = find.byKey(Key('lesson-unlock-${lesson.id}'));
+      await tester.scrollUntilVisible(unlockButton, 200);
+      expect(unlockButton, findsOneWidget);
+      expect(find.text(lesson.title), findsWidgets);
+    }
+  });
+
+  testWidgets(
     'keeps the avatar setup screen stable on a compact landscape phone',
     (WidgetTester tester) async {
       tester.view.physicalSize = const Size(780, 360);
@@ -176,15 +231,57 @@ Widget _wrapWithServices({
   required ProgressStore progressStore,
   required Widget child,
 }) {
-  return MaterialApp(
-    home: AppServicesScope(
-      services: AppServices(
-        progressStore: progressStore,
-        speechCueService: NoopSpeechCueService(),
-      ),
-      child: child,
+  return AppServicesScope(
+    services: AppServices(
+      progressStore: progressStore,
+      speechCueService: NoopSpeechCueService(),
     ),
+    child: MaterialApp(home: child),
   );
+}
+
+List<_ManifestLessonExpectation> _generatedManifestLaterLessons() {
+  return [
+    ..._readManifestLaterLessons(
+      categoryPrefix: 'hangul',
+      path: 'assets/generated/manifest/hangul_lessons.json',
+    ),
+    ..._readManifestLaterLessons(
+      categoryPrefix: 'alphabet',
+      path: 'assets/generated/manifest/alphabet_lessons.json',
+    ),
+    ..._readManifestLaterLessons(
+      categoryPrefix: 'numbers',
+      path: 'assets/generated/manifest/numbers_lessons.json',
+    ),
+  ];
+}
+
+List<_ManifestLessonExpectation> _readManifestLaterLessons({
+  required String categoryPrefix,
+  required String path,
+}) {
+  final manifest =
+      jsonDecode(File(path).readAsStringSync()) as Map<String, dynamic>;
+  final lessons = (manifest['lessons'] as List<dynamic>?) ?? const [];
+  return lessons
+      .skip(1)
+      .map((lesson) {
+        final lessonMap = lesson as Map<String, dynamic>;
+        final lessonId = lessonMap['id'] as String;
+        return _ManifestLessonExpectation(
+          id: '$categoryPrefix:$lessonId',
+          title: lessonMap['title'] as String,
+        );
+      })
+      .toList(growable: false);
+}
+
+class _ManifestLessonExpectation {
+  const _ManifestLessonExpectation({required this.id, required this.title});
+
+  final String id;
+  final String title;
 }
 
 const Map<String, dynamic> _hangulLesson = {
