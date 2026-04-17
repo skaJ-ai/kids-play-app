@@ -106,6 +106,58 @@ void main() {
     });
   });
 
+  group('ToyPanel tone', () {
+    testWidgets('keeps the cream shell by default', (
+      WidgetTester tester,
+    ) async {
+      await _pumpToyPanel(tester);
+
+      _expectResolvedColors(
+        tester,
+        expectedBackgroundColor: KidPalette.cream,
+        expectedBorderColor: KidPalette.stroke,
+      );
+    });
+
+    testWidgets('uses named tone defaults', (WidgetTester tester) async {
+      await _pumpToyPanel(tester, tone: ToyPanelTone.airy);
+
+      _expectResolvedColors(
+        tester,
+        expectedBackgroundColor: KidPalette.white.withValues(alpha: 0.94),
+        expectedBorderColor: KidPalette.stroke,
+      );
+
+      await _pumpToyPanel(tester, tone: ToyPanelTone.warm);
+
+      _expectResolvedColors(
+        tester,
+        expectedBackgroundColor: KidPalette.creamWarm,
+        expectedBorderColor: KidPalette.stroke,
+      );
+    });
+
+    testWidgets('lets explicit colors override tone defaults', (
+      WidgetTester tester,
+    ) async {
+      const customBackgroundColor = Color(0xFFFEDCBA);
+      const customBorderColor = Color(0xFF345678);
+
+      await _pumpToyPanel(
+        tester,
+        tone: ToyPanelTone.airy,
+        backgroundColor: customBackgroundColor,
+        borderColor: customBorderColor,
+      );
+
+      _expectResolvedColors(
+        tester,
+        expectedBackgroundColor: customBackgroundColor,
+        expectedBorderColor: customBorderColor,
+      );
+    });
+  });
+
   testWidgets('keeps the shadowed shell outside the clipped inner layer', (
     WidgetTester tester,
   ) async {
@@ -145,7 +197,10 @@ void main() {
 Future<void> _pumpToyPanel(
   WidgetTester tester, {
   ToyPanelDensity density = ToyPanelDensity.regular,
+  ToyPanelTone? tone,
   EdgeInsetsGeometry? padding,
+  Color? backgroundColor,
+  Color? borderColor,
   double? radius,
   ThemeData? theme,
 }) async {
@@ -156,7 +211,10 @@ Future<void> _pumpToyPanel(
         body: Center(
           child: ToyPanel(
             density: density,
+            tone: tone,
             padding: padding,
+            backgroundColor: backgroundColor,
+            borderColor: borderColor,
             radius: radius,
             child: const SizedBox(key: _panelChildKey, width: 120, height: 80),
           ),
@@ -214,6 +272,29 @@ void _expectResolvedShell(
   expect(tester.getSize(highlightFinder).height, expectedHighlightHeight);
   expect(highlightPositioned.left, expectedHighlightHorizontalInset);
   expect(highlightPositioned.right, expectedHighlightHorizontalInset);
+}
+
+void _expectResolvedColors(
+  WidgetTester tester, {
+  required Color expectedBackgroundColor,
+  required Color expectedBorderColor,
+}) {
+  final decoration = _panelDecoration(tester, find.byType(ToyPanel));
+  final gradient = decoration.gradient! as LinearGradient;
+  final border = decoration.border! as Border;
+  final expectedGradientColors = [
+    Color.lerp(expectedBackgroundColor, KidPalette.white, 0.34)!,
+    expectedBackgroundColor,
+  ];
+  final expectedResolvedBorderColor = expectedBorderColor.withValues(
+    alpha: expectedBorderColor == KidPalette.stroke ? 0.88 : 0.72,
+  );
+
+  expect(gradient.colors, expectedGradientColors);
+  expect(border.top.color, expectedResolvedBorderColor);
+  expect(border.right.color, expectedResolvedBorderColor);
+  expect(border.bottom.color, expectedResolvedBorderColor);
+  expect(border.left.color, expectedResolvedBorderColor);
 }
 
 BoxDecoration _panelDecoration(WidgetTester tester, Finder finder) {

@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kids_play_app/app/ui/toy_panel.dart';
 import 'package:kids_play_app/features/hero/presentation/hero_screen.dart';
 
 void main() {
@@ -36,6 +38,19 @@ void main() {
       expect(find.text('놀이 시작'), findsOneWidget);
     },
   );
+
+  testWidgets('uses named toy panel tones for the two main panels', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(_buildHeroScreen());
+    await tester.pumpAndSettle();
+
+    final panels = tester.widgetList<ToyPanel>(find.byType(ToyPanel)).toList();
+
+    expect(panels, hasLength(2));
+    expect(panels.first.tone, ToyPanelTone.airy);
+    expect(panels.last.tone, ToyPanelTone.warm);
+  });
 }
 
 Widget _buildHeroScreen() {

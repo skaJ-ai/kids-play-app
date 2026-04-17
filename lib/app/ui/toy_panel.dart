@@ -4,22 +4,26 @@ export 'kid_theme.dart' show ToyPanelDensity;
 
 import 'kid_theme.dart';
 
+enum ToyPanelTone { surface, airy, warm }
+
 class ToyPanel extends StatelessWidget {
   const ToyPanel({
     super.key,
     required this.child,
     this.density = ToyPanelDensity.regular,
+    this.tone,
     this.padding,
-    this.backgroundColor = KidPalette.cream,
-    this.borderColor = KidPalette.stroke,
+    this.backgroundColor,
+    this.borderColor,
     this.radius,
   });
 
   final Widget child;
   final ToyPanelDensity density;
+  final ToyPanelTone? tone;
   final EdgeInsetsGeometry? padding;
-  final Color backgroundColor;
-  final Color borderColor;
+  final Color? backgroundColor;
+  final Color? borderColor;
   final double? radius;
 
   @override
@@ -30,8 +34,13 @@ class ToyPanel extends StatelessWidget {
     final resolvedBorderWidth = densityTokens.borderWidth;
     final highlightHeight = densityTokens.highlightHeight;
     final highlightHorizontalInset = densityTokens.highlightHorizontalInset;
-    final resolvedBorder = borderColor.withValues(
-      alpha: borderColor == KidPalette.stroke ? 0.88 : 0.72,
+    final resolvedTone = tone ?? ToyPanelTone.surface;
+    final toneColors = _toneColorsFor(resolvedTone);
+    final resolvedBackgroundColor =
+        backgroundColor ?? toneColors.backgroundColor;
+    final resolvedBorderColor = borderColor ?? toneColors.borderColor;
+    final resolvedBorder = resolvedBorderColor.withValues(
+      alpha: resolvedBorderColor == KidPalette.stroke ? 0.88 : 0.72,
     );
 
     final borderRadius = BorderRadius.circular(resolvedRadius);
@@ -42,8 +51,8 @@ class ToyPanel extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color.lerp(backgroundColor, KidPalette.white, 0.34)!,
-            backgroundColor,
+            Color.lerp(resolvedBackgroundColor, KidPalette.white, 0.34)!,
+            resolvedBackgroundColor,
           ],
         ),
         borderRadius: borderRadius,
@@ -81,4 +90,31 @@ class ToyPanel extends StatelessWidget {
       ),
     );
   }
+}
+
+class _ToyPanelToneColors {
+  const _ToyPanelToneColors({
+    required this.backgroundColor,
+    required this.borderColor,
+  });
+
+  final Color backgroundColor;
+  final Color borderColor;
+}
+
+_ToyPanelToneColors _toneColorsFor(ToyPanelTone tone) {
+  return switch (tone) {
+    ToyPanelTone.surface => const _ToyPanelToneColors(
+      backgroundColor: KidPalette.cream,
+      borderColor: KidPalette.stroke,
+    ),
+    ToyPanelTone.airy => _ToyPanelToneColors(
+      backgroundColor: KidPalette.white.withValues(alpha: 0.94),
+      borderColor: KidPalette.stroke,
+    ),
+    ToyPanelTone.warm => const _ToyPanelToneColors(
+      backgroundColor: KidPalette.creamWarm,
+      borderColor: KidPalette.stroke,
+    ),
+  };
 }

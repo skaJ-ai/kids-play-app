@@ -115,10 +115,8 @@ class _HeroScreenState extends State<HeroScreen> {
                     SizedBox(height: sectionGap),
                     Expanded(
                       child: ToyPanel(
+                        tone: ToyPanelTone.airy,
                         padding: EdgeInsets.all(compact ? 10 : 18),
-                        backgroundColor: KidPalette.white.withValues(
-                          alpha: 0.94,
-                        ),
                         child: LayoutBuilder(
                           builder: (context, panelConstraints) {
                             final superCompact =
@@ -193,8 +191,8 @@ class _HeroScreenState extends State<HeroScreen> {
               Expanded(
                 flex: 5,
                 child: ToyPanel(
+                  tone: ToyPanelTone.warm,
                   padding: EdgeInsets.all(compact ? 16 : 22),
-                  backgroundColor: KidPalette.creamWarm,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
