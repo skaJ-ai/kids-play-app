@@ -4,8 +4,8 @@ import '../../../app/services/app_services.dart';
 import '../../../app/ui/audio_prompt_panel.dart';
 import '../../../app/ui/kid_theme.dart';
 import '../../../app/ui/play_feedback_layer.dart';
+import '../../../app/ui/play_choice_card.dart';
 import '../../../app/ui/playground_scaffold.dart';
-import '../../../app/ui/tap_cooldown.dart';
 import '../../../app/ui/toy_button.dart';
 import '../../../app/ui/toy_panel.dart';
 import '../data/numbers_lesson_repository.dart';
@@ -388,7 +388,7 @@ class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
                                   physics: const NeverScrollableScrollPhysics(),
                                   children: [
                                     for (var i = 0; i < choices.length; i++)
-                                      _QuizChoiceTile(
+                                      PlayChoiceCard(
                                         key: Key(
                                           'quiz-choice-${choices[i].symbol}',
                                         ),
@@ -620,100 +620,6 @@ class _TightQuizPromptPanel extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-class _QuizChoiceTile extends StatelessWidget {
-  const _QuizChoiceTile({
-    super.key,
-    required this.symbol,
-    required this.onTap,
-    required this.accentIndex,
-    required this.compact,
-    required this.disabled,
-  });
-
-  final String symbol;
-  final VoidCallback onTap;
-  final int accentIndex;
-  final bool compact;
-  final bool disabled;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = _paletteFor(accentIndex);
-
-    return Opacity(
-      opacity: disabled ? 0.88 : 1,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(colors: palette),
-          borderRadius: BorderRadius.circular(compact ? 26 : 32),
-          boxShadow: KidShadows.button,
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: CooldownInkWell(
-            borderRadius: BorderRadius.circular(compact ? 26 : 32),
-            onTap: disabled ? null : onTap,
-            child: Stack(
-              children: [
-                Positioned(
-                  right: 16,
-                  top: 16,
-                  child: Container(
-                    width: compact ? 30 : 38,
-                    height: compact ? 30 : 38,
-                    decoration: BoxDecoration(
-                      color: KidPalette.white.withValues(alpha: 0.24),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
-                Positioned(
-                  left: 18,
-                  top: 16,
-                  child: Text(
-                    '콕!',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: KidPalette.white.withValues(alpha: 0.92),
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-                Center(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      symbol,
-                      style: TextStyle(
-                        fontSize: compact ? 66 : 92,
-                        fontWeight: FontWeight.w900,
-                        height: 1,
-                        color: KidPalette.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  List<Color> _paletteFor(int index) {
-    switch (index % 4) {
-      case 0:
-        return const [KidPalette.blue, KidPalette.blueDark];
-      case 1:
-        return const [KidPalette.coral, KidPalette.coralDark];
-      case 2:
-        return const [KidPalette.mint, KidPalette.mintDark];
-      default:
-        return const [KidPalette.lilac, Color(0xFFA28CF5)];
-    }
   }
 }
 
