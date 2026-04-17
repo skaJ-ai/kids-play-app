@@ -190,10 +190,15 @@ class _CategoryCard extends StatelessWidget {
       0.52,
     )!;
 
+    final panelDensity = compact
+        ? ToyPanelDensity.compact
+        : ToyPanelDensity.regular;
+    final panelRadius = theme.kidLayout.panel.forDensity(panelDensity).radius;
+
     return Material(
       color: Colors.transparent,
       child: CooldownInkWell(
-        borderRadius: BorderRadius.circular(36),
+        borderRadius: BorderRadius.circular(panelRadius),
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute<void>(
@@ -205,8 +210,7 @@ class _CategoryCard extends StatelessWidget {
           );
         },
         child: ToyPanel(
-          density: compact ? ToyPanelDensity.compact : ToyPanelDensity.regular,
-          padding: compact ? null : const EdgeInsets.all(20),
+          density: panelDensity,
           backgroundColor: panelColor,
           borderColor: KidPalette.white.withValues(alpha: 0.78),
           child: Column(

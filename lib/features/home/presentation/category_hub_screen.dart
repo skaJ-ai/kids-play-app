@@ -178,187 +178,189 @@ class _ModeCard extends StatelessWidget {
 
     return Opacity(
       opacity: enabled ? 1 : 0.66,
-      child: Material(
-        color: Colors.transparent,
-        child: CooldownInkWell(
-          borderRadius: BorderRadius.circular(36),
-          onTap: onTap,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final isCompact = compact || constraints.maxHeight < 240;
-              final isTight = constraints.maxHeight <= 180;
-              final panelPadding = isTight ? 12.0 : (isCompact ? 16.0 : 20.0);
-              final topGap = isTight ? 8.0 : (isCompact ? 12.0 : 18.0);
-              final iconBoxSize = isTight ? 44.0 : (isCompact ? 62.0 : 76.0);
-              final iconSize = isTight ? 24.0 : (isCompact ? 30.0 : 38.0);
-              final titleStyle = isTight
-                  ? theme.textTheme.titleMedium
-                  : (isCompact
-                        ? theme.textTheme.titleLarge
-                        : theme.textTheme.headlineSmall);
-              final subtitleStyle = isTight
-                  ? theme.textTheme.labelLarge
-                  : (isCompact
-                        ? theme.textTheme.titleSmall
-                        : theme.textTheme.titleMedium);
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isCompact = compact || constraints.maxHeight < 240;
+          final isTight = constraints.maxHeight <= 180;
+          final panelDensity = isCompact
+              ? ToyPanelDensity.compact
+              : ToyPanelDensity.regular;
+          final panelRadius = theme.kidLayout.panel
+              .forDensity(panelDensity)
+              .radius;
+          final topGap = isTight ? 8.0 : (isCompact ? 12.0 : 18.0);
+          final iconBoxSize = isTight ? 44.0 : (isCompact ? 62.0 : 76.0);
+          final iconSize = isTight ? 24.0 : (isCompact ? 30.0 : 38.0);
+          final titleStyle = isTight
+              ? theme.textTheme.titleMedium
+              : (isCompact
+                    ? theme.textTheme.titleLarge
+                    : theme.textTheme.headlineSmall);
+          final subtitleStyle = isTight
+              ? theme.textTheme.labelLarge
+              : (isCompact
+                    ? theme.textTheme.titleSmall
+                    : theme.textTheme.titleMedium);
 
-              if (isCompact) {
-                return ToyPanel(
-                  density: ToyPanelDensity.compact,
-                  padding: const EdgeInsets.all(12),
-                  backgroundColor: backgroundColor,
-                  borderColor: KidPalette.white.withValues(alpha: 0.78),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: KidPalette.white.withValues(alpha: 0.9),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: KidPalette.white.withValues(alpha: 0.72),
+          return Material(
+            color: Colors.transparent,
+            child: CooldownInkWell(
+              borderRadius: BorderRadius.circular(panelRadius),
+              onTap: onTap,
+              child: isCompact
+                  ? ToyPanel(
+                      density: ToyPanelDensity.compact,
+                      backgroundColor: backgroundColor,
+                      borderColor: KidPalette.white.withValues(alpha: 0.78),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: KidPalette.white.withValues(alpha: 0.9),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: KidPalette.white.withValues(alpha: 0.72),
+                              ),
+                              boxShadow: KidShadows.panel,
+                            ),
+                            child: Icon(icon, size: 24, color: accentColor),
                           ),
-                          boxShadow: KidShadows.panel,
-                        ),
-                        child: Icon(icon, size: 24, color: accentColor),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Expanded(
-                                  child: Text(
-                                    title,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: theme.textTheme.titleMedium
-                                        ?.copyWith(
-                                          color: KidPalette.navy,
-                                          fontWeight: FontWeight.w900,
-                                        ),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        title,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: theme.textTheme.titleMedium
+                                            ?.copyWith(
+                                              color: KidPalette.navy,
+                                              fontWeight: FontWeight.w900,
+                                            ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    HomeAccentPill(
+                                      label: tag,
+                                      textColor: accentColor,
+                                      backgroundColor: accentColor.withValues(
+                                        alpha: 0.12,
+                                      ),
+                                      compact: true,
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  subtitle,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.labelLarge?.copyWith(
+                                    color: KidPalette.navy,
                                   ),
                                 ),
-                                const SizedBox(width: 8),
-                                HomeAccentPill(
-                                  label: tag,
-                                  textColor: accentColor,
-                                  backgroundColor: accentColor.withValues(
-                                    alpha: 0.12,
+                                const SizedBox(height: 4),
+                                Text(
+                                  enabled ? '바로 시작' : '준비 중',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.labelLarge?.copyWith(
+                                    color: accentColor,
+                                    fontWeight: FontWeight.w900,
                                   ),
-                                  compact: true,
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              subtitle,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.labelLarge?.copyWith(
-                                color: KidPalette.navy,
+                          ),
+                        ],
+                      ),
+                    )
+                  : ToyPanel(
+                      density: ToyPanelDensity.regular,
+                      backgroundColor: backgroundColor,
+                      borderColor: KidPalette.white.withValues(alpha: 0.78),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              HomeAccentPill(
+                                label: tag,
+                                textColor: accentColor,
+                                backgroundColor: accentColor.withValues(alpha: 0.12),
+                                compact: isCompact,
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              enabled ? '바로 시작' : '준비 중',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.labelLarge?.copyWith(
-                                color: accentColor,
-                                fontWeight: FontWeight.w900,
+                              const Spacer(),
+                              Icon(
+                                Icons.arrow_outward_rounded,
+                                color: enabled ? accentColor : KidPalette.body,
+                                size: isTight ? 16 : (isCompact ? 18 : 22),
                               ),
+                            ],
+                          ),
+                          SizedBox(height: topGap),
+                          Container(
+                            width: iconBoxSize,
+                            height: iconBoxSize,
+                            decoration: BoxDecoration(
+                              color: KidPalette.white.withValues(alpha: 0.9),
+                              borderRadius: BorderRadius.circular(
+                                isTight ? 16 : (isCompact ? 18 : 24),
+                              ),
+                              border: Border.all(
+                                color: KidPalette.white.withValues(alpha: 0.72),
+                              ),
+                              boxShadow: KidShadows.panel,
                             ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              return ToyPanel(
-                padding: EdgeInsets.all(panelPadding),
-                backgroundColor: backgroundColor,
-                borderColor: KidPalette.white.withValues(alpha: 0.78),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        HomeAccentPill(
-                          label: tag,
-                          textColor: accentColor,
-                          backgroundColor: accentColor.withValues(alpha: 0.12),
-                          compact: isCompact,
-                        ),
-                        const Spacer(),
-                        Icon(
-                          Icons.arrow_outward_rounded,
-                          color: enabled ? accentColor : KidPalette.body,
-                          size: isTight ? 16 : (isCompact ? 18 : 22),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: topGap),
-                    Container(
-                      width: iconBoxSize,
-                      height: iconBoxSize,
-                      decoration: BoxDecoration(
-                        color: KidPalette.white.withValues(alpha: 0.9),
-                        borderRadius: BorderRadius.circular(
-                          isTight ? 16 : (isCompact ? 18 : 24),
-                        ),
-                        border: Border.all(
-                          color: KidPalette.white.withValues(alpha: 0.72),
-                        ),
-                        boxShadow: KidShadows.panel,
-                      ),
-                      child: Icon(icon, size: iconSize, color: accentColor),
-                    ),
-                    SizedBox(height: isTight ? 8 : topGap),
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: titleStyle?.copyWith(
-                        color: KidPalette.navy,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    SizedBox(height: isTight ? 4 : (isCompact ? 6 : 10)),
-                    Text(
-                      subtitle,
-                      maxLines: isTight ? 1 : (isCompact ? 2 : 3),
-                      overflow: TextOverflow.ellipsis,
-                      style: subtitleStyle?.copyWith(color: KidPalette.navy),
-                    ),
-                    const Spacer(),
-                    Text(
-                      enabled ? '바로 시작' : '준비 중',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style:
-                          (isTight
-                                  ? theme.textTheme.titleSmall
-                                  : (isCompact
+                            child: Icon(icon, size: iconSize, color: accentColor),
+                          ),
+                          SizedBox(height: isTight ? 8 : topGap),
+                          Text(
+                            title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: titleStyle?.copyWith(
+                              color: KidPalette.navy,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                          SizedBox(height: isTight ? 4 : (isCompact ? 6 : 10)),
+                          Text(
+                            subtitle,
+                            maxLines: isTight ? 1 : (isCompact ? 2 : 3),
+                            overflow: TextOverflow.ellipsis,
+                            style: subtitleStyle?.copyWith(color: KidPalette.navy),
+                          ),
+                          const Spacer(),
+                          Text(
+                            enabled ? '바로 시작' : '준비 중',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style:
+                                (isTight
                                         ? theme.textTheme.titleSmall
-                                        : theme.textTheme.titleMedium))
-                              ?.copyWith(
-                                color: accentColor,
-                                fontWeight: FontWeight.w900,
-                              ),
+                                        : (isCompact
+                                              ? theme.textTheme.titleSmall
+                                              : theme.textTheme.titleMedium))
+                                    ?.copyWith(
+                                      color: accentColor,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
