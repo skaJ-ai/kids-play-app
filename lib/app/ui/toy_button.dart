@@ -78,14 +78,16 @@ class ToyButton extends StatelessWidget {
         : KidPalette.stroke;
     final chipSize = densityTokens.iconChipSize;
     final iconSize = densityTokens.iconSize;
-    final labelStyle =
-        (Theme.of(context).textTheme.titleLarge ??
-                const TextStyle(fontSize: 22, fontWeight: FontWeight.w800))
-            .copyWith(
-              color: foregroundColor,
-              fontWeight: FontWeight.w800,
-              fontSize: densityTokens.labelFontSize,
-            );
+    final baseLabelStyle = Theme.of(context).textTheme.titleLarge ??
+        const TextStyle();
+    final labelStyle = baseLabelStyle.copyWith(
+      color: foregroundColor,
+      fontSize: densityTokens.labelFontSize,
+      fontWeight: densityTokens.labelFontWeight ?? baseLabelStyle.fontWeight,
+      letterSpacing:
+          densityTokens.labelLetterSpacing ?? baseLabelStyle.letterSpacing,
+      height: densityTokens.labelHeight ?? baseLabelStyle.height,
+    );
     final iconFootprint = icon == null ? 0.0 : chipSize + densityTokens.iconGap;
 
     return Opacity(

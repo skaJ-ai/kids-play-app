@@ -53,6 +53,9 @@ class KidButtonDensityTokens {
     required this.iconChipSize,
     required this.iconSize,
     required this.labelFontSize,
+    this.labelFontWeight,
+    this.labelLetterSpacing,
+    this.labelHeight,
     this.primaryBorderWidth = 1.3,
     this.secondaryBorderWidth = 1.2,
     this.highlightHeight = 12,
@@ -66,6 +69,9 @@ class KidButtonDensityTokens {
   final double iconChipSize;
   final double iconSize;
   final double labelFontSize;
+  final FontWeight? labelFontWeight;
+  final double? labelLetterSpacing;
+  final double? labelHeight;
   final double primaryBorderWidth;
   final double secondaryBorderWidth;
   final double highlightHeight;
@@ -79,6 +85,9 @@ class KidButtonDensityTokens {
     double? iconChipSize,
     double? iconSize,
     double? labelFontSize,
+    FontWeight? labelFontWeight,
+    double? labelLetterSpacing,
+    double? labelHeight,
     double? primaryBorderWidth,
     double? secondaryBorderWidth,
     double? highlightHeight,
@@ -92,6 +101,9 @@ class KidButtonDensityTokens {
       iconChipSize: iconChipSize ?? this.iconChipSize,
       iconSize: iconSize ?? this.iconSize,
       labelFontSize: labelFontSize ?? this.labelFontSize,
+      labelFontWeight: labelFontWeight ?? this.labelFontWeight,
+      labelLetterSpacing: labelLetterSpacing ?? this.labelLetterSpacing,
+      labelHeight: labelHeight ?? this.labelHeight,
       primaryBorderWidth: primaryBorderWidth ?? this.primaryBorderWidth,
       secondaryBorderWidth: secondaryBorderWidth ?? this.secondaryBorderWidth,
       highlightHeight: highlightHeight ?? this.highlightHeight,
@@ -113,6 +125,25 @@ class KidButtonDensityTokens {
       iconSize: ui.lerpDouble(iconSize, other.iconSize, t) ?? iconSize,
       labelFontSize:
           ui.lerpDouble(labelFontSize, other.labelFontSize, t) ?? labelFontSize,
+      labelFontWeight:
+          labelFontWeight == null || other.labelFontWeight == null
+              ? (t < 0.5 ? labelFontWeight : other.labelFontWeight)
+              : FontWeight.lerp(labelFontWeight, other.labelFontWeight, t) ??
+                  (t < 0.5 ? labelFontWeight : other.labelFontWeight),
+      labelLetterSpacing:
+          labelLetterSpacing == null || other.labelLetterSpacing == null
+              ? (t < 0.5 ? labelLetterSpacing : other.labelLetterSpacing)
+              : ui.lerpDouble(
+                    labelLetterSpacing,
+                    other.labelLetterSpacing,
+                    t,
+                  ) ??
+                  (t < 0.5 ? labelLetterSpacing : other.labelLetterSpacing),
+      labelHeight:
+          labelHeight == null || other.labelHeight == null
+              ? (t < 0.5 ? labelHeight : other.labelHeight)
+              : ui.lerpDouble(labelHeight, other.labelHeight, t) ??
+                  (t < 0.5 ? labelHeight : other.labelHeight),
       primaryBorderWidth:
           ui.lerpDouble(primaryBorderWidth, other.primaryBorderWidth, t) ??
           primaryBorderWidth,
@@ -440,7 +471,10 @@ class KidLayoutTheme extends ThemeExtension<KidLayoutTheme> {
         iconGap: 10,
         iconChipSize: 34,
         iconSize: 18,
-        labelFontSize: 20,
+        labelFontSize: 19,
+        labelFontWeight: FontWeight.w700,
+        labelLetterSpacing: 0,
+        labelHeight: 1.1,
         primaryBorderWidth: 1.2,
         secondaryBorderWidth: 1.1,
         highlightHeight: 10,
@@ -453,7 +487,10 @@ class KidLayoutTheme extends ThemeExtension<KidLayoutTheme> {
         iconGap: 8,
         iconChipSize: 30,
         iconSize: 16,
-        labelFontSize: 18,
+        labelFontSize: 17,
+        labelFontWeight: FontWeight.w700,
+        labelLetterSpacing: 0,
+        labelHeight: 1.1,
         primaryBorderWidth: 1.1,
         secondaryBorderWidth: 1.0,
         highlightHeight: 8,

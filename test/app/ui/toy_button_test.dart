@@ -79,6 +79,9 @@ void main() {
             iconChipSize: 40,
             iconSize: 24,
             labelFontSize: 28,
+            labelFontWeight: FontWeight.w600,
+            labelLetterSpacing: 0.6,
+            labelHeight: 1.3,
             primaryBorderWidth: 1.7,
             secondaryBorderWidth: 1.1,
             highlightHeight: 14,
@@ -92,6 +95,9 @@ void main() {
             iconChipSize: 28,
             iconSize: 16,
             labelFontSize: 18,
+            labelFontWeight: FontWeight.w500,
+            labelLetterSpacing: 0.2,
+            labelHeight: 1.15,
             primaryBorderWidth: 0.9,
             secondaryBorderWidth: 0.7,
             highlightHeight: 8,
@@ -164,6 +170,30 @@ void main() {
         customLayout.button.regular.labelFontSize,
       );
       expect(
+        _buttonLabelStyle(
+          tester,
+          find.byKey(const Key('regular-button')),
+          '기본 버튼',
+        ).fontWeight,
+        customLayout.button.regular.labelFontWeight,
+      );
+      expect(
+        _buttonLabelStyle(
+          tester,
+          find.byKey(const Key('regular-button')),
+          '기본 버튼',
+        ).letterSpacing,
+        customLayout.button.regular.labelLetterSpacing,
+      );
+      expect(
+        _buttonLabelStyle(
+          tester,
+          find.byKey(const Key('regular-button')),
+          '기본 버튼',
+        ).height,
+        customLayout.button.regular.labelHeight,
+      );
+      expect(
         _buttonBorderWidth(tester, find.byKey(const Key('regular-button'))),
         customLayout.button.regular.primaryBorderWidth,
       );
@@ -223,6 +253,30 @@ void main() {
         customLayout.button.compact.labelFontSize,
       );
       expect(
+        _buttonLabelStyle(
+          tester,
+          find.byKey(const Key('compact-button')),
+          '조밀한 버튼',
+        ).fontWeight,
+        customLayout.button.compact.labelFontWeight,
+      );
+      expect(
+        _buttonLabelStyle(
+          tester,
+          find.byKey(const Key('compact-button')),
+          '조밀한 버튼',
+        ).letterSpacing,
+        customLayout.button.compact.labelLetterSpacing,
+      );
+      expect(
+        _buttonLabelStyle(
+          tester,
+          find.byKey(const Key('compact-button')),
+          '조밀한 버튼',
+        ).height,
+        customLayout.button.compact.labelHeight,
+      );
+      expect(
         _buttonBorderWidth(tester, find.byKey(const Key('compact-button'))),
         customLayout.button.compact.primaryBorderWidth,
       );
@@ -245,6 +299,58 @@ void main() {
         ),
         customLayout.button.compact.iconChipRadius,
       );
+    },
+  );
+
+  testWidgets(
+    'keeps inherited titleLarge typography when custom layouts only override geometry',
+    (WidgetTester tester) async {
+      final baseTheme = buildKidTheme();
+      final titleLarge = baseTheme.textTheme.titleLarge!;
+      final customLayout = KidLayoutTheme(
+        button: KidButtonTokens(
+          regular: const KidButtonDensityTokens(
+            height: 72,
+            horizontalPadding: 26,
+            iconGap: 14,
+            iconChipSize: 40,
+            iconSize: 24,
+            labelFontSize: 24,
+          ),
+          compact: const KidButtonDensityTokens(
+            height: 48,
+            horizontalPadding: 12,
+            iconGap: 6,
+            iconChipSize: 28,
+            iconSize: 16,
+            labelFontSize: 18,
+          ),
+        ),
+        panel: KidLayoutTheme.defaults.panel,
+      );
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          ToyButton(
+            key: const Key('fallback-typography-button'),
+            label: '타이포 버튼',
+            icon: Icons.play_arrow_rounded,
+            onPressed: () {},
+          ),
+          theme: baseTheme.copyWith(extensions: [customLayout]),
+        ),
+      );
+
+      final labelStyle = _buttonLabelStyle(
+        tester,
+        find.byKey(const Key('fallback-typography-button')),
+        '타이포 버튼',
+      );
+
+      expect(labelStyle.fontSize, 24);
+      expect(labelStyle.fontWeight, titleLarge.fontWeight);
+      expect(labelStyle.letterSpacing, titleLarge.letterSpacing);
+      expect(labelStyle.height, titleLarge.height);
     },
   );
 
@@ -536,12 +642,16 @@ double _buttonIconSize(WidgetTester tester, Finder finder, IconData icon) {
   return iconWidget.size!;
 }
 
-double _buttonLabelFontSize(WidgetTester tester, Finder finder, String label) {
+TextStyle _buttonLabelStyle(WidgetTester tester, Finder finder, String label) {
   final textWidget = tester.widget<Text>(
     find.descendant(of: finder, matching: find.text(label)),
   );
 
-  return textWidget.style!.fontSize!;
+  return textWidget.style!;
+}
+
+double _buttonLabelFontSize(WidgetTester tester, Finder finder, String label) {
+  return _buttonLabelStyle(tester, finder, label).fontSize!;
 }
 
 Finder _buttonBodyFinder(Finder finder) {

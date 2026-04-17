@@ -13,7 +13,10 @@ void main() {
     expect(layout.button.regular.iconGap, 10);
     expect(layout.button.regular.iconChipSize, 34);
     expect(layout.button.regular.iconSize, 18);
-    expect(layout.button.regular.labelFontSize, 20);
+    expect(layout.button.regular.labelFontSize, 19);
+    expect(layout.button.regular.labelFontWeight, FontWeight.w700);
+    expect(layout.button.regular.labelLetterSpacing, 0);
+    expect(layout.button.regular.labelHeight, 1.1);
     expect(layout.button.regular.primaryBorderWidth, 1.2);
     expect(layout.button.regular.secondaryBorderWidth, 1.1);
     expect(layout.button.regular.highlightHorizontalInset, 14);
@@ -24,7 +27,10 @@ void main() {
     expect(layout.button.compact.iconGap, 8);
     expect(layout.button.compact.iconChipSize, 30);
     expect(layout.button.compact.iconSize, 16);
-    expect(layout.button.compact.labelFontSize, 18);
+    expect(layout.button.compact.labelFontSize, 17);
+    expect(layout.button.compact.labelFontWeight, FontWeight.w700);
+    expect(layout.button.compact.labelLetterSpacing, 0);
+    expect(layout.button.compact.labelHeight, 1.1);
     expect(layout.button.compact.primaryBorderWidth, 1.1);
     expect(layout.button.compact.secondaryBorderWidth, 1.0);
     expect(layout.button.compact.highlightHorizontalInset, 12);
@@ -49,6 +55,83 @@ void main() {
     expect(layout.panel.tight.highlightHorizontalInset, 14);
     expect(layout.panel.tight.insetRadius, 14);
   });
+
+  test(
+    'KidButtonDensityTokens keeps label typography tokens in copyWith and lerp',
+    () {
+      const base = KidButtonDensityTokens(
+        height: 60,
+        horizontalPadding: 16,
+        iconGap: 10,
+        iconChipSize: 34,
+        iconSize: 18,
+        labelFontSize: 19,
+        labelFontWeight: FontWeight.w700,
+        labelLetterSpacing: 0,
+        labelHeight: 1.1,
+      );
+      const other = KidButtonDensityTokens(
+        height: 52,
+        horizontalPadding: 14,
+        iconGap: 8,
+        iconChipSize: 30,
+        iconSize: 16,
+        labelFontSize: 17,
+        labelFontWeight: FontWeight.w500,
+        labelLetterSpacing: 0.4,
+        labelHeight: 1.3,
+      );
+
+      final updated = base.copyWith(
+        labelFontWeight: FontWeight.w600,
+        labelLetterSpacing: 0.2,
+        labelHeight: 1.2,
+      );
+      final lerped = base.lerp(other, 1);
+
+      expect(updated.labelFontWeight, FontWeight.w600);
+      expect(updated.labelLetterSpacing, 0.2);
+      expect(updated.labelHeight, 1.2);
+      expect(lerped.labelFontWeight, other.labelFontWeight);
+      expect(lerped.labelLetterSpacing, other.labelLetterSpacing);
+      expect(lerped.labelHeight, other.labelHeight);
+    },
+  );
+
+  test(
+    'KidButtonDensityTokens keeps nullable typography fallback discrete during lerp',
+    () {
+      const inherited = KidButtonDensityTokens(
+        height: 60,
+        horizontalPadding: 16,
+        iconGap: 10,
+        iconChipSize: 34,
+        iconSize: 18,
+        labelFontSize: 19,
+      );
+      const explicit = KidButtonDensityTokens(
+        height: 60,
+        horizontalPadding: 16,
+        iconGap: 10,
+        iconChipSize: 34,
+        iconSize: 18,
+        labelFontSize: 19,
+        labelFontWeight: FontWeight.w700,
+        labelLetterSpacing: 0,
+        labelHeight: 1.1,
+      );
+
+      final beforeSwitch = inherited.lerp(explicit, 0.49);
+      final afterSwitch = inherited.lerp(explicit, 0.5);
+
+      expect(beforeSwitch.labelFontWeight, isNull);
+      expect(beforeSwitch.labelLetterSpacing, isNull);
+      expect(beforeSwitch.labelHeight, isNull);
+      expect(afterSwitch.labelFontWeight, explicit.labelFontWeight);
+      expect(afterSwitch.labelLetterSpacing, explicit.labelLetterSpacing);
+      expect(afterSwitch.labelHeight, explicit.labelHeight);
+    },
+  );
 
   test('buildKidTheme exposes the kid chrome token defaults', () {
     final theme = buildKidTheme();
