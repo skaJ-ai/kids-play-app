@@ -3,13 +3,26 @@ import 'package:flutter/material.dart';
 import 'kid_theme.dart';
 import 'tap_cooldown.dart';
 
+enum ToyButtonTone { primary, secondary }
+
+enum ToyButtonDensity { regular, compact }
+
+extension on ToyButtonDensity {
+  double get height => switch (this) {
+    ToyButtonDensity.regular => 64,
+    ToyButtonDensity.compact => 56,
+  };
+}
+
 class ToyButton extends StatelessWidget {
   const ToyButton({
     super.key,
     required this.label,
     this.icon,
     this.onPressed,
-    this.height = 72,
+    this.height,
+    this.density = ToyButtonDensity.regular,
+    this.tone = ToyButtonTone.primary,
     this.colors = const [KidPalette.blue, KidPalette.blueDark],
     this.cooldown = const Duration(milliseconds: 350),
   }) : assert(
@@ -20,19 +33,54 @@ class ToyButton extends StatelessWidget {
   final String label;
   final IconData? icon;
   final VoidCallback? onPressed;
-  final double height;
+  final double? height;
+  final ToyButtonDensity density;
+  final ToyButtonTone tone;
   final List<Color> colors;
   final Duration cooldown;
 
   @override
   Widget build(BuildContext context) {
     final enabled = onPressed != null;
-    final borderRadius = BorderRadius.circular(30);
-    final buttonColors = enabled
+    final effectiveHeight = height ?? density.height;
+    final compact = effectiveHeight <= ToyButtonDensity.compact.height;
+    final borderRadius = BorderRadius.circular(effectiveHeight / 2);
+    final primaryTone = tone == ToyButtonTone.primary;
+    final baseColors = primaryTone
         ? colors
-        : colors
-              .map((color) => Color.lerp(color, KidPalette.body, 0.36)!)
+        : const [KidPalette.cream, KidPalette.creamWarm];
+    final buttonColors = enabled
+        ? baseColors
+        : baseColors
+              .map(
+                (color) => Color.lerp(
+                  color,
+                  KidPalette.body,
+                  primaryTone ? 0.36 : 0.16,
+                )!,
+              )
               .toList(growable: false);
+    final foregroundColor = primaryTone ? KidPalette.white : KidPalette.navy;
+    final borderColor = primaryTone
+        ? KidPalette.white.withValues(alpha: 0.16)
+        : KidPalette.stroke;
+    final boxShadow = primaryTone ? KidShadows.button : KidShadows.buttonSoft;
+    final chipColor = primaryTone
+        ? KidPalette.white.withValues(alpha: 0.18)
+        : KidPalette.white.withValues(alpha: 0.88);
+    final chipBorderColor = primaryTone
+        ? KidPalette.white.withValues(alpha: 0.12)
+        : KidPalette.stroke;
+    final chipSize = compact ? 32.0 : 36.0;
+    final iconSize = compact ? 18.0 : 20.0;
+    final labelStyle =
+        (Theme.of(context).textTheme.titleLarge ??
+                const TextStyle(fontSize: 22, fontWeight: FontWeight.w800))
+            .copyWith(
+              color: foregroundColor,
+              fontWeight: FontWeight.w800,
+              fontSize: compact ? 20 : null,
+            );
 
     return Opacity(
       opacity: enabled ? 1 : 0.58,
@@ -45,27 +93,29 @@ class ToyButton extends StatelessWidget {
           ),
           borderRadius: borderRadius,
           border: Border.all(
-            color: KidPalette.white.withValues(alpha: 0.18),
-            width: 1.4,
+            color: borderColor,
+            width: primaryTone ? 1.3 : 1.2,
           ),
-          boxShadow: KidShadows.button,
+          boxShadow: boxShadow,
         ),
         child: Stack(
           children: [
             Positioned(
               top: 1,
-              left: 18,
-              right: 18,
+              left: 16,
+              right: 16,
               child: IgnorePointer(
                 child: Container(
-                  height: 14,
+                  height: 12,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(999),
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        KidPalette.white.withValues(alpha: 0.24),
+                        KidPalette.white.withValues(
+                          alpha: primaryTone ? 0.22 : 0.14,
+                        ),
                         KidPalette.white.withValues(alpha: 0),
                       ],
                     ),
@@ -80,30 +130,30 @@ class ToyButton extends StatelessWidget {
                 cooldown: cooldown,
                 onTap: onPressed,
                 child: SizedBox(
-                  height: height,
+                  height: effectiveHeight,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 18),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: compact ? 16 : 18,
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         if (icon != null) ...[
                           Container(
-                            width: 38,
-                            height: 38,
+                            width: chipSize,
+                            height: chipSize,
                             decoration: BoxDecoration(
-                              color: KidPalette.white.withValues(alpha: 0.18),
+                              color: chipColor,
                               borderRadius: BorderRadius.circular(14),
-                              border: Border.all(
-                                color: KidPalette.white.withValues(alpha: 0.12),
-                              ),
+                              border: Border.all(color: chipBorderColor),
                             ),
                             child: Icon(
                               icon,
-                              color: KidPalette.white,
-                              size: 22,
+                              color: foregroundColor,
+                              size: iconSize,
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          SizedBox(width: compact ? 10 : 12),
                         ],
                         Flexible(
                           child: Text(
@@ -111,16 +161,7 @@ class ToyButton extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
-                            style:
-                                (Theme.of(context).textTheme.titleLarge ??
-                                        const TextStyle(
-                                          fontSize: 22,
-                                          fontWeight: FontWeight.w800,
-                                        ))
-                                    .copyWith(
-                                      color: KidPalette.white,
-                                      fontWeight: FontWeight.w800,
-                                    ),
+                            style: labelStyle,
                           ),
                         ),
                       ],

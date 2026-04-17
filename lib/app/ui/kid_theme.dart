@@ -31,6 +31,11 @@ class KidShadows {
     BoxShadow(color: Color(0x241B4FA7), blurRadius: 24, offset: Offset(0, 12)),
     BoxShadow(color: Color(0x14182230), blurRadius: 10, offset: Offset(0, 4)),
   ];
+
+  static List<BoxShadow> get buttonSoft => const [
+    BoxShadow(color: Color(0x12182230), blurRadius: 18, offset: Offset(0, 8)),
+    BoxShadow(color: Color(0x08182230), blurRadius: 6, offset: Offset(0, 2)),
+  ];
 }
 
 ThemeData buildKidTheme() {
