@@ -38,6 +38,43 @@ class KidShadows {
   ];
 }
 
+enum ToyPanelDensity { regular, compact, tight }
+
+@immutable
+class KidPanelDensityTokens {
+  const KidPanelDensityTokens({required this.padding, required this.radius});
+
+  final EdgeInsets padding;
+  final double radius;
+}
+
+class KidPanelTokens {
+  const KidPanelTokens._();
+
+  static const regular = KidPanelDensityTokens(
+    padding: EdgeInsets.all(24),
+    radius: 32,
+  );
+
+  static const compact = KidPanelDensityTokens(
+    padding: EdgeInsets.all(14),
+    radius: 32,
+  );
+
+  static const tight = KidPanelDensityTokens(
+    padding: EdgeInsets.all(12),
+    radius: 24,
+  );
+
+  static KidPanelDensityTokens forDensity(ToyPanelDensity density) {
+    return switch (density) {
+      ToyPanelDensity.regular => regular,
+      ToyPanelDensity.compact => compact,
+      ToyPanelDensity.tight => tight,
+    };
+  }
+}
+
 ThemeData buildKidTheme() {
   final base = ThemeData(
     useMaterial3: true,

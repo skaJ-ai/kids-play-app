@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kids_play_app/app/ui/toy_panel.dart';
 import 'package:kids_play_app/features/home/data/home_catalog_repository.dart';
 import 'package:kids_play_app/features/home/presentation/category_hub_screen.dart';
 import 'package:kids_play_app/features/home/presentation/home_screen.dart';
@@ -34,6 +35,12 @@ void main() {
     expect(find.text('자음과 모음을 만나요'), findsNothing);
     expect(find.text('대문자와 소문자를 만나요'), findsNothing);
     expect(find.text('숫자 놀이를 시작해요'), findsNothing);
+    _expectPanelGeometryForText(
+      tester,
+      text: '한글',
+      expectedPadding: const EdgeInsets.all(14),
+      expectedRadius: 32,
+    );
   });
 
   testWidgets(
@@ -71,8 +78,53 @@ void main() {
       expect(find.text('듣고 바로 맞혀요'), findsOneWidget);
       expect(find.text('바로 시작'), findsNWidgets(2));
       expect(find.byIcon(Icons.arrow_outward_rounded), findsNothing);
+      _expectPanelGeometryForText(
+        tester,
+        text: '배우기',
+        expectedPadding: const EdgeInsets.all(12),
+        expectedRadius: 32,
+      );
+      _expectPanelGeometryForText(
+        tester,
+        text: '퀴즈',
+        expectedPadding: const EdgeInsets.all(12),
+        expectedRadius: 32,
+      );
     },
   );
+}
+
+void _expectPanelGeometryForText(
+  WidgetTester tester, {
+  required String text,
+  required EdgeInsetsGeometry expectedPadding,
+  required double expectedRadius,
+}) {
+  final panelFinder = find.ancestor(
+    of: find.text(text),
+    matching: find.byType(ToyPanel),
+  );
+  expect(panelFinder, findsOneWidget);
+
+  final panelPaddingWidgets = tester
+      .widgetList<Padding>(
+        find.descendant(of: panelFinder, matching: find.byType(Padding)),
+      )
+      .where((widget) => widget.child is Flex)
+      .toList();
+  final clipFinder = find.descendant(
+    of: panelFinder,
+    matching: find.byType(ClipRRect),
+  );
+
+  expect(panelPaddingWidgets, hasLength(1));
+  expect(clipFinder, findsOneWidget);
+
+  final paddingWidget = panelPaddingWidgets.single;
+  final clipWidget = tester.widget<ClipRRect>(clipFinder);
+
+  expect(paddingWidget.padding, expectedPadding);
+  expect(clipWidget.borderRadius, BorderRadius.circular(expectedRadius));
 }
 
 HomeCatalogRepository _fakeHomeCatalogRepository() {

@@ -204,6 +204,7 @@ class _ModeCard extends StatelessWidget {
 
               if (isCompact) {
                 return ToyPanel(
+                  density: ToyPanelDensity.compact,
                   padding: const EdgeInsets.all(12),
                   backgroundColor: backgroundColor,
                   borderColor: KidPalette.white.withValues(alpha: 0.78),

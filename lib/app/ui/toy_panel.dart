@@ -6,25 +6,30 @@ class ToyPanel extends StatelessWidget {
   const ToyPanel({
     super.key,
     required this.child,
-    this.padding = const EdgeInsets.all(24),
+    this.density = ToyPanelDensity.regular,
+    this.padding,
     this.backgroundColor = KidPalette.cream,
     this.borderColor = KidPalette.stroke,
-    this.radius = 32,
+    this.radius,
   });
 
   final Widget child;
-  final EdgeInsetsGeometry padding;
+  final ToyPanelDensity density;
+  final EdgeInsetsGeometry? padding;
   final Color backgroundColor;
   final Color borderColor;
-  final double radius;
+  final double? radius;
 
   @override
   Widget build(BuildContext context) {
+    final densityTokens = KidPanelTokens.forDensity(density);
+    final resolvedPadding = padding ?? densityTokens.padding;
+    final resolvedRadius = radius ?? densityTokens.radius;
     final resolvedBorder = borderColor.withValues(
       alpha: borderColor == KidPalette.stroke ? 0.88 : 0.72,
     );
 
-    final borderRadius = BorderRadius.circular(radius);
+    final borderRadius = BorderRadius.circular(resolvedRadius);
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -65,7 +70,7 @@ class ToyPanel extends StatelessWidget {
                 ),
               ),
             ),
-            Padding(padding: padding, child: child),
+            Padding(padding: resolvedPadding, child: child),
           ],
         ),
       ),

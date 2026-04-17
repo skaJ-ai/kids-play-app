@@ -199,7 +199,8 @@ class _CategoryCard extends StatelessWidget {
           );
         },
         child: ToyPanel(
-          padding: EdgeInsets.all(compact ? 14 : 20),
+          density: compact ? ToyPanelDensity.compact : ToyPanelDensity.regular,
+          padding: compact ? null : const EdgeInsets.all(20),
           backgroundColor: panelColor,
           borderColor: KidPalette.white.withValues(alpha: 0.78),
           child: Column(
