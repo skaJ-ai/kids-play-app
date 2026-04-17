@@ -19,6 +19,7 @@ void main() {
               borderWidth: 2,
               highlightHeight: 22,
               highlightHorizontalInset: 26,
+              insetRadius: 24,
             ),
             compact: KidPanelDensityTokens(
               padding: EdgeInsets.all(18),
@@ -26,6 +27,7 @@ void main() {
               borderWidth: 1.25,
               highlightHeight: 14,
               highlightHorizontalInset: 12,
+              insetRadius: 18,
             ),
             tight: KidPanelDensityTokens(
               padding: EdgeInsets.all(8),
@@ -33,6 +35,7 @@ void main() {
               borderWidth: 0.75,
               highlightHeight: 10,
               highlightHorizontalInset: 6,
+              insetRadius: 16,
             ),
           ),
         );

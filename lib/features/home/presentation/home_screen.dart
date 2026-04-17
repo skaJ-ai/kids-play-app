@@ -193,7 +193,9 @@ class _CategoryCard extends StatelessWidget {
     final panelDensity = compact
         ? ToyPanelDensity.compact
         : ToyPanelDensity.regular;
-    final panelRadius = theme.kidLayout.panel.forDensity(panelDensity).radius;
+    final panelTokens = theme.kidLayout.panel.forDensity(panelDensity);
+    final panelRadius = panelTokens.radius;
+    final iconTileRadius = panelTokens.insetRadius;
 
     return Material(
       color: Colors.transparent,
@@ -239,7 +241,7 @@ class _CategoryCard extends StatelessWidget {
                 height: compact ? 58 : 76,
                 decoration: BoxDecoration(
                   color: KidPalette.white.withValues(alpha: 0.88),
-                  borderRadius: BorderRadius.circular(compact ? 18 : 24),
+                  borderRadius: BorderRadius.circular(iconTileRadius),
                   border: Border.all(
                     color: KidPalette.white.withValues(alpha: 0.72),
                   ),

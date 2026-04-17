@@ -185,9 +185,14 @@ class _ModeCard extends StatelessWidget {
           final panelDensity = isCompact
               ? ToyPanelDensity.compact
               : ToyPanelDensity.regular;
-          final panelRadius = theme.kidLayout.panel
-              .forDensity(panelDensity)
-              .radius;
+          final panelTokens = theme.kidLayout.panel.forDensity(panelDensity);
+          final panelRadius = panelTokens.radius;
+          final iconTileDensity = isCompact
+              ? ToyPanelDensity.tight
+              : ToyPanelDensity.regular;
+          final iconTileRadius = theme.kidLayout.panel
+              .forDensity(iconTileDensity)
+              .insetRadius;
           final topGap = isTight ? 8.0 : (isCompact ? 12.0 : 18.0);
           final iconBoxSize = isTight ? 44.0 : (isCompact ? 62.0 : 76.0);
           final iconSize = isTight ? 24.0 : (isCompact ? 30.0 : 38.0);
@@ -219,7 +224,7 @@ class _ModeCard extends StatelessWidget {
                             height: 44,
                             decoration: BoxDecoration(
                               color: KidPalette.white.withValues(alpha: 0.9),
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(iconTileRadius),
                               border: Border.all(
                                 color: KidPalette.white.withValues(alpha: 0.72),
                               ),
@@ -312,9 +317,7 @@ class _ModeCard extends StatelessWidget {
                             height: iconBoxSize,
                             decoration: BoxDecoration(
                               color: KidPalette.white.withValues(alpha: 0.9),
-                              borderRadius: BorderRadius.circular(
-                                isTight ? 16 : (isCompact ? 18 : 24),
-                              ),
+                              borderRadius: BorderRadius.circular(iconTileRadius),
                               border: Border.all(
                                 color: KidPalette.white.withValues(alpha: 0.72),
                               ),

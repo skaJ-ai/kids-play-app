@@ -372,6 +372,7 @@ ThemeData _buildHeroThemeWithPanelTokens() {
       borderWidth: 1.5,
       highlightHeight: 18,
       highlightHorizontalInset: 20,
+      insetRadius: 24,
     ),
     compact: KidPanelDensityTokens(
       padding: EdgeInsets.all(12),
@@ -379,6 +380,7 @@ ThemeData _buildHeroThemeWithPanelTokens() {
       borderWidth: 1.4,
       highlightHeight: 16,
       highlightHorizontalInset: 18,
+      insetRadius: 18,
     ),
     tight: KidPanelDensityTokens(
       padding: EdgeInsets.all(11),
@@ -386,6 +388,7 @@ ThemeData _buildHeroThemeWithPanelTokens() {
       borderWidth: 1.3,
       highlightHeight: 14,
       highlightHorizontalInset: 16,
+      insetRadius: 16,
     ),
   );
   final baseTheme = buildKidTheme();

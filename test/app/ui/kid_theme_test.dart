@@ -35,16 +35,19 @@ void main() {
     expect(layout.panel.regular.borderWidth, 1.5);
     expect(layout.panel.regular.highlightHeight, 18);
     expect(layout.panel.regular.highlightHorizontalInset, 20);
+    expect(layout.panel.regular.insetRadius, 24);
     expect(layout.panel.compact.padding, const EdgeInsets.all(14));
     expect(layout.panel.compact.radius, 32);
     expect(layout.panel.compact.borderWidth, 1.4);
     expect(layout.panel.compact.highlightHeight, 16);
     expect(layout.panel.compact.highlightHorizontalInset, 18);
+    expect(layout.panel.compact.insetRadius, 18);
     expect(layout.panel.tight.padding, const EdgeInsets.all(12));
     expect(layout.panel.tight.radius, 24);
     expect(layout.panel.tight.borderWidth, 1.3);
     expect(layout.panel.tight.highlightHeight, 14);
     expect(layout.panel.tight.highlightHorizontalInset, 16);
+    expect(layout.panel.tight.insetRadius, 16);
   });
 
   test('buildKidTheme defines a calmer supporting label hierarchy', () {

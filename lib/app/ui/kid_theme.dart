@@ -176,6 +176,7 @@ class KidPanelDensityTokens {
     required this.borderWidth,
     required this.highlightHeight,
     required this.highlightHorizontalInset,
+    required this.insetRadius,
   });
 
   final EdgeInsets padding;
@@ -183,6 +184,7 @@ class KidPanelDensityTokens {
   final double borderWidth;
   final double highlightHeight;
   final double highlightHorizontalInset;
+  final double insetRadius;
 
   KidPanelDensityTokens copyWith({
     EdgeInsets? padding,
@@ -190,6 +192,7 @@ class KidPanelDensityTokens {
     double? borderWidth,
     double? highlightHeight,
     double? highlightHorizontalInset,
+    double? insetRadius,
   }) {
     return KidPanelDensityTokens(
       padding: padding ?? this.padding,
@@ -198,6 +201,7 @@ class KidPanelDensityTokens {
       highlightHeight: highlightHeight ?? this.highlightHeight,
       highlightHorizontalInset:
           highlightHorizontalInset ?? this.highlightHorizontalInset,
+      insetRadius: insetRadius ?? this.insetRadius,
     );
   }
 
@@ -217,6 +221,8 @@ class KidPanelDensityTokens {
             t,
           ) ??
           highlightHorizontalInset,
+      insetRadius:
+          ui.lerpDouble(insetRadius, other.insetRadius, t) ?? insetRadius,
     );
   }
 }
@@ -302,6 +308,7 @@ class KidLayoutTheme extends ThemeExtension<KidLayoutTheme> {
         borderWidth: 1.5,
         highlightHeight: 18,
         highlightHorizontalInset: 20,
+        insetRadius: 24,
       ),
       compact: KidPanelDensityTokens(
         padding: EdgeInsets.all(14),
@@ -309,6 +316,7 @@ class KidLayoutTheme extends ThemeExtension<KidLayoutTheme> {
         borderWidth: 1.4,
         highlightHeight: 16,
         highlightHorizontalInset: 18,
+        insetRadius: 18,
       ),
       tight: KidPanelDensityTokens(
         padding: EdgeInsets.all(12),
@@ -316,6 +324,7 @@ class KidLayoutTheme extends ThemeExtension<KidLayoutTheme> {
         borderWidth: 1.3,
         highlightHeight: 14,
         highlightHorizontalInset: 16,
+        insetRadius: 16,
       ),
     ),
   );
