@@ -31,6 +31,7 @@ class ToyPanel extends StatelessWidget {
     final layout = Theme.of(context).kidLayout;
     final densityTokens = layout.panel.forDensity(density);
     final chromeTokens = layout.chrome.panel;
+    final shadowTokens = layout.chrome.shadows;
     final resolvedPadding = padding ?? densityTokens.padding;
     final resolvedRadius = radius ?? densityTokens.radius;
     final resolvedBorderWidth = densityTokens.borderWidth;
@@ -61,7 +62,7 @@ class ToyPanel extends StatelessWidget {
         ),
         borderRadius: borderRadius,
         border: Border.all(color: resolvedBorder, width: resolvedBorderWidth),
-        boxShadow: KidShadows.panel,
+        boxShadow: shadowTokens.panel,
       ),
       child: ClipRRect(
         borderRadius: borderRadius,

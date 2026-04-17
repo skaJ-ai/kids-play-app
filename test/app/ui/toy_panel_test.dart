@@ -199,6 +199,42 @@ void main() {
         KidPalette.white.withValues(alpha: 0.31),
       );
     });
+
+    testWidgets('reads panel shadow overrides from kid theme tokens', (
+      WidgetTester tester,
+    ) async {
+      const customPanelShadows = [
+        BoxShadow(
+          color: Color(0x28112233),
+          blurRadius: 24,
+          offset: Offset(0, 14),
+        ),
+        BoxShadow(
+          color: Color(0x10000000),
+          blurRadius: 5,
+          offset: Offset(1, 2),
+        ),
+      ];
+      final customLayout = KidLayoutTheme(
+        button: KidLayoutTheme.defaults.button,
+        panel: KidLayoutTheme.defaults.panel,
+        chrome: const KidChromeTokens(
+          button: KidButtonChromeTokens(),
+          panel: KidPanelChromeTokens(),
+          shadows: KidShadowTokens(panel: customPanelShadows),
+        ),
+      );
+
+      await _pumpToyPanel(
+        tester,
+        theme: buildKidTheme().copyWith(extensions: [customLayout]),
+      );
+
+      expect(
+        _panelDecoration(tester, find.byType(ToyPanel)).boxShadow,
+        customPanelShadows,
+      );
+    });
   });
 
   testWidgets('keeps the shadowed shell outside the clipped inner layer', (

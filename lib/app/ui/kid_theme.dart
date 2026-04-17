@@ -24,17 +24,17 @@ class KidPalette {
 }
 
 class KidShadows {
-  static List<BoxShadow> get panel => const [
+  static const panel = [
     BoxShadow(color: Color(0x17182230), blurRadius: 28, offset: Offset(0, 16)),
     BoxShadow(color: Color(0x0D182230), blurRadius: 10, offset: Offset(0, 4)),
   ];
 
-  static List<BoxShadow> get button => const [
+  static const button = [
     BoxShadow(color: Color(0x241B4FA7), blurRadius: 24, offset: Offset(0, 12)),
     BoxShadow(color: Color(0x14182230), blurRadius: 10, offset: Offset(0, 4)),
   ];
 
-  static List<BoxShadow> get buttonSoft => const [
+  static const buttonSoft = [
     BoxShadow(color: Color(0x12182230), blurRadius: 18, offset: Offset(0, 8)),
     BoxShadow(color: Color(0x08182230), blurRadius: 6, offset: Offset(0, 2)),
   ];
@@ -125,25 +125,19 @@ class KidButtonDensityTokens {
       iconSize: ui.lerpDouble(iconSize, other.iconSize, t) ?? iconSize,
       labelFontSize:
           ui.lerpDouble(labelFontSize, other.labelFontSize, t) ?? labelFontSize,
-      labelFontWeight:
-          labelFontWeight == null || other.labelFontWeight == null
-              ? (t < 0.5 ? labelFontWeight : other.labelFontWeight)
-              : FontWeight.lerp(labelFontWeight, other.labelFontWeight, t) ??
-                  (t < 0.5 ? labelFontWeight : other.labelFontWeight),
+      labelFontWeight: labelFontWeight == null || other.labelFontWeight == null
+          ? (t < 0.5 ? labelFontWeight : other.labelFontWeight)
+          : FontWeight.lerp(labelFontWeight, other.labelFontWeight, t) ??
+                (t < 0.5 ? labelFontWeight : other.labelFontWeight),
       labelLetterSpacing:
           labelLetterSpacing == null || other.labelLetterSpacing == null
-              ? (t < 0.5 ? labelLetterSpacing : other.labelLetterSpacing)
-              : ui.lerpDouble(
-                    labelLetterSpacing,
-                    other.labelLetterSpacing,
-                    t,
-                  ) ??
-                  (t < 0.5 ? labelLetterSpacing : other.labelLetterSpacing),
-      labelHeight:
-          labelHeight == null || other.labelHeight == null
-              ? (t < 0.5 ? labelHeight : other.labelHeight)
-              : ui.lerpDouble(labelHeight, other.labelHeight, t) ??
-                  (t < 0.5 ? labelHeight : other.labelHeight),
+          ? (t < 0.5 ? labelLetterSpacing : other.labelLetterSpacing)
+          : ui.lerpDouble(labelLetterSpacing, other.labelLetterSpacing, t) ??
+                (t < 0.5 ? labelLetterSpacing : other.labelLetterSpacing),
+      labelHeight: labelHeight == null || other.labelHeight == null
+          ? (t < 0.5 ? labelHeight : other.labelHeight)
+          : ui.lerpDouble(labelHeight, other.labelHeight, t) ??
+                (t < 0.5 ? labelHeight : other.labelHeight),
       primaryBorderWidth:
           ui.lerpDouble(primaryBorderWidth, other.primaryBorderWidth, t) ??
           primaryBorderWidth,
@@ -433,24 +427,69 @@ class KidPanelChromeTokens {
 }
 
 @immutable
+class KidShadowTokens {
+  const KidShadowTokens({
+    this.buttonPrimary = KidShadows.button,
+    this.buttonSecondary = KidShadows.buttonSoft,
+    this.panel = KidShadows.panel,
+  });
+
+  static const defaults = KidShadowTokens();
+
+  final List<BoxShadow> buttonPrimary;
+  final List<BoxShadow> buttonSecondary;
+  final List<BoxShadow> panel;
+
+  KidShadowTokens copyWith({
+    List<BoxShadow>? buttonPrimary,
+    List<BoxShadow>? buttonSecondary,
+    List<BoxShadow>? panel,
+  }) {
+    return KidShadowTokens(
+      buttonPrimary: buttonPrimary ?? this.buttonPrimary,
+      buttonSecondary: buttonSecondary ?? this.buttonSecondary,
+      panel: panel ?? this.panel,
+    );
+  }
+
+  KidShadowTokens lerp(KidShadowTokens other, double t) {
+    return KidShadowTokens(
+      buttonPrimary:
+          BoxShadow.lerpList(buttonPrimary, other.buttonPrimary, t) ??
+          (t < 0.5 ? buttonPrimary : other.buttonPrimary),
+      buttonSecondary:
+          BoxShadow.lerpList(buttonSecondary, other.buttonSecondary, t) ??
+          (t < 0.5 ? buttonSecondary : other.buttonSecondary),
+      panel:
+          BoxShadow.lerpList(panel, other.panel, t) ??
+          (t < 0.5 ? panel : other.panel),
+    );
+  }
+}
+
+@immutable
 class KidChromeTokens {
   const KidChromeTokens({
     this.button = const KidButtonChromeTokens(),
     this.panel = const KidPanelChromeTokens(),
+    this.shadows = KidShadowTokens.defaults,
   });
 
   static const defaults = KidChromeTokens();
 
   final KidButtonChromeTokens button;
   final KidPanelChromeTokens panel;
+  final KidShadowTokens shadows;
 
   KidChromeTokens copyWith({
     KidButtonChromeTokens? button,
     KidPanelChromeTokens? panel,
+    KidShadowTokens? shadows,
   }) {
     return KidChromeTokens(
       button: button ?? this.button,
       panel: panel ?? this.panel,
+      shadows: shadows ?? this.shadows,
     );
   }
 
@@ -458,6 +497,7 @@ class KidChromeTokens {
     return KidChromeTokens(
       button: button.lerp(other.button, t),
       panel: panel.lerp(other.panel, t),
+      shadows: shadows.lerp(other.shadows, t),
     );
   }
 }

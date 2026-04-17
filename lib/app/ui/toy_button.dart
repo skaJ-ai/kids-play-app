@@ -44,6 +44,7 @@ class ToyButton extends StatelessWidget {
     final layout = Theme.of(context).kidLayout;
     final densityTokens = density.resolve(layout);
     final chromeTokens = layout.chrome.button;
+    final shadowTokens = layout.chrome.shadows;
     final effectiveHeight = height ?? densityTokens.height;
     final borderRadius = BorderRadius.circular(effectiveHeight / 2);
     final primaryTone = tone == ToyButtonTone.primary;
@@ -65,7 +66,9 @@ class ToyButton extends StatelessWidget {
     final borderColor = primaryTone
         ? KidPalette.white.withValues(alpha: chromeTokens.primaryBorderAlpha)
         : KidPalette.stroke;
-    final boxShadow = primaryTone ? KidShadows.button : KidShadows.buttonSoft;
+    final boxShadow = primaryTone
+        ? shadowTokens.buttonPrimary
+        : shadowTokens.buttonSecondary;
     final chipColor = primaryTone
         ? KidPalette.white.withValues(alpha: chromeTokens.primaryIconChipAlpha)
         : KidPalette.white.withValues(
@@ -78,8 +81,8 @@ class ToyButton extends StatelessWidget {
         : KidPalette.stroke;
     final chipSize = densityTokens.iconChipSize;
     final iconSize = densityTokens.iconSize;
-    final baseLabelStyle = Theme.of(context).textTheme.titleLarge ??
-        const TextStyle();
+    final baseLabelStyle =
+        Theme.of(context).textTheme.titleLarge ?? const TextStyle();
     final labelStyle = baseLabelStyle.copyWith(
       color: foregroundColor,
       fontSize: densityTokens.labelFontSize,

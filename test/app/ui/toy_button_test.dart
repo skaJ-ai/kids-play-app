@@ -502,6 +502,75 @@ void main() {
     expect(_buttonOpacity(tester, find.byType(ToyButton)), 0.23);
   });
 
+  testWidgets('reads primary shadow overrides from kid theme tokens', (
+    WidgetTester tester,
+  ) async {
+    const customPrimaryShadows = [
+      BoxShadow(color: Color(0x33123456), blurRadius: 21, offset: Offset(0, 9)),
+      BoxShadow(color: Color(0x14112233), blurRadius: 7, offset: Offset(2, 3)),
+    ];
+    final customLayout = KidLayoutTheme(
+      button: KidLayoutTheme.defaults.button,
+      panel: KidLayoutTheme.defaults.panel,
+      chrome: const KidChromeTokens(
+        button: KidButtonChromeTokens(),
+        panel: KidPanelChromeTokens(),
+        shadows: KidShadowTokens(buttonPrimary: customPrimaryShadows),
+      ),
+    );
+
+    await tester.pumpWidget(
+      _buildTestApp(
+        ToyButton(
+          label: '그림자 기본 버튼',
+          icon: Icons.play_arrow_rounded,
+          onPressed: () {},
+        ),
+        theme: buildKidTheme().copyWith(extensions: [customLayout]),
+      ),
+    );
+
+    expect(
+      _buttonDecoration(tester, find.byType(ToyButton)).boxShadow,
+      customPrimaryShadows,
+    );
+  });
+
+  testWidgets('reads secondary shadow overrides from kid theme tokens', (
+    WidgetTester tester,
+  ) async {
+    const customSecondaryShadows = [
+      BoxShadow(color: Color(0x22345678), blurRadius: 18, offset: Offset(0, 6)),
+      BoxShadow(color: Color(0x11010203), blurRadius: 4, offset: Offset(1, 2)),
+    ];
+    final customLayout = KidLayoutTheme(
+      button: KidLayoutTheme.defaults.button,
+      panel: KidLayoutTheme.defaults.panel,
+      chrome: const KidChromeTokens(
+        button: KidButtonChromeTokens(),
+        panel: KidPanelChromeTokens(),
+        shadows: KidShadowTokens(buttonSecondary: customSecondaryShadows),
+      ),
+    );
+
+    await tester.pumpWidget(
+      _buildTestApp(
+        ToyButton(
+          label: '그림자 보조 버튼',
+          icon: Icons.settings_rounded,
+          tone: ToyButtonTone.secondary,
+          onPressed: () {},
+        ),
+        theme: buildKidTheme().copyWith(extensions: [customLayout]),
+      ),
+    );
+
+    expect(
+      _buttonDecoration(tester, find.byType(ToyButton)).boxShadow,
+      customSecondaryShadows,
+    );
+  });
+
   testWidgets('renders a calmer secondary tone with surface styling', (
     WidgetTester tester,
   ) async {
