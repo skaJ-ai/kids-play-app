@@ -53,11 +53,11 @@ class KidButtonDensityTokens {
     required this.iconChipSize,
     required this.iconSize,
     required this.labelFontSize,
-    required this.primaryBorderWidth,
-    required this.secondaryBorderWidth,
-    required this.highlightInset,
-    required this.highlightHeight,
-    required this.iconChipRadius,
+    this.primaryBorderWidth = 1.3,
+    this.secondaryBorderWidth = 1.2,
+    this.highlightHeight = 12,
+    this.highlightHorizontalInset = 16,
+    this.iconChipRadius = 14,
   });
 
   final double height;
@@ -68,8 +68,8 @@ class KidButtonDensityTokens {
   final double labelFontSize;
   final double primaryBorderWidth;
   final double secondaryBorderWidth;
-  final double highlightInset;
   final double highlightHeight;
+  final double highlightHorizontalInset;
   final double iconChipRadius;
 
   KidButtonDensityTokens copyWith({
@@ -81,8 +81,8 @@ class KidButtonDensityTokens {
     double? labelFontSize,
     double? primaryBorderWidth,
     double? secondaryBorderWidth,
-    double? highlightInset,
     double? highlightHeight,
+    double? highlightHorizontalInset,
     double? iconChipRadius,
   }) {
     return KidButtonDensityTokens(
@@ -94,8 +94,9 @@ class KidButtonDensityTokens {
       labelFontSize: labelFontSize ?? this.labelFontSize,
       primaryBorderWidth: primaryBorderWidth ?? this.primaryBorderWidth,
       secondaryBorderWidth: secondaryBorderWidth ?? this.secondaryBorderWidth,
-      highlightInset: highlightInset ?? this.highlightInset,
       highlightHeight: highlightHeight ?? this.highlightHeight,
+      highlightHorizontalInset:
+          highlightHorizontalInset ?? this.highlightHorizontalInset,
       iconChipRadius: iconChipRadius ?? this.iconChipRadius,
     );
   }
@@ -118,12 +119,16 @@ class KidButtonDensityTokens {
       secondaryBorderWidth:
           ui.lerpDouble(secondaryBorderWidth, other.secondaryBorderWidth, t) ??
           secondaryBorderWidth,
-      highlightInset:
-          ui.lerpDouble(highlightInset, other.highlightInset, t) ??
-          highlightInset,
       highlightHeight:
           ui.lerpDouble(highlightHeight, other.highlightHeight, t) ??
           highlightHeight,
+      highlightHorizontalInset:
+          ui.lerpDouble(
+            highlightHorizontalInset,
+            other.highlightHorizontalInset,
+            t,
+          ) ??
+          highlightHorizontalInset,
       iconChipRadius:
           ui.lerpDouble(iconChipRadius, other.iconChipRadius, t) ??
           iconChipRadius,
@@ -272,8 +277,8 @@ class KidLayoutTheme extends ThemeExtension<KidLayoutTheme> {
         labelFontSize: 22,
         primaryBorderWidth: 1.3,
         secondaryBorderWidth: 1.2,
-        highlightInset: 16,
         highlightHeight: 12,
+        highlightHorizontalInset: 16,
         iconChipRadius: 14,
       ),
       compact: KidButtonDensityTokens(
@@ -285,8 +290,8 @@ class KidLayoutTheme extends ThemeExtension<KidLayoutTheme> {
         labelFontSize: 20,
         primaryBorderWidth: 1.2,
         secondaryBorderWidth: 1.1,
-        highlightInset: 14,
         highlightHeight: 10,
+        highlightHorizontalInset: 14,
         iconChipRadius: 12,
       ),
     ),

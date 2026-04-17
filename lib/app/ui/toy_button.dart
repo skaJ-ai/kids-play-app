@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-export 'kid_theme.dart' show ToyButtonDensity;
-
 import 'kid_theme.dart';
 import 'tap_cooldown.dart';
+
+export 'kid_theme.dart' show ToyButtonDensity;
 
 enum ToyButtonTone { primary, secondary }
 
@@ -73,12 +73,6 @@ class ToyButton extends StatelessWidget {
         : KidPalette.stroke;
     final chipSize = densityTokens.iconChipSize;
     final iconSize = densityTokens.iconSize;
-    final borderWidth = primaryTone
-        ? densityTokens.primaryBorderWidth
-        : densityTokens.secondaryBorderWidth;
-    final highlightInset = densityTokens.highlightInset;
-    final highlightHeight = densityTokens.highlightHeight;
-    final chipRadius = densityTokens.iconChipRadius;
     final labelStyle =
         (Theme.of(context).textTheme.titleLarge ??
                 const TextStyle(fontSize: 22, fontWeight: FontWeight.w800))
@@ -87,6 +81,7 @@ class ToyButton extends StatelessWidget {
               fontWeight: FontWeight.w800,
               fontSize: densityTokens.labelFontSize,
             );
+    final iconFootprint = icon == null ? 0.0 : chipSize + densityTokens.iconGap;
 
     return Opacity(
       opacity: enabled ? 1 : 0.58,
@@ -98,18 +93,23 @@ class ToyButton extends StatelessWidget {
             colors: buttonColors,
           ),
           borderRadius: borderRadius,
-          border: Border.all(color: borderColor, width: borderWidth),
+          border: Border.all(
+            color: borderColor,
+            width: primaryTone
+                ? densityTokens.primaryBorderWidth
+                : densityTokens.secondaryBorderWidth,
+          ),
           boxShadow: boxShadow,
         ),
         child: Stack(
           children: [
             Positioned(
               top: 1,
-              left: highlightInset,
-              right: highlightInset,
+              left: densityTokens.highlightHorizontalInset,
+              right: densityTokens.highlightHorizontalInset,
               child: IgnorePointer(
                 child: Container(
-                  height: highlightHeight,
+                  height: densityTokens.highlightHeight,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(999),
                     gradient: LinearGradient(
@@ -138,36 +138,65 @@ class ToyButton extends StatelessWidget {
                     padding: EdgeInsets.symmetric(
                       horizontal: densityTokens.horizontalPadding,
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        if (icon != null) ...[
-                          Container(
-                            width: chipSize,
-                            height: chipSize,
-                            decoration: BoxDecoration(
-                              color: chipColor,
-                              borderRadius: BorderRadius.circular(chipRadius),
-                              border: Border.all(color: chipBorderColor),
-                            ),
-                            child: Icon(
-                              icon,
-                              color: foregroundColor,
-                              size: iconSize,
-                            ),
-                          ),
-                          SizedBox(width: densityTokens.iconGap),
-                        ],
-                        Flexible(
-                          child: Text(
-                            label,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
-                            style: labelStyle,
-                          ),
-                        ),
-                      ],
+                    child: LayoutBuilder(
+                      builder:
+                          (BuildContext context, BoxConstraints constraints) {
+                            final trailingLabelReservation =
+                                _resolveTrailingLabelReservation(
+                                  context: context,
+                                  constraints: constraints,
+                                  iconFootprint: iconFootprint,
+                                  label: label,
+                                  labelStyle: labelStyle,
+                                );
+
+                            return Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                if (icon != null)
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Container(
+                                          width: chipSize,
+                                          height: chipSize,
+                                          decoration: BoxDecoration(
+                                            color: chipColor,
+                                            borderRadius: BorderRadius.circular(
+                                              densityTokens.iconChipRadius,
+                                            ),
+                                            border: Border.all(
+                                              color: chipBorderColor,
+                                            ),
+                                          ),
+                                          child: Icon(
+                                            icon,
+                                            color: foregroundColor,
+                                            size: iconSize,
+                                          ),
+                                        ),
+                                        SizedBox(width: densityTokens.iconGap),
+                                      ],
+                                    ),
+                                  ),
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                    left: iconFootprint,
+                                    right: trailingLabelReservation,
+                                  ),
+                                  child: Text(
+                                    label,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.center,
+                                    style: labelStyle,
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
                     ),
                   ),
                 ),
@@ -178,4 +207,49 @@ class ToyButton extends StatelessWidget {
       ),
     );
   }
+}
+
+double _resolveTrailingLabelReservation({
+  required BuildContext context,
+  required BoxConstraints constraints,
+  required double iconFootprint,
+  required String label,
+  required TextStyle labelStyle,
+}) {
+  if (iconFootprint == 0 || !constraints.hasBoundedWidth) {
+    return iconFootprint;
+  }
+
+  final symmetricLabelWidth = (constraints.maxWidth - (iconFootprint * 2))
+      .clamp(0.0, double.infinity)
+      .toDouble();
+  final fullLabelWidth = _measureSingleLineLabelWidth(
+    context: context,
+    label: label,
+    labelStyle: labelStyle,
+  );
+
+  if (fullLabelWidth <= symmetricLabelWidth) {
+    return iconFootprint;
+  }
+
+  return (constraints.maxWidth - iconFootprint - fullLabelWidth)
+      .clamp(0.0, iconFootprint)
+      .toDouble();
+}
+
+double _measureSingleLineLabelWidth({
+  required BuildContext context,
+  required String label,
+  required TextStyle labelStyle,
+}) {
+  final textPainter = TextPainter(
+    text: TextSpan(text: label, style: labelStyle),
+    maxLines: 1,
+    textDirection: Directionality.of(context),
+    locale: Localizations.maybeLocaleOf(context),
+    textScaler: MediaQuery.textScalerOf(context),
+  )..layout(maxWidth: double.infinity);
+
+  return textPainter.width;
 }

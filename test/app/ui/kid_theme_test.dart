@@ -16,7 +16,7 @@ void main() {
     expect(layout.button.regular.labelFontSize, 22);
     expect(layout.button.regular.primaryBorderWidth, 1.3);
     expect(layout.button.regular.secondaryBorderWidth, 1.2);
-    expect(layout.button.regular.highlightInset, 16);
+    expect(layout.button.regular.highlightHorizontalInset, 16);
     expect(layout.button.regular.highlightHeight, 12);
     expect(layout.button.regular.iconChipRadius, 14);
     expect(layout.button.compact.height, 56);
@@ -27,7 +27,7 @@ void main() {
     expect(layout.button.compact.labelFontSize, 20);
     expect(layout.button.compact.primaryBorderWidth, 1.2);
     expect(layout.button.compact.secondaryBorderWidth, 1.1);
-    expect(layout.button.compact.highlightInset, 14);
+    expect(layout.button.compact.highlightHorizontalInset, 14);
     expect(layout.button.compact.highlightHeight, 10);
     expect(layout.button.compact.iconChipRadius, 12);
     expect(layout.panel.regular.padding, const EdgeInsets.all(24));
