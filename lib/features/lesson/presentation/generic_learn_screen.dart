@@ -280,7 +280,9 @@ class _GenericLearnScreenState extends State<GenericLearnScreen> {
                                 icon: isLast
                                     ? Icons.refresh_rounded
                                     : Icons.arrow_forward_rounded,
-                                height: compact ? 50 : 72,
+                                density: compact
+                                    ? ToyButtonDensity.compact
+                                    : ToyButtonDensity.regular,
                                 onPressed: () => _moveToCard(
                                   lesson,
                                   isLast ? 0 : _currentIndex + 1,
