@@ -22,6 +22,8 @@ class AudioPromptPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final typography = Theme.of(context).kidTypography;
+
     return ToyPanel(
       tone: ToyPanelTone.warm,
       density: compact ? ToyPanelDensity.compact : ToyPanelDensity.regular,
@@ -55,7 +57,7 @@ class AudioPromptPanel extends StatelessWidget {
                     badge,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    style: typography.bodyMedium.copyWith(
                       color: KidPalette.coralDark,
                       fontWeight: FontWeight.w900,
                     ),
@@ -67,10 +69,8 @@ class AudioPromptPanel extends StatelessWidget {
                   maxLines: compact ? 1 : 2,
                   overflow: TextOverflow.ellipsis,
                   style:
-                      (compact
-                              ? Theme.of(context).textTheme.titleMedium
-                              : Theme.of(context).textTheme.titleLarge)
-                          ?.copyWith(
+                      (compact ? typography.titleMedium : typography.titleLarge)
+                          .copyWith(
                             color: KidPalette.navy,
                             fontWeight: FontWeight.w900,
                           ),
@@ -80,9 +80,9 @@ class AudioPromptPanel extends StatelessWidget {
                   subtitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(color: KidPalette.body),
+                  style: typography.bodyMedium.copyWith(
+                    color: KidPalette.body,
+                  ),
                 ),
               ],
             ),

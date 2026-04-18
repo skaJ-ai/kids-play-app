@@ -7,6 +7,65 @@ import 'package:kids_play_app/app/ui/toy_panel.dart';
 
 void main() {
   testWidgets(
+    'uses kid typography overrides from theme extensions for badge title and subtitle',
+    (WidgetTester tester) async {
+      final baseTheme = buildKidTheme();
+      final customTypography = KidTypographyTheme.defaults.copyWith(
+        bodyMedium: const TextStyle(
+          fontSize: 27,
+          fontWeight: FontWeight.w300,
+          letterSpacing: 3.5,
+          height: 1.8,
+          fontStyle: FontStyle.italic,
+          color: Colors.teal,
+        ),
+        titleLarge: const TextStyle(
+          fontSize: 31,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 1.7,
+          height: 1.4,
+          fontStyle: FontStyle.italic,
+          color: Colors.purple,
+        ),
+      );
+
+      await _pumpAudioPromptPanel(
+        tester,
+        compact: false,
+        theme: baseTheme.copyWith(
+          extensions: <ThemeExtension<dynamic>>[
+            baseTheme.kidLayout,
+            customTypography,
+          ],
+        ),
+      );
+
+      final badgeText = tester.widget<Text>(find.text('문제 듣기'));
+      final titleText = tester.widget<Text>(find.text('하나'));
+      final subtitleText = tester.widget<Text>(find.text('스피커를 눌러 다시 들어봐요.'));
+
+      expect(
+        badgeText.style,
+        customTypography.bodyMedium.copyWith(
+          color: KidPalette.coralDark,
+          fontWeight: FontWeight.w900,
+        ),
+      );
+      expect(
+        titleText.style,
+        customTypography.titleLarge.copyWith(
+          color: KidPalette.navy,
+          fontWeight: FontWeight.w900,
+        ),
+      );
+      expect(
+        subtitleText.style,
+        customTypography.bodyMedium.copyWith(color: KidPalette.body),
+      );
+    },
+  );
+
+  testWidgets(
     'uses the warm compact panel shell and a tight secondary replay button when compact is true',
     (WidgetTester tester) async {
       var replayCount = 0;
@@ -71,6 +130,7 @@ Future<void> _pumpAudioPromptPanel(
   required bool compact,
   VoidCallback? onReplay,
   double? width,
+  ThemeData? theme,
 }) async {
   final panel = AudioPromptPanel(
     badge: '문제 듣기',
@@ -82,7 +142,7 @@ Future<void> _pumpAudioPromptPanel(
 
   await tester.pumpWidget(
     MaterialApp(
-      theme: buildKidTheme(),
+      theme: theme ?? buildKidTheme(),
       home: Scaffold(
         body: Center(
           child: width == null ? panel : SizedBox(width: width, child: panel),
