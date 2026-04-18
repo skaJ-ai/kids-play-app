@@ -58,6 +58,28 @@ void main() {
     expect(session.earnedSticker, isTrue);
   });
 
+  test('builds a completion record for a sticker-winning quiz session', () {
+    var session = NumbersQuizSession.start(cards: _cards);
+    final completedAt = DateTime.utc(2026, 4, 19, 4, 45);
+
+    for (final choice in _cards) {
+      session = session.answer(choice).session;
+    }
+
+    final record = session.completedQuizRecord(
+      lessonId: 'numbers_count_1',
+      completedAt: completedAt,
+    );
+
+    expect(record, isNotNull);
+    expect(record?.lessonId, 'numbers:numbers_count_1');
+    expect(record?.correctCount, 5);
+    expect(record?.totalQuestions, 5);
+    expect(record?.recentMistakes, isEmpty);
+    expect(record?.stickersEarned, 1);
+    expect(record?.rewardEarnedAt, completedAt);
+  });
+
   test('restart clears progress while keeping the same quiz cards', () {
     final session = NumbersQuizSession.start(
       cards: _cards,

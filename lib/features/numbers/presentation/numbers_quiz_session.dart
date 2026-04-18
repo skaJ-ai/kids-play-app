@@ -10,6 +10,24 @@ class NumbersQuizAnswerResult {
   final NumbersQuizSession session;
 }
 
+class NumbersQuizCompletionRecord {
+  const NumbersQuizCompletionRecord({
+    required this.lessonId,
+    required this.correctCount,
+    required this.totalQuestions,
+    required this.recentMistakes,
+    required this.stickersEarned,
+    required this.rewardEarnedAt,
+  });
+
+  final String lessonId;
+  final int correctCount;
+  final int totalQuestions;
+  final List<String> recentMistakes;
+  final int stickersEarned;
+  final DateTime? rewardEarnedAt;
+}
+
 class NumbersQuizSession {
   NumbersQuizSession._({
     required this.cards,
@@ -47,6 +65,24 @@ class NumbersQuizSession {
 
   NumbersQuizSession restart() {
     return NumbersQuizSession._(cards: cards, quizCards: quizCards);
+  }
+
+  NumbersQuizCompletionRecord? completedQuizRecord({
+    required String lessonId,
+    required DateTime completedAt,
+  }) {
+    if (!isComplete) {
+      return null;
+    }
+
+    return NumbersQuizCompletionRecord(
+      lessonId: 'numbers:$lessonId',
+      correctCount: correctCount,
+      totalQuestions: totalQuestions,
+      recentMistakes: recentMistakes,
+      stickersEarned: earnedSticker ? 1 : 0,
+      rewardEarnedAt: earnedSticker ? completedAt : null,
+    );
   }
 
   List<NumbersCard> currentChoices() {

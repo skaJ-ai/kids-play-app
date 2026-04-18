@@ -386,30 +386,34 @@ class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
     }
 
     if (nextSession.isComplete) {
-      final lessonProgressKey = 'numbers:${widget.lessonId}';
-      final rewardEarnedAt = nextSession.earnedSticker ? DateTime.now() : null;
-      await services.progressStore.recordCompletedQuiz(
-        lessonId: lessonProgressKey,
-        correctCount: nextSession.correctCount,
-        totalQuestions: nextSession.totalQuestions,
-        recentMistakes: nextSession.recentMistakes,
-        stickersEarned: nextSession.earnedSticker ? 1 : 0,
-        rewardEarnedAt: rewardEarnedAt,
+      final completionRecord = nextSession.completedQuizRecord(
+        lessonId: widget.lessonId,
+        completedAt: DateTime.now(),
       );
-      if (!mounted || !identical(_session, session)) {
-        return;
-      }
-      if (settings.effectsEnabled && nextSession.earnedSticker) {
-        await services.audioService.playCue(
-          const AudioCue(
-            type: AudioCueType.reward,
-            assetKey: 'audio/sfx/reward.ogg',
-            fallbackText: '스티커 하나 획득!',
-            pitch: 1.12,
-          ),
+      if (completionRecord != null) {
+        await services.progressStore.recordCompletedQuiz(
+          lessonId: completionRecord.lessonId,
+          correctCount: completionRecord.correctCount,
+          totalQuestions: completionRecord.totalQuestions,
+          recentMistakes: completionRecord.recentMistakes,
+          stickersEarned: completionRecord.stickersEarned,
+          rewardEarnedAt: completionRecord.rewardEarnedAt,
         );
         if (!mounted || !identical(_session, session)) {
           return;
+        }
+        if (settings.effectsEnabled && completionRecord.stickersEarned > 0) {
+          await services.audioService.playCue(
+            const AudioCue(
+              type: AudioCueType.reward,
+              assetKey: 'audio/sfx/reward.ogg',
+              fallbackText: '스티커 하나 획득!',
+              pitch: 1.12,
+            ),
+          );
+          if (!mounted || !identical(_session, session)) {
+            return;
+          }
         }
       }
     }
