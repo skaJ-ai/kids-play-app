@@ -51,10 +51,11 @@ class ToyButton extends StatelessWidget {
     );
     final primaryTone = tone == ToyButtonTone.primary;
     final baseColors = primaryTone
-        ? (colors ?? [
-            chromeTokens.primaryShellGradientStart,
-            chromeTokens.primaryShellGradientEnd,
-          ])
+        ? (colors ??
+              [
+                chromeTokens.primaryShellGradientStart,
+                chromeTokens.primaryShellGradientEnd,
+              ])
         : [
             chromeTokens.secondaryShellGradientStart,
             chromeTokens.secondaryShellGradientEnd,
@@ -78,23 +79,27 @@ class ToyButton extends StatelessWidget {
         ? chromeTokens.primaryForegroundColor
         : chromeTokens.secondaryForegroundColor;
     final borderColor = primaryTone
-        ? KidPalette.white.withValues(alpha: chromeTokens.primaryBorderAlpha)
-        : KidPalette.stroke.withValues(
+        ? chromeTokens.primaryBorderColor.withValues(
+            alpha: chromeTokens.primaryBorderAlpha,
+          )
+        : chromeTokens.secondaryBorderColor.withValues(
             alpha: chromeTokens.secondaryBorderAlpha,
           );
     final boxShadow = primaryTone
         ? shadowTokens.buttonPrimary
         : shadowTokens.buttonSecondary;
     final chipColor = primaryTone
-        ? KidPalette.white.withValues(alpha: chromeTokens.primaryIconChipAlpha)
-        : KidPalette.white.withValues(
+        ? chromeTokens.primaryIconChipColor.withValues(
+            alpha: chromeTokens.primaryIconChipAlpha,
+          )
+        : chromeTokens.secondaryIconChipColor.withValues(
             alpha: chromeTokens.secondaryIconChipAlpha,
           );
     final chipBorderColor = primaryTone
-        ? KidPalette.white.withValues(
+        ? chromeTokens.primaryIconChipBorderColor.withValues(
             alpha: chromeTokens.primaryIconChipBorderAlpha,
           )
-        : KidPalette.stroke.withValues(
+        : chromeTokens.secondaryIconChipBorderColor.withValues(
             alpha: chromeTokens.secondaryIconChipBorderAlpha,
           );
     final chipSize = densityTokens.iconChipSize;

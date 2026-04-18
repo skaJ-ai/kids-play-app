@@ -676,44 +676,43 @@ void main() {
     },
   );
 
-  testWidgets(
-    'reads primary shell gradient overrides from kid theme tokens',
-    (WidgetTester tester) async {
-      const primaryShellGradientStart = Color(0xFF5A88FF);
-      const primaryShellGradientEnd = Color(0xFF2745C8);
-      final customLayout = KidLayoutTheme(
-        button: KidLayoutTheme.defaults.button,
-        panel: KidLayoutTheme.defaults.panel,
-        chrome: const KidChromeTokens(
-          button: KidButtonChromeTokens(
-            primaryShellGradientStart: primaryShellGradientStart,
-            primaryShellGradientEnd: primaryShellGradientEnd,
-          ),
-          panel: KidPanelChromeTokens(),
+  testWidgets('reads primary shell gradient overrides from kid theme tokens', (
+    WidgetTester tester,
+  ) async {
+    const primaryShellGradientStart = Color(0xFF5A88FF);
+    const primaryShellGradientEnd = Color(0xFF2745C8);
+    final customLayout = KidLayoutTheme(
+      button: KidLayoutTheme.defaults.button,
+      panel: KidLayoutTheme.defaults.panel,
+      chrome: const KidChromeTokens(
+        button: KidButtonChromeTokens(
+          primaryShellGradientStart: primaryShellGradientStart,
+          primaryShellGradientEnd: primaryShellGradientEnd,
         ),
-      );
+        panel: KidPanelChromeTokens(),
+      ),
+    );
 
-      await tester.pumpWidget(
-        _buildTestApp(
-          ToyButton(
-            label: '기본 껍질 토큰 버튼',
-            icon: Icons.play_arrow_rounded,
-            onPressed: () {},
-          ),
-          theme: buildKidTheme().copyWith(extensions: [customLayout]),
+    await tester.pumpWidget(
+      _buildTestApp(
+        ToyButton(
+          label: '기본 껍질 토큰 버튼',
+          icon: Icons.play_arrow_rounded,
+          onPressed: () {},
         ),
-      );
+        theme: buildKidTheme().copyWith(extensions: [customLayout]),
+      ),
+    );
 
-      final gradient =
-          _buttonDecoration(tester, find.byType(ToyButton)).gradient!
-              as LinearGradient;
+    final gradient =
+        _buttonDecoration(tester, find.byType(ToyButton)).gradient!
+            as LinearGradient;
 
-      expect(gradient.colors, const [
-        primaryShellGradientStart,
-        primaryShellGradientEnd,
-      ]);
-    },
-  );
+    expect(gradient.colors, const [
+      primaryShellGradientStart,
+      primaryShellGradientEnd,
+    ]);
+  });
 
   testWidgets(
     'keeps explicit primary colors ahead of themed shell gradient tokens',
@@ -970,7 +969,9 @@ void main() {
     );
 
     final primaryButton = find.byKey(const Key('primary-foreground-button'));
-    final secondaryButton = find.byKey(const Key('secondary-foreground-button'));
+    final secondaryButton = find.byKey(
+      const Key('secondary-foreground-button'),
+    );
     final primaryIcon = tester.widget<Icon>(
       find.descendant(
         of: primaryButton,
@@ -995,6 +996,105 @@ void main() {
     );
     expect(secondaryIcon.color, customSecondaryForeground);
   });
+
+  testWidgets(
+    'reads border and icon-chip base color overrides from kid theme chrome tokens',
+    (WidgetTester tester) async {
+      const customPrimaryBorderColor = Color(0xFF123456);
+      const customPrimaryIconChipColor = Color(0xFF2A7B9B);
+      const customPrimaryIconChipBorderColor = Color(0xFF4C5D6E);
+      const customSecondaryBorderColor = Color(0xFF7A5432);
+      const customSecondaryIconChipColor = Color(0xFF6BAE75);
+      const customSecondaryIconChipBorderColor = Color(0xFF9C4B8A);
+      final customLayout = KidLayoutTheme(
+        button: KidLayoutTheme.defaults.button,
+        panel: KidLayoutTheme.defaults.panel,
+        chrome: const KidChromeTokens(
+          button: KidButtonChromeTokens(
+            primaryBorderColor: customPrimaryBorderColor,
+            primaryIconChipColor: customPrimaryIconChipColor,
+            primaryIconChipBorderColor: customPrimaryIconChipBorderColor,
+            secondaryBorderColor: customSecondaryBorderColor,
+            secondaryIconChipColor: customSecondaryIconChipColor,
+            secondaryIconChipBorderColor: customSecondaryIconChipBorderColor,
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ToyButton(
+                key: const Key('primary-chrome-button'),
+                label: '기본 크롬 버튼',
+                icon: Icons.play_arrow_rounded,
+                onPressed: () {},
+              ),
+              const SizedBox(height: 12),
+              ToyButton(
+                key: const Key('secondary-chrome-button'),
+                label: '보조 크롬 버튼',
+                icon: Icons.settings_rounded,
+                tone: ToyButtonTone.secondary,
+                onPressed: () {},
+              ),
+            ],
+          ),
+          theme: buildKidTheme().copyWith(extensions: [customLayout]),
+        ),
+      );
+
+      final primaryButton = find.byKey(const Key('primary-chrome-button'));
+      final secondaryButton = find.byKey(const Key('secondary-chrome-button'));
+
+      expect(
+        _buttonBorderColor(tester, primaryButton),
+        customPrimaryBorderColor.withValues(
+          alpha: customLayout.chrome.button.primaryBorderAlpha,
+        ),
+      );
+      expect(
+        _buttonIconChipColor(tester, primaryButton, Icons.play_arrow_rounded),
+        customPrimaryIconChipColor.withValues(
+          alpha: customLayout.chrome.button.primaryIconChipAlpha,
+        ),
+      );
+      expect(
+        _buttonIconChipBorderColor(
+          tester,
+          primaryButton,
+          Icons.play_arrow_rounded,
+        ),
+        customPrimaryIconChipBorderColor.withValues(
+          alpha: customLayout.chrome.button.primaryIconChipBorderAlpha,
+        ),
+      );
+      expect(
+        _buttonBorderColor(tester, secondaryButton),
+        customSecondaryBorderColor.withValues(
+          alpha: customLayout.chrome.button.secondaryBorderAlpha,
+        ),
+      );
+      expect(
+        _buttonIconChipColor(tester, secondaryButton, Icons.settings_rounded),
+        customSecondaryIconChipColor.withValues(
+          alpha: customLayout.chrome.button.secondaryIconChipAlpha,
+        ),
+      );
+      expect(
+        _buttonIconChipBorderColor(
+          tester,
+          secondaryButton,
+          Icons.settings_rounded,
+        ),
+        customSecondaryIconChipBorderColor.withValues(
+          alpha: customLayout.chrome.button.secondaryIconChipBorderAlpha,
+        ),
+      );
+    },
+  );
 
   testWidgets('renders a calmer secondary tone with surface styling', (
     WidgetTester tester,
@@ -1120,6 +1220,12 @@ double _buttonBorderWidth(WidgetTester tester, Finder finder) {
   return border.top.width;
 }
 
+Color _buttonBorderColor(WidgetTester tester, Finder finder) {
+  final border = _buttonDecoration(tester, finder).border! as Border;
+
+  return border.top.color;
+}
+
 double _buttonBorderRadius(WidgetTester tester, Finder finder) {
   final borderRadius =
       _buttonDecoration(tester, finder).borderRadius! as BorderRadius;
@@ -1156,11 +1262,25 @@ double _buttonIconChipRadius(
   Finder finder,
   IconData icon,
 ) {
-  final chip = tester.widget<Container>(_buttonIconChipFinder(finder, icon));
-  final decoration = chip.decoration! as BoxDecoration;
+  final decoration = _buttonIconChipDecoration(tester, finder, icon);
   final borderRadius = decoration.borderRadius! as BorderRadius;
 
   return borderRadius.topLeft.x;
+}
+
+Color _buttonIconChipColor(WidgetTester tester, Finder finder, IconData icon) {
+  return _buttonIconChipDecoration(tester, finder, icon).color!;
+}
+
+Color _buttonIconChipBorderColor(
+  WidgetTester tester,
+  Finder finder,
+  IconData icon,
+) {
+  final border =
+      _buttonIconChipDecoration(tester, finder, icon).border! as Border;
+
+  return border.top.color;
 }
 
 double _buttonIconGapWidth(WidgetTester tester, Finder finder) {
@@ -1195,6 +1315,16 @@ TextStyle _buttonLabelStyle(WidgetTester tester, Finder finder, String label) {
 
 double _buttonLabelFontSize(WidgetTester tester, Finder finder, String label) {
   return _buttonLabelStyle(tester, finder, label).fontSize!;
+}
+
+BoxDecoration _buttonIconChipDecoration(
+  WidgetTester tester,
+  Finder finder,
+  IconData icon,
+) {
+  final chip = tester.widget<Container>(_buttonIconChipFinder(finder, icon));
+
+  return chip.decoration! as BoxDecoration;
 }
 
 Finder _buttonBodyFinder(Finder finder) {

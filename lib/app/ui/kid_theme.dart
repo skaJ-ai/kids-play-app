@@ -333,16 +333,22 @@ class KidButtonChromeTokens {
   const KidButtonChromeTokens({
     this.primaryShellGradientStart = KidPalette.blue,
     this.primaryShellGradientEnd = KidPalette.blueDark,
+    this.primaryBorderColor = KidPalette.white,
     this.primaryBorderAlpha = 0.16,
+    this.primaryIconChipColor = KidPalette.white,
     this.primaryIconChipAlpha = 0.18,
+    this.primaryIconChipBorderColor = KidPalette.white,
     this.primaryIconChipBorderAlpha = 0.12,
     this.primaryHighlightAlpha = 0.22,
     this.primaryForegroundColor = KidPalette.white,
     this.primaryDisabledGradientBlendTargetColor = KidPalette.body,
     this.secondaryShellGradientStart = KidPalette.cream,
     this.secondaryShellGradientEnd = KidPalette.creamWarm,
+    this.secondaryBorderColor = KidPalette.stroke,
     this.secondaryBorderAlpha = 0.82,
+    this.secondaryIconChipColor = KidPalette.white,
     this.secondaryIconChipAlpha = 0.88,
+    this.secondaryIconChipBorderColor = KidPalette.stroke,
     this.secondaryIconChipBorderAlpha = 0.72,
     this.secondaryHighlightAlpha = 0.14,
     this.secondaryForegroundColor = KidPalette.navy,
@@ -354,16 +360,22 @@ class KidButtonChromeTokens {
 
   final Color primaryShellGradientStart;
   final Color primaryShellGradientEnd;
+  final Color primaryBorderColor;
   final double primaryBorderAlpha;
+  final Color primaryIconChipColor;
   final double primaryIconChipAlpha;
+  final Color primaryIconChipBorderColor;
   final double primaryIconChipBorderAlpha;
   final double primaryHighlightAlpha;
   final Color primaryForegroundColor;
   final Color primaryDisabledGradientBlendTargetColor;
   final Color secondaryShellGradientStart;
   final Color secondaryShellGradientEnd;
+  final Color secondaryBorderColor;
   final double secondaryBorderAlpha;
+  final Color secondaryIconChipColor;
   final double secondaryIconChipAlpha;
+  final Color secondaryIconChipBorderColor;
   final double secondaryIconChipBorderAlpha;
   final double secondaryHighlightAlpha;
   final Color secondaryForegroundColor;
@@ -375,16 +387,22 @@ class KidButtonChromeTokens {
   KidButtonChromeTokens copyWith({
     Color? primaryShellGradientStart,
     Color? primaryShellGradientEnd,
+    Color? primaryBorderColor,
     double? primaryBorderAlpha,
+    Color? primaryIconChipColor,
     double? primaryIconChipAlpha,
+    Color? primaryIconChipBorderColor,
     double? primaryIconChipBorderAlpha,
     double? primaryHighlightAlpha,
     Color? primaryForegroundColor,
     Color? primaryDisabledGradientBlendTargetColor,
     Color? secondaryShellGradientStart,
     Color? secondaryShellGradientEnd,
+    Color? secondaryBorderColor,
     double? secondaryBorderAlpha,
+    Color? secondaryIconChipColor,
     double? secondaryIconChipAlpha,
+    Color? secondaryIconChipBorderColor,
     double? secondaryIconChipBorderAlpha,
     double? secondaryHighlightAlpha,
     Color? secondaryForegroundColor,
@@ -398,8 +416,12 @@ class KidButtonChromeTokens {
           primaryShellGradientStart ?? this.primaryShellGradientStart,
       primaryShellGradientEnd:
           primaryShellGradientEnd ?? this.primaryShellGradientEnd,
+      primaryBorderColor: primaryBorderColor ?? this.primaryBorderColor,
       primaryBorderAlpha: primaryBorderAlpha ?? this.primaryBorderAlpha,
+      primaryIconChipColor: primaryIconChipColor ?? this.primaryIconChipColor,
       primaryIconChipAlpha: primaryIconChipAlpha ?? this.primaryIconChipAlpha,
+      primaryIconChipBorderColor:
+          primaryIconChipBorderColor ?? this.primaryIconChipBorderColor,
       primaryIconChipBorderAlpha:
           primaryIconChipBorderAlpha ?? this.primaryIconChipBorderAlpha,
       primaryHighlightAlpha:
@@ -413,9 +435,14 @@ class KidButtonChromeTokens {
           secondaryShellGradientStart ?? this.secondaryShellGradientStart,
       secondaryShellGradientEnd:
           secondaryShellGradientEnd ?? this.secondaryShellGradientEnd,
+      secondaryBorderColor: secondaryBorderColor ?? this.secondaryBorderColor,
       secondaryBorderAlpha: secondaryBorderAlpha ?? this.secondaryBorderAlpha,
+      secondaryIconChipColor:
+          secondaryIconChipColor ?? this.secondaryIconChipColor,
       secondaryIconChipAlpha:
           secondaryIconChipAlpha ?? this.secondaryIconChipAlpha,
+      secondaryIconChipBorderColor:
+          secondaryIconChipBorderColor ?? this.secondaryIconChipBorderColor,
       secondaryIconChipBorderAlpha:
           secondaryIconChipBorderAlpha ?? this.secondaryIconChipBorderAlpha,
       secondaryHighlightAlpha:
@@ -445,14 +472,31 @@ class KidButtonChromeTokens {
           ) ??
           primaryShellGradientStart,
       primaryShellGradientEnd:
-          Color.lerp(primaryShellGradientEnd, other.primaryShellGradientEnd, t) ??
+          Color.lerp(
+            primaryShellGradientEnd,
+            other.primaryShellGradientEnd,
+            t,
+          ) ??
           primaryShellGradientEnd,
+      primaryBorderColor:
+          Color.lerp(primaryBorderColor, other.primaryBorderColor, t) ??
+          primaryBorderColor,
       primaryBorderAlpha:
           ui.lerpDouble(primaryBorderAlpha, other.primaryBorderAlpha, t) ??
           primaryBorderAlpha,
+      primaryIconChipColor:
+          Color.lerp(primaryIconChipColor, other.primaryIconChipColor, t) ??
+          primaryIconChipColor,
       primaryIconChipAlpha:
           ui.lerpDouble(primaryIconChipAlpha, other.primaryIconChipAlpha, t) ??
           primaryIconChipAlpha,
+      primaryIconChipBorderColor:
+          Color.lerp(
+            primaryIconChipBorderColor,
+            other.primaryIconChipBorderColor,
+            t,
+          ) ??
+          primaryIconChipBorderColor,
       primaryIconChipBorderAlpha:
           ui.lerpDouble(
             primaryIconChipBorderAlpha,
@@ -491,9 +535,15 @@ class KidButtonChromeTokens {
             t,
           ) ??
           secondaryShellGradientEnd,
+      secondaryBorderColor:
+          Color.lerp(secondaryBorderColor, other.secondaryBorderColor, t) ??
+          secondaryBorderColor,
       secondaryBorderAlpha:
           ui.lerpDouble(secondaryBorderAlpha, other.secondaryBorderAlpha, t) ??
           secondaryBorderAlpha,
+      secondaryIconChipColor:
+          Color.lerp(secondaryIconChipColor, other.secondaryIconChipColor, t) ??
+          secondaryIconChipColor,
       secondaryIconChipAlpha:
           ui.lerpDouble(
             secondaryIconChipAlpha,
@@ -501,6 +551,13 @@ class KidButtonChromeTokens {
             t,
           ) ??
           secondaryIconChipAlpha,
+      secondaryIconChipBorderColor:
+          Color.lerp(
+            secondaryIconChipBorderColor,
+            other.secondaryIconChipBorderColor,
+            t,
+          ) ??
+          secondaryIconChipBorderColor,
       secondaryIconChipBorderAlpha:
           ui.lerpDouble(
             secondaryIconChipBorderAlpha,
