@@ -53,20 +53,20 @@ void main() {
     expect(layout.panel.regular.highlightHeight, 16);
     expect(layout.panel.regular.highlightHorizontalInset, 18);
     expect(layout.panel.regular.insetRadius, 22);
-    expect(layout.panel.compact.padding, const EdgeInsets.all(12));
-    expect(layout.panel.compact.radius, 28);
-    expect(layout.panel.compact.borderWidth, 1.3);
+    expect(layout.panel.compact.padding, const EdgeInsets.all(10));
+    expect(layout.panel.compact.radius, 26);
+    expect(layout.panel.compact.borderWidth, 1.2);
     expect(layout.panel.compact.highlightTopInset, 0);
-    expect(layout.panel.compact.highlightHeight, 14);
-    expect(layout.panel.compact.highlightHorizontalInset, 16);
-    expect(layout.panel.compact.insetRadius, 16);
-    expect(layout.panel.tight.padding, const EdgeInsets.all(10));
-    expect(layout.panel.tight.radius, 22);
-    expect(layout.panel.tight.borderWidth, 1.2);
+    expect(layout.panel.compact.highlightHeight, 12);
+    expect(layout.panel.compact.highlightHorizontalInset, 14);
+    expect(layout.panel.compact.insetRadius, 14);
+    expect(layout.panel.tight.padding, const EdgeInsets.all(8));
+    expect(layout.panel.tight.radius, 20);
+    expect(layout.panel.tight.borderWidth, 1.1);
     expect(layout.panel.tight.highlightTopInset, 0);
-    expect(layout.panel.tight.highlightHeight, 12);
-    expect(layout.panel.tight.highlightHorizontalInset, 14);
-    expect(layout.panel.tight.insetRadius, 14);
+    expect(layout.panel.tight.highlightHeight, 10);
+    expect(layout.panel.tight.highlightHorizontalInset, 12);
+    expect(layout.panel.tight.insetRadius, 12);
   });
 
   test('buildKidTheme exposes the kid typography token defaults', () {

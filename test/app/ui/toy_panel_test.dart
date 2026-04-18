@@ -8,6 +8,47 @@ const _panelChildKey = ValueKey<String>('toy-panel-child');
 void main() {
   group('ToyPanel density', () {
     testWidgets(
+      'uses calmer compact and tight defaults from kid theme tokens',
+      (WidgetTester tester) async {
+        await _pumpToyPanel(tester, density: ToyPanelDensity.compact);
+
+        _expectResolvedShell(
+          tester,
+          expectedPadding: const EdgeInsets.all(10),
+          expectedRadius: 26,
+          expectedBorderWidth: 1.2,
+          expectedHighlightTopInset: 0,
+          expectedHighlightHeight: 12,
+          expectedHighlightHorizontalInset: 14,
+        );
+        expect(
+          (_panelHighlightDecoration(tester).borderRadius! as BorderRadius)
+              .topLeft
+              .x,
+          14,
+        );
+
+        await _pumpToyPanel(tester, density: ToyPanelDensity.tight);
+
+        _expectResolvedShell(
+          tester,
+          expectedPadding: const EdgeInsets.all(8),
+          expectedRadius: 20,
+          expectedBorderWidth: 1.1,
+          expectedHighlightTopInset: 0,
+          expectedHighlightHeight: 10,
+          expectedHighlightHorizontalInset: 12,
+        );
+        expect(
+          (_panelHighlightDecoration(tester).borderRadius! as BorderRadius)
+              .topLeft
+              .x,
+          12,
+        );
+      },
+    );
+
+    testWidgets(
       'reads regular compact and tight defaults from kid theme tokens',
       (WidgetTester tester) async {
         final customLayout = KidLayoutTheme(
@@ -621,4 +662,9 @@ Finder _panelHighlightFinder() {
           decoration.border == null;
     }),
   );
+}
+
+BoxDecoration _panelHighlightDecoration(WidgetTester tester) {
+  final highlight = tester.widget<Container>(_panelHighlightFinder());
+  return highlight.decoration! as BoxDecoration;
 }
