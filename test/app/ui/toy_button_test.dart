@@ -77,6 +77,7 @@ void main() {
             horizontalPadding: 26,
             iconGap: 14,
             iconChipSize: 40,
+            iconChipBorderWidth: 1.5,
             iconSize: 24,
             labelFontSize: 28,
             labelFontWeight: FontWeight.w600,
@@ -94,6 +95,7 @@ void main() {
             horizontalPadding: 12,
             iconGap: 6,
             iconChipSize: 28,
+            iconChipBorderWidth: 0.7,
             iconSize: 16,
             labelFontSize: 18,
             labelFontWeight: FontWeight.w500,
@@ -226,6 +228,14 @@ void main() {
         customLayout.button.regular.iconChipRadius,
       );
       expect(
+        _buttonIconChipBorderWidth(
+          tester,
+          find.byKey(const Key('regular-button')),
+          Icons.play_arrow_rounded,
+        ),
+        customLayout.button.regular.iconChipBorderWidth,
+      );
+      expect(
         _buttonHeight(tester, find.byKey(const Key('compact-button'))),
         customLayout.button.compact.height,
       );
@@ -315,6 +325,14 @@ void main() {
         ),
         customLayout.button.compact.iconChipRadius,
       );
+      expect(
+        _buttonIconChipBorderWidth(
+          tester,
+          find.byKey(const Key('compact-button')),
+          Icons.star_rounded,
+        ),
+        customLayout.button.compact.iconChipBorderWidth,
+      );
     },
   );
 
@@ -382,6 +400,7 @@ void main() {
           horizontalPadding: 10,
           iconGap: 6,
           iconChipSize: 24,
+          iconChipBorderWidth: 0.6,
           iconSize: 14,
           labelFontSize: 14,
           labelFontWeight: FontWeight.w800,
@@ -453,6 +472,10 @@ void main() {
     expect(
       _buttonIconChipRadius(tester, tightButton, Icons.volume_up_rounded),
       customLayout.button.tight.iconChipRadius,
+    );
+    expect(
+      _buttonIconChipBorderWidth(tester, tightButton, Icons.volume_up_rounded),
+      customLayout.button.tight.iconChipBorderWidth,
     );
   });
 
@@ -1541,6 +1564,17 @@ double _buttonIconChipRadius(
   final borderRadius = decoration.borderRadius! as BorderRadius;
 
   return borderRadius.topLeft.x;
+}
+
+double _buttonIconChipBorderWidth(
+  WidgetTester tester,
+  Finder finder,
+  IconData icon,
+) {
+  final border =
+      _buttonIconChipDecoration(tester, finder, icon).border! as Border;
+
+  return border.top.width;
 }
 
 Color _buttonIconChipColor(WidgetTester tester, Finder finder, IconData icon) {

@@ -56,6 +56,7 @@ class KidButtonDensityTokens {
     required this.horizontalPadding,
     required this.iconGap,
     required this.iconChipSize,
+    this.iconChipBorderWidth = 1.0,
     required this.iconSize,
     required this.labelFontSize,
     this.labelFontWeight,
@@ -74,6 +75,7 @@ class KidButtonDensityTokens {
   final double horizontalPadding;
   final double iconGap;
   final double iconChipSize;
+  final double iconChipBorderWidth;
   final double iconSize;
   final double labelFontSize;
   final FontWeight? labelFontWeight;
@@ -92,6 +94,7 @@ class KidButtonDensityTokens {
     double? horizontalPadding,
     double? iconGap,
     double? iconChipSize,
+    double? iconChipBorderWidth,
     double? iconSize,
     double? labelFontSize,
     FontWeight? labelFontWeight,
@@ -119,6 +122,7 @@ class KidButtonDensityTokens {
       horizontalPadding: horizontalPadding ?? this.horizontalPadding,
       iconGap: iconGap ?? this.iconGap,
       iconChipSize: iconChipSize ?? this.iconChipSize,
+      iconChipBorderWidth: iconChipBorderWidth ?? this.iconChipBorderWidth,
       iconSize: iconSize ?? this.iconSize,
       labelFontSize: labelFontSize ?? this.labelFontSize,
       labelFontWeight: clearLabelFontWeight
@@ -148,6 +152,9 @@ class KidButtonDensityTokens {
       iconGap: ui.lerpDouble(iconGap, other.iconGap, t) ?? iconGap,
       iconChipSize:
           ui.lerpDouble(iconChipSize, other.iconChipSize, t) ?? iconChipSize,
+      iconChipBorderWidth:
+          ui.lerpDouble(iconChipBorderWidth, other.iconChipBorderWidth, t) ??
+          iconChipBorderWidth,
       iconSize: ui.lerpDouble(iconSize, other.iconSize, t) ?? iconSize,
       labelFontSize:
           ui.lerpDouble(labelFontSize, other.labelFontSize, t) ?? labelFontSize,
@@ -919,6 +926,7 @@ class KidLayoutTheme extends ThemeExtension<KidLayoutTheme> {
         horizontalPadding: 16,
         iconGap: 10,
         iconChipSize: 34,
+        iconChipBorderWidth: 1.0,
         iconSize: 18,
         labelFontSize: 18,
         labelFontWeight: FontWeight.w700,
@@ -937,6 +945,7 @@ class KidLayoutTheme extends ThemeExtension<KidLayoutTheme> {
         horizontalPadding: 14,
         iconGap: 8,
         iconChipSize: 30,
+        iconChipBorderWidth: 0.9,
         iconSize: 16,
         labelFontSize: 16,
         labelFontWeight: FontWeight.w700,
@@ -955,6 +964,7 @@ class KidLayoutTheme extends ThemeExtension<KidLayoutTheme> {
         horizontalPadding: 12,
         iconGap: 6,
         iconChipSize: 24,
+        iconChipBorderWidth: 0.8,
         iconSize: 14,
         labelFontSize: 14,
         labelFontWeight: FontWeight.w700,

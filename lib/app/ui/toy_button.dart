@@ -207,6 +207,8 @@ class ToyButton extends StatelessWidget {
                                             ),
                                             border: Border.all(
                                               color: chipBorderColor,
+                                              width: densityTokens
+                                                  .iconChipBorderWidth,
                                             ),
                                           ),
                                           child: Icon(

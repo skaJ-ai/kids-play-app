@@ -19,6 +19,7 @@ void main() {
     expect(layout.button.regular.labelHeight, 1.1);
     expect(layout.button.regular.primaryBorderWidth, 1.2);
     expect(layout.button.regular.secondaryBorderWidth, 1.1);
+    expect(layout.button.regular.iconChipBorderWidth, 1.0);
     expect(layout.button.regular.radius, 24);
     expect(layout.button.regular.highlightTopInset, 1);
     expect(layout.button.regular.highlightHorizontalInset, 14);
@@ -35,11 +36,13 @@ void main() {
     expect(layout.button.compact.labelHeight, 1.1);
     expect(layout.button.compact.primaryBorderWidth, 1.1);
     expect(layout.button.compact.secondaryBorderWidth, 1.0);
+    expect(layout.button.compact.iconChipBorderWidth, 0.9);
     expect(layout.button.compact.radius, 22);
     expect(layout.button.compact.highlightTopInset, 1);
     expect(layout.button.compact.highlightHorizontalInset, 12);
     expect(layout.button.compact.highlightHeight, 8);
     expect(layout.button.compact.iconChipRadius, 11);
+    expect(layout.button.tight.iconChipBorderWidth, 0.8);
     expect(layout.panel.regular.padding, const EdgeInsets.all(20));
     expect(layout.panel.regular.radius, 30);
     expect(layout.panel.regular.borderWidth, 1.4);
@@ -263,6 +266,7 @@ void main() {
         horizontalPadding: 16,
         iconGap: 10,
         iconChipSize: 34,
+        iconChipBorderWidth: 1.4,
         iconSize: 18,
         labelFontSize: 19,
         labelFontWeight: FontWeight.w700,
@@ -275,6 +279,7 @@ void main() {
         horizontalPadding: 14,
         iconGap: 8,
         iconChipSize: 30,
+        iconChipBorderWidth: 0.8,
         iconSize: 16,
         labelFontSize: 17,
         labelFontWeight: FontWeight.w500,
@@ -284,6 +289,7 @@ void main() {
       );
 
       final updated = base.copyWith(
+        iconChipBorderWidth: 1.1,
         labelFontWeight: FontWeight.w600,
         labelLetterSpacing: 0.2,
         labelHeight: 1.2,
@@ -291,10 +297,12 @@ void main() {
       );
       final lerped = base.lerp(other, 1);
 
+      expect(updated.iconChipBorderWidth, 1.1);
       expect(updated.labelFontWeight, FontWeight.w600);
       expect(updated.labelLetterSpacing, 0.2);
       expect(updated.labelHeight, 1.2);
       expect(updated.highlightTopInset, 2);
+      expect(lerped.iconChipBorderWidth, other.iconChipBorderWidth);
       expect(lerped.labelFontWeight, other.labelFontWeight);
       expect(lerped.labelLetterSpacing, other.labelLetterSpacing);
       expect(lerped.labelHeight, other.labelHeight);
