@@ -399,12 +399,17 @@ void main() {
   );
 
   testWidgets(
-    'uses kid typography titleMedium fallback for compact button labels when token overrides are absent',
+    'keeps compact titleMedium fallback and uses titleSmall for tight labels when density overrides are cleared',
     (WidgetTester tester) async {
       final baseTheme = buildKidTheme();
       final customLayout = KidLayoutTheme.defaults.copyWith(
         button: KidLayoutTheme.defaults.button.copyWith(
           compact: KidLayoutTheme.defaults.button.compact.copyWith(
+            clearLabelFontWeight: true,
+            clearLabelLetterSpacing: true,
+            clearLabelHeight: true,
+          ),
+          tight: KidLayoutTheme.defaults.button.tight.copyWith(
             clearLabelFontWeight: true,
             clearLabelLetterSpacing: true,
             clearLabelHeight: true,
@@ -423,16 +428,35 @@ void main() {
           height: 1.44,
           fontStyle: FontStyle.italic,
         ),
+        titleSmall: baseTheme.kidTypography.titleSmall.copyWith(
+          fontWeight: FontWeight.w300,
+          letterSpacing: 0.9,
+          height: 1.08,
+          fontStyle: FontStyle.normal,
+        ),
       );
 
       await tester.pumpWidget(
         _buildTestApp(
-          ToyButton(
-            key: const Key('compact-fallback-typography-button'),
-            label: '조밀 버튼',
-            icon: Icons.star_rounded,
-            density: ToyButtonDensity.compact,
-            onPressed: () {},
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ToyButton(
+                key: const Key('compact-fallback-typography-button'),
+                label: '조밀 버튼',
+                icon: Icons.star_rounded,
+                density: ToyButtonDensity.compact,
+                onPressed: () {},
+              ),
+              const SizedBox(height: 12),
+              ToyButton(
+                key: const Key('tight-fallback-typography-button'),
+                label: '다시',
+                icon: Icons.volume_up_rounded,
+                density: ToyButtonDensity.tight,
+                onPressed: () {},
+              ),
+            ],
           ),
           theme: baseTheme.copyWith(
             extensions: <ThemeExtension<dynamic>>[
@@ -443,20 +467,43 @@ void main() {
         ),
       );
 
-      final labelStyle = _buttonLabelStyle(
+      final compactLabelStyle = _buttonLabelStyle(
         tester,
         find.byKey(const Key('compact-fallback-typography-button')),
         '조밀 버튼',
       );
+      final tightLabelStyle = _buttonLabelStyle(
+        tester,
+        find.byKey(const Key('tight-fallback-typography-button')),
+        '다시',
+      );
 
-      expect(labelStyle.fontSize, customLayout.button.compact.labelFontSize);
-      expect(labelStyle.fontWeight, customTypography.titleMedium.fontWeight);
       expect(
-        labelStyle.letterSpacing,
+        compactLabelStyle.fontSize,
+        customLayout.button.compact.labelFontSize,
+      );
+      expect(
+        compactLabelStyle.fontWeight,
+        customTypography.titleMedium.fontWeight,
+      );
+      expect(
+        compactLabelStyle.letterSpacing,
         customTypography.titleMedium.letterSpacing,
       );
-      expect(labelStyle.height, customTypography.titleMedium.height);
-      expect(labelStyle.fontStyle, customTypography.titleMedium.fontStyle);
+      expect(compactLabelStyle.height, customTypography.titleMedium.height);
+      expect(
+        compactLabelStyle.fontStyle,
+        customTypography.titleMedium.fontStyle,
+      );
+
+      expect(tightLabelStyle.fontSize, customLayout.button.tight.labelFontSize);
+      expect(tightLabelStyle.fontWeight, customTypography.titleSmall.fontWeight);
+      expect(
+        tightLabelStyle.letterSpacing,
+        customTypography.titleSmall.letterSpacing,
+      );
+      expect(tightLabelStyle.height, customTypography.titleSmall.height);
+      expect(tightLabelStyle.fontStyle, customTypography.titleSmall.fontStyle);
     },
   );
 
@@ -555,63 +602,6 @@ void main() {
       customLayout.button.tight.iconChipBorderWidth,
     );
   });
-
-  testWidgets(
-    'uses kid typography titleMedium fallback for tight button labels when token overrides are absent',
-    (WidgetTester tester) async {
-      final baseTheme = buildKidTheme();
-      final customLayout = KidLayoutTheme.defaults.copyWith(
-        button: KidLayoutTheme.defaults.button.copyWith(
-          tight: KidLayoutTheme.defaults.button.tight.copyWith(
-            clearLabelFontWeight: true,
-            clearLabelLetterSpacing: true,
-            clearLabelHeight: true,
-          ),
-        ),
-      );
-      final customTypography = baseTheme.kidTypography.copyWith(
-        titleMedium: baseTheme.kidTypography.titleMedium.copyWith(
-          fontWeight: FontWeight.w400,
-          letterSpacing: 1.4,
-          height: 1.44,
-          fontStyle: FontStyle.italic,
-        ),
-      );
-
-      await tester.pumpWidget(
-        _buildTestApp(
-          ToyButton(
-            key: const Key('tight-fallback-typography-button'),
-            label: '다시',
-            icon: Icons.volume_up_rounded,
-            density: ToyButtonDensity.tight,
-            onPressed: () {},
-          ),
-          theme: baseTheme.copyWith(
-            extensions: <ThemeExtension<dynamic>>[
-              customLayout,
-              customTypography,
-            ],
-          ),
-        ),
-      );
-
-      final labelStyle = _buttonLabelStyle(
-        tester,
-        find.byKey(const Key('tight-fallback-typography-button')),
-        '다시',
-      );
-
-      expect(labelStyle.fontSize, customLayout.button.tight.labelFontSize);
-      expect(labelStyle.fontWeight, customTypography.titleMedium.fontWeight);
-      expect(
-        labelStyle.letterSpacing,
-        customTypography.titleMedium.letterSpacing,
-      );
-      expect(labelStyle.height, customTypography.titleMedium.height);
-      expect(labelStyle.fontStyle, customTypography.titleMedium.fontStyle);
-    },
-  );
 
   testWidgets(
     'keeps textTheme titleLarge overrides when the typography extension stays at defaults',
