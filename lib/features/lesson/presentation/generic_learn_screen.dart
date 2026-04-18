@@ -187,8 +187,8 @@ class _GenericLearnScreenState extends State<GenericLearnScreen> {
                         Expanded(
                           flex: 5,
                           child: ToyPanel(
+                            tone: ToyPanelTone.warm,
                             padding: EdgeInsets.all(compact ? 12 : 24),
-                            backgroundColor: KidPalette.creamWarm,
                             child: Center(
                               child: FittedBox(
                                 fit: BoxFit.scaleDown,

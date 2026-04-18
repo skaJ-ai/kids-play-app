@@ -11,6 +11,30 @@ import 'package:kids_play_app/features/lesson/domain/lesson_category.dart';
 import 'package:kids_play_app/features/lesson/presentation/generic_learn_screen.dart';
 
 void main() {
+  testWidgets('uses the warm toy panel tone for the main symbol card', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrapWithServices(
+        child: GenericLearnScreen(
+          loader: _FakeLessonLoader(_lesson),
+          category: alphabetLessonCategory,
+          lessonId: _lesson.id,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final symbolPanel = find.ancestor(
+      of: find.text('A'),
+      matching: find.byWidgetPredicate(
+        (widget) => widget is ToyPanel && widget.tone == ToyPanelTone.warm,
+      ),
+    );
+
+    expect(symbolPanel, findsOneWidget);
+  });
+
   testWidgets('uses the lilac toy panel tone for the hint callout', (
     WidgetTester tester,
   ) async {
