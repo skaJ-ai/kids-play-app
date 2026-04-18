@@ -401,6 +401,10 @@ class _ParentSummaryPanel extends StatelessWidget {
         .expand((lesson) => lesson.recentMistakes)
         .toSet()
         .length;
+    final recentReward = snapshot.lastEarnedReward;
+    final recentRewardMetadata = recentReward == null
+        ? null
+        : _lessonMetadataFor(recentReward.lessonId);
 
     return ToyPanel(
       backgroundColor: KidPalette.white.withValues(alpha: 0.95),
@@ -435,11 +439,27 @@ class _ParentSummaryPanel extends StatelessWidget {
                 value: '$mistakeCount개',
                 color: KidPalette.lilac,
               ),
+              if (recentReward != null && recentRewardMetadata != null)
+                _SummaryChip(
+                  label: '최근 보상',
+                  detail: recentRewardMetadata.title,
+                  value: _formatRecentRewardValue(recentReward),
+                  color: recentRewardMetadata.color,
+                ),
             ],
           ),
         ],
       ),
     );
+  }
+}
+
+String _formatRecentRewardValue(RecentReward reward) {
+  switch (reward.kind) {
+    case 'sticker':
+      return '스티커 ${reward.amount}개';
+    default:
+      return '${reward.amount}개';
   }
 }
 
@@ -928,11 +948,13 @@ class _SummaryChip extends StatelessWidget {
     required this.label,
     required this.value,
     required this.color,
+    this.detail,
   });
 
   final String label;
   final String value;
   final Color color;
+  final String? detail;
 
   @override
   Widget build(BuildContext context) {
@@ -953,6 +975,18 @@ class _SummaryChip extends StatelessWidget {
               fontWeight: FontWeight.w900,
             ),
           ),
+          if (detail != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              detail!,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: KidPalette.navy.withValues(alpha: 0.82),
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
           const SizedBox(height: 6),
           Text(
             value,

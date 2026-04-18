@@ -29,6 +29,37 @@ void main() {
   });
 
   testWidgets(
+    'shows the most recent reward snapshot in the parent summary',
+    (WidgetTester tester) async {
+      final progressStore = MemoryProgressStore(
+        AppProgressSnapshot(
+          stickerCount: 3,
+          lastEarnedReward: RecentReward(
+            kind: 'sticker',
+            amount: 2,
+            lessonId: 'hangul:basic_consonants_1',
+            earnedAt: DateTime.utc(2026, 4, 18, 9),
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(
+        _wrapWithServices(
+          progressStore: progressStore,
+          child: const AvatarSetupScreen(),
+        ),
+      );
+      await tester.pumpAndSettle();
+      _drainKnownAvatarAssetExceptions(tester);
+
+      expect(find.text('현재 진행 요약'), findsOneWidget);
+      expect(find.text('최근 보상'), findsOneWidget);
+      expect(find.text('기본 자음 1'), findsOneWidget);
+      expect(find.text('스티커 2개'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
     'shows detailed lesson controls and lets parent adjust progress',
     (WidgetTester tester) async {
       final progressStore = MemoryProgressStore(
@@ -255,6 +286,18 @@ List<_ManifestLessonExpectation> _generatedManifestLaterLessons() {
       path: 'assets/generated/manifest/numbers_lessons.json',
     ),
   ];
+}
+
+void _drainKnownAvatarAssetExceptions(WidgetTester tester) {
+  Object? exception;
+  while ((exception = tester.takeException()) != null) {
+    if (exception is! FlutterError ||
+        !exception.toString().contains(
+          'assets/generated/images/hero/hero_face.png',
+        )) {
+      throw FlutterError('Unexpected test exception: $exception');
+    }
+  }
 }
 
 List<_ManifestLessonExpectation> _readManifestLaterLessons({
