@@ -507,6 +507,39 @@ void main() {
     },
   );
 
+  testWidgets(
+    'default tight buttons inherit titleSmall typography from kid theme',
+    (WidgetTester tester) async {
+      final theme = buildKidTheme();
+      final tightTokens = theme.kidLayout.button.tight;
+      final titleSmall = theme.kidTypography.titleSmall;
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          ToyButton(
+            key: const Key('default-tight-typography-button'),
+            label: '다시',
+            icon: Icons.volume_up_rounded,
+            density: ToyButtonDensity.tight,
+            onPressed: () {},
+          ),
+          theme: theme,
+        ),
+      );
+
+      final labelStyle = _buttonLabelStyle(
+        tester,
+        find.byKey(const Key('default-tight-typography-button')),
+        '다시',
+      );
+
+      expect(labelStyle.fontSize, tightTokens.labelFontSize);
+      expect(labelStyle.fontWeight, titleSmall.fontWeight);
+      expect(labelStyle.letterSpacing, titleSmall.letterSpacing);
+      expect(labelStyle.height, titleSmall.height);
+    },
+  );
+
   testWidgets('reads tight layout metrics from kid theme tokens', (
     WidgetTester tester,
   ) async {
