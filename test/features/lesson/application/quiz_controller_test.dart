@@ -47,10 +47,10 @@ class _RecordingAudioService implements AudioService {
 const _category = alphabetLessonCategory;
 
 final _items = [
-  const LessonItem(symbol: 'A', label: 'A', hint: ''),
-  const LessonItem(symbol: 'B', label: 'B', hint: ''),
-  const LessonItem(symbol: 'C', label: 'C', hint: ''),
-  const LessonItem(symbol: 'D', label: 'D', hint: ''),
+  const LessonItem(symbol: 'A', display: 'A', spoken: 'A', hint: ''),
+  const LessonItem(symbol: 'B', display: 'B', spoken: 'B', hint: ''),
+  const LessonItem(symbol: 'C', display: 'C', spoken: 'C', hint: ''),
+  const LessonItem(symbol: 'D', display: 'D', spoken: 'D', hint: ''),
 ];
 
 QuizController _buildController({
@@ -298,7 +298,7 @@ void main() {
       final controller = _buildController(
         speech: speech,
         audioService: audioService,
-        questions: const [LessonItem(symbol: '!!!', label: '!!!', hint: '')],
+        questions: const [LessonItem(symbol: '!!!', display: '!!!', spoken: '!!!', hint: '')],
       );
 
       await controller.replayPrompt();

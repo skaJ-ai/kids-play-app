@@ -266,11 +266,11 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
                               flex: 4,
                               child: isTight
                                   ? _TightQuizPromptPanel(
-                                      displayName: _displayNameFor(question),
+                                      displayName: question.spoken,
                                       prompt: widget.category.promptFor(
-                                        question.symbol,
+                                        question.spoken,
                                       ),
-                                      symbol: question.symbol,
+                                      symbol: question.display,
                                       onReplay: controller.replayPrompt,
                                     )
                                   : Column(
@@ -281,7 +281,7 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
                                           key: const Key('quiz-prompt-panel'),
                                           badge: '문제 듣기',
                                           title: widget.category.promptFor(
-                                            question.symbol,
+                                            question.spoken,
                                           ),
                                           subtitle: isCompact
                                               ? '스피커를 눌러 다시 들어봐요.'
@@ -334,7 +334,7 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
                                                   height: isCompact ? 8 : 12,
                                                 ),
                                                 Text(
-                                                  _displayNameFor(question),
+                                                  question.spoken,
                                                   maxLines: 1,
                                                   overflow:
                                                       TextOverflow.ellipsis,
@@ -365,7 +365,7 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
                                                     child: FittedBox(
                                                       fit: BoxFit.scaleDown,
                                                       child: Text(
-                                                        question.symbol,
+                                                        question.display,
                                                         style: TextStyle(
                                                           fontSize: isCompact
                                                               ? 86
@@ -426,7 +426,7 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
                                           key: Key(
                                             'quiz-choice-${choices[i].symbol}',
                                           ),
-                                          symbol: choices[i].symbol,
+                                          symbol: choices[i].display,
                                           compact: isCompact,
                                           accentIndex: i,
                                           disabled:
@@ -459,9 +459,6 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
     );
   }
 }
-
-String _displayNameFor(LessonItem question) =>
-    question.label.split(',').first.trim();
 
 class _TightQuizPromptPanel extends StatelessWidget {
   const _TightQuizPromptPanel({

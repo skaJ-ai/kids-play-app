@@ -202,7 +202,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('알파벳 학습'), findsOneWidget);
-    expect(find.text('에이, A a'), findsOneWidget);
+    expect(find.text('에이'), findsOneWidget);
     expect(find.text('다음'), findsOneWidget);
   });
 
@@ -223,7 +223,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('알파벳 게임'), findsOneWidget);
-    expect(find.text("'A a' 글자를 찾아봐!"), findsOneWidget);
+    expect(find.text("'에이' 글자를 찾아봐!"), findsOneWidget);
     expect(find.text('1 / 5'), findsOneWidget);
   });
 
@@ -483,11 +483,11 @@ const Map<String, dynamic> _alphabetLesson = {
   'id': 'alphabet_letters_1',
   'title': '알파벳 1',
   'cards': [
-    {'symbol': 'A a', 'label': '에이, A a', 'hint': '에이를 크게 보고 소리를 따라 말해봐요'},
-    {'symbol': 'B b', 'label': '비, B b', 'hint': '비를 보며 입으로 비 하고 말해봐요'},
-    {'symbol': 'C c', 'label': '씨, C c', 'hint': '씨를 보고 입모양을 동그랗게 해봐요'},
-    {'symbol': 'D d', 'label': '디, D d', 'hint': '디를 보며 손가락으로 천천히 짚어봐요'},
-    {'symbol': 'E e', 'label': '이, E e', 'hint': '이를 보고 환하게 따라 말해봐요'},
+    {'symbol': 'A', 'display': 'A', 'spoken': '에이', 'hint': '에이를 크게 보고 소리를 따라 말해봐요'},
+    {'symbol': 'B', 'display': 'B', 'spoken': '비', 'hint': '비를 보며 입으로 비 하고 말해봐요'},
+    {'symbol': 'C', 'display': 'C', 'spoken': '씨', 'hint': '씨를 보고 입모양을 동그랗게 해봐요'},
+    {'symbol': 'D', 'display': 'D', 'spoken': '디', 'hint': '디를 보며 손가락으로 천천히 짚어봐요'},
+    {'symbol': 'E', 'display': 'E', 'spoken': '이', 'hint': '이를 보고 환하게 따라 말해봐요'},
   ],
 };
 

@@ -65,7 +65,7 @@ class QuizController extends ChangeNotifier {
       AudioCueRef(
         assetPath:
             'assets/generated/audio/voice/prompts/${category.id}/${lessonId}_quiz_$slug.mp3',
-        fallbackText: category.promptFor(question.symbol),
+        fallbackText: category.promptFor(question.spoken),
       ),
     );
   }

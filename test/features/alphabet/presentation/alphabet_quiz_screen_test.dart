@@ -31,11 +31,11 @@ void main() {
 
     expect(find.text('알파벳 게임'), findsOneWidget);
     expect(find.text('1 / 5'), findsOneWidget);
-    expect(find.text("'A a' 글자를 찾아봐!"), findsOneWidget);
-    expect(find.byKey(const Key('quiz-choice-A a')), findsOneWidget);
-    expect(find.byKey(const Key('quiz-choice-B b')), findsOneWidget);
-    expect(find.byKey(const Key('quiz-choice-C c')), findsOneWidget);
-    expect(find.byKey(const Key('quiz-choice-D d')), findsOneWidget);
+    expect(find.text("'에이' 글자를 찾아봐!"), findsOneWidget);
+    expect(find.byKey(const Key('quiz-choice-A')), findsOneWidget);
+    expect(find.byKey(const Key('quiz-choice-B')), findsOneWidget);
+    expect(find.byKey(const Key('quiz-choice-C')), findsOneWidget);
+    expect(find.byKey(const Key('quiz-choice-D')), findsOneWidget);
   });
 
   testWidgets('uses a warm toy panel tone for the compact alphabet prompt panel', (
@@ -102,7 +102,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final screenBottom = tester.view.physicalSize.height;
-    for (final symbol in ['A a', 'B b', 'C c', 'D d']) {
+    for (final symbol in ['A', 'B', 'C', 'D']) {
       final rect = tester.getRect(find.byKey(Key('quiz-choice-$symbol')));
       expect(rect.bottom <= screenBottom, isTrue, reason: '$symbol choice should stay on screen');
     }
@@ -124,20 +124,20 @@ void main() {
         home: AlphabetQuizScreen(
           repository: repository,
           lessonId: 'alphabet_letters_1',
-          mistakeSymbols: const ['B b', 'D d'],
+          mistakeSymbols: const ['B', 'D'],
         ),
       ),
     );
     await tester.pumpAndSettle();
 
     expect(find.text('1 / 2'), findsOneWidget);
-    expect(find.text("'B b' 글자를 찾아봐!"), findsOneWidget);
+    expect(find.text("'비' 글자를 찾아봐!"), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('quiz-choice-B b')));
+    await tester.tap(find.byKey(const Key('quiz-choice-B')));
     await tester.pumpAndSettle();
 
     expect(find.text('2 / 2'), findsOneWidget);
-    expect(find.text("'D d' 글자를 찾아봐!"), findsOneWidget);
+    expect(find.text("'디' 글자를 찾아봐!"), findsOneWidget);
   });
 
   testWidgets('shows a sticker reward summary after finishing the alphabet quiz', (
@@ -161,15 +161,15 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('quiz-choice-A a')));
+    await tester.tap(find.byKey(const Key('quiz-choice-A')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('quiz-choice-B b')));
+    await tester.tap(find.byKey(const Key('quiz-choice-B')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('quiz-choice-C c')));
+    await tester.tap(find.byKey(const Key('quiz-choice-C')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('quiz-choice-D d')));
+    await tester.tap(find.byKey(const Key('quiz-choice-D')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('quiz-choice-E e')));
+    await tester.tap(find.byKey(const Key('quiz-choice-E')));
     await tester.pumpAndSettle();
 
     expect(find.text('5문제 중 5문제 맞았어요!'), findsOneWidget);
@@ -213,28 +213,33 @@ const Map<String, dynamic> _alphabetLesson = {
   'title': '알파벳 1',
   'cards': [
     {
-      'symbol': 'A a',
-      'label': '에이, A a',
+      'symbol': 'A',
+      'display': 'A',
+      'spoken': '에이',
       'hint': '에이를 크게 보고 소리를 따라 말해봐요',
     },
     {
-      'symbol': 'B b',
-      'label': '비, B b',
+      'symbol': 'B',
+      'display': 'B',
+      'spoken': '비',
       'hint': '비를 보며 입으로 비 하고 말해봐요',
     },
     {
-      'symbol': 'C c',
-      'label': '씨, C c',
+      'symbol': 'C',
+      'display': 'C',
+      'spoken': '씨',
       'hint': '씨를 보고 입모양을 동그랗게 해봐요',
     },
     {
-      'symbol': 'D d',
-      'label': '디, D d',
+      'symbol': 'D',
+      'display': 'D',
+      'spoken': '디',
       'hint': '디를 보며 손가락으로 천천히 짚어봐요',
     },
     {
-      'symbol': 'E e',
-      'label': '이, E e',
+      'symbol': 'E',
+      'display': 'E',
+      'spoken': '이',
       'hint': '이를 보고 환하게 따라 말해봐요',
     },
   ],
