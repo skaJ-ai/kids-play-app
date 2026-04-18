@@ -39,11 +39,6 @@ class _NumbersLearnScreenState extends State<NumbersLearnScreen> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
   Future<NumbersLesson> _loadLesson() async {
     final lesson = await (widget.repository ?? NumbersLessonRepository())
         .loadLesson(widget.lessonId);
@@ -216,8 +211,9 @@ class _NumbersLearnScreenState extends State<NumbersLearnScreen> {
                         Expanded(
                           flex: 5,
                           child: ToyPanel(
+                            key: const ValueKey('numbersLearnSymbolPanel'),
                             padding: EdgeInsets.all(compact ? 12 : 24),
-                            backgroundColor: KidPalette.creamWarm,
+                            tone: ToyPanelTone.warm,
                             child: Center(
                               child: FittedBox(
                                 fit: BoxFit.scaleDown,
@@ -254,10 +250,11 @@ class _NumbersLearnScreenState extends State<NumbersLearnScreen> {
                               SizedBox(height: compact ? 6 : 14),
                               Expanded(
                                 child: ToyPanel(
-                                  padding: EdgeInsets.all(compact ? 12 : 24),
-                                  backgroundColor: KidPalette.lilac.withValues(
-                                    alpha: 0.75,
+                                  key: const ValueKey(
+                                    'numbersLearnEncouragementPanel',
                                   ),
+                                  padding: EdgeInsets.all(compact ? 12 : 24),
+                                  tone: ToyPanelTone.lilac,
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,

@@ -8,6 +8,7 @@ import 'package:kids_play_app/app/services/progress_store.dart';
 import 'package:kids_play_app/app/services/speech_cue_service.dart';
 import 'package:kids_play_app/app/ui/kid_theme.dart';
 import 'package:kids_play_app/app/ui/toy_button.dart';
+import 'package:kids_play_app/app/ui/toy_panel.dart';
 import 'package:kids_play_app/features/numbers/data/numbers_lesson_repository.dart';
 import 'package:kids_play_app/features/numbers/presentation/numbers_learn_screen.dart';
 
@@ -46,6 +47,43 @@ void main() {
 
     expect(find.text('둘, 2'), findsOneWidget);
     expect(find.text('2 / 5'), findsOneWidget);
+  });
+
+  testWidgets('uses named warm and lilac panel tones in the learn body', (
+    WidgetTester tester,
+  ) async {
+    final repository = NumbersLessonRepository(
+      assetBundle: _FakeAssetBundle({
+        NumbersLessonRepository.manifestPath: jsonEncode({
+          'lessons': [_numbersLesson],
+        }),
+      }),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: NumbersLearnScreen(
+          repository: repository,
+          lessonId: 'numbers_count_1',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final numberPanelFinder = find.byKey(
+      const ValueKey('numbersLearnSymbolPanel'),
+    );
+    expect(numberPanelFinder, findsOneWidget);
+    expect(tester.widget<ToyPanel>(numberPanelFinder).tone, ToyPanelTone.warm);
+
+    final encouragementPanelFinder = find.byKey(
+      const ValueKey('numbersLearnEncouragementPanel'),
+    );
+    expect(encouragementPanelFinder, findsOneWidget);
+    expect(
+      tester.widget<ToyPanel>(encouragementPanelFinder).tone,
+      ToyPanelTone.lilac,
+    );
   });
 
   testWidgets('resumes from the saved numbers lesson progress', (
