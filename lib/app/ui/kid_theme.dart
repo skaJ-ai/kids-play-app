@@ -338,6 +338,7 @@ class KidButtonChromeTokens {
     this.primaryIconChipBorderAlpha = 0.12,
     this.primaryHighlightAlpha = 0.22,
     this.primaryForegroundColor = KidPalette.white,
+    this.primaryDisabledGradientBlendTargetColor = KidPalette.body,
     this.secondaryShellGradientStart = KidPalette.cream,
     this.secondaryShellGradientEnd = KidPalette.creamWarm,
     this.secondaryBorderAlpha = 0.82,
@@ -345,6 +346,7 @@ class KidButtonChromeTokens {
     this.secondaryIconChipBorderAlpha = 0.72,
     this.secondaryHighlightAlpha = 0.14,
     this.secondaryForegroundColor = KidPalette.navy,
+    this.secondaryDisabledGradientBlendTargetColor = KidPalette.body,
     this.primaryDisabledGradientBlendAmount = 0.36,
     this.secondaryDisabledGradientBlendAmount = 0.16,
     this.disabledOpacity = 0.58,
@@ -357,6 +359,7 @@ class KidButtonChromeTokens {
   final double primaryIconChipBorderAlpha;
   final double primaryHighlightAlpha;
   final Color primaryForegroundColor;
+  final Color primaryDisabledGradientBlendTargetColor;
   final Color secondaryShellGradientStart;
   final Color secondaryShellGradientEnd;
   final double secondaryBorderAlpha;
@@ -364,6 +367,7 @@ class KidButtonChromeTokens {
   final double secondaryIconChipBorderAlpha;
   final double secondaryHighlightAlpha;
   final Color secondaryForegroundColor;
+  final Color secondaryDisabledGradientBlendTargetColor;
   final double primaryDisabledGradientBlendAmount;
   final double secondaryDisabledGradientBlendAmount;
   final double disabledOpacity;
@@ -376,6 +380,7 @@ class KidButtonChromeTokens {
     double? primaryIconChipBorderAlpha,
     double? primaryHighlightAlpha,
     Color? primaryForegroundColor,
+    Color? primaryDisabledGradientBlendTargetColor,
     Color? secondaryShellGradientStart,
     Color? secondaryShellGradientEnd,
     double? secondaryBorderAlpha,
@@ -383,6 +388,7 @@ class KidButtonChromeTokens {
     double? secondaryIconChipBorderAlpha,
     double? secondaryHighlightAlpha,
     Color? secondaryForegroundColor,
+    Color? secondaryDisabledGradientBlendTargetColor,
     double? primaryDisabledGradientBlendAmount,
     double? secondaryDisabledGradientBlendAmount,
     double? disabledOpacity,
@@ -400,6 +406,9 @@ class KidButtonChromeTokens {
           primaryHighlightAlpha ?? this.primaryHighlightAlpha,
       primaryForegroundColor:
           primaryForegroundColor ?? this.primaryForegroundColor,
+      primaryDisabledGradientBlendTargetColor:
+          primaryDisabledGradientBlendTargetColor ??
+          this.primaryDisabledGradientBlendTargetColor,
       secondaryShellGradientStart:
           secondaryShellGradientStart ?? this.secondaryShellGradientStart,
       secondaryShellGradientEnd:
@@ -413,6 +422,9 @@ class KidButtonChromeTokens {
           secondaryHighlightAlpha ?? this.secondaryHighlightAlpha,
       secondaryForegroundColor:
           secondaryForegroundColor ?? this.secondaryForegroundColor,
+      secondaryDisabledGradientBlendTargetColor:
+          secondaryDisabledGradientBlendTargetColor ??
+          this.secondaryDisabledGradientBlendTargetColor,
       primaryDisabledGradientBlendAmount:
           primaryDisabledGradientBlendAmount ??
           this.primaryDisabledGradientBlendAmount,
@@ -458,6 +470,13 @@ class KidButtonChromeTokens {
       primaryForegroundColor:
           Color.lerp(primaryForegroundColor, other.primaryForegroundColor, t) ??
           primaryForegroundColor,
+      primaryDisabledGradientBlendTargetColor:
+          Color.lerp(
+            primaryDisabledGradientBlendTargetColor,
+            other.primaryDisabledGradientBlendTargetColor,
+            t,
+          ) ??
+          primaryDisabledGradientBlendTargetColor,
       secondaryShellGradientStart:
           Color.lerp(
             secondaryShellGradientStart,
@@ -503,6 +522,13 @@ class KidButtonChromeTokens {
             t,
           ) ??
           secondaryForegroundColor,
+      secondaryDisabledGradientBlendTargetColor:
+          Color.lerp(
+            secondaryDisabledGradientBlendTargetColor,
+            other.secondaryDisabledGradientBlendTargetColor,
+            t,
+          ) ??
+          secondaryDisabledGradientBlendTargetColor,
       primaryDisabledGradientBlendAmount:
           ui.lerpDouble(
             primaryDisabledGradientBlendAmount,

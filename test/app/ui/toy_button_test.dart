@@ -775,78 +775,89 @@ void main() {
     expect(_buttonOpacity(tester, find.byType(ToyButton)), 0.23);
   });
 
-  testWidgets('reads disabled blend amounts from kid theme chrome tokens', (
-    WidgetTester tester,
-  ) async {
-    const primaryBlendAmount = 0.68;
-    const secondaryBlendAmount = 0.34;
-    const secondaryShellGradientStart = Color(0xFFFFF3D9);
-    const secondaryShellGradientEnd = Color(0xFFFFE3B8);
-    final customLayout = KidLayoutTheme(
-      button: KidLayoutTheme.defaults.button,
-      panel: KidLayoutTheme.defaults.panel,
-      chrome: const KidChromeTokens(
-        button: KidButtonChromeTokens(
-          primaryDisabledGradientBlendAmount: primaryBlendAmount,
-          secondaryDisabledGradientBlendAmount: secondaryBlendAmount,
-          secondaryShellGradientStart: secondaryShellGradientStart,
-          secondaryShellGradientEnd: secondaryShellGradientEnd,
+  testWidgets(
+    'reads disabled blend target color overrides from kid theme chrome tokens for both tones',
+    (WidgetTester tester) async {
+      const primaryDisabledGradientBlendTargetColor = Color(0xFF8C9BAA);
+      const secondaryDisabledGradientBlendTargetColor = Color(0xFFC9B59A);
+      const secondaryShellGradientStart = Color(0xFFFFF3D9);
+      const secondaryShellGradientEnd = Color(0xFFFFE3B8);
+      final customLayout = KidLayoutTheme(
+        button: KidLayoutTheme.defaults.button,
+        panel: KidLayoutTheme.defaults.panel,
+        chrome: const KidChromeTokens(
+          button: KidButtonChromeTokens(
+            primaryDisabledGradientBlendTargetColor:
+                primaryDisabledGradientBlendTargetColor,
+            secondaryDisabledGradientBlendTargetColor:
+                secondaryDisabledGradientBlendTargetColor,
+            secondaryShellGradientStart: secondaryShellGradientStart,
+            secondaryShellGradientEnd: secondaryShellGradientEnd,
+          ),
+          panel: KidPanelChromeTokens(),
         ),
-        panel: KidPanelChromeTokens(),
-      ),
-    );
+      );
 
-    await tester.pumpWidget(
-      _buildTestApp(
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ToyButton(
-              key: const Key('disabled-primary-button'),
-              label: '비활성 기본 버튼',
-            ),
-            const SizedBox(height: 12),
-            ToyButton(
-              key: const Key('disabled-secondary-button'),
-              label: '비활성 보조 버튼',
-              tone: ToyButtonTone.secondary,
-            ),
-          ],
+      await tester.pumpWidget(
+        _buildTestApp(
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const ToyButton(
+                key: Key('disabled-primary-button'),
+                label: '비활성 기본 버튼',
+              ),
+              const SizedBox(height: 12),
+              const ToyButton(
+                key: Key('disabled-secondary-button'),
+                label: '비활성 보조 버튼',
+                tone: ToyButtonTone.secondary,
+              ),
+            ],
+          ),
+          theme: buildKidTheme().copyWith(extensions: [customLayout]),
         ),
-        theme: buildKidTheme().copyWith(extensions: [customLayout]),
-      ),
-    );
+      );
 
-    final primaryGradient =
-        _buttonDecoration(
-              tester,
-              find.byKey(const Key('disabled-primary-button')),
-            ).gradient!
-            as LinearGradient;
-    final secondaryGradient =
-        _buttonDecoration(
-              tester,
-              find.byKey(const Key('disabled-secondary-button')),
-            ).gradient!
-            as LinearGradient;
+      final primaryGradient =
+          _buttonDecoration(
+                tester,
+                find.byKey(const Key('disabled-primary-button')),
+              ).gradient!
+              as LinearGradient;
+      final secondaryGradient =
+          _buttonDecoration(
+                tester,
+                find.byKey(const Key('disabled-secondary-button')),
+              ).gradient!
+              as LinearGradient;
 
-    expect(primaryGradient.colors, [
-      Color.lerp(KidPalette.blue, KidPalette.body, primaryBlendAmount)!,
-      Color.lerp(KidPalette.blueDark, KidPalette.body, primaryBlendAmount)!,
-    ]);
-    expect(secondaryGradient.colors, [
-      Color.lerp(
-        secondaryShellGradientStart,
-        KidPalette.body,
-        secondaryBlendAmount,
-      )!,
-      Color.lerp(
-        secondaryShellGradientEnd,
-        KidPalette.body,
-        secondaryBlendAmount,
-      )!,
-    ]);
-  });
+      expect(primaryGradient.colors, [
+        Color.lerp(
+          KidPalette.blue,
+          primaryDisabledGradientBlendTargetColor,
+          customLayout.chrome.button.primaryDisabledGradientBlendAmount,
+        )!,
+        Color.lerp(
+          KidPalette.blueDark,
+          primaryDisabledGradientBlendTargetColor,
+          customLayout.chrome.button.primaryDisabledGradientBlendAmount,
+        )!,
+      ]);
+      expect(secondaryGradient.colors, [
+        Color.lerp(
+          secondaryShellGradientStart,
+          secondaryDisabledGradientBlendTargetColor,
+          customLayout.chrome.button.secondaryDisabledGradientBlendAmount,
+        )!,
+        Color.lerp(
+          secondaryShellGradientEnd,
+          secondaryDisabledGradientBlendTargetColor,
+          customLayout.chrome.button.secondaryDisabledGradientBlendAmount,
+        )!,
+      ]);
+    },
+  );
 
   testWidgets('reads primary shadow overrides from kid theme tokens', (
     WidgetTester tester,

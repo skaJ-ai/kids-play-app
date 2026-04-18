@@ -102,32 +102,63 @@ void main() {
   );
 
   test(
-    'KidButtonChromeTokens exposes primary shell gradient defaults and keeps them through copyWith and lerp',
+    'KidButtonChromeTokens exposes shell and disabled gradient defaults and keeps them through copyWith and lerp',
     () {
       final layout = buildKidTheme().extension<KidLayoutTheme>();
 
       expect(layout, isNotNull);
       expect(layout!.chrome.button.primaryShellGradientStart, KidPalette.blue);
       expect(layout.chrome.button.primaryShellGradientEnd, KidPalette.blueDark);
+      expect(
+        layout.chrome.button.primaryDisabledGradientBlendTargetColor,
+        KidPalette.body,
+      );
+      expect(
+        layout.chrome.button.secondaryDisabledGradientBlendTargetColor,
+        KidPalette.body,
+      );
 
       const copiedStart = Color(0xFF4B7BFF);
       const copiedEnd = Color(0xFF2443BE);
+      const copiedPrimaryDisabledTarget = Color(0xFF7A8A9B);
+      const copiedSecondaryDisabledTarget = Color(0xFFB29D84);
       final copied = layout.chrome.button.copyWith(
         primaryShellGradientStart: copiedStart,
         primaryShellGradientEnd: copiedEnd,
+        primaryDisabledGradientBlendTargetColor: copiedPrimaryDisabledTarget,
+        secondaryDisabledGradientBlendTargetColor:
+            copiedSecondaryDisabledTarget,
       );
       const updated = KidButtonChromeTokens(
         primaryShellGradientStart: Color(0xFF6E9DFF),
         primaryShellGradientEnd: Color(0xFF3157D8),
+        primaryDisabledGradientBlendTargetColor: Color(0xFF8B9CAD),
+        secondaryDisabledGradientBlendTargetColor: Color(0xFFC4B39A),
       );
       final lerped = layout.chrome.button.lerp(updated, 1);
 
       expect(copied.primaryShellGradientStart, copiedStart);
       expect(copied.primaryShellGradientEnd, copiedEnd);
+      expect(
+        copied.primaryDisabledGradientBlendTargetColor,
+        copiedPrimaryDisabledTarget,
+      );
+      expect(
+        copied.secondaryDisabledGradientBlendTargetColor,
+        copiedSecondaryDisabledTarget,
+      );
       expect(copied.secondaryShellGradientStart, KidPalette.cream);
       expect(copied.secondaryShellGradientEnd, KidPalette.creamWarm);
       expect(lerped.primaryShellGradientStart, updated.primaryShellGradientStart);
       expect(lerped.primaryShellGradientEnd, updated.primaryShellGradientEnd);
+      expect(
+        lerped.primaryDisabledGradientBlendTargetColor,
+        updated.primaryDisabledGradientBlendTargetColor,
+      );
+      expect(
+        lerped.secondaryDisabledGradientBlendTargetColor,
+        updated.secondaryDisabledGradientBlendTargetColor,
+      );
     },
   );
 
