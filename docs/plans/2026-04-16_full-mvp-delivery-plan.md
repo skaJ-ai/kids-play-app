@@ -1,6 +1,6 @@
 # Full MVP Delivery Plan
 
-> For Hermes: execute this plan incrementally with small commits, keep GitHub Actions generating an APK artifact after each meaningful slice, and verify every feature with tests/analyze/build before pushing.
+> For Hermes: execute this plan incrementally with small, committable slices, keep GitHub Actions generating an APK artifact after each meaningful slice, use the smallest relevant verification for each run, and reserve the full `./scripts/prepare_assets.sh` + `/home/openc/sdk/flutter/bin/flutter pub get` + `flutter test` / `flutter analyze` / release build gate for final integration gate G.
 
 ## Status update
 
@@ -15,8 +15,8 @@
 
 현재 큐 기준 상태
 - 우선순위 A-E 범위는 live repo와 targeted tests 기준으로 완료 상태
-- F — docs cleanup 진행 중
-- G — full `flutter test`는 이번 docs 정리 직전 HEAD `c5879e9`(README-only docs commit, 앱 코드는 마지막 코드 커밋 `a7767c8` 이후 동일)에서 재통과했고, full `flutter analyze` / release build / current-head APK artifact 확인은 아직 남아 있음
+- F — docs cleanup 진행 중이며, 이 범위는 문서 정합성을 맞추는 작은 committable slice들로 나눠 진행하고 각 run에서는 바뀐 문서/명령에 맞는 최소 검증만 남김
+- G — final integration gate. full `flutter test`는 이번 docs 정리 직전 HEAD `c5879e9`(README-only docs commit, 앱 코드는 마지막 코드 커밋 `a7767c8` 이후 동일)에서 재통과했고, full `flutter analyze` / release build / current-head APK artifact 확인은 아직 남아 있음
 - HEAD `c5879e9`에서 `./scripts/prepare_assets.sh` 후 full `/home/openc/sdk/flutter/bin/flutter test`가 `00:32 +227: All tests passed!`로 끝난 상태
 
 남은 확장 후보
@@ -35,6 +35,8 @@
 - 첫 탭은 즉시 반응, 연타는 방어
 - 가능한 모든 변경은 GitHub Actions APK artifact까지 이어지게 유지
 - 작은 커밋으로 자주 push
+- 각 run은 review/push 가능한 작은 slice 하나를 목표로 하고, slice마다 바뀐 범위에 맞는 smallest relevant verification만 수행
+- full `./scripts/prepare_assets.sh` + `/home/openc/sdk/flutter/bin/flutter pub get` + full `/home/openc/sdk/flutter/bin/flutter test` / `/home/openc/sdk/flutter/bin/flutter analyze` / release APK build는 final integration gate G에서만 요구
 
 ## Planned slices
 
@@ -85,15 +87,28 @@
 - docs cleanup 진행 중
 - final full `flutter test`는 이번 docs 정리 직전 HEAD `c5879e9`(README-only docs commit, 앱 코드는 마지막 코드 커밋 `a7767c8` 이후 동일)에서 재통과했고, analyze/release build + Actions/APK 확인은 마지막 게이트로 남아 있음
 
-## Verification checklist for every slice
+## Verification approach
+
+작은 per-run slice 원칙
+- 각 run은 committable한 작은 범위로 자른다.
+- docs-only 또는 국소 기능 변경은 해당 변경과 직접 연결된 최소 검증만 수행한다.
+- 예: docs-only slice는 exact diff 확인과 관련 문서 wording alignment 확인 정도만 남기고, 국소 feature/UI slice는 관련 targeted test만 실행한다.
+- full gate를 실제로 다시 돌린 경우에만 full `./scripts/prepare_assets.sh` → `/home/openc/sdk/flutter/bin/flutter pub get` → `flutter test` / `flutter analyze` / release build 재검증을 했다고 기록한다.
+
+### Gate G — final integration checklist
+
+이 게이트는 F docs cleanup까지 끝난 뒤 current HEAD에서 README / `handoff.md` / `docs/local-dev-setup.md` / `.github/workflows/build-apk.yml` 와 같은 순서(`./scripts/prepare_assets.sh` → `/home/openc/sdk/flutter/bin/flutter pub get` → `flutter test` → `flutter analyze` → release APK build)로 한 번에 수행하는 최종 통합 확인이다.
 
 ```bash
 cd /home/openc/kids-play-app
 ./scripts/prepare_assets.sh
+/home/openc/sdk/flutter/bin/flutter pub get
 /home/openc/sdk/flutter/bin/flutter test
 /home/openc/sdk/flutter/bin/flutter analyze
 /home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64
 ```
+
+- 위 순서의 명령과 current-head GitHub Actions APK artifact 확인까지 끝나야 G를 완료로 기록한다.
 
 ## Release handoff expectation
 
