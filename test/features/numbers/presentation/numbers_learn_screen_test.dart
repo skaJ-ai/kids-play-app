@@ -120,6 +120,55 @@ void main() {
     expect(find.text('하나, 1'), findsNothing);
   });
 
+  testWidgets('propagates themed button height tokens to the 다음 action', (
+    WidgetTester tester,
+  ) async {
+    final repository = NumbersLessonRepository(
+      assetBundle: _FakeAssetBundle({
+        NumbersLessonRepository.manifestPath: jsonEncode({
+          'lessons': [_numbersLesson],
+        }),
+      }),
+    );
+    final customLayout = KidLayoutTheme(
+      button: KidButtonTokens(
+        regular: KidLayoutTheme.defaults.button.regular.copyWith(height: 83),
+        compact: KidLayoutTheme.defaults.button.compact.copyWith(height: 39),
+      ),
+      panel: KidLayoutTheme.defaults.panel,
+    );
+
+    Future<void> pumpScreen() async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: buildKidTheme().copyWith(extensions: [customLayout]),
+          home: NumbersLearnScreen(
+            repository: repository,
+            lessonId: 'numbers_count_1',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    await pumpScreen();
+
+    final regularCta = _ctaButton(tester);
+
+    expect(regularCta.height, isNull);
+    expect(regularCta.density, ToyButtonDensity.regular);
+    expect(tester.getSize(_ctaButtonFinder()).height, customLayout.button.regular.height);
+
+    _setSurfaceSize(tester, const Size(780, 360));
+    await pumpScreen();
+
+    final compactCta = _ctaButton(tester);
+
+    expect(compactCta.height, isNull);
+    expect(compactCta.density, ToyButtonDensity.compact);
+    expect(tester.getSize(_ctaButtonFinder()).height, customLayout.button.compact.height);
+  });
+
   testWidgets('propagates themed regular button radius to the 다음 action', (
     WidgetTester tester,
   ) async {
@@ -149,10 +198,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(
-      _toyButtonBorderRadius(tester, find.widgetWithText(ToyButton, '다음')),
-      18,
-    );
+    expect(_toyButtonBorderRadius(tester, _ctaButtonFinder()), 18);
   });
 
   testWidgets(
@@ -257,6 +303,23 @@ Widget _wrapWithServices({
       child: child,
     ),
   );
+}
+
+void _setSurfaceSize(WidgetTester tester, Size size) {
+  tester.view.physicalSize = size;
+  tester.view.devicePixelRatio = 1.0;
+  addTearDown(() {
+    tester.view.resetPhysicalSize();
+    tester.view.resetDevicePixelRatio();
+  });
+}
+
+ToyButton _ctaButton(WidgetTester tester) {
+  return tester.widget<ToyButton>(_ctaButtonFinder());
+}
+
+Finder _ctaButtonFinder() {
+  return find.widgetWithText(ToyButton, '다음');
 }
 
 double _toyButtonBorderRadius(WidgetTester tester, Finder finder) {
