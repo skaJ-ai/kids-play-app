@@ -186,4 +186,4 @@ artifact
 - 이 앱은 데모가 아니라 실제 아이가 눌러보는 앱이다.
 - generic한 Flutter 샘플 느낌이면 실패다.
 - compact landscape 회귀를 깨지 않는 것이 중요하다.
-- 변경 후에는 항상 test / analyze / release apk까지 확인하는 것이 안전하다.
+- 변경 후에는 해당 slice에 맞는 최소 검증을 우선하고, 최종 handoff/merge 전에는 test / analyze / release apk까지 확인하는 것이 가장 안전하다.
