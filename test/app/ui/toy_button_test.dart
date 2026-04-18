@@ -676,6 +676,83 @@ void main() {
     },
   );
 
+  testWidgets(
+    'reads primary shell gradient overrides from kid theme tokens',
+    (WidgetTester tester) async {
+      const primaryShellGradientStart = Color(0xFF5A88FF);
+      const primaryShellGradientEnd = Color(0xFF2745C8);
+      final customLayout = KidLayoutTheme(
+        button: KidLayoutTheme.defaults.button,
+        panel: KidLayoutTheme.defaults.panel,
+        chrome: const KidChromeTokens(
+          button: KidButtonChromeTokens(
+            primaryShellGradientStart: primaryShellGradientStart,
+            primaryShellGradientEnd: primaryShellGradientEnd,
+          ),
+          panel: KidPanelChromeTokens(),
+        ),
+      );
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          ToyButton(
+            label: '기본 껍질 토큰 버튼',
+            icon: Icons.play_arrow_rounded,
+            onPressed: () {},
+          ),
+          theme: buildKidTheme().copyWith(extensions: [customLayout]),
+        ),
+      );
+
+      final gradient =
+          _buttonDecoration(tester, find.byType(ToyButton)).gradient!
+              as LinearGradient;
+
+      expect(gradient.colors, const [
+        primaryShellGradientStart,
+        primaryShellGradientEnd,
+      ]);
+    },
+  );
+
+  testWidgets(
+    'keeps explicit primary colors ahead of themed shell gradient tokens',
+    (WidgetTester tester) async {
+      const primaryShellGradientStart = Color(0xFF5A88FF);
+      const primaryShellGradientEnd = Color(0xFF2745C8);
+      const explicitColors = <Color>[Color(0xFFAA55FF), Color(0xFF6B2BD9)];
+      final customLayout = KidLayoutTheme(
+        button: KidLayoutTheme.defaults.button,
+        panel: KidLayoutTheme.defaults.panel,
+        chrome: const KidChromeTokens(
+          button: KidButtonChromeTokens(
+            primaryShellGradientStart: primaryShellGradientStart,
+            primaryShellGradientEnd: primaryShellGradientEnd,
+          ),
+          panel: KidPanelChromeTokens(),
+        ),
+      );
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          ToyButton(
+            label: '직접 색 버튼',
+            icon: Icons.play_arrow_rounded,
+            colors: explicitColors,
+            onPressed: () {},
+          ),
+          theme: buildKidTheme().copyWith(extensions: [customLayout]),
+        ),
+      );
+
+      final gradient =
+          _buttonDecoration(tester, find.byType(ToyButton)).gradient!
+              as LinearGradient;
+
+      expect(gradient.colors, explicitColors);
+    },
+  );
+
   testWidgets('reads disabled opacity from kid theme chrome tokens', (
     WidgetTester tester,
   ) async {

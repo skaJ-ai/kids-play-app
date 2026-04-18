@@ -22,10 +22,10 @@ class ToyButton extends StatelessWidget {
     this.height,
     this.density = ToyButtonDensity.regular,
     this.tone = ToyButtonTone.primary,
-    this.colors = const [KidPalette.blue, KidPalette.blueDark],
+    this.colors,
     this.cooldown = const Duration(milliseconds: 350),
   }) : assert(
-         colors.length >= 2,
+         colors == null || colors.length >= 2,
          'ToyButton.colors must include at least two colors.',
        );
 
@@ -35,7 +35,7 @@ class ToyButton extends StatelessWidget {
   final double? height;
   final ToyButtonDensity density;
   final ToyButtonTone tone;
-  final List<Color> colors;
+  final List<Color>? colors;
   final Duration cooldown;
 
   @override
@@ -51,7 +51,10 @@ class ToyButton extends StatelessWidget {
     );
     final primaryTone = tone == ToyButtonTone.primary;
     final baseColors = primaryTone
-        ? colors
+        ? (colors ?? [
+            chromeTokens.primaryShellGradientStart,
+            chromeTokens.primaryShellGradientEnd,
+          ])
         : [
             chromeTokens.secondaryShellGradientStart,
             chromeTokens.secondaryShellGradientEnd,

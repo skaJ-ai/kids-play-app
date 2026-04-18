@@ -331,6 +331,8 @@ class KidPanelTokens {
 @immutable
 class KidButtonChromeTokens {
   const KidButtonChromeTokens({
+    this.primaryShellGradientStart = KidPalette.blue,
+    this.primaryShellGradientEnd = KidPalette.blueDark,
     this.primaryBorderAlpha = 0.16,
     this.primaryIconChipAlpha = 0.18,
     this.primaryIconChipBorderAlpha = 0.12,
@@ -348,6 +350,8 @@ class KidButtonChromeTokens {
     this.disabledOpacity = 0.58,
   });
 
+  final Color primaryShellGradientStart;
+  final Color primaryShellGradientEnd;
   final double primaryBorderAlpha;
   final double primaryIconChipAlpha;
   final double primaryIconChipBorderAlpha;
@@ -365,6 +369,8 @@ class KidButtonChromeTokens {
   final double disabledOpacity;
 
   KidButtonChromeTokens copyWith({
+    Color? primaryShellGradientStart,
+    Color? primaryShellGradientEnd,
     double? primaryBorderAlpha,
     double? primaryIconChipAlpha,
     double? primaryIconChipBorderAlpha,
@@ -382,6 +388,10 @@ class KidButtonChromeTokens {
     double? disabledOpacity,
   }) {
     return KidButtonChromeTokens(
+      primaryShellGradientStart:
+          primaryShellGradientStart ?? this.primaryShellGradientStart,
+      primaryShellGradientEnd:
+          primaryShellGradientEnd ?? this.primaryShellGradientEnd,
       primaryBorderAlpha: primaryBorderAlpha ?? this.primaryBorderAlpha,
       primaryIconChipAlpha: primaryIconChipAlpha ?? this.primaryIconChipAlpha,
       primaryIconChipBorderAlpha:
@@ -415,6 +425,16 @@ class KidButtonChromeTokens {
 
   KidButtonChromeTokens lerp(KidButtonChromeTokens other, double t) {
     return KidButtonChromeTokens(
+      primaryShellGradientStart:
+          Color.lerp(
+            primaryShellGradientStart,
+            other.primaryShellGradientStart,
+            t,
+          ) ??
+          primaryShellGradientStart,
+      primaryShellGradientEnd:
+          Color.lerp(primaryShellGradientEnd, other.primaryShellGradientEnd, t) ??
+          primaryShellGradientEnd,
       primaryBorderAlpha:
           ui.lerpDouble(primaryBorderAlpha, other.primaryBorderAlpha, t) ??
           primaryBorderAlpha,

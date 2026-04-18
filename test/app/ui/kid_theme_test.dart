@@ -102,6 +102,36 @@ void main() {
   );
 
   test(
+    'KidButtonChromeTokens exposes primary shell gradient defaults and keeps them through copyWith and lerp',
+    () {
+      final layout = buildKidTheme().extension<KidLayoutTheme>();
+
+      expect(layout, isNotNull);
+      expect(layout!.chrome.button.primaryShellGradientStart, KidPalette.blue);
+      expect(layout.chrome.button.primaryShellGradientEnd, KidPalette.blueDark);
+
+      const copiedStart = Color(0xFF4B7BFF);
+      const copiedEnd = Color(0xFF2443BE);
+      final copied = layout.chrome.button.copyWith(
+        primaryShellGradientStart: copiedStart,
+        primaryShellGradientEnd: copiedEnd,
+      );
+      const updated = KidButtonChromeTokens(
+        primaryShellGradientStart: Color(0xFF6E9DFF),
+        primaryShellGradientEnd: Color(0xFF3157D8),
+      );
+      final lerped = layout.chrome.button.lerp(updated, 1);
+
+      expect(copied.primaryShellGradientStart, copiedStart);
+      expect(copied.primaryShellGradientEnd, copiedEnd);
+      expect(copied.secondaryShellGradientStart, KidPalette.cream);
+      expect(copied.secondaryShellGradientEnd, KidPalette.creamWarm);
+      expect(lerped.primaryShellGradientStart, updated.primaryShellGradientStart);
+      expect(lerped.primaryShellGradientEnd, updated.primaryShellGradientEnd);
+    },
+  );
+
+  test(
     'KidPanelDensityTokens keeps highlightTopInset in copyWith and lerp',
     () {
       const base = KidPanelDensityTokens(
