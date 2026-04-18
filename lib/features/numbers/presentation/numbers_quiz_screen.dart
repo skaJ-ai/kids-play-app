@@ -159,13 +159,15 @@ class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
                       Row(
                         children: [
                           Container(
+                            key: const ValueKey('numbersQuizModePill'),
                             padding: EdgeInsets.symmetric(
                               horizontal: headerHorizontalPadding,
                               vertical: headerVerticalPadding,
                             ),
                             decoration: BoxDecoration(
-                              color: KidPalette.white.withValues(alpha: 0.94),
+                              color: KidPalette.white.withValues(alpha: 0.92),
                               borderRadius: BorderRadius.circular(999),
+                              border: Border.all(color: KidPalette.stroke),
                               boxShadow: KidShadows.panel,
                             ),
                             child: Row(
@@ -190,13 +192,15 @@ class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
                           ),
                           const Spacer(),
                           Container(
+                            key: const ValueKey('numbersQuizProgressPill'),
                             padding: EdgeInsets.symmetric(
                               horizontal: headerHorizontalPadding,
                               vertical: headerVerticalPadding,
                             ),
                             decoration: BoxDecoration(
-                              color: KidPalette.white.withValues(alpha: 0.94),
+                              color: KidPalette.white.withValues(alpha: 0.92),
                               borderRadius: BorderRadius.circular(999),
+                              border: Border.all(color: KidPalette.stroke),
                               boxShadow: KidShadows.panel,
                             ),
                             child: Text(

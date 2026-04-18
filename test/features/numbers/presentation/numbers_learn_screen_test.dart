@@ -86,6 +86,31 @@ void main() {
     );
   });
 
+  testWidgets('header pills use calmer chrome with stroke borders', (
+    WidgetTester tester,
+  ) async {
+    final repository = NumbersLessonRepository(
+      assetBundle: _FakeAssetBundle({
+        NumbersLessonRepository.manifestPath: jsonEncode({
+          'lessons': [_numbersLesson],
+        }),
+      }),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: NumbersLearnScreen(
+          repository: repository,
+          lessonId: 'numbers_count_1',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    _expectHeaderPillChrome(tester, 'numbersLearnModePill');
+    _expectHeaderPillChrome(tester, 'numbersLearnProgressPill');
+  });
+
   testWidgets('resumes from the saved numbers lesson progress', (
     WidgetTester tester,
   ) async {
@@ -157,7 +182,10 @@ void main() {
 
     expect(regularCta.height, isNull);
     expect(regularCta.density, ToyButtonDensity.regular);
-    expect(tester.getSize(_ctaButtonFinder()).height, customLayout.button.regular.height);
+    expect(
+      tester.getSize(_ctaButtonFinder()).height,
+      customLayout.button.regular.height,
+    );
 
     _setSurfaceSize(tester, const Size(780, 360));
     await pumpScreen();
@@ -166,7 +194,10 @@ void main() {
 
     expect(compactCta.height, isNull);
     expect(compactCta.density, ToyButtonDensity.compact);
-    expect(tester.getSize(_ctaButtonFinder()).height, customLayout.button.compact.height);
+    expect(
+      tester.getSize(_ctaButtonFinder()).height,
+      customLayout.button.compact.height,
+    );
   });
 
   testWidgets('propagates themed regular button radius to the 다음 action', (
@@ -343,4 +374,20 @@ double _toyButtonBorderRadius(WidgetTester tester, Finder finder) {
       (decoratedBox.decoration as BoxDecoration).borderRadius! as BorderRadius;
 
   return borderRadius.topLeft.x;
+}
+
+void _expectHeaderPillChrome(WidgetTester tester, String keyValue) {
+  final pillFinder = find.byKey(ValueKey<String>(keyValue));
+
+  expect(pillFinder, findsOneWidget);
+
+  final pill = tester.widget<Container>(pillFinder);
+  expect(pill.decoration, isA<BoxDecoration>());
+
+  final decoration = pill.decoration! as BoxDecoration;
+  expect(decoration.color, KidPalette.white.withValues(alpha: 0.92));
+
+  final border = decoration.border;
+  expect(border, isA<Border>());
+  expect((border! as Border).top.color, KidPalette.stroke);
 }

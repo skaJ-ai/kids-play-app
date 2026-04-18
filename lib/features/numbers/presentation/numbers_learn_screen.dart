@@ -137,13 +137,15 @@ class _NumbersLearnScreenState extends State<NumbersLearnScreen> {
                   Row(
                     children: [
                       Container(
+                        key: const ValueKey('numbersLearnModePill'),
                         padding: EdgeInsets.symmetric(
                           horizontal: compact ? 12 : 16,
                           vertical: compact ? 6 : 10,
                         ),
                         decoration: BoxDecoration(
-                          color: KidPalette.white.withValues(alpha: 0.94),
+                          color: KidPalette.white.withValues(alpha: 0.92),
                           borderRadius: BorderRadius.circular(999),
+                          border: Border.all(color: KidPalette.stroke),
                           boxShadow: KidShadows.panel,
                         ),
                         child: Row(
@@ -168,13 +170,15 @@ class _NumbersLearnScreenState extends State<NumbersLearnScreen> {
                       ),
                       const Spacer(),
                       Container(
+                        key: const ValueKey('numbersLearnProgressPill'),
                         padding: EdgeInsets.symmetric(
                           horizontal: compact ? 12 : 16,
                           vertical: compact ? 6 : 10,
                         ),
                         decoration: BoxDecoration(
-                          color: KidPalette.white.withValues(alpha: 0.94),
+                          color: KidPalette.white.withValues(alpha: 0.92),
                           borderRadius: BorderRadius.circular(999),
+                          border: Border.all(color: KidPalette.stroke),
                           boxShadow: KidShadows.panel,
                         ),
                         child: Text(

@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kids_play_app/app/services/app_services.dart';
 import 'package:kids_play_app/app/services/progress_store.dart';
 import 'package:kids_play_app/app/services/speech_cue_service.dart';
+import 'package:kids_play_app/app/ui/kid_theme.dart';
 import 'package:kids_play_app/app/ui/toy_panel.dart';
 import 'package:kids_play_app/features/numbers/data/numbers_lesson_repository.dart';
 import 'package:kids_play_app/features/numbers/presentation/numbers_quiz_screen.dart';
@@ -43,6 +44,31 @@ void main() {
     expect(find.byKey(const Key('quiz-choice-2')), findsOneWidget);
     expect(find.byKey(const Key('quiz-choice-3')), findsOneWidget);
     expect(find.byKey(const Key('quiz-choice-4')), findsOneWidget);
+  });
+
+  testWidgets('header pills use calmer chrome with stroke borders', (
+    WidgetTester tester,
+  ) async {
+    final repository = NumbersLessonRepository(
+      assetBundle: _FakeAssetBundle({
+        NumbersLessonRepository.manifestPath: jsonEncode({
+          'lessons': [_numbersLesson],
+        }),
+      }),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: NumbersQuizScreen(
+          repository: repository,
+          lessonId: 'numbers_count_1',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    _expectHeaderPillChrome(tester, 'numbersQuizModePill');
+    _expectHeaderPillChrome(tester, 'numbersQuizProgressPill');
   });
 
   testWidgets(
@@ -345,4 +371,20 @@ class _FakeAssetBundle extends CachingAssetBundle {
     final bytes = Uint8List.fromList(utf8.encode(string));
     return ByteData.view(bytes.buffer);
   }
+}
+
+void _expectHeaderPillChrome(WidgetTester tester, String keyValue) {
+  final pillFinder = find.byKey(ValueKey<String>(keyValue));
+
+  expect(pillFinder, findsOneWidget);
+
+  final pill = tester.widget<Container>(pillFinder);
+  expect(pill.decoration, isA<BoxDecoration>());
+
+  final decoration = pill.decoration! as BoxDecoration;
+  expect(decoration.color, KidPalette.white.withValues(alpha: 0.92));
+
+  final border = decoration.border;
+  expect(border, isA<Border>());
+  expect((border! as Border).top.color, KidPalette.stroke);
 }
