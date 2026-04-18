@@ -53,10 +53,15 @@
 
 ### 로컬 개발
 ```bash
-cd /home/openc/kids-play-app
+REPO_ROOT=/home/openc/kids-play-app
+FLUTTER_BIN=/home/openc/sdk/flutter/bin/flutter
+# 다른 머신에서는 REPO_ROOT 를 자신의 checkout root로 바꾸고,
+# FLUTTER_BIN 은 자신의 Flutter binary 경로 또는 PATH 의 flutter 로 교체
+
+cd "$REPO_ROOT"
 ./scripts/prepare_assets.sh
-/home/openc/sdk/flutter/bin/flutter pub get
-/home/openc/sdk/flutter/bin/flutter run
+"$FLUTTER_BIN" pub get
+"$FLUTTER_BIN" run
 ```
 
 ### 테스트 / 최종 검증
@@ -66,12 +71,17 @@ cd /home/openc/kids-play-app
 - 아래 순서는 `docs/local-dev-setup.md` 및 `.github/workflows/build-apk.yml` 기준의 현재 최종 통합 게이트이며, 이 중 아직 pending인 것은 full `flutter analyze` / release build / current-head GitHub Actions artifact `kids-play-app-arm64-v8a-release` 확인입니다.
 
 ```bash
-cd /home/openc/kids-play-app
+REPO_ROOT=/home/openc/kids-play-app
+FLUTTER_BIN=/home/openc/sdk/flutter/bin/flutter
+# 다른 머신에서는 REPO_ROOT 를 자신의 checkout root로 바꾸고,
+# FLUTTER_BIN 은 자신의 Flutter binary 경로 또는 PATH 의 flutter 로 교체
+
+cd "$REPO_ROOT"
 ./scripts/prepare_assets.sh
-/home/openc/sdk/flutter/bin/flutter pub get
-/home/openc/sdk/flutter/bin/flutter test
-/home/openc/sdk/flutter/bin/flutter analyze
-/home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64
+"$FLUTTER_BIN" pub get
+"$FLUTTER_BIN" test
+"$FLUTTER_BIN" analyze
+"$FLUTTER_BIN" build apk --release --target-platform android-arm64
 ```
 
 - 현재는 full `flutter test`만 docs-only HEAD `c5879e9`(앱 코드는 마지막 코드 커밋 `a7767c8` 이후 동일)에서 다시 통과한 상태이고, full `flutter analyze` / release build / current-head GitHub Actions artifact `kids-play-app-arm64-v8a-release` 확인은 아직 남아 있습니다.
@@ -93,7 +103,9 @@ GitHub Actions
 
 자산 준비
 ```bash
-REPO_ROOT=/home/openc/kids-play-app # 다른 머신에서는 자신의 checkout root로 교체
+REPO_ROOT=/home/openc/kids-play-app
+# 다른 머신에서는 REPO_ROOT 를 자신의 checkout root로 교체
+
 cd "$REPO_ROOT"
 ./scripts/prepare_assets.sh
 ```
