@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kids_play_app/app/audio/audio_cue.dart';
+import 'package:kids_play_app/app/audio/audio_service.dart';
 import 'package:kids_play_app/app/services/app_services.dart';
 import 'package:kids_play_app/app/services/progress_store.dart';
 import 'package:kids_play_app/app/services/speech_cue_service.dart';
@@ -14,6 +16,180 @@ void main() {
   test('uses numbers_count_1 as the default lesson id', () {
     expect(const NumbersQuizScreen().lessonId, 'numbers_count_1');
   });
+
+  testWidgets(
+    'replays the current numbers prompt through the injected audio service',
+    (WidgetTester tester) async {
+      final repository = NumbersLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          NumbersLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_numbersLesson],
+          }),
+        }),
+      );
+      final audioService = _FakeAudioService();
+
+      await tester.pumpWidget(
+        AppServicesScope(
+          services: AppServices(
+            progressStore: MemoryProgressStore(),
+            speechCueService: NoopSpeechCueService(),
+            audioService: audioService,
+          ),
+          child: MaterialApp(
+            home: NumbersQuizScreen(
+              repository: repository,
+              lessonId: 'numbers_count_1',
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(audioService.promptCalls, hasLength(1));
+      expect(audioService.promptCalls.single.categoryId, 'numbers');
+      expect(audioService.promptCalls.single.lessonId, 'numbers_count_1');
+      expect(audioService.promptCalls.single.symbol, '1');
+      expect(audioService.promptCalls.single.fallbackText, "'1' 숫자를 찾아봐!");
+    },
+  );
+
+  testWidgets(
+    'plays the success feedback cue through the injected audio service',
+    (WidgetTester tester) async {
+      final repository = NumbersLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          NumbersLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_numbersLesson],
+          }),
+        }),
+      );
+      final audioService = _FakeAudioService();
+
+      await tester.pumpWidget(
+        AppServicesScope(
+          services: AppServices(
+            progressStore: MemoryProgressStore(),
+            speechCueService: NoopSpeechCueService(),
+            audioService: audioService,
+          ),
+          child: MaterialApp(
+            home: NumbersQuizScreen(
+              repository: repository,
+              lessonId: 'numbers_count_1',
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      audioService.promptCalls.clear();
+
+      await tester.tap(find.byKey(const Key('quiz-choice-1')));
+      await tester.pump();
+
+      expect(audioService.cueCalls, hasLength(1));
+      expect(audioService.cueCalls.single.type, AudioCueType.success);
+      expect(audioService.cueCalls.single.assetKey, 'audio/sfx/success.ogg');
+      expect(audioService.cueCalls.single.fallbackText, '딩동댕');
+
+      await tester.pump(const Duration(milliseconds: 650));
+      await tester.pumpAndSettle();
+    },
+  );
+
+  testWidgets(
+    'plays the success feedback cue when voice prompts are off but feedback effects stay on',
+    (WidgetTester tester) async {
+      final repository = NumbersLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          NumbersLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_numbersLesson],
+          }),
+        }),
+      );
+      final audioService = _FakeAudioService();
+
+      await tester.pumpWidget(
+        AppServicesScope(
+          services: AppServices(
+            progressStore: MemoryProgressStore(
+              const AppProgressSnapshot(
+                voicePromptsEnabled: false,
+                effectsEnabled: true,
+              ),
+            ),
+            speechCueService: NoopSpeechCueService(),
+            audioService: audioService,
+          ),
+          child: MaterialApp(
+            home: NumbersQuizScreen(
+              repository: repository,
+              lessonId: 'numbers_count_1',
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(audioService.promptCalls, isEmpty);
+
+      await tester.tap(find.byKey(const Key('quiz-choice-1')));
+      await tester.pump();
+
+      expect(audioService.cueCalls, hasLength(1));
+      expect(audioService.cueCalls.single.type, AudioCueType.success);
+
+      await tester.pump(const Duration(milliseconds: 650));
+      await tester.pumpAndSettle();
+    },
+  );
+
+  testWidgets(
+    'does not play the success feedback cue when feedback effects are off',
+    (WidgetTester tester) async {
+      final repository = NumbersLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          NumbersLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_numbersLesson],
+          }),
+        }),
+      );
+      final audioService = _FakeAudioService();
+
+      await tester.pumpWidget(
+        AppServicesScope(
+          services: AppServices(
+            progressStore: MemoryProgressStore(
+              const AppProgressSnapshot(
+                voicePromptsEnabled: true,
+                effectsEnabled: false,
+              ),
+            ),
+            speechCueService: NoopSpeechCueService(),
+            audioService: audioService,
+          ),
+          child: MaterialApp(
+            home: NumbersQuizScreen(
+              repository: repository,
+              lessonId: 'numbers_count_1',
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      audioService.promptCalls.clear();
+
+      await tester.tap(find.byKey(const Key('quiz-choice-1')));
+      await tester.pump();
+
+      expect(audioService.cueCalls, isEmpty);
+
+      await tester.pump(const Duration(milliseconds: 220));
+      await tester.pumpAndSettle();
+    },
+  );
 
   testWidgets('shows the first numbers quiz question with four choices', (
     WidgetTester tester,
@@ -745,5 +921,26 @@ class _FakeAssetBundle extends CachingAssetBundle {
     final string = await loadString(key);
     final bytes = Uint8List.fromList(utf8.encode(string));
     return ByteData.view(bytes.buffer);
+  }
+}
+
+class _FakeAudioService implements AudioService {
+  final List<AudioPromptRequest> promptCalls = [];
+  final List<AudioCue> cueCalls = [];
+  int stopCount = 0;
+
+  @override
+  Future<void> playCue(AudioCue cue) async {
+    cueCalls.add(cue);
+  }
+
+  @override
+  Future<void> playPrompt(AudioPromptRequest request) async {
+    promptCalls.add(request);
+  }
+
+  @override
+  Future<void> stop() async {
+    stopCount += 1;
   }
 }
