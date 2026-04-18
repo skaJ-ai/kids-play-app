@@ -840,6 +840,74 @@ void main() {
     );
   });
 
+  testWidgets('reads foreground color overrides from kid theme chrome tokens', (
+    WidgetTester tester,
+  ) async {
+    const customPrimaryForeground = Color(0xFFFAFBFC);
+    const customSecondaryForeground = Color(0xFF123456);
+    final customLayout = KidLayoutTheme(
+      button: KidLayoutTheme.defaults.button,
+      panel: KidLayoutTheme.defaults.panel,
+      chrome: const KidChromeTokens(
+        button: KidButtonChromeTokens(
+          primaryForegroundColor: customPrimaryForeground,
+          secondaryForegroundColor: customSecondaryForeground,
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(
+      _buildTestApp(
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ToyButton(
+              key: const Key('primary-foreground-button'),
+              label: '기본 전경색',
+              icon: Icons.play_arrow_rounded,
+              onPressed: () {},
+            ),
+            const SizedBox(height: 12),
+            ToyButton(
+              key: const Key('secondary-foreground-button'),
+              label: '보조 전경색',
+              icon: Icons.settings_rounded,
+              tone: ToyButtonTone.secondary,
+              onPressed: () {},
+            ),
+          ],
+        ),
+        theme: buildKidTheme().copyWith(extensions: [customLayout]),
+      ),
+    );
+
+    final primaryButton = find.byKey(const Key('primary-foreground-button'));
+    final secondaryButton = find.byKey(const Key('secondary-foreground-button'));
+    final primaryIcon = tester.widget<Icon>(
+      find.descendant(
+        of: primaryButton,
+        matching: find.byIcon(Icons.play_arrow_rounded),
+      ),
+    );
+    final secondaryIcon = tester.widget<Icon>(
+      find.descendant(
+        of: secondaryButton,
+        matching: find.byIcon(Icons.settings_rounded),
+      ),
+    );
+
+    expect(
+      _buttonLabelStyle(tester, primaryButton, '기본 전경색').color,
+      customPrimaryForeground,
+    );
+    expect(primaryIcon.color, customPrimaryForeground);
+    expect(
+      _buttonLabelStyle(tester, secondaryButton, '보조 전경색').color,
+      customSecondaryForeground,
+    );
+    expect(secondaryIcon.color, customSecondaryForeground);
+  });
+
   testWidgets('renders a calmer secondary tone with surface styling', (
     WidgetTester tester,
   ) async {

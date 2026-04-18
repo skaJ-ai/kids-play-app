@@ -488,6 +488,42 @@ void main() {
     },
   );
 
+  test(
+    'KidButtonChromeTokens exposes foreground colors and keeps them through copyWith and lerp',
+    () {
+      final layout = buildKidTheme().extension<KidLayoutTheme>();
+      const updatedPrimaryForeground = Color(0xFFF9FAFB);
+      const updatedSecondaryForeground = Color(0xFF234567);
+
+      expect(layout, isNotNull);
+      expect(layout!.chrome.button.primaryForegroundColor, KidPalette.white);
+      expect(layout.chrome.button.secondaryForegroundColor, KidPalette.navy);
+
+      final updated = layout.chrome.button.copyWith(
+        primaryForegroundColor: updatedPrimaryForeground,
+        secondaryForegroundColor: updatedSecondaryForeground,
+      );
+      final preserved = layout.chrome.button.copyWith(primaryBorderAlpha: 0.44);
+      const lerpTarget = KidButtonChromeTokens(
+        primaryForegroundColor: updatedPrimaryForeground,
+        secondaryForegroundColor: updatedSecondaryForeground,
+      );
+
+      expect(updated.primaryForegroundColor, updatedPrimaryForeground);
+      expect(updated.secondaryForegroundColor, updatedSecondaryForeground);
+      expect(preserved.primaryForegroundColor, KidPalette.white);
+      expect(preserved.secondaryForegroundColor, KidPalette.navy);
+      expect(
+        layout.chrome.button.lerp(lerpTarget, 1).primaryForegroundColor,
+        updatedPrimaryForeground,
+      );
+      expect(
+        layout.chrome.button.lerp(lerpTarget, 1).secondaryForegroundColor,
+        updatedSecondaryForeground,
+      );
+    },
+  );
+
   test('buildKidTheme defines a calmer supporting label hierarchy', () {
     final theme = buildKidTheme();
     final textTheme = theme.textTheme;

@@ -335,12 +335,14 @@ class KidButtonChromeTokens {
     this.primaryIconChipAlpha = 0.18,
     this.primaryIconChipBorderAlpha = 0.12,
     this.primaryHighlightAlpha = 0.22,
+    this.primaryForegroundColor = KidPalette.white,
     this.secondaryShellGradientStart = KidPalette.cream,
     this.secondaryShellGradientEnd = KidPalette.creamWarm,
     this.secondaryBorderAlpha = 0.82,
     this.secondaryIconChipAlpha = 0.88,
     this.secondaryIconChipBorderAlpha = 0.72,
     this.secondaryHighlightAlpha = 0.14,
+    this.secondaryForegroundColor = KidPalette.navy,
     this.primaryDisabledGradientBlendAmount = 0.36,
     this.secondaryDisabledGradientBlendAmount = 0.16,
     this.disabledOpacity = 0.58,
@@ -350,12 +352,14 @@ class KidButtonChromeTokens {
   final double primaryIconChipAlpha;
   final double primaryIconChipBorderAlpha;
   final double primaryHighlightAlpha;
+  final Color primaryForegroundColor;
   final Color secondaryShellGradientStart;
   final Color secondaryShellGradientEnd;
   final double secondaryBorderAlpha;
   final double secondaryIconChipAlpha;
   final double secondaryIconChipBorderAlpha;
   final double secondaryHighlightAlpha;
+  final Color secondaryForegroundColor;
   final double primaryDisabledGradientBlendAmount;
   final double secondaryDisabledGradientBlendAmount;
   final double disabledOpacity;
@@ -365,12 +369,14 @@ class KidButtonChromeTokens {
     double? primaryIconChipAlpha,
     double? primaryIconChipBorderAlpha,
     double? primaryHighlightAlpha,
+    Color? primaryForegroundColor,
     Color? secondaryShellGradientStart,
     Color? secondaryShellGradientEnd,
     double? secondaryBorderAlpha,
     double? secondaryIconChipAlpha,
     double? secondaryIconChipBorderAlpha,
     double? secondaryHighlightAlpha,
+    Color? secondaryForegroundColor,
     double? primaryDisabledGradientBlendAmount,
     double? secondaryDisabledGradientBlendAmount,
     double? disabledOpacity,
@@ -382,6 +388,8 @@ class KidButtonChromeTokens {
           primaryIconChipBorderAlpha ?? this.primaryIconChipBorderAlpha,
       primaryHighlightAlpha:
           primaryHighlightAlpha ?? this.primaryHighlightAlpha,
+      primaryForegroundColor:
+          primaryForegroundColor ?? this.primaryForegroundColor,
       secondaryShellGradientStart:
           secondaryShellGradientStart ?? this.secondaryShellGradientStart,
       secondaryShellGradientEnd:
@@ -393,6 +401,8 @@ class KidButtonChromeTokens {
           secondaryIconChipBorderAlpha ?? this.secondaryIconChipBorderAlpha,
       secondaryHighlightAlpha:
           secondaryHighlightAlpha ?? this.secondaryHighlightAlpha,
+      secondaryForegroundColor:
+          secondaryForegroundColor ?? this.secondaryForegroundColor,
       primaryDisabledGradientBlendAmount:
           primaryDisabledGradientBlendAmount ??
           this.primaryDisabledGradientBlendAmount,
@@ -425,6 +435,9 @@ class KidButtonChromeTokens {
             t,
           ) ??
           primaryHighlightAlpha,
+      primaryForegroundColor:
+          Color.lerp(primaryForegroundColor, other.primaryForegroundColor, t) ??
+          primaryForegroundColor,
       secondaryShellGradientStart:
           Color.lerp(
             secondaryShellGradientStart,
@@ -463,6 +476,13 @@ class KidButtonChromeTokens {
             t,
           ) ??
           secondaryHighlightAlpha,
+      secondaryForegroundColor:
+          Color.lerp(
+            secondaryForegroundColor,
+            other.secondaryForegroundColor,
+            t,
+          ) ??
+          secondaryForegroundColor,
       primaryDisabledGradientBlendAmount:
           ui.lerpDouble(
             primaryDisabledGradientBlendAmount,

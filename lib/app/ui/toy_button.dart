@@ -69,7 +69,9 @@ class ToyButton extends StatelessWidget {
                 )!,
               )
               .toList(growable: false);
-    final foregroundColor = primaryTone ? KidPalette.white : KidPalette.navy;
+    final foregroundColor = primaryTone
+        ? chromeTokens.primaryForegroundColor
+        : chromeTokens.secondaryForegroundColor;
     final borderColor = primaryTone
         ? KidPalette.white.withValues(alpha: chromeTokens.primaryBorderAlpha)
         : KidPalette.stroke.withValues(
