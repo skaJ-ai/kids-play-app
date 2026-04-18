@@ -4,6 +4,7 @@ import 'package:kids_play_app/app/ui/kid_theme.dart';
 import 'package:kids_play_app/app/ui/toy_panel.dart';
 
 const _panelChildKey = ValueKey<String>('toy-panel-child');
+const _insetSurfaceChildKey = ValueKey<String>('toy-panel-inset-surface-child');
 
 void main() {
   group('ToyPanel density', () {
@@ -189,6 +190,41 @@ void main() {
         expectedHighlightHorizontalInset: defaults.highlightHorizontalInset,
       );
     });
+  });
+
+  group('ToyPanel inset surface', () {
+    testWidgets(
+      'uses the density inset radius with shared icon-tile chrome by default',
+      (WidgetTester tester) async {
+        const compactInsetRadius = 19.0;
+        final defaults = KidLayoutTheme.defaults;
+        final customLayout = defaults.copyWith(
+          panel: defaults.panel.copyWith(
+            compact: defaults.panel.compact.copyWith(
+              insetRadius: compactInsetRadius,
+            ),
+          ),
+        );
+
+        await _pumpToyPanelInsetSurface(
+          tester,
+          density: ToyPanelDensity.compact,
+          theme: buildKidTheme().copyWith(extensions: [customLayout]),
+        );
+
+        final decoration = _insetSurfaceDecoration(tester);
+        final border = decoration.border! as Border;
+
+        expect(decoration.color, KidPalette.white.withValues(alpha: 0.9));
+        expect(
+          decoration.borderRadius,
+          BorderRadius.circular(compactInsetRadius),
+        );
+        expect(border.top.color, KidPalette.white.withValues(alpha: 0.72));
+        expect(border.top.width, 1);
+        expect(decoration.boxShadow, KidShadows.panel);
+      },
+    );
   });
 
   group('ToyPanel tone', () {
@@ -610,6 +646,30 @@ Future<void> _pumpToyPanel(
   );
 }
 
+Future<void> _pumpToyPanelInsetSurface(
+  WidgetTester tester, {
+  ToyPanelDensity density = ToyPanelDensity.regular,
+  Color? backgroundColor,
+  ThemeData? theme,
+}) async {
+  await tester.pumpWidget(
+    MaterialApp(
+      theme: theme ?? buildKidTheme(),
+      home: Scaffold(
+        body: Center(
+          child: ToyPanelInsetSurface(
+            density: density,
+            width: 56,
+            height: 56,
+            backgroundColor: backgroundColor,
+            child: const SizedBox(key: _insetSurfaceChildKey),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 void _expectResolvedShell(
   WidgetTester tester, {
   required EdgeInsetsGeometry expectedPadding,
@@ -720,6 +780,26 @@ BoxDecoration _panelDecoration(WidgetTester tester, Finder finder) {
   );
 
   return decoratedBox.decoration as BoxDecoration;
+}
+
+BoxDecoration _insetSurfaceDecoration(WidgetTester tester) {
+  final container = tester.widget<Container>(
+    find.descendant(
+      of: find.byType(ToyPanelInsetSurface),
+      matching: find.byWidgetPredicate((Widget widget) {
+        if (widget is! Container) {
+          return false;
+        }
+
+        final decoration = widget.decoration;
+        return decoration is BoxDecoration &&
+            decoration.border != null &&
+            decoration.boxShadow?.isNotEmpty == true;
+      }),
+    ),
+  );
+
+  return container.decoration! as BoxDecoration;
 }
 
 Finder _panelHighlightFinder() {

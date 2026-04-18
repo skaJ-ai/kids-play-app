@@ -88,9 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               SizedBox(height: compact ? 6 : 10),
               Text(
-                compact
-                    ? '좋아하는 차고를 콕 눌러요.'
-                    : '마음에 드는 차고를 누르고 놀이를 골라요.',
+                compact ? '좋아하는 차고를 콕 눌러요.' : '마음에 드는 차고를 누르고 놀이를 골라요.',
                 textAlign: TextAlign.center,
                 maxLines: compact ? 1 : 2,
                 overflow: TextOverflow.ellipsis,
@@ -193,9 +191,7 @@ class _CategoryCard extends StatelessWidget {
     final panelDensity = compact
         ? ToyPanelDensity.compact
         : ToyPanelDensity.regular;
-    final panelTokens = theme.kidLayout.panel.forDensity(panelDensity);
-    final panelRadius = panelTokens.radius;
-    final iconTileRadius = panelTokens.insetRadius;
+    final panelRadius = theme.kidLayout.panel.forDensity(panelDensity).radius;
 
     return Material(
       color: Colors.transparent,
@@ -236,17 +232,11 @@ class _CategoryCard extends StatelessWidget {
                 ],
               ),
               const Spacer(),
-              Container(
+              ToyPanelInsetSurface(
+                density: panelDensity,
                 width: compact ? 58 : 76,
                 height: compact ? 58 : 76,
-                decoration: BoxDecoration(
-                  color: KidPalette.white.withValues(alpha: 0.88),
-                  borderRadius: BorderRadius.circular(iconTileRadius),
-                  border: Border.all(
-                    color: KidPalette.white.withValues(alpha: 0.72),
-                  ),
-                  boxShadow: KidShadows.panel,
-                ),
+                backgroundColor: KidPalette.white.withValues(alpha: 0.88),
                 child: Icon(
                   category.icon,
                   size: compact ? 30 : 38,

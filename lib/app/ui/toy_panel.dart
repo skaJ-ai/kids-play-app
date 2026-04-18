@@ -108,6 +108,54 @@ class ToyPanel extends StatelessWidget {
   }
 }
 
+class ToyPanelInsetSurface extends StatelessWidget {
+  const ToyPanelInsetSurface({
+    super.key,
+    required this.child,
+    required this.width,
+    required this.height,
+    this.density = ToyPanelDensity.regular,
+    this.backgroundColor,
+    this.borderColor,
+    this.borderRadius,
+    this.boxShadow,
+    this.padding,
+  });
+
+  final Widget child;
+  final double width;
+  final double height;
+  final ToyPanelDensity density;
+  final Color? backgroundColor;
+  final Color? borderColor;
+  final BorderRadiusGeometry? borderRadius;
+  final List<BoxShadow>? boxShadow;
+  final EdgeInsetsGeometry? padding;
+
+  @override
+  Widget build(BuildContext context) {
+    final panelTokens = Theme.of(context).kidLayout.panel.forDensity(density);
+    final resolvedBorderRadius =
+        borderRadius ?? BorderRadius.circular(panelTokens.insetRadius);
+
+    return Container(
+      width: width,
+      height: height,
+      alignment: Alignment.center,
+      padding: padding,
+      decoration: BoxDecoration(
+        color: backgroundColor ?? KidPalette.white.withValues(alpha: 0.9),
+        borderRadius: resolvedBorderRadius,
+        border: Border.all(
+          color: borderColor ?? KidPalette.white.withValues(alpha: 0.72),
+        ),
+        boxShadow: boxShadow ?? KidShadows.panel,
+      ),
+      child: child,
+    );
+  }
+}
+
 List<BoxShadow> _panelShadowsFor(
   ToyPanelTone tone,
   KidShadowTokens shadowTokens,

@@ -190,9 +190,6 @@ class _ModeCard extends StatelessWidget {
           final iconTileDensity = isCompact
               ? ToyPanelDensity.tight
               : ToyPanelDensity.regular;
-          final iconTileRadius = theme.kidLayout.panel
-              .forDensity(iconTileDensity)
-              .insetRadius;
           final topGap = isTight ? 8.0 : (isCompact ? 12.0 : 18.0);
           final iconBoxSize = isTight ? 44.0 : (isCompact ? 62.0 : 76.0);
           final iconSize = isTight ? 24.0 : (isCompact ? 30.0 : 38.0);
@@ -219,17 +216,10 @@ class _ModeCard extends StatelessWidget {
                       borderColor: KidPalette.white.withValues(alpha: 0.78),
                       child: Row(
                         children: [
-                          Container(
+                          ToyPanelInsetSurface(
+                            density: iconTileDensity,
                             width: 44,
                             height: 44,
-                            decoration: BoxDecoration(
-                              color: KidPalette.white.withValues(alpha: 0.9),
-                              borderRadius: BorderRadius.circular(iconTileRadius),
-                              border: Border.all(
-                                color: KidPalette.white.withValues(alpha: 0.72),
-                              ),
-                              boxShadow: KidShadows.panel,
-                            ),
                             child: Icon(icon, size: 24, color: accentColor),
                           ),
                           const SizedBox(width: 10),
@@ -300,7 +290,9 @@ class _ModeCard extends StatelessWidget {
                               HomeAccentPill(
                                 label: tag,
                                 textColor: accentColor,
-                                backgroundColor: accentColor.withValues(alpha: 0.12),
+                                backgroundColor: accentColor.withValues(
+                                  alpha: 0.12,
+                                ),
                                 compact: isCompact,
                               ),
                               const Spacer(),
@@ -312,18 +304,15 @@ class _ModeCard extends StatelessWidget {
                             ],
                           ),
                           SizedBox(height: topGap),
-                          Container(
+                          ToyPanelInsetSurface(
+                            density: iconTileDensity,
                             width: iconBoxSize,
                             height: iconBoxSize,
-                            decoration: BoxDecoration(
-                              color: KidPalette.white.withValues(alpha: 0.9),
-                              borderRadius: BorderRadius.circular(iconTileRadius),
-                              border: Border.all(
-                                color: KidPalette.white.withValues(alpha: 0.72),
-                              ),
-                              boxShadow: KidShadows.panel,
+                            child: Icon(
+                              icon,
+                              size: iconSize,
+                              color: accentColor,
                             ),
-                            child: Icon(icon, size: iconSize, color: accentColor),
                           ),
                           SizedBox(height: isTight ? 8 : topGap),
                           Text(
@@ -340,7 +329,9 @@ class _ModeCard extends StatelessWidget {
                             subtitle,
                             maxLines: isTight ? 1 : (isCompact ? 2 : 3),
                             overflow: TextOverflow.ellipsis,
-                            style: subtitleStyle?.copyWith(color: KidPalette.navy),
+                            style: subtitleStyle?.copyWith(
+                              color: KidPalette.navy,
+                            ),
                           ),
                           const Spacer(),
                           Text(
