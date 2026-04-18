@@ -44,12 +44,12 @@
 
 ---
 
-## 이번 라운드 기준 상태
+## 현재 큐 기준 상태
 
 ### queue 기준 상태
-- A-E 범위(숫자 feature/라우팅, home/category 연결, design-system theme/button/panel 정리, hero/home/category 리디자인, 보호자 summary/settings/retry/unlock 흐름)는 live repo에서 재확인됨
-- F 문서 정리는 이번 slice에서 진행 중
-- G 최종 통합 게이트(full `flutter test` / `flutter analyze` / release APK build / current-head APK artifact 확인)는 아직 남아 있음
+- A-E 범위(숫자 feature/라우팅, home/category 연결, design-system theme/button/panel 정리, hero/home/category 리디자인, 보호자 summary/settings/retry/unlock 흐름)는 live repo 기준으로 완료 상태이며, 일부 핵심 흐름은 선별 테스트로 다시 확인된 상태다
+- F 문서 정리는 진행 중인 cleanup 범위다
+- G 최종 통합 게이트(full `flutter test` / `flutter analyze` / release APK build / current-head APK artifact 확인)는 아직 남아 있다
 
 ### 1. 문서/CI 정합성
 - docs/script 변경도 APK workflow에 포함되도록 정리됨
@@ -83,9 +83,9 @@
 
 ---
 
-## 검증 결과
+## 선별 검증 메모
 
-이번 런에서 재확인된 테스트
+최근 문서화된 선별 재확인 기록 (최종 통합 게이트 아님)
 - numbers + routing
   - `/home/openc/sdk/flutter/bin/flutter test test/features/numbers/data/numbers_lesson_repository_test.dart test/features/numbers/presentation/numbers_learn_screen_test.dart test/features/numbers/presentation/numbers_quiz_screen_test.dart test/features/home/presentation/category_lesson_picker_flow_test.dart`
   - 결과: passed
@@ -96,7 +96,7 @@
   - `/home/openc/sdk/flutter/bin/flutter test test/features/hero/presentation/hero_screen_test.dart test/features/home/presentation/home_redesign_test.dart test/features/avatar/presentation/avatar_setup_screen_test.dart`
   - 결과: passed
 
-이번 런에서 아직 남은 최종 통합 확인
+아직 남은 최종 통합 확인
 - full `/home/openc/sdk/flutter/bin/flutter test`
 - full `/home/openc/sdk/flutter/bin/flutter analyze`
 - `/home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64`
