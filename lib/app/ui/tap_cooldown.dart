@@ -15,17 +15,30 @@ class TapCooldownGate {
       return;
     }
 
+    Object? thrownError;
+    StackTrace? thrownStackTrace;
+    var didThrow = false;
+
     _locked = true;
     try {
       await action();
-    } finally {
-      if (cooldown == Duration.zero) {
-        _locked = false;
-        return;
-      }
-      Future<void>.delayed(cooldown).then((_) {
-        _locked = false;
-      });
+    } catch (error, stackTrace) {
+      didThrow = true;
+      thrownError = error;
+      thrownStackTrace = stackTrace;
+    }
+
+    if (cooldown == Duration.zero) {
+      _locked = false;
+      return;
+    }
+
+    Future<void>.delayed(cooldown).then((_) {
+      _locked = false;
+    });
+
+    if (didThrow) {
+      Error.throwWithStackTrace(thrownError!, thrownStackTrace!);
     }
   }
 }
@@ -57,6 +70,10 @@ class _CooldownInkWellState extends State<CooldownInkWell> {
       return;
     }
 
+    Object? thrownError;
+    StackTrace? thrownStackTrace;
+    var didThrow = false;
+
     _unlockTimer?.cancel();
     setState(() {
       _locked = true;
@@ -64,26 +81,35 @@ class _CooldownInkWellState extends State<CooldownInkWell> {
 
     try {
       await widget.onTap?.call();
-    } finally {
-      if (widget.cooldown == Duration.zero) {
-        if (!mounted) {
-          _locked = false;
-          return;
-        }
+    } catch (error, stackTrace) {
+      didThrow = true;
+      thrownError = error;
+      thrownStackTrace = stackTrace;
+    }
+
+    if (widget.cooldown == Duration.zero) {
+      if (!mounted) {
+        _locked = false;
+      } else {
         setState(() {
           _locked = false;
         });
+      }
+      return;
+    }
+
+    _unlockTimer = Timer(widget.cooldown, () {
+      if (!mounted) {
+        _locked = false;
         return;
       }
-      _unlockTimer = Timer(widget.cooldown, () {
-        if (!mounted) {
-          _locked = false;
-          return;
-        }
-        setState(() {
-          _locked = false;
-        });
+      setState(() {
+        _locked = false;
       });
+    });
+
+    if (didThrow) {
+      Error.throwWithStackTrace(thrownError!, thrownStackTrace!);
     }
   }
 
