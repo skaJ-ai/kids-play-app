@@ -19,13 +19,14 @@
 - local: `/home/openc/kids-play-app`
 - remote: `git@github.com:skaJ-ai/kids-play-app.git`
 
-최근 기능 커밋
-- `4cc5bb2` `feat(parent): add lesson progress controls`
-- `eb7aaf5` `feat(ui): polish garage home flow`
+대표 기능 커밋 예시
+- `ea8ff71` `feat(parent): add manual lesson unlock flow`
+- `00ec1dc` `feat(content): add multi-lesson curriculum flow`
 
 현재 이미 동작하는 것
 - landscape 고정 + immersive full-screen
 - hero / home / category hub garage flow
+- 홈 / 카테고리 허브에서 한글 / 알파벳 / 숫자 3개 카테고리 배우기/퀴즈 라우팅 완료
 - 한글 / 알파벳 / 숫자 다중 세트 학습
 - 한글 / 알파벳 / 숫자 다중 세트 퀴즈
 - 세트 선택 화면 추가
@@ -33,11 +34,11 @@
 - toddler-safe tap cooldown / 즉시 피드백 오버레이
 - 음성 cue / 다시 듣기 버튼
 - shared_preferences 기반 progress / settings / sticker 저장
-- 보호자 메뉴의 진행 요약, 음성/효과 토글, 세트별 진도 조절, 오답 다시 풀기, 오답 비우기, 앱 종료/리셋
+- 보호자 메뉴의 진행 요약, 음성/효과 토글, 세트별 진도 조절, 오답 다시 풀기, 오답 비우기, 세트별 수동 해금, 앱 종료/리셋
 - GitHub Actions APK 빌드
 
 아직 남은 확장 후보
-- 해금 수동 제어 / 더 세밀한 보호자 운영 기능
+- 오답 다시 풀기 결과를 별도 통계/보상과 연결
 - 실제 표정 사진 업로드/크롭 파이프라인
 - richer reward / 효과음 / 배경음악 polish
 
@@ -68,6 +69,7 @@
 - 세트별 진도 앞뒤 조절 제공
 - 세트별 오답 다시 풀기 제공
 - 세트별 최근 오답 비우기 제공
+- 세트별 수동 해금 제공
 - 앱 종료/리셋 최소 운영 기능 제공
 
 ### 5. 최근 UI polish
@@ -141,10 +143,9 @@ artifact
 ## 다음 작업자가 바로 이어갈 포인트
 
 우선순위 추천
-1. 해금 수동 제어 / 보호자 고급 운영
+1. 오답 다시 풀기 결과를 별도 통계/보상과 연결
 2. 실제 표정 사진 업로드/크롭
 3. richer reward / 효과음 / 배경음악 polish
-4. 오답 다시 풀기 결과를 별도 통계/보상과 연결
 
 주의
 - 이 앱은 데모가 아니라 실제 아이가 눌러보는 앱이다.

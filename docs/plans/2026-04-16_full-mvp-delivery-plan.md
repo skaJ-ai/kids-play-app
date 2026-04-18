@@ -11,16 +11,16 @@
 - Slice 3 — alphabet playable MVP
 - Slice 4 — numbers playable MVP
 - Slice 5 — audio-first prompt layer
-- Slice 6 — end-to-end polish의 home/category/hub garage UI 정리, 보호자 기본 진도 제어, 오답 다시 풀기 진입, 다중 lesson/컨텐츠 확장까지
+- Slice 6 — end-to-end polish의 home/category/hub garage UI 정리, 보호자 진행 요약/진도 제어/오답 다시 풀기/오답 비우기/수동 해금, 다중 세트와 3개 카테고리 라우팅 확장까지
 
 남은 확장 후보
-- 해금 수동 제어 / 보호자 고급 운영
+- 오답 다시 풀기 결과를 별도 통계/보상과 연결
 - 실제 표정 사진 업로드/크롭
 - richer reward / 효과음 / 배경음악 polish
 
 ## Goal
 
-현재 한글 MVP 상태의 `승원이의 빵빵 놀이터`를, 사용자가 다음날 순차적으로 확인할 수 있는 end-to-end toddler-ready APK로 확장한다.
+현재 한글/알파벳/숫자 라우팅까지 완료된 `승원이의 빵빵 놀이터`를, 사용자가 다음날 순차적으로 확인할 수 있는 end-to-end toddler-ready APK로 확장한다.
 
 ## Delivery principles
 
@@ -73,11 +73,11 @@
 - tests는 fake/noop audio로 유지
 
 ### Slice 6 — end-to-end polish
-- parent dashboard 정보 정리
-- 카테고리 허브에서 현재 진도/보상 표시
-- summary/reward polish
-- docs 최종 업데이트
-- final test/analyze/release build + Actions 확인
+- parent dashboard 정보 정리 완료
+- home/category/hub garage UI 정리 완료
+- 기본 summary/reward 흐름 정리 완료
+- docs 최종 업데이트 완료
+- final test/analyze/release build + Actions 확인 완료
 
 ## Verification checklist for every slice
 
