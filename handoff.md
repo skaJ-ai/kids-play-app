@@ -96,15 +96,21 @@
   - `/home/openc/sdk/flutter/bin/flutter test test/features/hero/presentation/hero_screen_test.dart test/features/home/presentation/home_redesign_test.dart test/features/avatar/presentation/avatar_setup_screen_test.dart`
   - 결과: passed
 - docs 정리 직전 HEAD 기준 full test 재확인 (`c5879e9`, README-only docs commit; 앱 코드는 마지막 코드 커밋 `a7767c8` 이후 동일)
-  - `./scripts/prepare_assets.sh`
-  - 결과: succeeded
-  - full `/home/openc/sdk/flutter/bin/flutter test`
+  - 재실행 예시 (`REPO_ROOT` / `FLUTTER_BIN` 값만 바꾸면 다른 머신에서도 같은 순서로 재현 가능)
+    ```bash
+    REPO_ROOT=/home/openc/kids-play-app
+    FLUTTER_BIN=/home/openc/sdk/flutter/bin/flutter
+
+    cd "$REPO_ROOT"
+    ./scripts/prepare_assets.sh
+    "$FLUTTER_BIN" pub get
+    "$FLUTTER_BIN" test
+    ```
+  - 결과: `./scripts/prepare_assets.sh` succeeded
   - 결과: `00:32 +227: All tests passed!`
 
 아직 남은 최종 통합 확인
-- full `/home/openc/sdk/flutter/bin/flutter analyze`
-- `/home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64`
-- current-head GitHub Actions APK artifact 확인
+- 아래 `로컬 실행 / 검증` 블록과 같은 변수 기준으로 current HEAD 에서 full `analyze` 와 release APK build, current-head GitHub Actions APK artifact 확인이 아직 남아 있다
 
 release build output path (when generated)
 - `build/app/outputs/flutter-apk/app-release.apk`
@@ -132,17 +138,25 @@ artifact name (when workflow passes)
 
 ## 로컬 실행 / 검증
 
-Flutter 경로
-- `/home/openc/sdk/flutter/bin/flutter`
+현재 머신에서 확인된 기본값
+- `REPO_ROOT=/home/openc/kids-play-app`
+- `FLUTTER_BIN=/home/openc/sdk/flutter/bin/flutter`
 
-기본 명령
+다른 머신에서 실행할 때
+- `REPO_ROOT` 는 자신의 checkout 경로로 바꾼다
+- `FLUTTER_BIN` 은 자신의 Flutter binary 경로로 바꾸거나 PATH 의 `flutter` 로 바꾼다
+
+기본 명령 (`docs/local-dev-setup.md` 및 `.github/workflows/build-apk.yml` 과 같은 순서)
 ```bash
-cd /home/openc/kids-play-app
+REPO_ROOT=/home/openc/kids-play-app
+FLUTTER_BIN=/home/openc/sdk/flutter/bin/flutter
+
+cd "$REPO_ROOT"
 ./scripts/prepare_assets.sh
-/home/openc/sdk/flutter/bin/flutter pub get
-/home/openc/sdk/flutter/bin/flutter test
-/home/openc/sdk/flutter/bin/flutter analyze
-/home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64
+"$FLUTTER_BIN" pub get
+"$FLUTTER_BIN" test
+"$FLUTTER_BIN" analyze
+"$FLUTTER_BIN" build apk --release --target-platform android-arm64
 ```
 
 ---
