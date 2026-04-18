@@ -75,9 +75,15 @@ void main() {
     expect(controller.questionIndex, 1);
   });
 
-  test('marks the quiz complete on the last question and awards a sticker',
+  test(
+      'marks the quiz complete on the last question, awards a sticker, and persists the recent reward snapshot',
       () async {
-    final store = MemoryProgressStore();
+    final store = MemoryProgressStore(
+      const AppProgressSnapshot(
+        voicePromptsEnabled: false,
+        effectsEnabled: false,
+      ),
+    );
     final services = AppServices(
       progressStore: store,
       speechCueService: _RecordingSpeech(),
@@ -90,9 +96,12 @@ void main() {
       pool: _items,
     );
 
-    for (var i = 0; i < _items.length; i++) {
+    for (var i = 0; i < _items.length - 1; i++) {
       await controller.selectChoice(controller.currentQuestion);
     }
+    final completionStartedAt = DateTime.now();
+    await controller.selectChoice(controller.currentQuestion);
+    final completionFinishedAt = DateTime.now();
 
     expect(controller.isComplete, isTrue);
     expect(controller.correctCount, 4);
@@ -104,6 +113,22 @@ void main() {
       snapshot.progressFor(_category.progressIdFor('alphabet_letters_1'))
           .bestScore,
       4,
+    );
+    expect(snapshot.lastEarnedReward, isNotNull);
+    expect(snapshot.lastEarnedReward!.kind, 'sticker');
+    expect(snapshot.lastEarnedReward!.amount, 1);
+    expect(snapshot.lastEarnedReward!.earnedAt.isUtc, isTrue);
+    expect(
+      snapshot.lastEarnedReward!.lessonId,
+      _category.progressIdFor('alphabet_letters_1'),
+    );
+    expect(
+      snapshot.lastEarnedReward!.earnedAt.isBefore(completionStartedAt.toUtc()),
+      isFalse,
+    );
+    expect(
+      snapshot.lastEarnedReward!.earnedAt.isAfter(completionFinishedAt),
+      isFalse,
     );
   });
 

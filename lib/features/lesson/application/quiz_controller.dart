@@ -104,11 +104,19 @@ class QuizController extends ChangeNotifier {
 
     final isLastQuestion = _questionIndex == totalQuestions - 1;
     if (isLastQuestion) {
+      final progressLessonId = category.progressIdFor(lessonId);
       if (earnedSticker(nextCorrectCount, totalQuestions)) {
+        final completedAt = DateTime.now().toUtc();
         await _services.progressStore.addStickers(1);
+        await _services.progressStore.recordRewardEarned(
+          kind: 'sticker',
+          amount: 1,
+          lessonId: progressLessonId,
+          earnedAt: completedAt,
+        );
       }
       await _services.progressStore.recordQuizResult(
-        lessonId: category.progressIdFor(lessonId),
+        lessonId: progressLessonId,
         correctCount: nextCorrectCount,
         totalQuestions: totalQuestions,
         recentMistakes: nextMistakes,
