@@ -49,7 +49,7 @@
 ### queue 기준 상태
 - A-E 범위(숫자 feature/라우팅, home/category 연결, design-system theme/button/panel 정리, hero/home/category 리디자인, 보호자 summary/settings/retry/unlock 흐름)는 live repo 기준으로 완료 상태이며, 일부 핵심 흐름은 선별 테스트로 다시 확인된 상태다
 - F 문서 정리는 진행 중인 cleanup 범위다
-- G 최종 통합 게이트 중 full `flutter test`는 이번 docs 정리 직전 HEAD `c5879e9`(README-only docs commit, 앱 코드는 마지막 코드 커밋 `a7767c8` 이후 동일)에서 다시 통과했고, full `flutter analyze` / release APK build / current-head APK artifact 확인은 아직 남아 있다
+- G 최종 통합 게이트는 아직 미완료다. docs-only HEAD `c5879e9`에서 full `flutter test` 재통과 기록은 남아 있지만, 이후 코드 커밋 `5696c1f` (`fix(ui): remove tap cooldown analyze blocker`)가 `lib/app/ui/tap_cooldown.dart`, `test/app/ui/tap_cooldown_test.dart`를 변경했다. 검증 기준 코드 스냅샷은 `5696c1f`이며, 이 코드 스냅샷에서는 targeted test/analyze만 다시 확인됐다. `5696c1f` 기준 코드 스냅샷에 대한 full `flutter test` / full `flutter analyze` / release APK build / APK artifact 확인은 아직 남아 있다
 
 ### 1. 문서/CI 정합성
 - docs/script 변경도 APK workflow에 포함되도록 정리됨
@@ -95,7 +95,7 @@
 - hero / home / parent entry + parent summary controls
   - `/home/openc/sdk/flutter/bin/flutter test test/features/hero/presentation/hero_screen_test.dart test/features/home/presentation/home_redesign_test.dart test/features/avatar/presentation/avatar_setup_screen_test.dart`
   - 결과: passed
-- docs 정리 직전 HEAD 기준 full test 재확인 (`c5879e9`, README-only docs commit; 앱 코드는 마지막 코드 커밋 `a7767c8` 이후 동일)
+- docs-only HEAD `c5879e9` 기준 full test 재확인 (README-only docs commit)
   - 재실행 예시 (`REPO_ROOT` / `FLUTTER_BIN` 값만 바꾸면 다른 머신에서도 같은 순서로 재현 가능)
     ```bash
     REPO_ROOT=/home/openc/kids-play-app
@@ -108,9 +108,17 @@
     ```
   - 결과: `./scripts/prepare_assets.sh` succeeded
   - 결과: `00:32 +227: All tests passed!`
+- 이후 코드 변경
+  - `5696c1f` `fix(ui): remove tap cooldown analyze blocker`
+  - 변경 파일: `lib/app/ui/tap_cooldown.dart`, `test/app/ui/tap_cooldown_test.dart`
+- `5696c1f` 기준 코드 스냅샷 targeted verification
+  - `/home/openc/sdk/flutter/bin/flutter test test/app/ui/tap_cooldown_test.dart`
+  - 결과: `00:00 +9: All tests passed!`
+  - `/home/openc/sdk/flutter/bin/flutter analyze lib/app/ui/tap_cooldown.dart test/app/ui/tap_cooldown_test.dart`
+  - 결과: `No issues found!`
 
 아직 남은 최종 통합 확인
-- 아래 `로컬 실행 / 검증` 블록과 같은 변수 기준으로 current HEAD 에서 full `analyze` 와 release APK build, current-head GitHub Actions APK artifact 확인이 아직 남아 있다
+- 아래 `로컬 실행 / 검증` 블록과 같은 변수 기준으로 `5696c1f` 기준 코드 스냅샷에 대한 full `flutter test`, full `flutter analyze`, release APK build, GitHub Actions APK artifact 확인이 아직 남아 있다
 
 release build output path (when generated)
 - `build/app/outputs/flutter-apk/app-release.apk`

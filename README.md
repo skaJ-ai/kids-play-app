@@ -16,8 +16,10 @@
 
 - 우선순위 큐 A-E 범위는 live repo 기준으로 완료 상태이며, 숫자/라우팅·design-system UI·hero/home/parent 핵심 흐름은 선별 테스트로 다시 확인했습니다.
 - 현재 진행 중인 작업은 README·handoff·plan 정합성을 맞추는 docs cleanup입니다.
-- 이번 docs 정리 직전 HEAD `c5879e9`(README-only docs commit, 앱 코드는 마지막 코드 커밋 `a7767c8` 이후 동일)에서 `./scripts/prepare_assets.sh` 이후 full `/home/openc/sdk/flutter/bin/flutter test`를 다시 돌려 `00:32 +227: All tests passed!`로 통과했습니다.
-- 다만 최종 통합 게이트 전체가 끝난 것은 아닙니다. full `/home/openc/sdk/flutter/bin/flutter analyze`, `/home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64`, current-head GitHub Actions artifact `kids-play-app-arm64-v8a-release` 확인은 아직 남아 있습니다.
+- docs-only HEAD `c5879e9`에서는 `./scripts/prepare_assets.sh` 이후 full `/home/openc/sdk/flutter/bin/flutter test`를 다시 돌려 `00:32 +227: All tests passed!`로 통과했습니다.
+- 다만 검증 기준 코드 스냅샷은 그 뒤 코드 커밋 `5696c1f` (`fix(ui): remove tap cooldown analyze blocker`)로 이동했습니다. 이 커밋은 `lib/app/ui/tap_cooldown.dart`, `test/app/ui/tap_cooldown_test.dart`를 변경했습니다.
+- `5696c1f` 기준 코드 스냅샷에 대해서는 `/home/openc/sdk/flutter/bin/flutter test test/app/ui/tap_cooldown_test.dart`를 다시 실행해 `00:00 +9: All tests passed!`, `/home/openc/sdk/flutter/bin/flutter analyze lib/app/ui/tap_cooldown.dart test/app/ui/tap_cooldown_test.dart`를 실행해 `No issues found!`를 확인했습니다.
+- 따라서 최종 통합 게이트에서 아직 남아 있는 것은 `5696c1f` 기준 코드 스냅샷에 대한 full `/home/openc/sdk/flutter/bin/flutter test`, full `/home/openc/sdk/flutter/bin/flutter analyze`, release APK build, GitHub Actions artifact `kids-play-app-arm64-v8a-release` 확인입니다.
 
 ## 현재 구현 범위
 
@@ -67,8 +69,10 @@ cd "$REPO_ROOT"
 ### 테스트 / 최종 검증
 현재 기준
 - A-E 범위는 live repo와 핵심 선별 테스트 기준으로 재확인 완료
-- 이번 docs 정리 직전 HEAD `c5879e9`(README-only docs commit, 앱 코드는 마지막 코드 커밋 `a7767c8` 이후 동일)에서 `./scripts/prepare_assets.sh` 후 full `/home/openc/sdk/flutter/bin/flutter test`를 재실행했고, 최종 요약은 `00:32 +227: All tests passed!`였습니다.
-- 아래 순서는 `docs/local-dev-setup.md` 및 `.github/workflows/build-apk.yml` 기준의 현재 최종 통합 게이트이며, 이 중 아직 pending인 것은 full `flutter analyze` / release build / current-head GitHub Actions artifact `kids-play-app-arm64-v8a-release` 확인입니다.
+- full `/home/openc/sdk/flutter/bin/flutter test` 재실행 기록은 docs-only HEAD `c5879e9`에서 `./scripts/prepare_assets.sh` 후 `00:32 +227: All tests passed!`였습니다.
+- 이후 검증 기준 코드 스냅샷은 `5696c1f`로 이동했습니다. `5696c1f`는 `lib/app/ui/tap_cooldown.dart`, `test/app/ui/tap_cooldown_test.dart`를 변경했습니다. 따라서 위 full test 기록은 `5696c1f` 기준 코드 스냅샷 전체를 대체하는 증거는 아닙니다.
+- 대신 `5696c1f` 기준 코드 스냅샷에 대해서는 `/home/openc/sdk/flutter/bin/flutter test test/app/ui/tap_cooldown_test.dart` => `00:00 +9: All tests passed!`, `/home/openc/sdk/flutter/bin/flutter analyze lib/app/ui/tap_cooldown.dart test/app/ui/tap_cooldown_test.dart` => `No issues found!`까지 선별 재검증했습니다.
+- 아래 순서는 `docs/local-dev-setup.md` 및 `.github/workflows/build-apk.yml` 기준의 현재 최종 통합 게이트이며, 아직 pending인 것은 `5696c1f` 기준 코드 스냅샷에 대한 full `flutter test` / full `flutter analyze` / release build / GitHub Actions artifact `kids-play-app-arm64-v8a-release` 확인입니다.
 
 ```bash
 REPO_ROOT=/home/openc/kids-play-app
@@ -84,7 +88,7 @@ cd "$REPO_ROOT"
 "$FLUTTER_BIN" build apk --release --target-platform android-arm64
 ```
 
-- 현재는 full `flutter test`만 docs-only HEAD `c5879e9`(앱 코드는 마지막 코드 커밋 `a7767c8` 이후 동일)에서 다시 통과한 상태이고, full `flutter analyze` / release build / current-head GitHub Actions artifact `kids-play-app-arm64-v8a-release` 확인은 아직 남아 있습니다.
+- `c5879e9`의 full `flutter test` 통과 기록과 `5696c1f` 기준 코드 스냅샷의 tap cooldown targeted 재검증은 각각 따로 남아 있지만, Gate G 완료로 기록하려면 `5696c1f` 기준 코드 스냅샷에 대한 full `flutter test` / full `flutter analyze` / release build / GitHub Actions artifact `kids-play-app-arm64-v8a-release` 확인이 모두 추가로 필요합니다.
 
 ## APK 확인 방법
 

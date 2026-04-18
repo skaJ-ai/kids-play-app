@@ -16,8 +16,9 @@
 현재 큐 기준 상태
 - 우선순위 A-E 범위는 live repo와 targeted tests 기준으로 완료 상태
 - F — docs cleanup 진행 중이며, 이 범위는 문서 정합성을 맞추는 작은 committable slice들로 나눠 진행하고 각 run에서는 바뀐 문서/명령에 맞는 최소 검증만 남김
-- G — final integration gate. full `flutter test`는 이번 docs 정리 직전 HEAD `c5879e9`(README-only docs commit, 앱 코드는 마지막 코드 커밋 `a7767c8` 이후 동일)에서 재통과했고, full `flutter analyze` / release build / current-head APK artifact 확인은 아직 남아 있음
-- HEAD `c5879e9`에서 `./scripts/prepare_assets.sh` 후 full `/home/openc/sdk/flutter/bin/flutter test`가 `00:32 +227: All tests passed!`로 끝난 상태
+- G — final integration gate. docs-only HEAD `c5879e9`에서 full `flutter test`는 재통과했지만, 그 뒤 코드 커밋 `5696c1f` (`fix(ui): remove tap cooldown analyze blocker`)가 `lib/app/ui/tap_cooldown.dart`, `test/app/ui/tap_cooldown_test.dart`를 변경했으므로 검증 기준 코드 스냅샷은 더 이상 `c5879e9`가 아니라 `5696c1f`임
+- provenance 메모: `c5879e9`에서 `./scripts/prepare_assets.sh` 후 full `/home/openc/sdk/flutter/bin/flutter test`가 `00:32 +227: All tests passed!`로 끝났고, 이후 검증 기준 코드 스냅샷은 `5696c1f`로 이동했다. 이 코드 스냅샷에서는 `/home/openc/sdk/flutter/bin/flutter test test/app/ui/tap_cooldown_test.dart` => `00:00 +9: All tests passed!`, `/home/openc/sdk/flutter/bin/flutter analyze lib/app/ui/tap_cooldown.dart test/app/ui/tap_cooldown_test.dart` => `No issues found!`까지 재확인된 상태
+- 따라서 Gate G에 남아 있는 것은 `5696c1f` 기준 코드 스냅샷에 대한 full `flutter test`, full `flutter analyze`, release build, GitHub Actions APK artifact 확인
 
 남은 확장 후보
 - 오답 다시 풀기 결과를 별도 통계/보상과 연결
@@ -85,7 +86,7 @@
 - home/category/hub garage UI 정리 완료
 - 기본 summary/reward 흐름 정리 완료
 - docs cleanup 진행 중
-- final full `flutter test`는 이번 docs 정리 직전 HEAD `c5879e9`(README-only docs commit, 앱 코드는 마지막 코드 커밋 `a7767c8` 이후 동일)에서 재통과했고, analyze/release build + Actions/APK 확인은 마지막 게이트로 남아 있음
+- docs-only HEAD `c5879e9`의 full `flutter test` 재통과 기록은 유지하되, 이후 코드 커밋 `5696c1f` 기준 코드 스냅샷의 targeted test/analyze 재검증과 별도로 Gate G의 full `flutter test` / full `flutter analyze` / release build / Actions artifact 확인이 마지막 게이트로 남아 있음
 
 ## Verification approach
 
