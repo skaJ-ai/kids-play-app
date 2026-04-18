@@ -12,6 +12,12 @@
 - 보호자 메뉴는 숨김 진입(히어로 얼굴 5회 탭)
 - GitHub Actions에서 매 변경마다 설치 가능한 APK artifact를 계속 생성
 
+## 현재 상태
+
+- 우선순위 큐 A-E 범위는 live repo 기준으로 완료 상태이며, 숫자/라우팅·design-system UI·hero/home/parent 핵심 흐름은 선별 테스트로 다시 확인했습니다.
+- 현재 진행 중인 작업은 README·handoff·plan 정합성을 맞추는 docs cleanup입니다.
+- 최종 통합 검증은 아직 남아 있습니다: full `flutter test`, full `flutter analyze`, arm64 release APK 빌드, current-head GitHub Actions artifact `kids-play-app-arm64-v8a-release` 확인.
+
 ## 현재 구현 범위
 
 이미 구현된 것
@@ -52,13 +58,19 @@ cd /home/openc/kids-play-app
 /home/openc/sdk/flutter/bin/flutter run
 ```
 
-### 테스트
+### 테스트 / 최종 검증
+현재 기준
+- A-E 범위는 live repo와 핵심 선별 테스트 기준으로 재확인 완료
+- 아래 명령은 아직 남아 있는 최종 통합 게이트입니다
+
 ```bash
 /home/openc/sdk/flutter/bin/flutter test
 /home/openc/sdk/flutter/bin/flutter analyze
 ```
 
 ### 릴리즈 APK 빌드
+아래 빌드와 current-head Actions artifact 확인도 아직 남아 있는 최종 게이트입니다.
+
 ```bash
 /home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64
 ```
