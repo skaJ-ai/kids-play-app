@@ -29,6 +29,135 @@ void main() {
   });
 
   testWidgets(
+    'shows the recent reward callout with reward amount and lesson metadata',
+    (WidgetTester tester) async {
+      final progressStore = MemoryProgressStore(
+        AppProgressSnapshot(
+          stickerCount: 4,
+          lastEarnedReward: RecentReward(
+            kind: 'sticker',
+            amount: 1,
+            lessonId: 'numbers:numbers_count_1',
+            earnedAt: DateTime(2026, 4, 18, 15),
+          ),
+          lessons: const {
+            'numbers:numbers_count_1': LessonProgress(
+              bestScore: 5,
+              totalQuestions: 5,
+              lastViewedIndex: 4,
+            ),
+          },
+        ),
+      );
+
+      await tester.pumpWidget(
+        _wrapWithServices(
+          progressStore: progressStore,
+          child: const AvatarSetupScreen(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final summaryPanel = find.byKey(const Key('parent-summary-panel'));
+      expect(summaryPanel, findsOneWidget);
+      expect(
+        find.descendant(
+          of: summaryPanel,
+          matching: find.byKey(const Key('parent-summary-reward-callout')),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: summaryPanel,
+          matching: find.byKey(const Key('parent-summary-reward-amount')),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: summaryPanel, matching: find.text('자동차 스티커 1개')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: summaryPanel,
+          matching: find.byKey(const Key('parent-summary-reward-category')),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: summaryPanel, matching: find.text('숫자 차고')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: summaryPanel,
+          matching: find.byKey(const Key('parent-summary-reward-lesson')),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: summaryPanel, matching: find.text('숫자 1부터 5까지')),
+        findsOneWidget,
+      );
+    },
+  );
+
+  testWidgets(
+    'shows generic reward copy for unknown recent reward kinds',
+    (WidgetTester tester) async {
+      final progressStore = MemoryProgressStore(
+        AppProgressSnapshot(
+          stickerCount: 5,
+          lastEarnedReward: RecentReward(
+            kind: 'bonus',
+            amount: 2,
+            lessonId: 'alphabet:alphabet_letters_1',
+            earnedAt: DateTime(2026, 4, 18, 16),
+          ),
+          lessons: const {
+            'alphabet:alphabet_letters_1': LessonProgress(
+              bestScore: 5,
+              totalQuestions: 5,
+              lastViewedIndex: 4,
+            ),
+          },
+        ),
+      );
+
+      await tester.pumpWidget(
+        _wrapWithServices(
+          progressStore: progressStore,
+          child: const AvatarSetupScreen(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final summaryPanel = find.byKey(const Key('parent-summary-panel'));
+      expect(summaryPanel, findsOneWidget);
+      expect(
+        find.descendant(
+          of: summaryPanel,
+          matching: find.byKey(const Key('parent-summary-reward-callout')),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: summaryPanel, matching: find.text('보상 2개')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: summaryPanel, matching: find.text('알파벳 차고')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: summaryPanel, matching: find.text('알파벳 1')),
+        findsOneWidget,
+      );
+    },
+  );
+
+  testWidgets(
     'shows the scoped confusion summary for the most confusing lesson and tie breaks by metadata order',
     (WidgetTester tester) async {
       final progressStore = MemoryProgressStore(
@@ -227,6 +356,34 @@ void main() {
         find.descendant(
           of: summaryPanel,
           matching: find.byKey(const Key('parent-summary-confusion-retry')),
+        ),
+        findsNothing,
+      );
+      expect(
+        find.descendant(
+          of: summaryPanel,
+          matching: find.byKey(const Key('parent-summary-reward-callout')),
+        ),
+        findsNothing,
+      );
+      expect(
+        find.descendant(
+          of: summaryPanel,
+          matching: find.byKey(const Key('parent-summary-reward-amount')),
+        ),
+        findsNothing,
+      );
+      expect(
+        find.descendant(
+          of: summaryPanel,
+          matching: find.byKey(const Key('parent-summary-reward-category')),
+        ),
+        findsNothing,
+      );
+      expect(
+        find.descendant(
+          of: summaryPanel,
+          matching: find.byKey(const Key('parent-summary-reward-lesson')),
         ),
         findsNothing,
       );

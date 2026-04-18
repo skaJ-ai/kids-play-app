@@ -408,6 +408,10 @@ class _ParentSummaryPanel extends StatelessWidget {
         .expand((lesson) => lesson.recentMistakes)
         .toSet()
         .length;
+    final recentReward = snapshot.lastEarnedReward;
+    final recentRewardLesson = recentReward == null
+        ? null
+        : _lessonMetadataFor(recentReward.lessonId);
     final mostConfusingLesson = _mostConfusingLessonMetadataFor(snapshot);
     final mostConfusingLessonMistakes = mostConfusingLesson == null
         ? const <String>[]
@@ -449,6 +453,76 @@ class _ParentSummaryPanel extends StatelessWidget {
               ),
             ],
           ),
+          if (recentReward != null && recentRewardLesson != null) ...[
+            SizedBox(height: compact ? 10 : 12),
+            Container(
+              key: const Key('parent-summary-reward-callout'),
+              width: double.infinity,
+              padding: EdgeInsets.all(compact ? 12 : 14),
+              decoration: BoxDecoration(
+                color: KidPalette.yellow.withValues(alpha: 0.26),
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(
+                  color: KidPalette.yellowDark.withValues(alpha: 0.16),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.auto_awesome_rounded,
+                        color: KidPalette.coralDark,
+                        size: compact ? 18 : 20,
+                      ),
+                      SizedBox(width: compact ? 6 : 8),
+                      Expanded(
+                        child: Text(
+                          '최근 받은 보상',
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                color: KidPalette.navy,
+                                fontWeight: FontWeight.w900,
+                              ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: compact ? 8 : 10),
+                  Text(
+                    _recentRewardAmountLabel(recentReward),
+                    key: const Key('parent-summary-reward-amount'),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: KidPalette.navy,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  SizedBox(height: compact ? 8 : 10),
+                  Wrap(
+                    spacing: compact ? 10 : 12,
+                    runSpacing: compact ? 10 : 12,
+                    children: [
+                      KeyedSubtree(
+                        key: const Key('parent-summary-reward-category'),
+                        child: _LessonMetricChip(
+                          label: '카테고리',
+                          value: recentRewardLesson.categoryLabel,
+                        ),
+                      ),
+                      KeyedSubtree(
+                        key: const Key('parent-summary-reward-lesson'),
+                        child: _LessonMetricChip(
+                          label: '세트',
+                          value: recentRewardLesson.title,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
           SizedBox(height: compact ? 10 : 12),
           Container(
             key: const Key('parent-summary-confusion-callout'),
@@ -1383,6 +1457,15 @@ _LessonMetadata _lessonMetadataFor(String lessonId) {
     color: KidPalette.navy,
     sortOrder: 99,
   );
+}
+
+String _recentRewardAmountLabel(RecentReward reward) {
+  switch (reward.kind) {
+    case 'sticker':
+      return '자동차 스티커 ${reward.amount}개';
+    default:
+      return '보상 ${reward.amount}개';
+  }
 }
 
 _LessonMetadata? _mostConfusingLessonMetadataFor(AppProgressSnapshot snapshot) {
