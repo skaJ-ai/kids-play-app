@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kids_play_app/app/services/app_services.dart';
+import 'package:kids_play_app/app/services/progress_store.dart';
+import 'package:kids_play_app/app/services/speech_cue_service.dart';
 import 'package:kids_play_app/features/hangul/data/hangul_lesson_repository.dart';
 import 'package:kids_play_app/features/hangul/presentation/hangul_quiz_screen.dart';
 
@@ -188,6 +191,58 @@ void main() {
     expect(find.text('5문제 중 5문제 맞았어요!'), findsOneWidget);
     expect(find.text('자동차 스티커 1개 획득!'), findsOneWidget);
     expect(find.text('다시하기'), findsOneWidget);
+  });
+
+  testWidgets('stores the recent sticker reward after finishing the hangul quiz', (
+    WidgetTester tester,
+  ) async {
+    final repository = HangulLessonRepository(
+      assetBundle: _FakeAssetBundle({
+        HangulLessonRepository.manifestPath: jsonEncode({
+          'lessons': [_basicConsonantsLesson],
+        }),
+      }),
+    );
+    final progressStore = MemoryProgressStore(
+      const AppProgressSnapshot(
+        voicePromptsEnabled: false,
+        effectsEnabled: false,
+      ),
+    );
+
+    await tester.pumpWidget(
+      AppServicesScope(
+        services: AppServices(
+          progressStore: progressStore,
+          speechCueService: NoopSpeechCueService(),
+        ),
+        child: MaterialApp(
+          home: HangulQuizScreen(
+            repository: repository,
+            lessonId: 'basic_consonants_1',
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('quiz-choice-ㄱ')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('quiz-choice-ㄴ')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('quiz-choice-ㄷ')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('quiz-choice-ㄹ')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('quiz-choice-ㅁ')));
+    await tester.pumpAndSettle();
+
+    final snapshot = await progressStore.loadSnapshot();
+
+    expect(snapshot.lastEarnedReward, isNotNull);
+    expect(snapshot.lastEarnedReward?.kind, 'sticker');
+    expect(snapshot.lastEarnedReward?.amount, 1);
+    expect(snapshot.lastEarnedReward?.lessonId, 'hangul:basic_consonants_1');
   });
 
   testWidgets('shows an error message when the hangul quiz fails to load', (

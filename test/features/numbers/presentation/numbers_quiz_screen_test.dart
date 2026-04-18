@@ -323,7 +323,7 @@ void main() {
   );
 
   testWidgets(
-    'ignores a stale completion when recent mistake symbols change during reward persistence',
+    'ignores a stale completion when recent mistake symbols change during atomic completion persistence',
     (WidgetTester tester) async {
       final repository = NumbersLessonRepository(
         assetBundle: _FakeAssetBundle({
@@ -332,7 +332,7 @@ void main() {
           }),
         }),
       );
-      final addStickersCompleter = Completer<void>();
+      final recordCompletedQuizCompleter = Completer<void>();
       final progressStore = _ControlledProgressStore(
         MemoryProgressStore(
           const AppProgressSnapshot(
@@ -340,7 +340,7 @@ void main() {
             effectsEnabled: false,
           ),
         ),
-        addStickersCompleter: addStickersCompleter,
+        recordCompletedQuizCompleter: recordCompletedQuizCompleter,
       );
 
       Widget buildQuiz(List<String> mistakeSymbols) {
@@ -367,7 +367,9 @@ void main() {
       await tester.pump(const Duration(milliseconds: 220));
       await tester.pump();
 
-      expect(progressStore.addStickersCallCount, 1);
+      expect(progressStore.recordCompletedQuizCallCount, 1);
+      expect(progressStore.addStickersCallCount, 0);
+      expect(progressStore.recordRewardEarnedCallCount, 0);
 
       await tester.pumpWidget(buildQuiz(const ['2', '5']));
       await tester.pumpAndSettle();
@@ -382,7 +384,7 @@ void main() {
       expect(rebuiltTexts, contains('1 / 2'));
       expect(rebuiltTexts, contains("'2' 숫자를 찾아봐!"));
 
-      addStickersCompleter.complete();
+      recordCompletedQuizCompleter.complete();
       await tester.pumpAndSettle();
 
       final settledTexts = tester
@@ -394,6 +396,87 @@ void main() {
 
       expect(settledTexts, contains('1 / 2'));
       expect(settledTexts, contains("'2' 숫자를 찾아봐!"));
+
+      await tester.pump(const Duration(milliseconds: 350));
+    },
+  );
+
+  testWidgets(
+    'records the completed quiz result when recent mistake symbols change during atomic completion persistence',
+    (WidgetTester tester) async {
+      final repository = NumbersLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          NumbersLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_numbersLesson],
+          }),
+        }),
+      );
+      final recordCompletedQuizCompleter = Completer<void>();
+      final progressStore = _ControlledProgressStore(
+        MemoryProgressStore(
+          const AppProgressSnapshot(
+            voicePromptsEnabled: false,
+            effectsEnabled: false,
+          ),
+        ),
+        recordCompletedQuizCompleter: recordCompletedQuizCompleter,
+      );
+
+      Widget buildQuiz(List<String> mistakeSymbols) {
+        return AppServicesScope(
+          services: AppServices(
+            progressStore: progressStore,
+            speechCueService: NoopSpeechCueService(),
+          ),
+          child: MaterialApp(
+            home: NumbersQuizScreen(
+              repository: repository,
+              lessonId: 'numbers_count_1',
+              mistakeSymbols: mistakeSymbols,
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildQuiz(const ['5']));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('quiz-choice-5')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 220));
+      await tester.pump();
+
+      expect(progressStore.recordCompletedQuizCallCount, 1);
+      expect(progressStore.addStickersCallCount, 0);
+      expect(progressStore.recordRewardEarnedCallCount, 0);
+
+      await tester.pumpWidget(buildQuiz(const ['2', '5']));
+      await tester.pumpAndSettle();
+
+      final rebuiltTexts = tester
+          .widgetList<Text>(find.byType(Text))
+          .map((widget) {
+            return widget.data ?? widget.textSpan?.toPlainText() ?? '';
+          })
+          .toList(growable: false);
+
+      expect(rebuiltTexts, contains('1 / 2'));
+      expect(rebuiltTexts, contains("'2' 숫자를 찾아봐!"));
+
+      recordCompletedQuizCompleter.complete();
+      await tester.pumpAndSettle();
+
+      final snapshot = await progressStore.loadSnapshot();
+
+      expect(snapshot.stickerCount, 1);
+      expect(snapshot.lastEarnedReward?.kind, 'sticker');
+      expect(snapshot.lastEarnedReward?.lessonId, 'numbers:numbers_count_1');
+      expect(snapshot.progressFor('numbers:numbers_count_1').bestScore, 1);
+      expect(snapshot.progressFor('numbers:numbers_count_1').totalQuestions, 1);
+      expect(
+        snapshot.progressFor('numbers:numbers_count_1').recentMistakes,
+        isEmpty,
+      );
 
       await tester.pump(const Duration(milliseconds: 350));
     },
@@ -437,56 +520,61 @@ void main() {
     },
   );
 
-  testWidgets('stores numbers quiz progress with a numbers lesson key', (
-    WidgetTester tester,
-  ) async {
-    final repository = NumbersLessonRepository(
-      assetBundle: _FakeAssetBundle({
-        NumbersLessonRepository.manifestPath: jsonEncode({
-          'lessons': [_numbersLesson],
+  testWidgets(
+    'stores numbers quiz progress and the recent sticker reward with a numbers lesson key',
+    (WidgetTester tester) async {
+      final repository = NumbersLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          NumbersLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_numbersLesson],
+          }),
         }),
-      }),
-    );
-    final progressStore = MemoryProgressStore(
-      const AppProgressSnapshot(
-        voicePromptsEnabled: false,
-        effectsEnabled: false,
-      ),
-    );
-
-    await tester.pumpWidget(
-      AppServicesScope(
-        services: AppServices(
-          progressStore: progressStore,
-          speechCueService: NoopSpeechCueService(),
+      );
+      final progressStore = MemoryProgressStore(
+        const AppProgressSnapshot(
+          voicePromptsEnabled: false,
+          effectsEnabled: false,
         ),
-        child: MaterialApp(
-          home: NumbersQuizScreen(
-            repository: repository,
-            lessonId: 'numbers_count_1',
+      );
+
+      await tester.pumpWidget(
+        AppServicesScope(
+          services: AppServices(
+            progressStore: progressStore,
+            speechCueService: NoopSpeechCueService(),
+          ),
+          child: MaterialApp(
+            home: NumbersQuizScreen(
+              repository: repository,
+              lessonId: 'numbers_count_1',
+            ),
           ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('quiz-choice-1')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('quiz-choice-2')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('quiz-choice-3')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('quiz-choice-4')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('quiz-choice-5')));
-    await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('quiz-choice-1')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('quiz-choice-2')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('quiz-choice-3')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('quiz-choice-4')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('quiz-choice-5')));
+      await tester.pumpAndSettle();
 
-    final snapshot = await progressStore.loadSnapshot();
+      final snapshot = await progressStore.loadSnapshot();
 
-    expect(snapshot.lessons.containsKey('numbers:numbers_count_1'), isTrue);
-    expect(snapshot.lessons.containsKey('alphabet:numbers_count_1'), isFalse);
-    expect(snapshot.progressFor('numbers:numbers_count_1').bestScore, 5);
-  });
+      expect(snapshot.lessons.containsKey('numbers:numbers_count_1'), isTrue);
+      expect(snapshot.lessons.containsKey('alphabet:numbers_count_1'), isFalse);
+      expect(snapshot.progressFor('numbers:numbers_count_1').bestScore, 5);
+      expect(snapshot.lastEarnedReward, isNotNull);
+      expect(snapshot.lastEarnedReward?.kind, 'sticker');
+      expect(snapshot.lastEarnedReward?.amount, 1);
+      expect(snapshot.lastEarnedReward?.lessonId, 'numbers:numbers_count_1');
+    },
+  );
 
   testWidgets('shows an error message when the numbers quiz fails to load', (
     WidgetTester tester,
@@ -525,22 +613,20 @@ const Map<String, dynamic> _numbersLesson = {
 class _ControlledProgressStore implements ProgressStore {
   _ControlledProgressStore(
     this._delegate, {
-    this.addStickersCompleter,
     this.loadSnapshotCompleter,
+    this.recordCompletedQuizCompleter,
   });
 
   final ProgressStore _delegate;
-  final Completer<void>? addStickersCompleter;
   final Completer<void>? loadSnapshotCompleter;
+  final Completer<void>? recordCompletedQuizCompleter;
   int addStickersCallCount = 0;
+  int recordCompletedQuizCallCount = 0;
+  int recordRewardEarnedCallCount = 0;
 
   @override
   Future<void> addStickers(int count) async {
     addStickersCallCount += 1;
-    final completer = addStickersCompleter;
-    if (completer != null) {
-      await completer.future;
-    }
     await _delegate.addStickers(count);
   }
 
@@ -580,13 +666,38 @@ class _ControlledProgressStore implements ProgressStore {
   }
 
   @override
+  Future<void> recordCompletedQuiz({
+    required String lessonId,
+    required int correctCount,
+    required int totalQuestions,
+    required List<String> recentMistakes,
+    int stickersEarned = 0,
+    DateTime? rewardEarnedAt,
+  }) async {
+    recordCompletedQuizCallCount += 1;
+    final completer = recordCompletedQuizCompleter;
+    if (completer != null) {
+      await completer.future;
+    }
+    await _delegate.recordCompletedQuiz(
+      lessonId: lessonId,
+      correctCount: correctCount,
+      totalQuestions: totalQuestions,
+      recentMistakes: recentMistakes,
+      stickersEarned: stickersEarned,
+      rewardEarnedAt: rewardEarnedAt,
+    );
+  }
+
+  @override
   Future<void> recordRewardEarned({
     required String kind,
     required int amount,
     required String lessonId,
     required DateTime earnedAt,
-  }) {
-    return _delegate.recordRewardEarned(
+  }) async {
+    recordRewardEarnedCallCount += 1;
+    await _delegate.recordRewardEarned(
       kind: kind,
       amount: amount,
       lessonId: lessonId,

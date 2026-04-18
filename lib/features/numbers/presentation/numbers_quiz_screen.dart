@@ -374,17 +374,15 @@ class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
     }
 
     if (nextSession.isComplete) {
-      if (nextSession.earnedSticker) {
-        await services.progressStore.addStickers(1);
-        if (!mounted || !identical(_session, session)) {
-          return;
-        }
-      }
-      await services.progressStore.recordQuizResult(
-        lessonId: 'numbers:${widget.lessonId}',
+      final lessonProgressKey = 'numbers:${widget.lessonId}';
+      final rewardEarnedAt = nextSession.earnedSticker ? DateTime.now() : null;
+      await services.progressStore.recordCompletedQuiz(
+        lessonId: lessonProgressKey,
         correctCount: nextSession.correctCount,
         totalQuestions: nextSession.totalQuestions,
         recentMistakes: nextSession.recentMistakes,
+        stickersEarned: nextSession.earnedSticker ? 1 : 0,
+        rewardEarnedAt: rewardEarnedAt,
       );
       if (!mounted || !identical(_session, session)) {
         return;

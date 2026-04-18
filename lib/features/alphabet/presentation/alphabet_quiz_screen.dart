@@ -359,15 +359,16 @@ class _AlphabetQuizScreenState extends State<AlphabetQuizScreen> {
 
     final isLastQuestion = _questionIndex == totalQuestions - 1;
     if (isLastQuestion) {
+      final lessonProgressKey = 'alphabet:${widget.lessonId}';
       final earnedSticker = nextCorrectCount >= (totalQuestions * 0.8).ceil();
-      if (earnedSticker) {
-        await services.progressStore.addStickers(1);
-      }
-      await services.progressStore.recordQuizResult(
-        lessonId: 'alphabet:${widget.lessonId}',
+      final rewardEarnedAt = earnedSticker ? DateTime.now() : null;
+      await services.progressStore.recordCompletedQuiz(
+        lessonId: lessonProgressKey,
         correctCount: nextCorrectCount,
         totalQuestions: totalQuestions,
         recentMistakes: nextMistakes,
+        stickersEarned: earnedSticker ? 1 : 0,
+        rewardEarnedAt: rewardEarnedAt,
       );
       if (!mounted) {
         return;

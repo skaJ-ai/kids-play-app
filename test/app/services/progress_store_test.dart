@@ -52,6 +52,48 @@ void main() {
     );
   });
 
+  test(
+    'memory progress store records completed quiz progress and reward in one atomic operation',
+    () async {
+      final store = MemoryProgressStore(
+        AppProgressSnapshot(
+          stickerCount: 2,
+          lastEarnedReward: RecentReward(
+            kind: 'sticker',
+            amount: 1,
+            lessonId: 'alphabet:alphabet_letters_1',
+            earnedAt: DateTime.utc(2026, 4, 17, 11, 45),
+          ),
+        ),
+      );
+      final rewardEarnedAt = DateTime.utc(2026, 4, 17, 13, 0);
+
+      await store.recordCompletedQuiz(
+        lessonId: 'numbers:numbers_count_1',
+        correctCount: 4,
+        totalQuestions: 5,
+        recentMistakes: const ['2', '4', '2'],
+        stickersEarned: 1,
+        rewardEarnedAt: rewardEarnedAt,
+      );
+
+      final snapshot = await store.loadSnapshot();
+
+      expect(snapshot.stickerCount, 3);
+      expect(snapshot.lastEarnedReward, isNotNull);
+      expect(snapshot.lastEarnedReward?.kind, 'sticker');
+      expect(snapshot.lastEarnedReward?.amount, 1);
+      expect(snapshot.lastEarnedReward?.lessonId, 'numbers:numbers_count_1');
+      expect(snapshot.lastEarnedReward?.earnedAt, rewardEarnedAt);
+      expect(snapshot.progressFor('numbers:numbers_count_1').bestScore, 4);
+      expect(snapshot.progressFor('numbers:numbers_count_1').totalQuestions, 5);
+      expect(
+        snapshot.progressFor('numbers:numbers_count_1').recentMistakes,
+        const ['2', '4'],
+      );
+    },
+  );
+
   test('shared preferences progress store persists and resets state', () async {
     final preferences = await SharedPreferences.getInstance();
     final store = SharedPreferencesProgressStore(preferences);
@@ -97,6 +139,51 @@ void main() {
     expect(resetSnapshot.lastEarnedReward, isNull);
     expect(resetSnapshot.voicePromptsEnabled, isTrue);
   });
+
+  test(
+    'shared preferences progress store keeps the recent reward when completed quiz persistence earns no sticker',
+    () async {
+      final preferences = await SharedPreferences.getInstance();
+      final store = SharedPreferencesProgressStore(preferences);
+      final rewardEarnedAt = DateTime.utc(2026, 4, 17, 13, 30);
+
+      await store.recordCompletedQuiz(
+        lessonId: 'alphabet:alphabet_letters_1',
+        correctCount: 5,
+        totalQuestions: 5,
+        recentMistakes: const <String>[],
+        stickersEarned: 1,
+        rewardEarnedAt: rewardEarnedAt,
+      );
+      await store.recordCompletedQuiz(
+        lessonId: 'alphabet:alphabet_letters_1',
+        correctCount: 4,
+        totalQuestions: 5,
+        recentMistakes: const <String>['B b'],
+      );
+
+      final snapshot = await store.loadSnapshot();
+
+      expect(snapshot.stickerCount, 1);
+      expect(snapshot.lastEarnedReward, isNotNull);
+      expect(snapshot.lastEarnedReward?.kind, 'sticker');
+      expect(snapshot.lastEarnedReward?.amount, 1);
+      expect(
+        snapshot.lastEarnedReward?.lessonId,
+        'alphabet:alphabet_letters_1',
+      );
+      expect(snapshot.lastEarnedReward?.earnedAt, rewardEarnedAt);
+      expect(snapshot.progressFor('alphabet:alphabet_letters_1').bestScore, 5);
+      expect(
+        snapshot.progressFor('alphabet:alphabet_letters_1').totalQuestions,
+        5,
+      );
+      expect(
+        snapshot.progressFor('alphabet:alphabet_letters_1').recentMistakes,
+        const ['B b'],
+      );
+    },
+  );
 
   test('snapshot ignores incomplete persisted lastEarnedReward payloads', () {
     final snapshot = AppProgressSnapshot.fromJson({

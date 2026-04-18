@@ -219,6 +219,15 @@ abstract class ProgressStore {
     required List<String> recentMistakes,
   });
 
+  Future<void> recordCompletedQuiz({
+    required String lessonId,
+    required int correctCount,
+    required int totalQuestions,
+    required List<String> recentMistakes,
+    int stickersEarned = 0,
+    DateTime? rewardEarnedAt,
+  });
+
   Future<void> setVoicePromptsEnabled(bool enabled);
 
   Future<void> setEffectsEnabled(bool enabled);
@@ -282,18 +291,32 @@ class MemoryProgressStore implements ProgressStore {
     required int totalQuestions,
     required List<String> recentMistakes,
   }) async {
-    final current = _snapshot.progressFor(lessonId);
-    _snapshot = _snapshot.copyWith(
-      lessons: {
-        ..._snapshot.lessons,
-        lessonId: current.copyWith(
-          bestScore: correctCount > current.bestScore
-              ? correctCount
-              : current.bestScore,
-          totalQuestions: totalQuestions,
-          recentMistakes: _normalizedMistakes(recentMistakes),
-        ),
-      },
+    _snapshot = _snapshotWithQuizResult(
+      _snapshot,
+      lessonId: lessonId,
+      correctCount: correctCount,
+      totalQuestions: totalQuestions,
+      recentMistakes: recentMistakes,
+    );
+  }
+
+  @override
+  Future<void> recordCompletedQuiz({
+    required String lessonId,
+    required int correctCount,
+    required int totalQuestions,
+    required List<String> recentMistakes,
+    int stickersEarned = 0,
+    DateTime? rewardEarnedAt,
+  }) async {
+    _snapshot = _snapshotWithCompletedQuiz(
+      _snapshot,
+      lessonId: lessonId,
+      correctCount: correctCount,
+      totalQuestions: totalQuestions,
+      recentMistakes: recentMistakes,
+      stickersEarned: stickersEarned,
+      rewardEarnedAt: rewardEarnedAt,
     );
   }
 
@@ -398,18 +421,34 @@ class SharedPreferencesProgressStore implements ProgressStore {
     required List<String> recentMistakes,
   }) async {
     await _mutate((snapshot) {
-      final current = snapshot.progressFor(lessonId);
-      return snapshot.copyWith(
-        lessons: {
-          ...snapshot.lessons,
-          lessonId: current.copyWith(
-            bestScore: correctCount > current.bestScore
-                ? correctCount
-                : current.bestScore,
-            totalQuestions: totalQuestions,
-            recentMistakes: _normalizedMistakes(recentMistakes),
-          ),
-        },
+      return _snapshotWithQuizResult(
+        snapshot,
+        lessonId: lessonId,
+        correctCount: correctCount,
+        totalQuestions: totalQuestions,
+        recentMistakes: recentMistakes,
+      );
+    });
+  }
+
+  @override
+  Future<void> recordCompletedQuiz({
+    required String lessonId,
+    required int correctCount,
+    required int totalQuestions,
+    required List<String> recentMistakes,
+    int stickersEarned = 0,
+    DateTime? rewardEarnedAt,
+  }) async {
+    await _mutate((snapshot) {
+      return _snapshotWithCompletedQuiz(
+        snapshot,
+        lessonId: lessonId,
+        correctCount: correctCount,
+        totalQuestions: totalQuestions,
+        recentMistakes: recentMistakes,
+        stickersEarned: stickersEarned,
+        rewardEarnedAt: rewardEarnedAt,
       );
     });
   }
@@ -454,6 +493,90 @@ class SharedPreferencesProgressStore implements ProgressStore {
     final next = transform(snapshot);
     await _preferences.setString(storageKey, jsonEncode(next.toJson()));
   }
+}
+
+AppProgressSnapshot _snapshotWithQuizResult(
+  AppProgressSnapshot snapshot, {
+  required String lessonId,
+  required int correctCount,
+  required int totalQuestions,
+  required List<String> recentMistakes,
+}) {
+  return snapshot.copyWith(
+    lessons: {
+      ...snapshot.lessons,
+      lessonId: _lessonProgressWithQuizResult(
+        snapshot.progressFor(lessonId),
+        correctCount: correctCount,
+        totalQuestions: totalQuestions,
+        recentMistakes: recentMistakes,
+      ),
+    },
+  );
+}
+
+AppProgressSnapshot _snapshotWithCompletedQuiz(
+  AppProgressSnapshot snapshot, {
+  required String lessonId,
+  required int correctCount,
+  required int totalQuestions,
+  required List<String> recentMistakes,
+  int stickersEarned = 0,
+  DateTime? rewardEarnedAt,
+}) {
+  if (stickersEarned < 0) {
+    throw ArgumentError.value(
+      stickersEarned,
+      'stickersEarned',
+      'must be greater than or equal to 0',
+    );
+  }
+  if (stickersEarned == 0 && rewardEarnedAt != null) {
+    throw ArgumentError.value(
+      rewardEarnedAt,
+      'rewardEarnedAt',
+      'must be null when no sticker reward is earned',
+    );
+  }
+  if (stickersEarned > 0 && rewardEarnedAt == null) {
+    throw ArgumentError.notNull('rewardEarnedAt');
+  }
+
+  return snapshot.copyWith(
+    stickerCount: snapshot.stickerCount + stickersEarned,
+    lastEarnedReward: stickersEarned == 0
+        ? _noRecentRewardChange
+        : RecentReward(
+            kind: 'sticker',
+            amount: stickersEarned,
+            lessonId: lessonId,
+            earnedAt: rewardEarnedAt!,
+          ),
+    lessons: {
+      ...snapshot.lessons,
+      lessonId: _lessonProgressWithQuizResult(
+        snapshot.progressFor(lessonId),
+        correctCount: correctCount,
+        totalQuestions: totalQuestions,
+        recentMistakes: recentMistakes,
+      ),
+    },
+  );
+}
+
+LessonProgress _lessonProgressWithQuizResult(
+  LessonProgress current, {
+  required int correctCount,
+  required int totalQuestions,
+  required List<String> recentMistakes,
+}) {
+  return current.copyWith(
+    bestScore: correctCount > current.bestScore
+        ? correctCount
+        : current.bestScore,
+    totalQuestions: totalQuestions,
+    recentMistakes: _normalizedMistakes(recentMistakes),
+  );
 }
 
 List<String> _normalizedMistakes(List<String> mistakes) {

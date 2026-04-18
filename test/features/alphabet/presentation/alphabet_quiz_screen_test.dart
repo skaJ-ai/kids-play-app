@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kids_play_app/app/services/app_services.dart';
+import 'package:kids_play_app/app/services/progress_store.dart';
+import 'package:kids_play_app/app/services/speech_cue_service.dart';
 import 'package:kids_play_app/features/alphabet/data/alphabet_lesson_repository.dart';
 import 'package:kids_play_app/features/alphabet/presentation/alphabet_quiz_screen.dart';
 
@@ -139,6 +142,58 @@ void main() {
     expect(find.text('5문제 중 5문제 맞았어요!'), findsOneWidget);
     expect(find.text('자동차 스티커 1개 획득!'), findsOneWidget);
     expect(find.text('다시하기'), findsOneWidget);
+  });
+
+  testWidgets('stores the recent sticker reward after finishing the alphabet quiz', (
+    WidgetTester tester,
+  ) async {
+    final repository = AlphabetLessonRepository(
+      assetBundle: _FakeAssetBundle({
+        AlphabetLessonRepository.manifestPath: jsonEncode({
+          'lessons': [_alphabetLesson],
+        }),
+      }),
+    );
+    final progressStore = MemoryProgressStore(
+      const AppProgressSnapshot(
+        voicePromptsEnabled: false,
+        effectsEnabled: false,
+      ),
+    );
+
+    await tester.pumpWidget(
+      AppServicesScope(
+        services: AppServices(
+          progressStore: progressStore,
+          speechCueService: NoopSpeechCueService(),
+        ),
+        child: MaterialApp(
+          home: AlphabetQuizScreen(
+            repository: repository,
+            lessonId: 'alphabet_letters_1',
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('quiz-choice-A a')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('quiz-choice-B b')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('quiz-choice-C c')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('quiz-choice-D d')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('quiz-choice-E e')));
+    await tester.pumpAndSettle();
+
+    final snapshot = await progressStore.loadSnapshot();
+
+    expect(snapshot.lastEarnedReward, isNotNull);
+    expect(snapshot.lastEarnedReward?.kind, 'sticker');
+    expect(snapshot.lastEarnedReward?.amount, 1);
+    expect(snapshot.lastEarnedReward?.lessonId, 'alphabet:alphabet_letters_1');
   });
 
   testWidgets('shows an error message when the alphabet quiz fails to load', (
