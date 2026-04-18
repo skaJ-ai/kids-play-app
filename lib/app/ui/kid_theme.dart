@@ -67,6 +67,7 @@ class KidButtonDensityTokens {
     this.radius,
     this.highlightTopInset = 1,
     this.highlightHeight = 12,
+    this.highlightRadius = 4,
     this.highlightHorizontalInset = 16,
     this.iconChipRadius = 14,
   });
@@ -86,6 +87,7 @@ class KidButtonDensityTokens {
   final double? radius;
   final double highlightTopInset;
   final double highlightHeight;
+  final double highlightRadius;
   final double highlightHorizontalInset;
   final double iconChipRadius;
 
@@ -109,6 +111,7 @@ class KidButtonDensityTokens {
     bool clearRadius = false,
     double? highlightTopInset,
     double? highlightHeight,
+    double? highlightRadius,
     double? highlightHorizontalInset,
     double? iconChipRadius,
   }) {
@@ -137,6 +140,7 @@ class KidButtonDensityTokens {
       radius: clearRadius ? null : radius ?? this.radius,
       highlightTopInset: highlightTopInset ?? this.highlightTopInset,
       highlightHeight: highlightHeight ?? this.highlightHeight,
+      highlightRadius: highlightRadius ?? this.highlightRadius,
       highlightHorizontalInset:
           highlightHorizontalInset ?? this.highlightHorizontalInset,
       iconChipRadius: iconChipRadius ?? this.iconChipRadius,
@@ -187,6 +191,9 @@ class KidButtonDensityTokens {
       highlightHeight:
           ui.lerpDouble(highlightHeight, other.highlightHeight, t) ??
           highlightHeight,
+      highlightRadius:
+          ui.lerpDouble(highlightRadius, other.highlightRadius, t) ??
+          highlightRadius,
       highlightHorizontalInset:
           ui.lerpDouble(
             highlightHorizontalInset,
@@ -937,6 +944,7 @@ class KidLayoutTheme extends ThemeExtension<KidLayoutTheme> {
         radius: 24,
         highlightTopInset: 1,
         highlightHeight: 10,
+        highlightRadius: 4,
         highlightHorizontalInset: 14,
         iconChipRadius: 13,
       ),
@@ -956,6 +964,7 @@ class KidLayoutTheme extends ThemeExtension<KidLayoutTheme> {
         radius: 22,
         highlightTopInset: 1,
         highlightHeight: 8,
+        highlightRadius: 3,
         highlightHorizontalInset: 12,
         iconChipRadius: 11,
       ),
@@ -975,6 +984,7 @@ class KidLayoutTheme extends ThemeExtension<KidLayoutTheme> {
         radius: 18,
         highlightTopInset: 1,
         highlightHeight: 6,
+        highlightRadius: 2.5,
         highlightHorizontalInset: 10,
         iconChipRadius: 9,
       ),

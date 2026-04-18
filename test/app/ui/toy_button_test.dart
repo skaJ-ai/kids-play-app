@@ -88,6 +88,7 @@ void main() {
             highlightTopInset: 3,
             highlightHeight: 14,
             highlightHorizontalInset: 22,
+            highlightRadius: 4.5,
             iconChipRadius: 18,
           ),
           compact: KidButtonDensityTokens(
@@ -106,6 +107,7 @@ void main() {
             highlightTopInset: 5,
             highlightHeight: 8,
             highlightHorizontalInset: 10,
+            highlightRadius: 3,
             iconChipRadius: 9,
           ),
         ),
@@ -220,6 +222,10 @@ void main() {
         customLayout.button.regular.highlightHorizontalInset,
       );
       expect(
+        _buttonHighlightRadius(tester, find.byKey(const Key('regular-button'))),
+        customLayout.button.regular.highlightRadius,
+      );
+      expect(
         _buttonIconChipRadius(
           tester,
           find.byKey(const Key('regular-button')),
@@ -318,6 +324,10 @@ void main() {
         customLayout.button.compact.highlightHorizontalInset,
       );
       expect(
+        _buttonHighlightRadius(tester, find.byKey(const Key('compact-button'))),
+        customLayout.button.compact.highlightRadius,
+      );
+      expect(
         _buttonIconChipRadius(
           tester,
           find.byKey(const Key('compact-button')),
@@ -412,6 +422,7 @@ void main() {
           highlightTopInset: 1,
           highlightHeight: 6,
           highlightHorizontalInset: 10,
+          highlightRadius: 2.5,
           iconChipRadius: 8,
         ),
       ),
@@ -468,6 +479,10 @@ void main() {
     expect(
       _buttonHighlightHeight(tester, tightButton),
       customLayout.button.tight.highlightHeight,
+    );
+    expect(
+      _buttonHighlightRadius(tester, tightButton),
+      customLayout.button.tight.highlightRadius,
     );
     expect(
       _buttonIconChipRadius(tester, tightButton, Icons.volume_up_rounded),
@@ -1547,6 +1562,15 @@ double _buttonHighlightHorizontalInset(WidgetTester tester, Finder finder) {
   final highlightRect = tester.getRect(_buttonHighlightFinder(finder));
 
   return highlightRect.left - buttonRect.left;
+}
+
+double _buttonHighlightRadius(WidgetTester tester, Finder finder) {
+  final decoration =
+      tester.widget<Container>(_buttonHighlightFinder(finder)).decoration!
+          as BoxDecoration;
+  final borderRadius = decoration.borderRadius! as BorderRadius;
+
+  return borderRadius.topLeft.x;
 }
 
 double _buttonIconChipSize(WidgetTester tester, Finder finder, IconData icon) {

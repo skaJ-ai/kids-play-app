@@ -147,7 +147,9 @@ class ToyButton extends StatelessWidget {
                 child: Container(
                   height: densityTokens.highlightHeight,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(999),
+                    borderRadius: BorderRadius.circular(
+                      densityTokens.highlightRadius,
+                    ),
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,

@@ -24,6 +24,7 @@ void main() {
     expect(layout.button.regular.highlightTopInset, 1);
     expect(layout.button.regular.highlightHorizontalInset, 14);
     expect(layout.button.regular.highlightHeight, 10);
+    expect(layout.button.regular.highlightRadius, 4);
     expect(layout.button.regular.iconChipRadius, 13);
     expect(layout.button.compact.height, 48);
     expect(layout.button.compact.horizontalPadding, 14);
@@ -41,8 +42,10 @@ void main() {
     expect(layout.button.compact.highlightTopInset, 1);
     expect(layout.button.compact.highlightHorizontalInset, 12);
     expect(layout.button.compact.highlightHeight, 8);
+    expect(layout.button.compact.highlightRadius, 3);
     expect(layout.button.compact.iconChipRadius, 11);
     expect(layout.button.tight.iconChipBorderWidth, 0.8);
+    expect(layout.button.tight.highlightRadius, 2.5);
     expect(layout.panel.regular.padding, const EdgeInsets.all(20));
     expect(layout.panel.regular.radius, 30);
     expect(layout.panel.regular.borderWidth, 1.4);
@@ -259,7 +262,7 @@ void main() {
   );
 
   test(
-    'KidButtonDensityTokens keeps highlight and label tokens in copyWith and lerp',
+    'KidButtonDensityTokens keeps highlight, highlight radius, and label tokens in copyWith and lerp',
     () {
       const base = KidButtonDensityTokens(
         height: 60,
@@ -273,6 +276,7 @@ void main() {
         labelLetterSpacing: 0,
         labelHeight: 1.1,
         highlightTopInset: 1,
+        highlightRadius: 4,
       );
       const other = KidButtonDensityTokens(
         height: 52,
@@ -286,6 +290,7 @@ void main() {
         labelLetterSpacing: 0.4,
         labelHeight: 1.3,
         highlightTopInset: 3,
+        highlightRadius: 2.5,
       );
 
       final updated = base.copyWith(
@@ -294,6 +299,7 @@ void main() {
         labelLetterSpacing: 0.2,
         labelHeight: 1.2,
         highlightTopInset: 2,
+        highlightRadius: 3.5,
       );
       final lerped = base.lerp(other, 1);
 
@@ -302,11 +308,13 @@ void main() {
       expect(updated.labelLetterSpacing, 0.2);
       expect(updated.labelHeight, 1.2);
       expect(updated.highlightTopInset, 2);
+      expect(updated.highlightRadius, 3.5);
       expect(lerped.iconChipBorderWidth, other.iconChipBorderWidth);
       expect(lerped.labelFontWeight, other.labelFontWeight);
       expect(lerped.labelLetterSpacing, other.labelLetterSpacing);
       expect(lerped.labelHeight, other.labelHeight);
       expect(lerped.highlightTopInset, other.highlightTopInset);
+      expect(lerped.highlightRadius, other.highlightRadius);
     },
   );
 
