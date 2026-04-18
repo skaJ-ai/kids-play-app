@@ -6,10 +6,54 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kids_play_app/app/services/app_services.dart';
 import 'package:kids_play_app/app/services/progress_store.dart';
 import 'package:kids_play_app/app/services/speech_cue_service.dart';
+import 'package:kids_play_app/app/ui/kid_theme.dart';
+import 'package:kids_play_app/app/ui/toy_button.dart';
 import 'package:kids_play_app/features/hangul/data/hangul_lesson_repository.dart';
 import 'package:kids_play_app/features/hangul/presentation/hangul_learn_screen.dart';
 
 void main() {
+  testWidgets('propagates themed button height tokens to the 다음 action', (
+    WidgetTester tester,
+  ) async {
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final defaults = KidLayoutTheme.defaults;
+    final customLayout = defaults.copyWith(
+      button: defaults.button.copyWith(
+        regular: defaults.button.regular.copyWith(height: 83),
+        compact: defaults.button.compact.copyWith(height: 39),
+      ),
+    );
+    final theme = buildKidTheme().copyWith(extensions: [customLayout]);
+
+    await _pumpHangulLearnScreen(
+      tester,
+      repository: _twoCardRepository(),
+      theme: theme,
+      viewport: const Size(1024, 900),
+    );
+    _expectNextActionUsesThemeTokens(
+      tester,
+      expectedDensity: ToyButtonDensity.regular,
+      expectedHeight: customLayout.button.regular.height,
+    );
+
+    await _pumpHangulLearnScreen(
+      tester,
+      repository: _twoCardRepository(),
+      theme: theme,
+      viewport: const Size(780, 360),
+    );
+    _expectNextActionUsesThemeTokens(
+      tester,
+      expectedDensity: ToyButtonDensity.compact,
+      expectedHeight: customLayout.button.compact.height,
+    );
+  });
+
   testWidgets('shows the first hangul card and advances to the next one', (
     WidgetTester tester,
   ) async {
@@ -235,5 +279,79 @@ Widget _wrapWithServices({
       ),
       child: child,
     ),
+  );
+}
+
+Future<void> _pumpHangulLearnScreen(
+  WidgetTester tester, {
+  required HangulLessonRepository repository,
+  required ThemeData theme,
+  required Size viewport,
+}) async {
+  tester.view.physicalSize = viewport;
+  tester.view.devicePixelRatio = 1.0;
+
+  await tester.pumpWidget(
+    MaterialApp(
+      theme: theme,
+      home: HangulLearnScreen(
+        repository: repository,
+        lessonId: 'basic_consonants_1',
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
+void _expectNextActionUsesThemeTokens(
+  WidgetTester tester, {
+  required ToyButtonDensity expectedDensity,
+  required double expectedHeight,
+}) {
+  final ctaFinder = find.widgetWithText(ToyButton, '다음');
+  expect(ctaFinder, findsOneWidget);
+
+  final cta = tester.widget<ToyButton>(ctaFinder);
+  expect(cta.height, isNull);
+  expect(cta.density, expectedDensity);
+  expect(
+    tester.getSize(_buttonDecorationFinder(ctaFinder)).height,
+    expectedHeight,
+  );
+}
+
+HangulLessonRepository _twoCardRepository() {
+  return HangulLessonRepository(
+    assetBundle: _FakeAssetBundle({
+      HangulLessonRepository.manifestPath: jsonEncode({
+        'lessons': [
+          {
+            'id': 'basic_consonants_1',
+            'title': '기본 자음 1',
+            'cards': [
+              {'symbol': 'ㄱ', 'label': '기역, ㄱ', 'hint': '큰 카드로 기역을 천천히 봐요'},
+              {'symbol': 'ㄴ', 'label': '니은, ㄴ', 'hint': '니은을 손가락으로 콕 눌러봐요'},
+            ],
+          },
+        ],
+      }),
+    }),
+  );
+}
+
+Finder _buttonDecorationFinder(Finder finder) {
+  return find.descendant(
+    of: finder,
+    matching: find.byWidgetPredicate((Widget widget) {
+      if (widget is! DecoratedBox) {
+        return false;
+      }
+
+      final decoration = widget.decoration;
+      return decoration is BoxDecoration &&
+          decoration.gradient != null &&
+          decoration.border != null &&
+          decoration.boxShadow != null;
+    }),
   );
 }

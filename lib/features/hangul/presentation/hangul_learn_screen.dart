@@ -309,7 +309,9 @@ class _HangulLearnScreenState extends State<HangulLearnScreen> {
                                 icon: isLastCard
                                     ? Icons.refresh_rounded
                                     : Icons.arrow_forward_rounded,
-                                height: compact ? 50 : 72,
+                                density: compact
+                                    ? ToyButtonDensity.compact
+                                    : ToyButtonDensity.regular,
                                 onPressed: () => _moveToCard(
                                   lesson,
                                   isLastCard ? 0 : _currentCardIndex + 1,
