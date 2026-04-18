@@ -8,6 +8,7 @@ import 'package:kids_play_app/app/services/progress_store.dart';
 import 'package:kids_play_app/app/services/speech_cue_service.dart';
 import 'package:kids_play_app/app/ui/kid_theme.dart';
 import 'package:kids_play_app/app/ui/toy_button.dart';
+import 'package:kids_play_app/app/ui/toy_panel.dart';
 import 'package:kids_play_app/features/hangul/data/hangul_lesson_repository.dart';
 import 'package:kids_play_app/features/hangul/presentation/hangul_learn_screen.dart';
 
@@ -51,6 +52,37 @@ void main() {
       tester,
       expectedDensity: ToyButtonDensity.compact,
       expectedHeight: customLayout.button.compact.height,
+    );
+  });
+
+  testWidgets('uses named warm and lilac panel tones in the learn body', (
+    WidgetTester tester,
+  ) async {
+    final repository = _twoCardRepository();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: HangulLearnScreen(
+          repository: repository,
+          lessonId: 'basic_consonants_1',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final symbolPanelFinder = find.byKey(
+      const ValueKey('hangulLearnSymbolPanel'),
+    );
+    expect(symbolPanelFinder, findsOneWidget);
+    expect(tester.widget<ToyPanel>(symbolPanelFinder).tone, ToyPanelTone.warm);
+
+    final encouragementPanelFinder = find.byKey(
+      const ValueKey('hangulLearnEncouragementPanel'),
+    );
+    expect(encouragementPanelFinder, findsOneWidget);
+    expect(
+      tester.widget<ToyPanel>(encouragementPanelFinder).tone,
+      ToyPanelTone.lilac,
     );
   });
 
