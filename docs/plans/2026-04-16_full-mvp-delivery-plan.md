@@ -4,14 +4,19 @@
 
 ## Status update
 
-완료된 slice
+완료되었거나 live repo에서 재확인된 slice
 - Slice 0 — docs + CI alignment
 - Slice 1 — toddler interaction foundation
 - Slice 2 — persistence + parent controls foundation
 - Slice 3 — alphabet playable MVP
 - Slice 4 — numbers playable MVP
 - Slice 5 — audio-first prompt layer
-- Slice 6 — end-to-end polish의 home/category/hub garage UI 정리, 보호자 진행 요약/진도 제어/오답 다시 풀기/오답 비우기/수동 해금, 다중 세트와 3개 카테고리 라우팅 확장까지
+- Slice 6 기능 범위 중 home/category/hub garage UI 정리, 보호자 진행 요약/진도 제어/오답 다시 풀기/오답 비우기/수동 해금, 다중 세트와 3개 카테고리 라우팅 확장까지 반영 및 재확인됨
+
+현재 큐 기준 상태
+- 우선순위 A-E 범위는 live repo와 targeted tests 기준으로 완료 상태
+- F — docs cleanup 진행 중
+- G — final full `flutter test` / `flutter analyze` / release build / current-head APK artifact verification pending
 
 남은 확장 후보
 - 오답 다시 풀기 결과를 별도 통계/보상과 연결
@@ -76,8 +81,8 @@
 - parent dashboard 정보 정리 완료
 - home/category/hub garage UI 정리 완료
 - 기본 summary/reward 흐름 정리 완료
-- docs 최종 업데이트 완료
-- final test/analyze/release build + Actions 확인 완료
+- docs cleanup 진행 중
+- final full test/analyze/release build + Actions/APK 확인은 마지막 게이트로 남아 있음
 
 ## Verification checklist for every slice
 

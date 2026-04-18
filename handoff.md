@@ -44,11 +44,16 @@
 
 ---
 
-## 이번 라운드까지 완료된 범위
+## 이번 라운드 기준 상태
+
+### queue 기준 상태
+- A-E 범위(숫자 feature/라우팅, home/category 연결, design-system theme/button/panel 정리, hero/home/category 리디자인, 보호자 summary/settings/retry/unlock 흐름)는 live repo에서 재확인됨
+- F 문서 정리는 이번 slice에서 진행 중
+- G 최종 통합 게이트(full `flutter test` / `flutter analyze` / release APK build / current-head APK artifact 확인)는 아직 남아 있음
 
 ### 1. 문서/CI 정합성
 - docs/script 변경도 APK workflow에 포함되도록 정리됨
-- README / handoff / 구현 계획 문서는 계속 최신화 중
+- handoff / 구현 계획 문서는 현재 상태에 맞춰 정리 중
 
 ### 2. toddler interaction foundation
 - 공통 탭 쿨타임/연타 방지 적용
@@ -80,15 +85,27 @@
 
 ## 검증 결과
 
-최근 코드 기준 검증 완료
-- `/home/openc/sdk/flutter/bin/flutter test`
-- `/home/openc/sdk/flutter/bin/flutter analyze`
-- `/home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64`
+이번 런에서 재확인된 테스트
+- numbers + routing
+  - `/home/openc/sdk/flutter/bin/flutter test test/features/numbers/data/numbers_lesson_repository_test.dart test/features/numbers/presentation/numbers_learn_screen_test.dart test/features/numbers/presentation/numbers_quiz_screen_test.dart test/features/home/presentation/category_lesson_picker_flow_test.dart`
+  - 결과: passed
+- design system
+  - `/home/openc/sdk/flutter/bin/flutter test test/app/ui/kid_theme_test.dart test/app/ui/kid_theme_typography_test.dart test/app/ui/toy_button_test.dart test/app/ui/toy_panel_test.dart test/app/ui/toy_button_api_surface_test.dart test/app/ui/toy_panel_api_surface_test.dart test/app/ui/toy_button_label_centering_test.dart`
+  - 결과: passed
+- hero / home / parent entry + parent summary controls
+  - `/home/openc/sdk/flutter/bin/flutter test test/features/hero/presentation/hero_screen_test.dart test/features/home/presentation/home_redesign_test.dart test/features/avatar/presentation/avatar_setup_screen_test.dart`
+  - 결과: passed
 
-로컬 APK
+이번 런에서 아직 남은 최종 통합 확인
+- full `/home/openc/sdk/flutter/bin/flutter test`
+- full `/home/openc/sdk/flutter/bin/flutter analyze`
+- `/home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64`
+- current-head GitHub Actions APK artifact 확인
+
+release build output path (when generated)
 - `build/app/outputs/flutter-apk/app-release.apk`
 
-GitHub Actions artifact
+artifact name (when workflow passes)
 - `kids-play-app-arm64-v8a-release`
 
 ---
