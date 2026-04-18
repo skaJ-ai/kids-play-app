@@ -385,6 +385,21 @@ class _HangulQuizScreenState extends State<HangulQuizScreen> {
       if (!mounted) {
         return;
       }
+      if (settings.effectsEnabled && earnedSticker) {
+        try {
+          await services.audioService.playCue(
+            const AudioCue(
+              type: AudioCueType.reward,
+              assetKey: 'audio/sfx/reward.ogg',
+              fallbackText: '스티커 하나 획득!',
+              pitch: 1.12,
+            ),
+          );
+        } catch (_) {}
+        if (!mounted) {
+          return;
+        }
+      }
       setState(() {
         _feedbackVisible = false;
         _isResolvingChoice = false;

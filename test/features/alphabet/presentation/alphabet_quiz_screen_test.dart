@@ -372,6 +372,105 @@ void main() {
     expect(snapshot.lastEarnedReward?.lessonId, 'alphabet:alphabet_letters_1');
   });
 
+  testWidgets(
+    'plays a reward cue after finishing the alphabet quiz with a sticker reward',
+    (WidgetTester tester) async {
+      final repository = AlphabetLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          AlphabetLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_alphabetLesson],
+          }),
+        }),
+      );
+      final audioService = _FakeAudioService();
+
+      await tester.pumpWidget(
+        AppServicesScope(
+          services: AppServices(
+            progressStore: MemoryProgressStore(
+              const AppProgressSnapshot(
+                voicePromptsEnabled: false,
+                effectsEnabled: true,
+              ),
+            ),
+            speechCueService: NoopSpeechCueService(),
+            audioService: audioService,
+          ),
+          child: MaterialApp(
+            home: AlphabetQuizScreen(
+              repository: repository,
+              lessonId: 'alphabet_letters_1',
+              mistakeSymbols: const ['E e'],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('quiz-choice-E e')));
+      await tester.pump();
+
+      expect(audioService.cueCalls, hasLength(1));
+      expect(audioService.cueCalls.single.type, AudioCueType.success);
+
+      await tester.pump(const Duration(milliseconds: 650));
+      await tester.pumpAndSettle();
+
+      expect(audioService.cueCalls, hasLength(2));
+      expect(audioService.cueCalls.last.type, AudioCueType.reward);
+      expect(audioService.cueCalls.last.assetKey, 'audio/sfx/reward.ogg');
+      expect(audioService.cueCalls.last.fallbackText, '스티커 하나 획득!');
+    },
+  );
+
+  testWidgets(
+    'still completes the alphabet quiz when reward cue playback fails',
+    (WidgetTester tester) async {
+      final repository = AlphabetLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          AlphabetLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_alphabetLesson],
+          }),
+        }),
+      );
+      final audioService = _ThrowOnRewardCueAudioService();
+
+      await tester.pumpWidget(
+        AppServicesScope(
+          services: AppServices(
+            progressStore: MemoryProgressStore(
+              const AppProgressSnapshot(
+                voicePromptsEnabled: false,
+                effectsEnabled: true,
+              ),
+            ),
+            speechCueService: NoopSpeechCueService(),
+            audioService: audioService,
+          ),
+          child: MaterialApp(
+            home: AlphabetQuizScreen(
+              repository: repository,
+              lessonId: 'alphabet_letters_1',
+              mistakeSymbols: const ['E e'],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('quiz-choice-E e')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 650));
+
+      expect(tester.takeException(), isNull);
+      await tester.pumpAndSettle();
+
+      expect(find.text('1문제 중 1문제 맞았어요!'), findsOneWidget);
+      expect(find.text('자동차 스티커 1개 획득!'), findsOneWidget);
+      expect(find.text('다시하기'), findsOneWidget);
+    },
+  );
+
   testWidgets('shows an error message when the alphabet quiz fails to load', (
     WidgetTester tester,
   ) async {
@@ -464,5 +563,15 @@ class _FakeAudioService implements AudioService {
   @override
   Future<void> stop() async {
     stopCount += 1;
+  }
+}
+
+class _ThrowOnRewardCueAudioService extends _FakeAudioService {
+  @override
+  Future<void> playCue(AudioCue cue) async {
+    await super.playCue(cue);
+    if (cue.type == AudioCueType.reward) {
+      throw StateError('reward cue failed');
+    }
   }
 }
