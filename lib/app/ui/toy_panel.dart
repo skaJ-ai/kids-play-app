@@ -134,7 +134,10 @@ class ToyPanelInsetSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final panelTokens = Theme.of(context).kidLayout.panel.forDensity(density);
+    final layout = Theme.of(context).kidLayout;
+    final panelTokens = layout.panel.forDensity(density);
+    final chromeTokens = layout.chrome.panel;
+    final shadowTokens = layout.chrome.shadows;
     final resolvedBorderRadius =
         borderRadius ?? BorderRadius.circular(panelTokens.insetRadius);
 
@@ -144,12 +147,21 @@ class ToyPanelInsetSurface extends StatelessWidget {
       alignment: Alignment.center,
       padding: padding,
       decoration: BoxDecoration(
-        color: backgroundColor ?? KidPalette.white.withValues(alpha: 0.9),
+        color:
+            backgroundColor ??
+            chromeTokens.insetSurfaceBackgroundColor.withValues(
+              alpha: chromeTokens.insetSurfaceBackgroundAlpha,
+            ),
         borderRadius: resolvedBorderRadius,
         border: Border.all(
-          color: borderColor ?? KidPalette.white.withValues(alpha: 0.72),
+          color:
+              borderColor ??
+              chromeTokens.insetSurfaceBorderColor.withValues(
+                alpha: chromeTokens.insetSurfaceBorderAlpha,
+              ),
+          width: chromeTokens.insetSurfaceBorderWidth,
         ),
-        boxShadow: boxShadow ?? KidShadows.panel,
+        boxShadow: boxShadow ?? shadowTokens.surfacePanel,
       ),
       child: child,
     );

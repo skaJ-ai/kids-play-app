@@ -648,6 +648,11 @@ class KidPanelChromeTokens {
     this.warmBorderColor = KidPalette.stroke,
     this.lilacBackgroundColor = KidPalette.lilac,
     this.lilacBorderColor = KidPalette.stroke,
+    this.insetSurfaceBackgroundColor = KidPalette.white,
+    this.insetSurfaceBorderColor = KidPalette.white,
+    this.insetSurfaceBackgroundAlpha = 0.9,
+    this.insetSurfaceBorderAlpha = 0.72,
+    this.insetSurfaceBorderWidth = 1.0,
     double? highlightAlpha,
     this.airyBackgroundAlpha = 0.94,
     this.lilacBackgroundAlpha = 0.75,
@@ -691,6 +696,11 @@ class KidPanelChromeTokens {
   final Color warmBorderColor;
   final Color lilacBackgroundColor;
   final Color lilacBorderColor;
+  final Color insetSurfaceBackgroundColor;
+  final Color insetSurfaceBorderColor;
+  final double insetSurfaceBackgroundAlpha;
+  final double insetSurfaceBorderAlpha;
+  final double insetSurfaceBorderWidth;
   final double surfaceHighlightAlpha;
   final double airyHighlightAlpha;
   final double warmHighlightAlpha;
@@ -717,6 +727,11 @@ class KidPanelChromeTokens {
     Color? warmBorderColor,
     Color? lilacBackgroundColor,
     Color? lilacBorderColor,
+    Color? insetSurfaceBackgroundColor,
+    Color? insetSurfaceBorderColor,
+    double? insetSurfaceBackgroundAlpha,
+    double? insetSurfaceBorderAlpha,
+    double? insetSurfaceBorderWidth,
     double? highlightAlpha,
     double? airyBackgroundAlpha,
     double? lilacBackgroundAlpha,
@@ -742,6 +757,16 @@ class KidPanelChromeTokens {
       warmBorderColor: warmBorderColor ?? this.warmBorderColor,
       lilacBackgroundColor: lilacBackgroundColor ?? this.lilacBackgroundColor,
       lilacBorderColor: lilacBorderColor ?? this.lilacBorderColor,
+      insetSurfaceBackgroundColor:
+          insetSurfaceBackgroundColor ?? this.insetSurfaceBackgroundColor,
+      insetSurfaceBorderColor:
+          insetSurfaceBorderColor ?? this.insetSurfaceBorderColor,
+      insetSurfaceBackgroundAlpha:
+          insetSurfaceBackgroundAlpha ?? this.insetSurfaceBackgroundAlpha,
+      insetSurfaceBorderAlpha:
+          insetSurfaceBorderAlpha ?? this.insetSurfaceBorderAlpha,
+      insetSurfaceBorderWidth:
+          insetSurfaceBorderWidth ?? this.insetSurfaceBorderWidth,
       surfaceHighlightAlpha:
           surfaceHighlightAlpha ?? highlightAlpha ?? this.surfaceHighlightAlpha,
       airyHighlightAlpha:
@@ -803,6 +828,41 @@ class KidPanelChromeTokens {
       lilacBorderColor:
           Color.lerp(lilacBorderColor, other.lilacBorderColor, t) ??
           lilacBorderColor,
+      insetSurfaceBackgroundColor:
+          Color.lerp(
+            insetSurfaceBackgroundColor,
+            other.insetSurfaceBackgroundColor,
+            t,
+          ) ??
+          insetSurfaceBackgroundColor,
+      insetSurfaceBorderColor:
+          Color.lerp(
+            insetSurfaceBorderColor,
+            other.insetSurfaceBorderColor,
+            t,
+          ) ??
+          insetSurfaceBorderColor,
+      insetSurfaceBackgroundAlpha:
+          ui.lerpDouble(
+            insetSurfaceBackgroundAlpha,
+            other.insetSurfaceBackgroundAlpha,
+            t,
+          ) ??
+          insetSurfaceBackgroundAlpha,
+      insetSurfaceBorderAlpha:
+          ui.lerpDouble(
+            insetSurfaceBorderAlpha,
+            other.insetSurfaceBorderAlpha,
+            t,
+          ) ??
+          insetSurfaceBorderAlpha,
+      insetSurfaceBorderWidth:
+          ui.lerpDouble(
+            insetSurfaceBorderWidth,
+            other.insetSurfaceBorderWidth,
+            t,
+          ) ??
+          insetSurfaceBorderWidth,
       surfaceHighlightAlpha:
           ui.lerpDouble(
             surfaceHighlightAlpha,

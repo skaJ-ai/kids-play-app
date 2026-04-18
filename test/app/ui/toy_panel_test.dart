@@ -225,6 +225,65 @@ void main() {
         expect(decoration.boxShadow, KidShadows.panel);
       },
     );
+
+    testWidgets('reads inset surface chrome and shadow from kid theme tokens', (
+      WidgetTester tester,
+    ) async {
+      const customInsetSurfaceBackgroundColor = Color(0xFF4FD3F7);
+      const customInsetSurfaceBackgroundAlpha = 0.84;
+      const customInsetSurfaceBorderColor = Color(0xFF2A7FA9);
+      const customInsetSurfaceBorderAlpha = 0.61;
+      const customInsetSurfaceBorderWidth = 2.5;
+      const customInsetSurfaceShadows = [
+        BoxShadow(
+          color: Color(0x22112233),
+          blurRadius: 18,
+          offset: Offset(0, 9),
+        ),
+        BoxShadow(
+          color: Color(0x12000000),
+          blurRadius: 4,
+          offset: Offset(1, 2),
+        ),
+      ];
+      final customLayout = KidLayoutTheme.defaults.copyWith(
+        chrome: KidLayoutTheme.defaults.chrome.copyWith(
+          panel: KidLayoutTheme.defaults.chrome.panel.copyWith(
+            insetSurfaceBackgroundColor: customInsetSurfaceBackgroundColor,
+            insetSurfaceBackgroundAlpha: customInsetSurfaceBackgroundAlpha,
+            insetSurfaceBorderColor: customInsetSurfaceBorderColor,
+            insetSurfaceBorderAlpha: customInsetSurfaceBorderAlpha,
+            insetSurfaceBorderWidth: customInsetSurfaceBorderWidth,
+          ),
+          shadows: KidLayoutTheme.defaults.chrome.shadows.copyWith(
+            surfacePanel: customInsetSurfaceShadows,
+          ),
+        ),
+      );
+
+      await _pumpToyPanelInsetSurface(
+        tester,
+        theme: buildKidTheme().copyWith(extensions: [customLayout]),
+      );
+
+      final decoration = _insetSurfaceDecoration(tester);
+      final border = decoration.border! as Border;
+
+      expect(
+        decoration.color,
+        customInsetSurfaceBackgroundColor.withValues(
+          alpha: customInsetSurfaceBackgroundAlpha,
+        ),
+      );
+      expect(
+        border.top.color,
+        customInsetSurfaceBorderColor.withValues(
+          alpha: customInsetSurfaceBorderAlpha,
+        ),
+      );
+      expect(border.top.width, customInsetSurfaceBorderWidth);
+      expect(decoration.boxShadow, customInsetSurfaceShadows);
+    });
   });
 
   group('ToyPanel tone', () {
