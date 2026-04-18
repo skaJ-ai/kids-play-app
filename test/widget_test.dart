@@ -223,7 +223,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('알파벳 게임'), findsOneWidget);
-    expect(find.text("'에이' 글자를 찾아봐!"), findsOneWidget);
+    expect(find.text('에이 글자를 찾아봐!'), findsOneWidget);
     expect(find.text('1 / 5'), findsOneWidget);
   });
 

@@ -68,7 +68,7 @@ const alphabetLessonCategory = LessonCategoryConfig(
   quizPromptHeadline: '알맞은 알파벳을 찾아보자!',
   quizInstruction: '차근차근 보고, 정답을 콕 눌러봐요.',
   quizTargetBadge: '찾아볼 알파벳',
-  quizPromptTemplate: "'{symbol}' 글자를 찾아봐!",
+  quizPromptTemplate: '{symbol} 글자를 찾아봐!',
   quizSummaryTitle: '알파벳 게임 끝!',
   quizStickerCopy: '자동차 스티커 1개 획득!',
   quizStickerMissedCopy: '한 번 더 하면 스티커를 받을 수 있어!',

@@ -42,7 +42,6 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
   late Future<Lesson> _lessonFuture;
   late AppServices _services;
   QuizController? _controller;
-  String? _lastPromptKey;
 
   @override
   void didChangeDependencies() {
@@ -66,7 +65,6 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
     setState(() {
       _controller?.dispose();
       _controller = null;
-      _lastPromptKey = null;
       _lessonFuture = widget.loader.loadLesson(widget.lessonId);
     });
   }
@@ -93,20 +91,6 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
       return;
     }
     setState(() {});
-  }
-
-  void _queuePrompt(QuizController controller) {
-    final key = controller.promptKeyFor(controller.currentQuestion);
-    if (_lastPromptKey == key) {
-      return;
-    }
-    _lastPromptKey = key;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) {
-        return;
-      }
-      controller.replayPrompt();
-    });
   }
 
   @override
@@ -151,14 +135,10 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
               category: widget.category,
               totalQuestions: controller.totalQuestions,
               correctCount: controller.correctCount,
-              onRestart: () {
-                _lastPromptKey = null;
-                controller.restart();
-              },
+              onRestart: controller.restart,
             );
           }
 
-          _queuePrompt(controller);
           final question = controller.currentQuestion;
           final choices = controller.currentChoices;
 

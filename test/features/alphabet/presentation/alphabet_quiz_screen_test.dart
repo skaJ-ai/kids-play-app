@@ -31,7 +31,7 @@ void main() {
 
     expect(find.text('알파벳 게임'), findsOneWidget);
     expect(find.text('1 / 5'), findsOneWidget);
-    expect(find.text("'에이' 글자를 찾아봐!"), findsOneWidget);
+    expect(find.text('에이 글자를 찾아봐!'), findsOneWidget);
     expect(find.byKey(const Key('quiz-choice-A')), findsOneWidget);
     expect(find.byKey(const Key('quiz-choice-B')), findsOneWidget);
     expect(find.byKey(const Key('quiz-choice-C')), findsOneWidget);
@@ -131,13 +131,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('1 / 2'), findsOneWidget);
-    expect(find.text("'비' 글자를 찾아봐!"), findsOneWidget);
+    expect(find.text('비 글자를 찾아봐!'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('quiz-choice-B')));
     await tester.pumpAndSettle();
 
     expect(find.text('2 / 2'), findsOneWidget);
-    expect(find.text("'디' 글자를 찾아봐!"), findsOneWidget);
+    expect(find.text('디 글자를 찾아봐!'), findsOneWidget);
   });
 
   testWidgets('shows a sticker reward summary after finishing the alphabet quiz', (

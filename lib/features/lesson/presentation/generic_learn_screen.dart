@@ -41,7 +41,6 @@ class _GenericLearnScreenState extends State<GenericLearnScreen> {
   late AppServices _services;
   bool _didLoadLesson = false;
   int _currentIndex = 0;
-  String? _lastPromptKey;
 
   @override
   void didChangeDependencies() {
@@ -71,7 +70,6 @@ class _GenericLearnScreenState extends State<GenericLearnScreen> {
   void _retryLoad() {
     setState(() {
       _currentIndex = 0;
-      _lastPromptKey = null;
       _lessonFuture = _loadLesson();
     });
   }
@@ -111,21 +109,6 @@ class _GenericLearnScreenState extends State<GenericLearnScreen> {
     return slug;
   }
 
-  void _queuePrompt(LessonItem item) {
-    final itemIndex = _currentIndex;
-    final promptKey = '${widget.lessonId}:${item.symbol}:$itemIndex';
-    if (_lastPromptKey == promptKey) {
-      return;
-    }
-    _lastPromptKey = promptKey;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) {
-        return;
-      }
-      _replayPrompt(item, itemIndex: itemIndex);
-    });
-  }
-
   Future<void> _moveToCard(Lesson lesson, int nextIndex) async {
     final boundedIndex = nextIndex.clamp(0, lesson.items.length - 1);
     setState(() {
@@ -162,7 +145,6 @@ class _GenericLearnScreenState extends State<GenericLearnScreen> {
 
           final item = lesson.items[_currentIndex];
           final isLast = _currentIndex == lesson.items.length - 1;
-          _queuePrompt(item);
 
           return LayoutBuilder(
             builder: (context, constraints) {
