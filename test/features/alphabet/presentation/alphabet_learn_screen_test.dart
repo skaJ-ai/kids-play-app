@@ -6,9 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kids_play_app/app/services/app_services.dart';
 import 'package:kids_play_app/app/services/progress_store.dart';
 import 'package:kids_play_app/app/services/speech_cue_service.dart';
-import 'package:kids_play_app/app/ui/kid_theme.dart';
-import 'package:kids_play_app/app/ui/toy_button.dart';
-import 'package:kids_play_app/app/ui/toy_panel.dart';
+import 'package:kids_play_app/app/ui/mascot_view.dart';
 import 'package:kids_play_app/features/alphabet/data/alphabet_lesson_repository.dart';
 import 'package:kids_play_app/features/alphabet/presentation/alphabet_learn_screen.dart';
 
@@ -35,14 +33,60 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('알파벳 1'), findsOneWidget);
-    expect(find.text('에이, A a'), findsOneWidget);
+    expect(find.byKey(const Key('learn-spoken-caption')), findsOneWidget);
+    expect(
+      tester.widget<Text>(find.byKey(const Key('learn-spoken-caption'))).data,
+      '에이',
+    );
     expect(find.text('1 / 5'), findsOneWidget);
+    expect(find.byType(MascotView), findsOneWidget);
 
-    await tester.tap(find.text('다음'));
+    await tester.tap(find.byKey(const Key('learn-next-button')));
     await tester.pumpAndSettle();
 
-    expect(find.text('비, B b'), findsOneWidget);
+    expect(
+      tester.widget<Text>(find.byKey(const Key('learn-spoken-caption'))).data,
+      '비',
+    );
     expect(find.text('2 / 5'), findsOneWidget);
+  });
+
+  testWidgets('tapping the glyph card switches the mascot to correct pose',
+      (WidgetTester tester) async {
+    final repository = AlphabetLessonRepository(
+      assetBundle: _FakeAssetBundle({
+        AlphabetLessonRepository.manifestPath: jsonEncode({
+          'lessons': [_alphabetLesson],
+        }),
+      }),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: AlphabetLearnScreen(
+          repository: repository,
+          lessonId: 'alphabet_letters_1',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final initial =
+        tester.widget<MascotView>(find.byKey(const Key('learn-mascot')));
+    expect(initial.state, MascotState.idle);
+
+    await tester.tap(find.byKey(const Key('learn-glyph-card')));
+    await tester.pump();
+
+    final after =
+        tester.widget<MascotView>(find.byKey(const Key('learn-mascot')));
+    expect(after.state, MascotState.correct);
+
+    // Let the reset timer fire so the state falls back to idle.
+    await tester.pump(const Duration(milliseconds: 950));
+    final reset =
+        tester.widget<MascotView>(find.byKey(const Key('learn-mascot')));
+    expect(reset.state, MascotState.idle);
   });
 
   testWidgets('resumes from the saved alphabet lesson progress', (
@@ -74,151 +118,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('씨, C c'), findsOneWidget);
+    expect(
+      tester.widget<Text>(find.byKey(const Key('learn-spoken-caption'))).data,
+      '씨',
+    );
     expect(find.text('3 / 5'), findsOneWidget);
-    expect(find.text('에이, A a'), findsNothing);
-  });
-
-  testWidgets('uses themed regular CTA height on roomy alphabet layouts', (
-    WidgetTester tester,
-  ) async {
-    _setSurfaceSize(tester, const Size(1024, 768));
-    final customLayout = KidLayoutTheme(
-      button: KidButtonTokens(
-        regular: KidLayoutTheme.defaults.button.regular.copyWith(height: 88),
-        compact: KidLayoutTheme.defaults.button.compact.copyWith(height: 41),
-      ),
-      panel: KidLayoutTheme.defaults.panel,
-    );
-    final repository = AlphabetLessonRepository(
-      assetBundle: _FakeAssetBundle({
-        AlphabetLessonRepository.manifestPath: jsonEncode({
-          'lessons': [_alphabetLesson],
-        }),
-      }),
-    );
-
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: buildKidTheme().copyWith(extensions: [customLayout]),
-        home: AlphabetLearnScreen(
-          repository: repository,
-          lessonId: 'alphabet_letters_1',
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    final cta = _ctaButton(tester);
-
-    expect(cta.height, isNull);
-    expect(cta.density, ToyButtonDensity.regular);
-    expect(
-      tester.getSize(find.widgetWithText(ToyButton, '다음')).height,
-      customLayout.button.regular.height,
-    );
-  });
-
-  testWidgets('uses themed compact CTA height on compact alphabet layouts', (
-    WidgetTester tester,
-  ) async {
-    _setSurfaceSize(tester, const Size(780, 360));
-    final customLayout = KidLayoutTheme(
-      button: KidButtonTokens(
-        regular: KidLayoutTheme.defaults.button.regular.copyWith(height: 88),
-        compact: KidLayoutTheme.defaults.button.compact.copyWith(height: 41),
-      ),
-      panel: KidLayoutTheme.defaults.panel,
-    );
-    final repository = AlphabetLessonRepository(
-      assetBundle: _FakeAssetBundle({
-        AlphabetLessonRepository.manifestPath: jsonEncode({
-          'lessons': [_alphabetLesson],
-        }),
-      }),
-    );
-
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: buildKidTheme().copyWith(extensions: [customLayout]),
-        home: AlphabetLearnScreen(
-          repository: repository,
-          lessonId: 'alphabet_letters_1',
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    final cta = _ctaButton(tester);
-
-    expect(cta.height, isNull);
-    expect(cta.density, ToyButtonDensity.compact);
-    expect(
-      tester.getSize(find.widgetWithText(ToyButton, '다음')).height,
-      customLayout.button.compact.height,
-    );
-  });
-
-  testWidgets('inherits regular ToyPanel density on roomy alphabet layouts', (
-    WidgetTester tester,
-  ) async {
-    _setSurfaceSize(tester, const Size(1024, 768));
-    final repository = AlphabetLessonRepository(
-      assetBundle: _FakeAssetBundle({
-        AlphabetLessonRepository.manifestPath: jsonEncode({
-          'lessons': [_alphabetLesson],
-        }),
-      }),
-    );
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: AlphabetLearnScreen(
-          repository: repository,
-          lessonId: 'alphabet_letters_1',
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    final symbolPanel = _panelForText(tester, 'A a');
-    final hintPanel = _panelForText(tester, '천천히 해봐!');
-
-    expect(symbolPanel.density, ToyPanelDensity.regular);
-    expect(symbolPanel.padding, isNull);
-    expect(hintPanel.density, ToyPanelDensity.regular);
-    expect(hintPanel.padding, isNull);
-  });
-
-  testWidgets('inherits compact ToyPanel density on compact alphabet layouts', (
-    WidgetTester tester,
-  ) async {
-    _setSurfaceSize(tester, const Size(780, 360));
-    final repository = AlphabetLessonRepository(
-      assetBundle: _FakeAssetBundle({
-        AlphabetLessonRepository.manifestPath: jsonEncode({
-          'lessons': [_alphabetLesson],
-        }),
-      }),
-    );
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: AlphabetLearnScreen(
-          repository: repository,
-          lessonId: 'alphabet_letters_1',
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    final symbolPanel = _panelForText(tester, 'A a');
-    final hintPanel = _panelForText(tester, '천천히!');
-
-    expect(symbolPanel.density, ToyPanelDensity.compact);
-    expect(symbolPanel.padding, isNull);
-    expect(hintPanel.density, ToyPanelDensity.compact);
-    expect(hintPanel.padding, isNull);
   });
 
   testWidgets(
@@ -250,7 +154,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
-      expect(find.text('에이, A a'), findsOneWidget);
+      expect(find.byKey(const Key('learn-spoken-caption')), findsOneWidget);
+      expect(find.byKey(const Key('learn-next-button')), findsOneWidget);
     },
   );
 
@@ -280,11 +185,11 @@ const Map<String, dynamic> _alphabetLesson = {
   'id': 'alphabet_letters_1',
   'title': '알파벳 1',
   'cards': [
-    {'symbol': 'A a', 'label': '에이, A a', 'hint': '에이를 크게 보고 소리를 따라 말해봐요'},
-    {'symbol': 'B b', 'label': '비, B b', 'hint': '비를 보며 입으로 비 하고 말해봐요'},
-    {'symbol': 'C c', 'label': '씨, C c', 'hint': '씨를 보고 입모양을 동그랗게 해봐요'},
-    {'symbol': 'D d', 'label': '디, D d', 'hint': '디를 보며 손가락으로 천천히 짚어봐요'},
-    {'symbol': 'E e', 'label': '이, E e', 'hint': '이를 보고 환하게 따라 말해봐요'},
+    {'symbol': 'A', 'display': 'A', 'spoken': '에이', 'hint': '에이를 크게 보고 소리를 따라 말해봐요'},
+    {'symbol': 'B', 'display': 'B', 'spoken': '비', 'hint': '비를 보며 입으로 비 하고 말해봐요'},
+    {'symbol': 'C', 'display': 'C', 'spoken': '씨', 'hint': '씨를 보고 입모양을 동그랗게 해봐요'},
+    {'symbol': 'D', 'display': 'D', 'spoken': '디', 'hint': '디를 보며 손가락으로 천천히 짚어봐요'},
+    {'symbol': 'E', 'display': 'E', 'spoken': '이', 'hint': '이를 보고 환하게 따라 말해봐요'},
   ],
 };
 
@@ -323,26 +228,4 @@ Widget _wrapWithServices({
       child: child,
     ),
   );
-}
-
-void _setSurfaceSize(WidgetTester tester, Size size) {
-  tester.view.physicalSize = size;
-  tester.view.devicePixelRatio = 1.0;
-  addTearDown(() {
-    tester.view.resetPhysicalSize();
-    tester.view.resetDevicePixelRatio();
-  });
-}
-
-ToyButton _ctaButton(WidgetTester tester) {
-  return tester.widget<ToyButton>(find.widgetWithText(ToyButton, '다음'));
-}
-
-ToyPanel _panelForText(WidgetTester tester, String text) {
-  final panelFinder = find.ancestor(
-    of: find.text(text),
-    matching: find.byType(ToyPanel),
-  );
-  expect(panelFinder, findsOneWidget);
-  return tester.widget<ToyPanel>(panelFinder);
 }

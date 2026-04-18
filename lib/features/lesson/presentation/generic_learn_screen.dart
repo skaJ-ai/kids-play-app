@@ -1,9 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../app/audio/audio_cue.dart';
 import '../../../app/services/app_services.dart';
-import '../../../app/ui/audio_prompt_panel.dart';
 import '../../../app/ui/kid_theme.dart';
+import '../../../app/ui/mascot_view.dart';
 import '../../../app/ui/playground_scaffold.dart';
 import '../../../app/ui/toy_button.dart';
 import '../../../app/ui/toy_panel.dart';
@@ -19,7 +21,6 @@ class GenericLearnScreen extends StatefulWidget {
     required this.lessonId,
     this.errorMessage,
     this.emptyMessage,
-    this.loadingLabelOverride,
   });
 
   final LessonContentLoader loader;
@@ -27,10 +28,6 @@ class GenericLearnScreen extends StatefulWidget {
   final String lessonId;
   final String? errorMessage;
   final String? emptyMessage;
-
-  /// Optional override for the text below the title when rendering a long
-  /// card intro. Defaults to [LessonCategoryConfig.learnSubtitle].
-  final String? loadingLabelOverride;
 
   @override
   State<GenericLearnScreen> createState() => _GenericLearnScreenState();
@@ -41,6 +38,10 @@ class _GenericLearnScreenState extends State<GenericLearnScreen> {
   late AppServices _services;
   bool _didLoadLesson = false;
   int _currentIndex = 0;
+  MascotState _mascotState = MascotState.idle;
+  bool _pulsing = false;
+  Timer? _mascotResetTimer;
+  Timer? _pulseResetTimer;
 
   @override
   void didChangeDependencies() {
@@ -50,6 +51,13 @@ class _GenericLearnScreenState extends State<GenericLearnScreen> {
       _didLoadLesson = true;
       _lessonFuture = _loadLesson();
     }
+  }
+
+  @override
+  void dispose() {
+    _mascotResetTimer?.cancel();
+    _pulseResetTimer?.cancel();
+    super.dispose();
   }
 
   Future<Lesson> _loadLesson() async {
@@ -72,10 +80,6 @@ class _GenericLearnScreenState extends State<GenericLearnScreen> {
       _currentIndex = 0;
       _lessonFuture = _loadLesson();
     });
-  }
-
-  Future<void> _replayPrompt(LessonItem item, {int? itemIndex}) async {
-    await _playPromptIfEnabled(_promptCueFor(item, itemIndex ?? _currentIndex));
   }
 
   Future<void> _playPromptIfEnabled(PromptCue cue) async {
@@ -109,10 +113,33 @@ class _GenericLearnScreenState extends State<GenericLearnScreen> {
     return slug;
   }
 
+  void _onGlyphTap(LessonItem item) {
+    _mascotResetTimer?.cancel();
+    _pulseResetTimer?.cancel();
+    setState(() {
+      _mascotState = MascotState.correct;
+      _pulsing = true;
+    });
+    _playPromptIfEnabled(_promptCueFor(item, _currentIndex));
+
+    _pulseResetTimer = Timer(const Duration(milliseconds: 160), () {
+      if (!mounted) return;
+      setState(() => _pulsing = false);
+    });
+    _mascotResetTimer = Timer(const Duration(milliseconds: 900), () {
+      if (!mounted) return;
+      setState(() => _mascotState = MascotState.idle);
+    });
+  }
+
   Future<void> _moveToCard(Lesson lesson, int nextIndex) async {
     final boundedIndex = nextIndex.clamp(0, lesson.items.length - 1);
+    _mascotResetTimer?.cancel();
+    _pulseResetTimer?.cancel();
     setState(() {
       _currentIndex = boundedIndex;
+      _mascotState = MascotState.idle;
+      _pulsing = false;
     });
     await _services.progressStore.recordLessonIndex(
       lessonId: widget.category.progressIdFor(widget.lessonId),
@@ -140,7 +167,9 @@ class _GenericLearnScreenState extends State<GenericLearnScreen> {
 
           final lesson = snapshot.data!;
           if (lesson.items.isEmpty) {
-            return Center(child: Text(widget.emptyMessage ?? '준비 중인 세트예요.'));
+            return Center(
+              child: Text(widget.emptyMessage ?? '준비 중인 세트예요.'),
+            );
           }
 
           final item = lesson.items[_currentIndex];
@@ -149,9 +178,8 @@ class _GenericLearnScreenState extends State<GenericLearnScreen> {
           return LayoutBuilder(
             builder: (context, constraints) {
               final compact = constraints.maxHeight < 420;
-              final panelDensity = compact
-                  ? ToyPanelDensity.compact
-                  : ToyPanelDensity.regular;
+              final mascotSize = compact ? 120.0 : 180.0;
+              final glyphFontSize = compact ? 148.0 : 200.0;
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -165,13 +193,14 @@ class _GenericLearnScreenState extends State<GenericLearnScreen> {
                       ),
                       const Spacer(),
                       _HeaderPill(
-                        label: '${_currentIndex + 1} / ${lesson.items.length}',
+                        label:
+                            '${_currentIndex + 1} / ${lesson.items.length}',
                         compact: compact,
                         labelColor: KidPalette.coralDark,
                       ),
                     ],
                   ),
-                  SizedBox(height: compact ? 10 : 18),
+                  SizedBox(height: compact ? 8 : 14),
                   Text(
                     lesson.title,
                     textAlign: TextAlign.center,
@@ -179,116 +208,64 @@ class _GenericLearnScreenState extends State<GenericLearnScreen> {
                         ? Theme.of(context).textTheme.titleLarge
                         : Theme.of(context).textTheme.headlineMedium,
                   ),
-                  if (!compact) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      widget.category.learnSubtitle,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                  ],
-                  SizedBox(height: compact ? 10 : 22),
+                  SizedBox(height: compact ? 10 : 20),
                   Expanded(
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Expanded(
                           flex: 5,
-                          child: ToyPanel(
-                            density: panelDensity,
-                            tone: ToyPanelTone.warm,
-                            child: Center(
-                              child: FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: Text(
-                                  item.display,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .displayLarge
-                                      ?.copyWith(
-                                        fontSize: compact ? 136 : 180,
-                                        fontWeight: FontWeight.w900,
-                                        color: KidPalette.navy,
-                                      ),
-                                ),
-                              ),
-                            ),
+                          child: _GlyphCard(
+                            display: item.display,
+                            fontSize: glyphFontSize,
+                            pulsing: _pulsing,
+                            compact: compact,
+                            onTap: () => _onGlyphTap(item),
                           ),
                         ),
-                        SizedBox(width: compact ? 12 : 18),
+                        SizedBox(width: compact ? 12 : 20),
                         Expanded(
                           flex: 4,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              AudioPromptPanel(
-                                badge: '이름 듣기',
-                                title: item.spoken,
-                                subtitle: compact
-                                    ? widget.category.learnSubtitleCompact
-                                    : '스피커를 누르면 이름을 다시 들을 수 있어요.',
-                                onReplay: () =>
-                                    _replayPrompt(item, itemIndex: _currentIndex),
-                                compact: compact,
-                              ),
-                              SizedBox(height: compact ? 6 : 14),
                               Expanded(
-                                child: ToyPanel(
-                                  density: panelDensity,
-                                  tone: ToyPanelTone.lilac,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        compact ? '천천히!' : '천천히 해봐!',
-                                        style:
-                                            (compact
-                                                    ? Theme.of(
-                                                        context,
-                                                      ).textTheme.titleMedium
-                                                    : Theme.of(
-                                                        context,
-                                                      ).textTheme.titleLarge)
-                                                ?.copyWith(
-                                                  color: KidPalette.coralDark,
-                                                ),
-                                      ),
-                                      SizedBox(height: compact ? 6 : 12),
-                                      Expanded(
-                                        child: SingleChildScrollView(
-                                          physics:
-                                              const NeverScrollableScrollPhysics(),
-                                          child: Text(
-                                            item.hint,
-                                            maxLines: compact ? 3 : 4,
-                                            overflow: TextOverflow.ellipsis,
-                                            style:
-                                                (compact
-                                                        ? Theme.of(
-                                                            context,
-                                                          ).textTheme.titleSmall
-                                                        : Theme.of(context)
-                                                              .textTheme
-                                                              .titleMedium)
-                                                    ?.copyWith(
-                                                      color: KidPalette.navy,
-                                                    ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                                child: Center(
+                                  child: MascotView(
+                                    key: const Key('learn-mascot'),
+                                    state: _mascotState,
+                                    size: mascotSize,
                                   ),
                                 ),
                               ),
-                              SizedBox(height: compact ? 6 : 14),
+                              SizedBox(height: compact ? 6 : 10),
+                              Text(
+                                item.spoken,
+                                key: const Key('learn-spoken-caption'),
+                                textAlign: TextAlign.center,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style:
+                                    (compact
+                                            ? Theme.of(
+                                                context,
+                                              ).textTheme.titleLarge
+                                            : Theme.of(
+                                                context,
+                                              ).textTheme.headlineSmall)
+                                        ?.copyWith(
+                                          color: KidPalette.coralDark,
+                                          fontWeight: FontWeight.w900,
+                                        ),
+                              ),
+                              SizedBox(height: compact ? 8 : 14),
                               ToyButton(
+                                key: const Key('learn-next-button'),
                                 label: isLast ? '처음부터' : '다음',
                                 icon: isLast
                                     ? Icons.refresh_rounded
                                     : Icons.arrow_forward_rounded,
-                                density: compact
-                                    ? ToyButtonDensity.compact
-                                    : ToyButtonDensity.regular,
+                                height: compact ? 50 : 72,
                                 onPressed: () => _moveToCard(
                                   lesson,
                                   isLast ? 0 : _currentIndex + 1,
@@ -305,6 +282,83 @@ class _GenericLearnScreenState extends State<GenericLearnScreen> {
             },
           );
         },
+      ),
+    );
+  }
+}
+
+class _GlyphCard extends StatelessWidget {
+  const _GlyphCard({
+    required this.display,
+    required this.fontSize,
+    required this.pulsing,
+    required this.compact,
+    required this.onTap,
+  });
+
+  final String display;
+  final double fontSize;
+  final bool pulsing;
+  final bool compact;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: '$display 소리 듣기',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          key: const Key('learn-glyph-card'),
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(compact ? 28 : 36),
+          child: AnimatedScale(
+            scale: pulsing ? 1.07 : 1.0,
+            duration: const Duration(milliseconds: 140),
+            curve: Curves.easeOut,
+            child: ToyPanel(
+              padding: EdgeInsets.all(compact ? 14 : 28),
+              backgroundColor: KidPalette.creamWarm,
+              child: Stack(
+                children: [
+                  Center(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        display,
+                        style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                              fontSize: fontSize,
+                              fontWeight: FontWeight.w900,
+                              color: KidPalette.navy,
+                              height: 1,
+                            ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: compact ? 4 : 10,
+                    right: compact ? 4 : 10,
+                    child: Container(
+                      width: compact ? 38 : 52,
+                      height: compact ? 38 : 52,
+                      decoration: BoxDecoration(
+                        color: KidPalette.white.withValues(alpha: 0.92),
+                        shape: BoxShape.circle,
+                        boxShadow: KidShadows.button,
+                      ),
+                      child: Icon(
+                        Icons.volume_up_rounded,
+                        color: KidPalette.coralDark,
+                        size: compact ? 22 : 30,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -339,15 +393,19 @@ class _HeaderPill extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
-            Icon(icon, color: KidPalette.navy, size: compact ? 18 : 24),
+            Icon(
+              icon,
+              color: KidPalette.navy,
+              size: compact ? 18 : 24,
+            ),
             SizedBox(width: compact ? 6 : 8),
           ],
           Text(
             label,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              color: labelColor ?? KidPalette.navy,
-              fontWeight: FontWeight.w900,
-            ),
+                  color: labelColor ?? KidPalette.navy,
+                  fontWeight: FontWeight.w900,
+                ),
           ),
         ],
       ),
