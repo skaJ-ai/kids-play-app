@@ -45,40 +45,78 @@ void main() {
     expect(find.byKey(const Key('quiz-choice-4')), findsOneWidget);
   });
 
-  testWidgets('uses a warm toy panel tone for the compact numbers prompt panel', (
-    WidgetTester tester,
-  ) async {
-    tester.view.physicalSize = const Size(780, 360);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(() {
-      tester.view.resetPhysicalSize();
-      tester.view.resetDevicePixelRatio();
-    });
+  testWidgets(
+    'uses a warm toy panel tone for the compact numbers prompt panel',
+    (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(780, 360);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
 
-    final repository = NumbersLessonRepository(
-      assetBundle: _FakeAssetBundle({
-        NumbersLessonRepository.manifestPath: jsonEncode({
-          'lessons': [_numbersLesson],
+      final repository = NumbersLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          NumbersLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_numbersLesson],
+          }),
         }),
-      }),
-    );
+      );
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: NumbersQuizScreen(
-          repository: repository,
-          lessonId: 'numbers_count_1',
+      await tester.pumpWidget(
+        MaterialApp(
+          home: NumbersQuizScreen(
+            repository: repository,
+            lessonId: 'numbers_count_1',
+          ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    final promptPanel = tester.widget<ToyPanel>(
-      find.byKey(const Key('quiz-prompt-panel')),
-    );
+      final promptPanel = tester.widget<ToyPanel>(
+        find.byKey(const Key('quiz-prompt-panel')),
+      );
 
-    expect(promptPanel.tone, ToyPanelTone.warm);
-  });
+      expect(promptPanel.tone, ToyPanelTone.warm);
+    },
+  );
+
+  testWidgets(
+    'uses shared airy panel tone and compact density for the numbers target card on compact landscape',
+    (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(780, 430);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final repository = NumbersLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          NumbersLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_numbersLesson],
+          }),
+        }),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: NumbersQuizScreen(
+            repository: repository,
+            lessonId: 'numbers_count_1',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final targetPanel = tester.widget<ToyPanel>(
+        find.byKey(const Key('quiz-target-panel')),
+      );
+
+      expect(targetPanel.tone, ToyPanelTone.airy);
+      expect(targetPanel.density, ToyPanelDensity.compact);
+    },
+  );
 
   testWidgets(
     'keeps all numbers answer choices fully visible on a compact landscape screen',

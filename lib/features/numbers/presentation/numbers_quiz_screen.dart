@@ -269,11 +269,11 @@ class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
                                         SizedBox(height: isCompact ? 10 : 14),
                                         Expanded(
                                           child: ToyPanel(
-                                            padding: EdgeInsets.all(
-                                              isCompact ? 14 : 24,
-                                            ),
-                                            backgroundColor: KidPalette.white
-                                                .withValues(alpha: 0.94),
+                                            key: const Key('quiz-target-panel'),
+                                            density: isCompact
+                                                ? ToyPanelDensity.compact
+                                                : ToyPanelDensity.regular,
+                                            tone: ToyPanelTone.airy,
                                             child: Column(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
