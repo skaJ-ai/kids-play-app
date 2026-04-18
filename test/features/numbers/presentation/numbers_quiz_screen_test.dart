@@ -659,6 +659,122 @@ void main() {
   );
 
   testWidgets(
+    'plays a reward cue after finishing the numbers quiz with a sticker reward',
+    (WidgetTester tester) async {
+      final repository = NumbersLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          NumbersLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_numbersLesson],
+          }),
+        }),
+      );
+      final audioService = _FakeAudioService();
+
+      await tester.pumpWidget(
+        AppServicesScope(
+          services: AppServices(
+            progressStore: MemoryProgressStore(
+              const AppProgressSnapshot(
+                voicePromptsEnabled: false,
+                effectsEnabled: true,
+              ),
+            ),
+            speechCueService: NoopSpeechCueService(),
+            audioService: audioService,
+          ),
+          child: MaterialApp(
+            home: NumbersQuizScreen(
+              repository: repository,
+              lessonId: 'numbers_count_1',
+              mistakeSymbols: const ['5'],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('quiz-choice-5')));
+      await tester.pump();
+
+      expect(audioService.cueCalls, hasLength(1));
+      expect(audioService.cueCalls.single.type, AudioCueType.success);
+
+      await tester.pump(const Duration(milliseconds: 650));
+      await tester.pumpAndSettle();
+
+      expect(audioService.cueCalls, hasLength(2));
+      expect(audioService.cueCalls.last.type, AudioCueType.reward);
+      expect(audioService.cueCalls.last.assetKey, 'audio/sfx/reward.ogg');
+      expect(audioService.cueCalls.last.fallbackText, '스티커 하나 획득!');
+    },
+  );
+
+  testWidgets(
+    'ignores a stale completion when recent mistake symbols change during reward cue playback',
+    (WidgetTester tester) async {
+      final repository = NumbersLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          NumbersLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_numbersLesson],
+          }),
+        }),
+      );
+      final rewardCueCompleter = Completer<void>();
+      final audioService = _ControlledAudioService(
+        rewardCueCompleter: rewardCueCompleter,
+      );
+      final progressStore = MemoryProgressStore(
+        const AppProgressSnapshot(
+          voicePromptsEnabled: false,
+          effectsEnabled: true,
+        ),
+      );
+
+      Widget buildQuiz(List<String> mistakeSymbols) {
+        return AppServicesScope(
+          services: AppServices(
+            progressStore: progressStore,
+            speechCueService: NoopSpeechCueService(),
+            audioService: audioService,
+          ),
+          child: MaterialApp(
+            home: NumbersQuizScreen(
+              repository: repository,
+              lessonId: 'numbers_count_1',
+              mistakeSymbols: mistakeSymbols,
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildQuiz(const ['5']));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('quiz-choice-5')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 650));
+      await tester.pump();
+
+      expect(audioService.cueCalls.last.type, AudioCueType.reward);
+
+      await tester.pumpWidget(buildQuiz(const ['2', '5']));
+      await tester.pumpAndSettle();
+
+      expect(find.text('1 / 2'), findsOneWidget);
+      expect(find.text("'2' 숫자를 찾아봐!"), findsOneWidget);
+
+      rewardCueCompleter.complete();
+      await tester.pumpAndSettle();
+
+      expect(find.text('1 / 2'), findsOneWidget);
+      expect(find.text("'2' 숫자를 찾아봐!"), findsOneWidget);
+      expect(find.text('1문제 중 1문제 맞았어요!'), findsNothing);
+
+      await tester.pump(const Duration(milliseconds: 350));
+    },
+  );
+
+  testWidgets(
     'shows a sticker reward summary after finishing the numbers quiz',
     (WidgetTester tester) async {
       final repository = NumbersLessonRepository(
@@ -921,6 +1037,36 @@ class _FakeAssetBundle extends CachingAssetBundle {
     final string = await loadString(key);
     final bytes = Uint8List.fromList(utf8.encode(string));
     return ByteData.view(bytes.buffer);
+  }
+}
+
+class _ControlledAudioService implements AudioService {
+  _ControlledAudioService({this.rewardCueCompleter});
+
+  final Completer<void>? rewardCueCompleter;
+  final List<AudioPromptRequest> promptCalls = [];
+  final List<AudioCue> cueCalls = [];
+  int stopCount = 0;
+
+  @override
+  Future<void> playCue(AudioCue cue) async {
+    cueCalls.add(cue);
+    if (cue.type == AudioCueType.reward) {
+      final completer = rewardCueCompleter;
+      if (completer != null) {
+        await completer.future;
+      }
+    }
+  }
+
+  @override
+  Future<void> playPrompt(AudioPromptRequest request) async {
+    promptCalls.add(request);
+  }
+
+  @override
+  Future<void> stop() async {
+    stopCount += 1;
   }
 }
 

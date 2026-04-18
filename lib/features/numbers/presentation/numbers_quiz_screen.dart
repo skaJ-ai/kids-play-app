@@ -399,6 +399,19 @@ class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
       if (!mounted || !identical(_session, session)) {
         return;
       }
+      if (settings.effectsEnabled && nextSession.earnedSticker) {
+        await services.audioService.playCue(
+          const AudioCue(
+            type: AudioCueType.reward,
+            assetKey: 'audio/sfx/reward.ogg',
+            fallbackText: '스티커 하나 획득!',
+            pitch: 1.12,
+          ),
+        );
+        if (!mounted || !identical(_session, session)) {
+          return;
+        }
+      }
     }
 
     if (!mounted) {
