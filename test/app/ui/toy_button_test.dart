@@ -398,6 +398,68 @@ void main() {
     },
   );
 
+  testWidgets(
+    'uses kid typography titleMedium fallback for compact button labels when token overrides are absent',
+    (WidgetTester tester) async {
+      final baseTheme = buildKidTheme();
+      final customLayout = KidLayoutTheme.defaults.copyWith(
+        button: KidLayoutTheme.defaults.button.copyWith(
+          compact: KidLayoutTheme.defaults.button.compact.copyWith(
+            clearLabelFontWeight: true,
+            clearLabelLetterSpacing: true,
+            clearLabelHeight: true,
+          ),
+        ),
+      );
+      final customTypography = baseTheme.kidTypography.copyWith(
+        titleLarge: baseTheme.kidTypography.titleLarge.copyWith(
+          fontWeight: FontWeight.w900,
+          letterSpacing: 2.8,
+          height: 1.62,
+        ),
+        titleMedium: baseTheme.kidTypography.titleMedium.copyWith(
+          fontWeight: FontWeight.w400,
+          letterSpacing: 1.4,
+          height: 1.44,
+          fontStyle: FontStyle.italic,
+        ),
+      );
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          ToyButton(
+            key: const Key('compact-fallback-typography-button'),
+            label: '조밀 버튼',
+            icon: Icons.star_rounded,
+            density: ToyButtonDensity.compact,
+            onPressed: () {},
+          ),
+          theme: baseTheme.copyWith(
+            extensions: <ThemeExtension<dynamic>>[
+              customLayout,
+              customTypography,
+            ],
+          ),
+        ),
+      );
+
+      final labelStyle = _buttonLabelStyle(
+        tester,
+        find.byKey(const Key('compact-fallback-typography-button')),
+        '조밀 버튼',
+      );
+
+      expect(labelStyle.fontSize, customLayout.button.compact.labelFontSize);
+      expect(labelStyle.fontWeight, customTypography.titleMedium.fontWeight);
+      expect(
+        labelStyle.letterSpacing,
+        customTypography.titleMedium.letterSpacing,
+      );
+      expect(labelStyle.height, customTypography.titleMedium.height);
+      expect(labelStyle.fontStyle, customTypography.titleMedium.fontStyle);
+    },
+  );
+
   testWidgets('reads tight layout metrics from kid theme tokens', (
     WidgetTester tester,
   ) async {
@@ -526,7 +588,10 @@ void main() {
             onPressed: () {},
           ),
           theme: baseTheme.copyWith(
-            extensions: <ThemeExtension<dynamic>>[customLayout, customTypography],
+            extensions: <ThemeExtension<dynamic>>[
+              customLayout,
+              customTypography,
+            ],
           ),
         ),
       );
@@ -539,7 +604,10 @@ void main() {
 
       expect(labelStyle.fontSize, customLayout.button.tight.labelFontSize);
       expect(labelStyle.fontWeight, customTypography.titleMedium.fontWeight);
-      expect(labelStyle.letterSpacing, customTypography.titleMedium.letterSpacing);
+      expect(
+        labelStyle.letterSpacing,
+        customTypography.titleMedium.letterSpacing,
+      );
       expect(labelStyle.height, customTypography.titleMedium.height);
       expect(labelStyle.fontStyle, customTypography.titleMedium.fontStyle);
     },
