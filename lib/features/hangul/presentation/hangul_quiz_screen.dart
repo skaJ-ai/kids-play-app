@@ -513,7 +513,7 @@ class _TightQuizPromptPanel extends StatelessWidget {
     return ToyPanel(
       key: const Key('quiz-prompt-panel'),
       padding: const EdgeInsets.all(12),
-      backgroundColor: KidPalette.creamWarm,
+      tone: ToyPanelTone.warm,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -700,7 +700,7 @@ class _QuizSummary extends StatelessWidget {
       child: SizedBox(
         width: 560,
         child: ToyPanel(
-          backgroundColor: KidPalette.creamWarm,
+          tone: ToyPanelTone.warm,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

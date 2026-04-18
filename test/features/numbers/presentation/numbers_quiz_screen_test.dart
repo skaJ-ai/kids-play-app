@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kids_play_app/app/services/app_services.dart';
 import 'package:kids_play_app/app/services/progress_store.dart';
 import 'package:kids_play_app/app/services/speech_cue_service.dart';
+import 'package:kids_play_app/app/ui/toy_panel.dart';
 import 'package:kids_play_app/features/numbers/data/numbers_lesson_repository.dart';
 import 'package:kids_play_app/features/numbers/presentation/numbers_quiz_screen.dart';
 
@@ -42,6 +43,41 @@ void main() {
     expect(find.byKey(const Key('quiz-choice-2')), findsOneWidget);
     expect(find.byKey(const Key('quiz-choice-3')), findsOneWidget);
     expect(find.byKey(const Key('quiz-choice-4')), findsOneWidget);
+  });
+
+  testWidgets('uses a warm toy panel tone for the compact numbers prompt panel', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(780, 360);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final repository = NumbersLessonRepository(
+      assetBundle: _FakeAssetBundle({
+        NumbersLessonRepository.manifestPath: jsonEncode({
+          'lessons': [_numbersLesson],
+        }),
+      }),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: NumbersQuizScreen(
+          repository: repository,
+          lessonId: 'numbers_count_1',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final promptPanel = tester.widget<ToyPanel>(
+      find.byKey(const Key('quiz-prompt-panel')),
+    );
+
+    expect(promptPanel.tone, ToyPanelTone.warm);
   });
 
   testWidgets(
@@ -152,6 +188,17 @@ void main() {
       expect(find.text('5문제 중 5문제 맞았어요!'), findsOneWidget);
       expect(find.text('자동차 스티커 1개 획득!'), findsOneWidget);
       expect(find.text('다시하기'), findsOneWidget);
+
+      final summaryPanelFinder = find.ancestor(
+        of: find.text('자동차 스티커 1개 획득!'),
+        matching: find.byType(ToyPanel),
+      );
+
+      expect(summaryPanelFinder, findsOneWidget);
+      expect(
+        tester.widget<ToyPanel>(summaryPanelFinder).tone,
+        ToyPanelTone.warm,
+      );
     },
   );
 

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kids_play_app/app/ui/toy_panel.dart';
 import 'package:kids_play_app/features/hangul/data/hangul_lesson_repository.dart';
 import 'package:kids_play_app/features/hangul/presentation/hangul_quiz_screen.dart';
 
@@ -60,6 +61,41 @@ void main() {
     expect(find.byKey(const Key('quiz-choice-ㄴ')), findsOneWidget);
     expect(find.byKey(const Key('quiz-choice-ㄷ')), findsOneWidget);
     expect(find.byKey(const Key('quiz-choice-ㄹ')), findsOneWidget);
+  });
+
+  testWidgets('uses a warm toy panel tone for the compact hangul prompt panel', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(780, 360);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final repository = HangulLessonRepository(
+      assetBundle: _FakeAssetBundle({
+        HangulLessonRepository.manifestPath: jsonEncode({
+          'lessons': [_basicConsonantsLesson],
+        }),
+      }),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: HangulQuizScreen(
+          repository: repository,
+          lessonId: 'basic_consonants_1',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final promptPanel = tester.widget<ToyPanel>(
+      find.byKey(const Key('quiz-prompt-panel')),
+    );
+
+    expect(promptPanel.tone, ToyPanelTone.warm);
   });
 
   testWidgets('keeps all four answer choices fully visible on a compact landscape screen', (
@@ -188,6 +224,17 @@ void main() {
     expect(find.text('5문제 중 5문제 맞았어요!'), findsOneWidget);
     expect(find.text('자동차 스티커 1개 획득!'), findsOneWidget);
     expect(find.text('다시하기'), findsOneWidget);
+
+    final summaryPanelFinder = find.ancestor(
+      of: find.text('자동차 스티커 1개 획득!'),
+      matching: find.byType(ToyPanel),
+    );
+
+    expect(summaryPanelFinder, findsOneWidget);
+    expect(
+      tester.widget<ToyPanel>(summaryPanelFinder).tone,
+      ToyPanelTone.warm,
+    );
   });
 
   testWidgets('shows an error message when the hangul quiz fails to load', (
