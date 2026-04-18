@@ -814,11 +814,11 @@ void main() {
     final theme = buildKidTheme();
     final textTheme = theme.textTheme;
 
-    expect(textTheme.labelLarge?.fontSize, 14);
+    expect(textTheme.labelLarge?.fontSize, 13);
     expect(textTheme.labelLarge?.fontWeight, FontWeight.w700);
-    expect(textTheme.labelLarge?.letterSpacing, -0.1);
+    expect(textTheme.labelLarge?.letterSpacing, 0.08);
     expect(textTheme.labelLarge?.color, KidPalette.navy);
-    expect(textTheme.labelLarge?.height, 1.15);
+    expect(textTheme.labelLarge?.height, 1.14);
 
     expect(textTheme.labelMedium?.fontSize, 12);
     expect(textTheme.labelMedium?.fontWeight, FontWeight.w600);

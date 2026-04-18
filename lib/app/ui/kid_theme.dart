@@ -1164,10 +1164,10 @@ class KidTypographyTheme extends ThemeExtension<KidTypographyTheme> {
     ),
     titleSmall: TextStyle(
       fontSize: 14,
-      fontWeight: FontWeight.w700,
-      letterSpacing: 0,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 0.02,
       color: KidPalette.navy,
-      height: 1.20,
+      height: 1.22,
     ),
     bodyLarge: TextStyle(
       fontSize: 16,
@@ -1188,11 +1188,11 @@ class KidTypographyTheme extends ThemeExtension<KidTypographyTheme> {
       height: 1.32,
     ),
     labelLarge: TextStyle(
-      fontSize: 14,
+      fontSize: 13,
       fontWeight: FontWeight.w700,
-      letterSpacing: -0.1,
+      letterSpacing: 0.08,
       color: KidPalette.navy,
-      height: 1.15,
+      height: 1.14,
     ),
     labelMedium: TextStyle(
       fontSize: 12,

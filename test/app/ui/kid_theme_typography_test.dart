@@ -46,10 +46,10 @@ void main() {
     final textTheme = buildKidTheme().textTheme;
 
     expect(textTheme.labelLarge, isNotNull);
-    expect(textTheme.labelLarge!.fontSize, 14);
+    expect(textTheme.labelLarge!.fontSize, 13);
     expect(textTheme.labelLarge!.fontWeight, FontWeight.w700);
-    expect(textTheme.labelLarge!.letterSpacing, -0.1);
-    expect(textTheme.labelLarge!.height, 1.15);
+    expect(textTheme.labelLarge!.letterSpacing, 0.08);
+    expect(textTheme.labelLarge!.height, 1.14);
     expect(textTheme.labelLarge!.color, KidPalette.navy);
   });
 
@@ -65,9 +65,9 @@ void main() {
 
     expect(textTheme.titleSmall, isNotNull);
     expect(textTheme.titleSmall!.fontSize, 14);
-    expect(textTheme.titleSmall!.fontWeight, FontWeight.w700);
-    expect(textTheme.titleSmall!.letterSpacing, 0);
-    expect(textTheme.titleSmall!.height, 1.20);
+    expect(textTheme.titleSmall!.fontWeight, FontWeight.w600);
+    expect(textTheme.titleSmall!.letterSpacing, 0.02);
+    expect(textTheme.titleSmall!.height, 1.22);
     expect(textTheme.titleSmall!.color, KidPalette.navy);
 
     expect(textTheme.bodyLarge, isNotNull);
