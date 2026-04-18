@@ -52,7 +52,10 @@ class ToyButton extends StatelessWidget {
     final primaryTone = tone == ToyButtonTone.primary;
     final baseColors = primaryTone
         ? colors
-        : const [KidPalette.cream, KidPalette.creamWarm];
+        : [
+            chromeTokens.secondaryShellGradientStart,
+            chromeTokens.secondaryShellGradientEnd,
+          ];
     final buttonColors = enabled
         ? baseColors
         : baseColors
@@ -69,7 +72,9 @@ class ToyButton extends StatelessWidget {
     final foregroundColor = primaryTone ? KidPalette.white : KidPalette.navy;
     final borderColor = primaryTone
         ? KidPalette.white.withValues(alpha: chromeTokens.primaryBorderAlpha)
-        : KidPalette.stroke.withValues(alpha: chromeTokens.secondaryBorderAlpha);
+        : KidPalette.stroke.withValues(
+            alpha: chromeTokens.secondaryBorderAlpha,
+          );
     final boxShadow = primaryTone
         ? shadowTokens.buttonPrimary
         : shadowTokens.buttonSecondary;

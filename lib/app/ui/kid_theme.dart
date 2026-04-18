@@ -335,6 +335,8 @@ class KidButtonChromeTokens {
     this.primaryIconChipAlpha = 0.18,
     this.primaryIconChipBorderAlpha = 0.12,
     this.primaryHighlightAlpha = 0.22,
+    this.secondaryShellGradientStart = KidPalette.cream,
+    this.secondaryShellGradientEnd = KidPalette.creamWarm,
     this.secondaryBorderAlpha = 0.82,
     this.secondaryIconChipAlpha = 0.88,
     this.secondaryIconChipBorderAlpha = 0.72,
@@ -348,6 +350,8 @@ class KidButtonChromeTokens {
   final double primaryIconChipAlpha;
   final double primaryIconChipBorderAlpha;
   final double primaryHighlightAlpha;
+  final Color secondaryShellGradientStart;
+  final Color secondaryShellGradientEnd;
   final double secondaryBorderAlpha;
   final double secondaryIconChipAlpha;
   final double secondaryIconChipBorderAlpha;
@@ -361,6 +365,8 @@ class KidButtonChromeTokens {
     double? primaryIconChipAlpha,
     double? primaryIconChipBorderAlpha,
     double? primaryHighlightAlpha,
+    Color? secondaryShellGradientStart,
+    Color? secondaryShellGradientEnd,
     double? secondaryBorderAlpha,
     double? secondaryIconChipAlpha,
     double? secondaryIconChipBorderAlpha,
@@ -376,6 +382,10 @@ class KidButtonChromeTokens {
           primaryIconChipBorderAlpha ?? this.primaryIconChipBorderAlpha,
       primaryHighlightAlpha:
           primaryHighlightAlpha ?? this.primaryHighlightAlpha,
+      secondaryShellGradientStart:
+          secondaryShellGradientStart ?? this.secondaryShellGradientStart,
+      secondaryShellGradientEnd:
+          secondaryShellGradientEnd ?? this.secondaryShellGradientEnd,
       secondaryBorderAlpha: secondaryBorderAlpha ?? this.secondaryBorderAlpha,
       secondaryIconChipAlpha:
           secondaryIconChipAlpha ?? this.secondaryIconChipAlpha,
@@ -415,6 +425,20 @@ class KidButtonChromeTokens {
             t,
           ) ??
           primaryHighlightAlpha,
+      secondaryShellGradientStart:
+          Color.lerp(
+            secondaryShellGradientStart,
+            other.secondaryShellGradientStart,
+            t,
+          ) ??
+          secondaryShellGradientStart,
+      secondaryShellGradientEnd:
+          Color.lerp(
+            secondaryShellGradientEnd,
+            other.secondaryShellGradientEnd,
+            t,
+          ) ??
+          secondaryShellGradientEnd,
       secondaryBorderAlpha:
           ui.lerpDouble(secondaryBorderAlpha, other.secondaryBorderAlpha, t) ??
           secondaryBorderAlpha,

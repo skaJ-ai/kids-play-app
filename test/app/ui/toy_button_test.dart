@@ -636,6 +636,46 @@ void main() {
     );
   });
 
+  testWidgets(
+    'reads secondary shell gradient overrides from kid theme tokens',
+    (WidgetTester tester) async {
+      const secondaryShellGradientStart = Color(0xFFFFF3D9);
+      const secondaryShellGradientEnd = Color(0xFFFFE3B8);
+      final customLayout = KidLayoutTheme(
+        button: KidLayoutTheme.defaults.button,
+        panel: KidLayoutTheme.defaults.panel,
+        chrome: const KidChromeTokens(
+          button: KidButtonChromeTokens(
+            secondaryShellGradientStart: secondaryShellGradientStart,
+            secondaryShellGradientEnd: secondaryShellGradientEnd,
+          ),
+          panel: KidPanelChromeTokens(),
+        ),
+      );
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          ToyButton(
+            label: '껍질 토큰 버튼',
+            icon: Icons.settings_rounded,
+            tone: ToyButtonTone.secondary,
+            onPressed: () {},
+          ),
+          theme: buildKidTheme().copyWith(extensions: [customLayout]),
+        ),
+      );
+
+      final gradient =
+          _buttonDecoration(tester, find.byType(ToyButton)).gradient!
+              as LinearGradient;
+
+      expect(gradient.colors, const [
+        secondaryShellGradientStart,
+        secondaryShellGradientEnd,
+      ]);
+    },
+  );
+
   testWidgets('reads disabled opacity from kid theme chrome tokens', (
     WidgetTester tester,
   ) async {
@@ -663,6 +703,8 @@ void main() {
   ) async {
     const primaryBlendAmount = 0.68;
     const secondaryBlendAmount = 0.34;
+    const secondaryShellGradientStart = Color(0xFFFFF3D9);
+    const secondaryShellGradientEnd = Color(0xFFFFE3B8);
     final customLayout = KidLayoutTheme(
       button: KidLayoutTheme.defaults.button,
       panel: KidLayoutTheme.defaults.panel,
@@ -670,6 +712,8 @@ void main() {
         button: KidButtonChromeTokens(
           primaryDisabledGradientBlendAmount: primaryBlendAmount,
           secondaryDisabledGradientBlendAmount: secondaryBlendAmount,
+          secondaryShellGradientStart: secondaryShellGradientStart,
+          secondaryShellGradientEnd: secondaryShellGradientEnd,
         ),
         panel: KidPanelChromeTokens(),
       ),
@@ -714,8 +758,16 @@ void main() {
       Color.lerp(KidPalette.blueDark, KidPalette.body, primaryBlendAmount)!,
     ]);
     expect(secondaryGradient.colors, [
-      Color.lerp(KidPalette.cream, KidPalette.body, secondaryBlendAmount)!,
-      Color.lerp(KidPalette.creamWarm, KidPalette.body, secondaryBlendAmount)!,
+      Color.lerp(
+        secondaryShellGradientStart,
+        KidPalette.body,
+        secondaryBlendAmount,
+      )!,
+      Color.lerp(
+        secondaryShellGradientEnd,
+        KidPalette.body,
+        secondaryBlendAmount,
+      )!,
     ]);
   });
 

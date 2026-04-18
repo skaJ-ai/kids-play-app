@@ -80,32 +80,35 @@ void main() {
     },
   );
 
-  test('KidPanelDensityTokens keeps highlightTopInset in copyWith and lerp', () {
-    const base = KidPanelDensityTokens(
-      padding: EdgeInsets.all(20),
-      radius: 30,
-      borderWidth: 1.4,
-      highlightTopInset: 0,
-      highlightHeight: 16,
-      highlightHorizontalInset: 18,
-      insetRadius: 22,
-    );
-    const other = KidPanelDensityTokens(
-      padding: EdgeInsets.all(12),
-      radius: 28,
-      borderWidth: 1.3,
-      highlightTopInset: 6,
-      highlightHeight: 14,
-      highlightHorizontalInset: 16,
-      insetRadius: 16,
-    );
+  test(
+    'KidPanelDensityTokens keeps highlightTopInset in copyWith and lerp',
+    () {
+      const base = KidPanelDensityTokens(
+        padding: EdgeInsets.all(20),
+        radius: 30,
+        borderWidth: 1.4,
+        highlightTopInset: 0,
+        highlightHeight: 16,
+        highlightHorizontalInset: 18,
+        insetRadius: 22,
+      );
+      const other = KidPanelDensityTokens(
+        padding: EdgeInsets.all(12),
+        radius: 28,
+        borderWidth: 1.3,
+        highlightTopInset: 6,
+        highlightHeight: 14,
+        highlightHorizontalInset: 16,
+        insetRadius: 16,
+      );
 
-    final updated = base.copyWith(highlightTopInset: 3);
-    final lerped = base.lerp(other, 1);
+      final updated = base.copyWith(highlightTopInset: 3);
+      final lerped = base.lerp(other, 1);
 
-    expect(updated.highlightTopInset, 3);
-    expect(lerped.highlightTopInset, other.highlightTopInset);
-  });
+      expect(updated.highlightTopInset, 3);
+      expect(lerped.highlightTopInset, other.highlightTopInset);
+    },
+  );
 
   test(
     'KidButtonDensityTokens keeps highlight and label tokens in copyWith and lerp',
@@ -396,6 +399,11 @@ void main() {
     expect(layout.chrome.button.primaryIconChipAlpha, 0.18);
     expect(layout.chrome.button.primaryIconChipBorderAlpha, 0.12);
     expect(layout.chrome.button.primaryHighlightAlpha, 0.22);
+    expect(layout.chrome.button.secondaryShellGradientStart, KidPalette.cream);
+    expect(
+      layout.chrome.button.secondaryShellGradientEnd,
+      KidPalette.creamWarm,
+    );
     expect(layout.chrome.button.secondaryIconChipAlpha, 0.88);
     expect(layout.chrome.button.secondaryHighlightAlpha, 0.14);
     expect(layout.chrome.button.primaryDisabledGradientBlendAmount, 0.36);
@@ -408,21 +416,40 @@ void main() {
     expect(layout.chrome.panel.shellGradientWhiteBlendAmount, 0.34);
   });
 
-  test('KidButtonChromeTokens exposes secondary border alpha tokens', () {
+  test('KidButtonChromeTokens exposes secondary shell and border tokens', () {
     final layout = buildKidTheme().extension<KidLayoutTheme>();
+    const updatedStart = Color(0xFFF8F1E4);
+    const updatedEnd = Color(0xFFEAD9BE);
 
     expect(layout, isNotNull);
-    expect(layout!.chrome.button.secondaryBorderAlpha, 0.82);
+    expect(layout!.chrome.button.secondaryShellGradientStart, KidPalette.cream);
+    expect(
+      layout.chrome.button.secondaryShellGradientEnd,
+      KidPalette.creamWarm,
+    );
+    expect(layout.chrome.button.secondaryBorderAlpha, 0.82);
     expect(layout.chrome.button.secondaryIconChipBorderAlpha, 0.72);
 
     final preserved = layout.chrome.button.copyWith(primaryBorderAlpha: 0.44);
     const updated = KidButtonChromeTokens(
+      secondaryShellGradientStart: updatedStart,
+      secondaryShellGradientEnd: updatedEnd,
       secondaryBorderAlpha: 0.64,
       secondaryIconChipBorderAlpha: 0.48,
     );
 
+    expect(preserved.secondaryShellGradientStart, KidPalette.cream);
+    expect(preserved.secondaryShellGradientEnd, KidPalette.creamWarm);
     expect(preserved.secondaryBorderAlpha, 0.82);
     expect(preserved.secondaryIconChipBorderAlpha, 0.72);
+    expect(
+      layout.chrome.button.lerp(updated, 1).secondaryShellGradientStart,
+      updatedStart,
+    );
+    expect(
+      layout.chrome.button.lerp(updated, 1).secondaryShellGradientEnd,
+      updatedEnd,
+    );
     expect(layout.chrome.button.lerp(updated, 1).secondaryBorderAlpha, 0.64);
     expect(
       layout.chrome.button.lerp(updated, 1).secondaryIconChipBorderAlpha,
