@@ -9,6 +9,7 @@ import '../../../app/ui/playground_scaffold.dart';
 import '../../../app/ui/toy_button.dart';
 import '../../../app/ui/toy_panel.dart';
 import '../data/numbers_lesson_repository.dart';
+import 'numbers_quiz_session.dart';
 
 class NumbersQuizScreen extends StatefulWidget {
   const NumbersQuizScreen({
@@ -29,13 +30,10 @@ class NumbersQuizScreen extends StatefulWidget {
 class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
   late Future<NumbersLesson> _lessonFuture;
   late AppServices _services;
-  int _questionIndex = 0;
-  int _correctCount = 0;
-  bool _isComplete = false;
+  NumbersQuizSession? _session;
   bool _feedbackVisible = false;
   bool _feedbackCorrect = false;
   bool _isResolvingChoice = false;
-  List<String> _recentMistakes = const [];
   String? _lastPromptKey;
 
   @override
@@ -50,6 +48,22 @@ class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
     _lessonFuture = _loadLesson();
   }
 
+  @override
+  void didUpdateWidget(covariant NumbersQuizScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_sameMistakeReplayFilter(
+      oldWidget.mistakeSymbols,
+      widget.mistakeSymbols,
+    )) {
+      return;
+    }
+    _session = null;
+    _feedbackVisible = false;
+    _feedbackCorrect = false;
+    _isResolvingChoice = false;
+    _lastPromptKey = null;
+  }
+
   Future<NumbersLesson> _loadLesson() {
     return (widget.repository ?? NumbersLessonRepository()).loadLesson(
       widget.lessonId,
@@ -58,13 +72,10 @@ class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
 
   void _retryLoad() {
     setState(() {
-      _questionIndex = 0;
-      _correctCount = 0;
-      _isComplete = false;
+      _session = null;
       _feedbackVisible = false;
       _feedbackCorrect = false;
       _isResolvingChoice = false;
-      _recentMistakes = const [];
       _lastPromptKey = null;
       _lessonFuture = _loadLesson();
     });
@@ -83,7 +94,12 @@ class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
   }
 
   void _queuePrompt(NumbersCard question) {
-    final promptKey = '${widget.lessonId}:${question.symbol}:$_questionIndex';
+    final session = _session;
+    if (session == null) {
+      return;
+    }
+    final promptKey =
+        '${widget.lessonId}:${question.symbol}:${session.questionIndex}';
     if (_lastPromptKey == promptKey) {
       return;
     }
@@ -116,30 +132,30 @@ class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
             return const Center(child: Text('퀴즈 카드가 아직 부족해요.'));
           }
 
-          final quizCards = _resolvedQuizCards(lesson.cards);
-          if (quizCards.isEmpty) {
+          final session = _session ??= NumbersQuizSession.start(
+            cards: lesson.cards,
+            mistakeSymbols: widget.mistakeSymbols,
+          );
+          if (session.totalQuestions == 0) {
             return const Center(child: Text('다시 풀 오답이 없어요.'));
           }
 
-          if (_isComplete) {
+          if (session.isComplete) {
             return _QuizSummary(
-              totalQuestions: quizCards.length,
-              correctCount: _correctCount,
+              totalQuestions: session.totalQuestions,
+              correctCount: session.correctCount,
               onRestart: () => setState(() {
-                _questionIndex = 0;
-                _correctCount = 0;
-                _isComplete = false;
+                _session = session.restart();
                 _feedbackVisible = false;
                 _feedbackCorrect = false;
                 _isResolvingChoice = false;
-                _recentMistakes = const [];
                 _lastPromptKey = null;
               }),
             );
           }
 
-          final question = quizCards[_questionIndex];
-          final choices = _buildChoices(lesson.cards, question, _questionIndex);
+          final question = session.currentQuestion;
+          final choices = session.currentChoices();
           _queuePrompt(question);
 
           return LayoutBuilder(
@@ -202,7 +218,7 @@ class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
                             boxShadow: KidShadows.panel,
                           ),
                           child: Text(
-                            '${_questionIndex + 1} / ${quizCards.length}',
+                            '${session.questionIndex + 1} / ${session.totalQuestions}',
                             style: Theme.of(context).textTheme.titleSmall
                                 ?.copyWith(
                                   color: KidPalette.coralDark,
@@ -295,11 +311,8 @@ class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
                                         compact: isCompact,
                                         accentIndex: i,
                                         disabled: _isResolvingChoice,
-                                        onTap: () => _selectChoice(
-                                          choice: choices[i],
-                                          answer: question,
-                                          totalQuestions: quizCards.length,
-                                        ),
+                                        onTap: () =>
+                                            _selectChoice(choice: choices[i]),
                                       ),
                                   ],
                                 );
@@ -319,37 +332,36 @@ class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
     );
   }
 
-  Future<void> _selectChoice({
-    required NumbersCard choice,
-    required NumbersCard answer,
-    required int totalQuestions,
-  }) async {
+  Future<void> _selectChoice({required NumbersCard choice}) async {
     if (_isResolvingChoice) {
+      return;
+    }
+
+    final session = _session;
+    if (session == null) {
       return;
     }
 
     final services = AppServicesScope.of(context);
     final settings = await services.progressStore.loadSnapshot();
-    final isCorrect = choice.symbol == answer.symbol;
-    final nextCorrectCount = isCorrect ? _correctCount + 1 : _correctCount;
-    final nextMistakes = isCorrect
-        ? _recentMistakes
-        : <String>[..._recentMistakes, answer.symbol];
+    if (!mounted || !identical(_session, session)) {
+      return;
+    }
+    final result = session.answer(choice);
+    final nextSession = result.session;
 
     setState(() {
-      _correctCount = nextCorrectCount;
-      _recentMistakes = nextMistakes;
-      _feedbackCorrect = isCorrect;
+      _feedbackCorrect = result.isCorrect;
       _feedbackVisible = settings.effectsEnabled;
       _isResolvingChoice = true;
     });
 
     if (settings.voicePromptsEnabled) {
       await services.speechCueService.speak(
-        isCorrect ? '딩동댕' : '다시 해보자',
+        result.isCorrect ? '딩동댕' : '다시 해보자',
         locale: 'ko-KR',
         rate: 0.46,
-        pitch: isCorrect ? 1.08 : 0.94,
+        pitch: result.isCorrect ? 1.08 : 0.94,
       );
     }
 
@@ -357,68 +369,36 @@ class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
       Duration(milliseconds: settings.effectsEnabled ? 650 : 220),
     );
 
-    final isLastQuestion = _questionIndex == totalQuestions - 1;
-    if (isLastQuestion) {
-      final earnedSticker = nextCorrectCount >= (totalQuestions * 0.8).ceil();
-      if (earnedSticker) {
+    if (!mounted || !identical(_session, session)) {
+      return;
+    }
+
+    if (nextSession.isComplete) {
+      if (nextSession.earnedSticker) {
         await services.progressStore.addStickers(1);
+        if (!mounted || !identical(_session, session)) {
+          return;
+        }
       }
       await services.progressStore.recordQuizResult(
         lessonId: 'numbers:${widget.lessonId}',
-        correctCount: nextCorrectCount,
-        totalQuestions: totalQuestions,
-        recentMistakes: nextMistakes,
+        correctCount: nextSession.correctCount,
+        totalQuestions: nextSession.totalQuestions,
+        recentMistakes: nextSession.recentMistakes,
       );
-      if (!mounted) {
+      if (!mounted || !identical(_session, session)) {
         return;
       }
-      setState(() {
-        _feedbackVisible = false;
-        _isResolvingChoice = false;
-        _isComplete = true;
-      });
-      return;
     }
 
     if (!mounted) {
       return;
     }
     setState(() {
-      _questionIndex += 1;
+      _session = nextSession;
       _feedbackVisible = false;
       _isResolvingChoice = false;
     });
-  }
-
-  List<NumbersCard> _buildChoices(
-    List<NumbersCard> cards,
-    NumbersCard answer,
-    int questionIndex,
-  ) {
-    final distractors = cards
-        .where((card) => card.symbol != answer.symbol)
-        .toList();
-    final startIndex = distractors.isEmpty
-        ? 0
-        : questionIndex % distractors.length;
-    final rotatedDistractors = [
-      ...distractors.skip(startIndex),
-      ...distractors.take(startIndex),
-    ];
-    final choices = rotatedDistractors.take(3).toList(growable: true);
-    choices.insert(questionIndex % 4, answer);
-    return choices;
-  }
-
-  List<NumbersCard> _resolvedQuizCards(List<NumbersCard> cards) {
-    final symbols = widget.mistakeSymbols;
-    if (symbols == null || symbols.isEmpty) {
-      return cards;
-    }
-
-    return cards
-        .where((card) => symbols.contains(card.symbol))
-        .toList(growable: false);
   }
 
   String _displayNameFor(NumbersCard question) {
@@ -427,6 +407,13 @@ class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
 
   String _targetPromptFor(NumbersCard question) {
     return "'${question.symbol}' 숫자를 찾아봐!";
+  }
+
+  bool _sameMistakeReplayFilter(List<String>? previous, List<String>? next) {
+    final previousSet = previous == null ? <String>{} : previous.toSet();
+    final nextSet = next == null ? <String>{} : next.toSet();
+    return previousSet.length == nextSet.length &&
+        previousSet.containsAll(nextSet);
   }
 }
 

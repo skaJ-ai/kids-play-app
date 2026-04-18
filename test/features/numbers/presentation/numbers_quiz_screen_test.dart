@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -114,6 +115,287 @@ void main() {
 
       expect(find.text('2 / 2'), findsOneWidget);
       expect(find.text("'5' 숫자를 찾아봐!"), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'waits for feedback timing before advancing to the next numbers question',
+    (WidgetTester tester) async {
+      final repository = NumbersLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          NumbersLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_numbersLesson],
+          }),
+        }),
+      );
+      final progressStore = MemoryProgressStore(
+        const AppProgressSnapshot(
+          voicePromptsEnabled: false,
+          effectsEnabled: false,
+        ),
+      );
+
+      await tester.pumpWidget(
+        AppServicesScope(
+          services: AppServices(
+            progressStore: progressStore,
+            speechCueService: NoopSpeechCueService(),
+          ),
+          child: MaterialApp(
+            home: NumbersQuizScreen(
+              repository: repository,
+              lessonId: 'numbers_count_1',
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('quiz-choice-1')));
+      await tester.pump();
+
+      expect(find.text('1 / 5'), findsOneWidget);
+      expect(find.text("'1' 숫자를 찾아봐!"), findsOneWidget);
+
+      await tester.pump(const Duration(milliseconds: 220));
+      await tester.pumpAndSettle();
+
+      expect(find.text('2 / 5'), findsOneWidget);
+      expect(find.text("'2' 숫자를 찾아봐!"), findsOneWidget);
+    },
+  );
+
+  testWidgets('rebuilds the quiz session when recent mistake symbols change', (
+    WidgetTester tester,
+  ) async {
+    final repository = NumbersLessonRepository(
+      assetBundle: _FakeAssetBundle({
+        NumbersLessonRepository.manifestPath: jsonEncode({
+          'lessons': [_numbersLesson],
+        }),
+      }),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: NumbersQuizScreen(
+          repository: repository,
+          lessonId: 'numbers_count_1',
+          mistakeSymbols: const ['2', '5'],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('1 / 2'), findsOneWidget);
+    expect(find.text("'2' 숫자를 찾아봐!"), findsOneWidget);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: NumbersQuizScreen(
+          repository: repository,
+          lessonId: 'numbers_count_1',
+          mistakeSymbols: const ['5'],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('1 / 1'), findsOneWidget);
+    expect(find.text("'5' 숫자를 찾아봐!"), findsOneWidget);
+  });
+
+  testWidgets(
+    'ignores a stale answer resolution when recent mistake symbols change mid-feedback',
+    (WidgetTester tester) async {
+      final repository = NumbersLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          NumbersLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_numbersLesson],
+          }),
+        }),
+      );
+      final progressStore = MemoryProgressStore(
+        const AppProgressSnapshot(
+          voicePromptsEnabled: false,
+          effectsEnabled: false,
+        ),
+      );
+
+      Widget buildQuiz(List<String> mistakeSymbols) {
+        return AppServicesScope(
+          services: AppServices(
+            progressStore: progressStore,
+            speechCueService: NoopSpeechCueService(),
+          ),
+          child: MaterialApp(
+            home: NumbersQuizScreen(
+              repository: repository,
+              lessonId: 'numbers_count_1',
+              mistakeSymbols: mistakeSymbols,
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildQuiz(const ['2', '5']));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('quiz-choice-2')));
+      await tester.pump();
+
+      await tester.pumpWidget(buildQuiz(const ['5']));
+      await tester.pumpAndSettle();
+
+      expect(find.text('1 / 1'), findsOneWidget);
+      expect(find.text("'5' 숫자를 찾아봐!"), findsOneWidget);
+
+      await tester.pump(const Duration(milliseconds: 220));
+      await tester.pumpAndSettle();
+
+      expect(find.text('1 / 1'), findsOneWidget);
+      expect(find.text("'5' 숫자를 찾아봐!"), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'ignores a stale answer start when recent mistake symbols change before settings load',
+    (WidgetTester tester) async {
+      final repository = NumbersLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          NumbersLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_numbersLesson],
+          }),
+        }),
+      );
+      final loadSnapshotCompleter = Completer<void>();
+      final progressStore = _ControlledProgressStore(
+        MemoryProgressStore(
+          const AppProgressSnapshot(
+            voicePromptsEnabled: false,
+            effectsEnabled: false,
+          ),
+        ),
+        loadSnapshotCompleter: loadSnapshotCompleter,
+      );
+
+      Widget buildQuiz(List<String> mistakeSymbols) {
+        return AppServicesScope(
+          services: AppServices(
+            progressStore: progressStore,
+            speechCueService: NoopSpeechCueService(),
+          ),
+          child: MaterialApp(
+            home: NumbersQuizScreen(
+              repository: repository,
+              lessonId: 'numbers_count_1',
+              mistakeSymbols: mistakeSymbols,
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildQuiz(const ['2', '5']));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('quiz-choice-2')));
+      await tester.pump();
+
+      await tester.pumpWidget(buildQuiz(const ['5']));
+      await tester.pumpAndSettle();
+
+      expect(find.text('1 / 1'), findsOneWidget);
+      expect(find.text("'5' 숫자를 찾아봐!"), findsOneWidget);
+
+      loadSnapshotCompleter.complete();
+      await tester.pump();
+
+      await tester.tap(find.byKey(const Key('quiz-choice-5')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 220));
+      await tester.pumpAndSettle();
+
+      expect(find.text('1문제 중 1문제 맞았어요!'), findsOneWidget);
+      expect(find.text('자동차 스티커 1개 획득!'), findsOneWidget);
+
+      await tester.pump(const Duration(milliseconds: 350));
+    },
+  );
+
+  testWidgets(
+    'ignores a stale completion when recent mistake symbols change during reward persistence',
+    (WidgetTester tester) async {
+      final repository = NumbersLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          NumbersLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_numbersLesson],
+          }),
+        }),
+      );
+      final addStickersCompleter = Completer<void>();
+      final progressStore = _ControlledProgressStore(
+        MemoryProgressStore(
+          const AppProgressSnapshot(
+            voicePromptsEnabled: false,
+            effectsEnabled: false,
+          ),
+        ),
+        addStickersCompleter: addStickersCompleter,
+      );
+
+      Widget buildQuiz(List<String> mistakeSymbols) {
+        return AppServicesScope(
+          services: AppServices(
+            progressStore: progressStore,
+            speechCueService: NoopSpeechCueService(),
+          ),
+          child: MaterialApp(
+            home: NumbersQuizScreen(
+              repository: repository,
+              lessonId: 'numbers_count_1',
+              mistakeSymbols: mistakeSymbols,
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildQuiz(const ['5']));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('quiz-choice-5')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 220));
+      await tester.pump();
+
+      expect(progressStore.addStickersCallCount, 1);
+
+      await tester.pumpWidget(buildQuiz(const ['2', '5']));
+      await tester.pumpAndSettle();
+
+      final rebuiltTexts = tester
+          .widgetList<Text>(find.byType(Text))
+          .map((widget) {
+            return widget.data ?? widget.textSpan?.toPlainText() ?? '';
+          })
+          .toList(growable: false);
+
+      expect(rebuiltTexts, contains('1 / 2'));
+      expect(rebuiltTexts, contains("'2' 숫자를 찾아봐!"));
+
+      addStickersCompleter.complete();
+      await tester.pumpAndSettle();
+
+      final settledTexts = tester
+          .widgetList<Text>(find.byType(Text))
+          .map((widget) {
+            return widget.data ?? widget.textSpan?.toPlainText() ?? '';
+          })
+          .toList(growable: false);
+
+      expect(settledTexts, contains('1 / 2'));
+      expect(settledTexts, contains("'2' 숫자를 찾아봐!"));
+
+      await tester.pump(const Duration(milliseconds: 350));
     },
   );
 
@@ -239,6 +521,99 @@ const Map<String, dynamic> _numbersLesson = {
     {'symbol': '5', 'label': '다섯, 5', 'hint': '자동차 다섯 대를 보며 다섯을 말해봐요'},
   ],
 };
+
+class _ControlledProgressStore implements ProgressStore {
+  _ControlledProgressStore(
+    this._delegate, {
+    this.addStickersCompleter,
+    this.loadSnapshotCompleter,
+  });
+
+  final ProgressStore _delegate;
+  final Completer<void>? addStickersCompleter;
+  final Completer<void>? loadSnapshotCompleter;
+  int addStickersCallCount = 0;
+
+  @override
+  Future<void> addStickers(int count) async {
+    addStickersCallCount += 1;
+    final completer = addStickersCompleter;
+    if (completer != null) {
+      await completer.future;
+    }
+    await _delegate.addStickers(count);
+  }
+
+  @override
+  Future<AppProgressSnapshot> loadSnapshot() async {
+    final completer = loadSnapshotCompleter;
+    if (completer != null) {
+      await completer.future;
+    }
+    return _delegate.loadSnapshot();
+  }
+
+  @override
+  Future<void> recordLessonIndex({
+    required String lessonId,
+    required int lastViewedIndex,
+  }) {
+    return _delegate.recordLessonIndex(
+      lessonId: lessonId,
+      lastViewedIndex: lastViewedIndex,
+    );
+  }
+
+  @override
+  Future<void> recordQuizResult({
+    required String lessonId,
+    required int correctCount,
+    required int totalQuestions,
+    required List<String> recentMistakes,
+  }) {
+    return _delegate.recordQuizResult(
+      lessonId: lessonId,
+      correctCount: correctCount,
+      totalQuestions: totalQuestions,
+      recentMistakes: recentMistakes,
+    );
+  }
+
+  @override
+  Future<void> recordRewardEarned({
+    required String kind,
+    required int amount,
+    required String lessonId,
+    required DateTime earnedAt,
+  }) {
+    return _delegate.recordRewardEarned(
+      kind: kind,
+      amount: amount,
+      lessonId: lessonId,
+      earnedAt: earnedAt,
+    );
+  }
+
+  @override
+  Future<void> reset() {
+    return _delegate.reset();
+  }
+
+  @override
+  Future<void> setEffectsEnabled(bool enabled) {
+    return _delegate.setEffectsEnabled(enabled);
+  }
+
+  @override
+  Future<void> setLessonUnlocked(String lessonId, bool unlocked) {
+    return _delegate.setLessonUnlocked(lessonId, unlocked);
+  }
+
+  @override
+  Future<void> setVoicePromptsEnabled(bool enabled) {
+    return _delegate.setVoicePromptsEnabled(enabled);
+  }
+}
 
 class _FakeAssetBundle extends CachingAssetBundle {
   _FakeAssetBundle(this._assets);
