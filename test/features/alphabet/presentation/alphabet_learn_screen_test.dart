@@ -8,6 +8,7 @@ import 'package:kids_play_app/app/services/progress_store.dart';
 import 'package:kids_play_app/app/services/speech_cue_service.dart';
 import 'package:kids_play_app/app/ui/kid_theme.dart';
 import 'package:kids_play_app/app/ui/toy_button.dart';
+import 'package:kids_play_app/app/ui/toy_panel.dart';
 import 'package:kids_play_app/features/alphabet/data/alphabet_lesson_repository.dart';
 import 'package:kids_play_app/features/alphabet/presentation/alphabet_learn_screen.dart';
 
@@ -158,6 +159,68 @@ void main() {
     );
   });
 
+  testWidgets('inherits regular ToyPanel density on roomy alphabet layouts', (
+    WidgetTester tester,
+  ) async {
+    _setSurfaceSize(tester, const Size(1024, 768));
+    final repository = AlphabetLessonRepository(
+      assetBundle: _FakeAssetBundle({
+        AlphabetLessonRepository.manifestPath: jsonEncode({
+          'lessons': [_alphabetLesson],
+        }),
+      }),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: AlphabetLearnScreen(
+          repository: repository,
+          lessonId: 'alphabet_letters_1',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final symbolPanel = _panelForText(tester, 'A a');
+    final hintPanel = _panelForText(tester, '천천히 해봐!');
+
+    expect(symbolPanel.density, ToyPanelDensity.regular);
+    expect(symbolPanel.padding, isNull);
+    expect(hintPanel.density, ToyPanelDensity.regular);
+    expect(hintPanel.padding, isNull);
+  });
+
+  testWidgets('inherits compact ToyPanel density on compact alphabet layouts', (
+    WidgetTester tester,
+  ) async {
+    _setSurfaceSize(tester, const Size(780, 360));
+    final repository = AlphabetLessonRepository(
+      assetBundle: _FakeAssetBundle({
+        AlphabetLessonRepository.manifestPath: jsonEncode({
+          'lessons': [_alphabetLesson],
+        }),
+      }),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: AlphabetLearnScreen(
+          repository: repository,
+          lessonId: 'alphabet_letters_1',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final symbolPanel = _panelForText(tester, 'A a');
+    final hintPanel = _panelForText(tester, '천천히!');
+
+    expect(symbolPanel.density, ToyPanelDensity.compact);
+    expect(symbolPanel.padding, isNull);
+    expect(hintPanel.density, ToyPanelDensity.compact);
+    expect(hintPanel.padding, isNull);
+  });
+
   testWidgets(
     'keeps the alphabet learn screen stable on a compact landscape phone',
     (WidgetTester tester) async {
@@ -273,4 +336,13 @@ void _setSurfaceSize(WidgetTester tester, Size size) {
 
 ToyButton _ctaButton(WidgetTester tester) {
   return tester.widget<ToyButton>(find.widgetWithText(ToyButton, '다음'));
+}
+
+ToyPanel _panelForText(WidgetTester tester, String text) {
+  final panelFinder = find.ancestor(
+    of: find.text(text),
+    matching: find.byType(ToyPanel),
+  );
+  expect(panelFinder, findsOneWidget);
+  return tester.widget<ToyPanel>(panelFinder);
 }

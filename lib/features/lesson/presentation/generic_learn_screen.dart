@@ -144,6 +144,9 @@ class _GenericLearnScreenState extends State<GenericLearnScreen> {
           return LayoutBuilder(
             builder: (context, constraints) {
               final compact = constraints.maxHeight < 420;
+              final panelDensity = compact
+                  ? ToyPanelDensity.compact
+                  : ToyPanelDensity.regular;
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -187,8 +190,8 @@ class _GenericLearnScreenState extends State<GenericLearnScreen> {
                         Expanded(
                           flex: 5,
                           child: ToyPanel(
+                            density: panelDensity,
                             tone: ToyPanelTone.warm,
-                            padding: EdgeInsets.all(compact ? 12 : 24),
                             child: Center(
                               child: FittedBox(
                                 fit: BoxFit.scaleDown,
@@ -225,8 +228,8 @@ class _GenericLearnScreenState extends State<GenericLearnScreen> {
                               SizedBox(height: compact ? 6 : 14),
                               Expanded(
                                 child: ToyPanel(
+                                  density: panelDensity,
                                   tone: ToyPanelTone.lilac,
-                                  padding: EdgeInsets.all(compact ? 12 : 24),
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
