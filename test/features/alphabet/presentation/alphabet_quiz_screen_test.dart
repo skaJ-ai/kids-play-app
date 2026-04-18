@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kids_play_app/app/audio/audio_cue.dart';
+import 'package:kids_play_app/app/audio/audio_service.dart';
 import 'package:kids_play_app/app/services/app_services.dart';
 import 'package:kids_play_app/app/services/progress_store.dart';
 import 'package:kids_play_app/app/services/speech_cue_service.dart';
@@ -10,6 +12,180 @@ import 'package:kids_play_app/features/alphabet/data/alphabet_lesson_repository.
 import 'package:kids_play_app/features/alphabet/presentation/alphabet_quiz_screen.dart';
 
 void main() {
+  testWidgets(
+    'replays the current alphabet prompt through the injected audio service',
+    (WidgetTester tester) async {
+      final repository = AlphabetLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          AlphabetLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_alphabetLesson],
+          }),
+        }),
+      );
+      final audioService = _FakeAudioService();
+
+      await tester.pumpWidget(
+        AppServicesScope(
+          services: AppServices(
+            progressStore: MemoryProgressStore(),
+            speechCueService: NoopSpeechCueService(),
+            audioService: audioService,
+          ),
+          child: MaterialApp(
+            home: AlphabetQuizScreen(
+              repository: repository,
+              lessonId: 'alphabet_letters_1',
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(audioService.promptCalls, hasLength(1));
+      expect(audioService.promptCalls.single.categoryId, 'alphabet');
+      expect(audioService.promptCalls.single.lessonId, 'alphabet_letters_1');
+      expect(audioService.promptCalls.single.symbol, 'A a');
+      expect(audioService.promptCalls.single.fallbackText, "'A a' 글자를 찾아봐!");
+    },
+  );
+
+  testWidgets(
+    'plays the success feedback cue through the injected audio service',
+    (WidgetTester tester) async {
+      final repository = AlphabetLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          AlphabetLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_alphabetLesson],
+          }),
+        }),
+      );
+      final audioService = _FakeAudioService();
+
+      await tester.pumpWidget(
+        AppServicesScope(
+          services: AppServices(
+            progressStore: MemoryProgressStore(),
+            speechCueService: NoopSpeechCueService(),
+            audioService: audioService,
+          ),
+          child: MaterialApp(
+            home: AlphabetQuizScreen(
+              repository: repository,
+              lessonId: 'alphabet_letters_1',
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      audioService.promptCalls.clear();
+
+      await tester.tap(find.byKey(const Key('quiz-choice-A a')));
+      await tester.pump();
+
+      expect(audioService.cueCalls, hasLength(1));
+      expect(audioService.cueCalls.single.type, AudioCueType.success);
+      expect(audioService.cueCalls.single.assetKey, 'audio/sfx/success.ogg');
+      expect(audioService.cueCalls.single.fallbackText, '딩동댕');
+
+      await tester.pump(const Duration(milliseconds: 650));
+      await tester.pumpAndSettle();
+    },
+  );
+
+  testWidgets(
+    'plays the success feedback cue when voice prompts are off but effects stay on',
+    (WidgetTester tester) async {
+      final repository = AlphabetLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          AlphabetLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_alphabetLesson],
+          }),
+        }),
+      );
+      final audioService = _FakeAudioService();
+
+      await tester.pumpWidget(
+        AppServicesScope(
+          services: AppServices(
+            progressStore: MemoryProgressStore(
+              const AppProgressSnapshot(
+                voicePromptsEnabled: false,
+                effectsEnabled: true,
+              ),
+            ),
+            speechCueService: NoopSpeechCueService(),
+            audioService: audioService,
+          ),
+          child: MaterialApp(
+            home: AlphabetQuizScreen(
+              repository: repository,
+              lessonId: 'alphabet_letters_1',
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(audioService.promptCalls, isEmpty);
+
+      await tester.tap(find.byKey(const Key('quiz-choice-A a')));
+      await tester.pump();
+
+      expect(audioService.cueCalls, hasLength(1));
+      expect(audioService.cueCalls.single.type, AudioCueType.success);
+
+      await tester.pump(const Duration(milliseconds: 650));
+      await tester.pumpAndSettle();
+    },
+  );
+
+  testWidgets(
+    'does not play the success feedback cue when feedback effects are off',
+    (WidgetTester tester) async {
+      final repository = AlphabetLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          AlphabetLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_alphabetLesson],
+          }),
+        }),
+      );
+      final audioService = _FakeAudioService();
+
+      await tester.pumpWidget(
+        AppServicesScope(
+          services: AppServices(
+            progressStore: MemoryProgressStore(
+              const AppProgressSnapshot(
+                voicePromptsEnabled: true,
+                effectsEnabled: false,
+              ),
+            ),
+            speechCueService: NoopSpeechCueService(),
+            audioService: audioService,
+          ),
+          child: MaterialApp(
+            home: AlphabetQuizScreen(
+              repository: repository,
+              lessonId: 'alphabet_letters_1',
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      audioService.promptCalls.clear();
+
+      await tester.tap(find.byKey(const Key('quiz-choice-A a')));
+      await tester.pump();
+
+      expect(audioService.cueCalls, isEmpty);
+
+      await tester.pump(const Duration(milliseconds: 220));
+      await tester.pumpAndSettle();
+    },
+  );
+
   testWidgets('shows the first alphabet quiz question with four choices', (
     WidgetTester tester,
   ) async {
@@ -267,5 +443,26 @@ class _FakeAssetBundle extends CachingAssetBundle {
     final string = await loadString(key);
     final bytes = Uint8List.fromList(utf8.encode(string));
     return ByteData.view(bytes.buffer);
+  }
+}
+
+class _FakeAudioService implements AudioService {
+  final List<AudioPromptRequest> promptCalls = [];
+  final List<AudioCue> cueCalls = [];
+  int stopCount = 0;
+
+  @override
+  Future<void> playPrompt(AudioPromptRequest request) async {
+    promptCalls.add(request);
+  }
+
+  @override
+  Future<void> playCue(AudioCue cue) async {
+    cueCalls.add(cue);
+  }
+
+  @override
+  Future<void> stop() async {
+    stopCount += 1;
   }
 }

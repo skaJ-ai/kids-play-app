@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/audio/audio_cue.dart';
 import '../../../app/services/app_services.dart';
 import '../../../app/ui/kid_theme.dart';
 import '../../../app/ui/play_feedback_layer.dart';
@@ -70,16 +71,23 @@ class _AlphabetQuizScreenState extends State<AlphabetQuizScreen> {
     });
   }
 
-  Future<void> _speakIfEnabled(String text) async {
+  Future<void> _speakIfEnabled(AlphabetCard question, String text) async {
     final snapshot = await _services.progressStore.loadSnapshot();
     if (!snapshot.voicePromptsEnabled) {
       return;
     }
-    await _services.speechCueService.speak(text, locale: 'ko-KR');
+    await _services.audioService.playPrompt(
+      AudioPromptRequest(
+        categoryId: 'alphabet',
+        lessonId: widget.lessonId,
+        symbol: question.symbol,
+        fallbackText: text,
+      ),
+    );
   }
 
   Future<void> _replayQuestion(AlphabetCard question) async {
-    await _speakIfEnabled(_targetPromptFor(question));
+    await _speakIfEnabled(question, _targetPromptFor(question));
   }
 
   void _queuePrompt(AlphabetCard question) {
@@ -344,12 +352,16 @@ class _AlphabetQuizScreenState extends State<AlphabetQuizScreen> {
       _isResolvingChoice = true;
     });
 
-    if (settings.voicePromptsEnabled) {
-      await services.speechCueService.speak(
-        isCorrect ? '딩동댕' : '다시 해보자',
-        locale: 'ko-KR',
-        rate: 0.46,
-        pitch: isCorrect ? 1.08 : 0.94,
+    if (settings.effectsEnabled) {
+      await services.audioService.playCue(
+        AudioCue(
+          type: isCorrect ? AudioCueType.success : AudioCueType.error,
+          assetKey: isCorrect
+              ? 'audio/sfx/success.ogg'
+              : 'audio/sfx/error.ogg',
+          fallbackText: isCorrect ? '딩동댕' : '다시 해보자',
+          pitch: isCorrect ? 1.08 : 0.94,
+        ),
       );
     }
 
