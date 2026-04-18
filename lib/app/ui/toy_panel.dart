@@ -63,7 +63,7 @@ class ToyPanel extends StatelessWidget {
             Color.lerp(
               resolvedBackgroundColor,
               KidPalette.white,
-              chromeTokens.shellGradientWhiteBlendAmount,
+              toneColors.shellGradientWhiteBlendAmount,
             )!,
             resolvedBackgroundColor,
           ],
@@ -90,7 +90,7 @@ class ToyPanel extends StatelessWidget {
                       end: Alignment.bottomCenter,
                       colors: [
                         KidPalette.white.withValues(
-                          alpha: chromeTokens.highlightAlpha,
+                          alpha: toneColors.highlightAlpha,
                         ),
                         KidPalette.white.withValues(alpha: 0),
                       ],
@@ -111,10 +111,14 @@ class _ToyPanelToneColors {
   const _ToyPanelToneColors({
     required this.backgroundColor,
     required this.borderColor,
+    required this.shellGradientWhiteBlendAmount,
+    required this.highlightAlpha,
   });
 
   final Color backgroundColor;
   final Color borderColor;
+  final double shellGradientWhiteBlendAmount;
+  final double highlightAlpha;
 }
 
 _ToyPanelToneColors _toneColorsFor(
@@ -122,25 +126,37 @@ _ToyPanelToneColors _toneColorsFor(
   KidPanelChromeTokens chromeTokens,
 ) {
   return switch (tone) {
-    ToyPanelTone.surface => const _ToyPanelToneColors(
+    ToyPanelTone.surface => _ToyPanelToneColors(
       backgroundColor: KidPalette.cream,
       borderColor: KidPalette.stroke,
+      shellGradientWhiteBlendAmount:
+          chromeTokens.surfaceShellGradientWhiteBlendAmount,
+      highlightAlpha: chromeTokens.surfaceHighlightAlpha,
     ),
     ToyPanelTone.airy => _ToyPanelToneColors(
       backgroundColor: KidPalette.white.withValues(
         alpha: chromeTokens.airyBackgroundAlpha,
       ),
       borderColor: KidPalette.stroke,
+      shellGradientWhiteBlendAmount:
+          chromeTokens.airyShellGradientWhiteBlendAmount,
+      highlightAlpha: chromeTokens.airyHighlightAlpha,
     ),
-    ToyPanelTone.warm => const _ToyPanelToneColors(
+    ToyPanelTone.warm => _ToyPanelToneColors(
       backgroundColor: KidPalette.creamWarm,
       borderColor: KidPalette.stroke,
+      shellGradientWhiteBlendAmount:
+          chromeTokens.warmShellGradientWhiteBlendAmount,
+      highlightAlpha: chromeTokens.warmHighlightAlpha,
     ),
     ToyPanelTone.lilac => _ToyPanelToneColors(
       backgroundColor: KidPalette.lilac.withValues(
         alpha: chromeTokens.lilacBackgroundAlpha,
       ),
       borderColor: KidPalette.stroke,
+      shellGradientWhiteBlendAmount:
+          chromeTokens.lilacShellGradientWhiteBlendAmount,
+      highlightAlpha: chromeTokens.lilacHighlightAlpha,
     ),
   };
 }

@@ -50,7 +50,8 @@ void main() {
           expectedPadding: customLayout.panel.regular.padding,
           expectedRadius: customLayout.panel.regular.radius,
           expectedBorderWidth: customLayout.panel.regular.borderWidth,
-          expectedHighlightTopInset: customLayout.panel.regular.highlightTopInset,
+          expectedHighlightTopInset:
+              customLayout.panel.regular.highlightTopInset,
           expectedHighlightHeight: customLayout.panel.regular.highlightHeight,
           expectedHighlightHorizontalInset:
               customLayout.panel.regular.highlightHorizontalInset,
@@ -66,7 +67,8 @@ void main() {
           expectedPadding: customLayout.panel.compact.padding,
           expectedRadius: customLayout.panel.compact.radius,
           expectedBorderWidth: customLayout.panel.compact.borderWidth,
-          expectedHighlightTopInset: customLayout.panel.compact.highlightTopInset,
+          expectedHighlightTopInset:
+              customLayout.panel.compact.highlightTopInset,
           expectedHighlightHeight: customLayout.panel.compact.highlightHeight,
           expectedHighlightHorizontalInset:
               customLayout.panel.compact.highlightHorizontalInset,
@@ -168,6 +170,8 @@ void main() {
         tester,
         expectedBackgroundColor: KidPalette.white.withValues(alpha: 0.94),
         expectedBorderColor: KidPalette.stroke,
+        expectedShellGradientWhiteBlendAmount: 0.46,
+        expectedHighlightAlpha: 0.34,
       );
 
       await _pumpToyPanel(tester, tone: ToyPanelTone.warm);
@@ -176,6 +180,8 @@ void main() {
         tester,
         expectedBackgroundColor: KidPalette.creamWarm,
         expectedBorderColor: KidPalette.stroke,
+        expectedShellGradientWhiteBlendAmount: 0.18,
+        expectedHighlightAlpha: 0.2,
       );
     });
 
@@ -186,19 +192,27 @@ void main() {
         tester,
         expectedBackgroundColor: KidPalette.lilac.withValues(alpha: 0.75),
         expectedBorderColor: KidPalette.stroke,
+        expectedShellGradientWhiteBlendAmount: 0.3,
+        expectedHighlightAlpha: 0.24,
       );
     });
 
-    testWidgets('reads lilac tone alpha overrides from kid theme tokens', (
+    testWidgets('reads lilac tone chrome overrides from kid theme tokens', (
       WidgetTester tester,
     ) async {
       const customLilacAlpha = 0.61;
+      const customLilacHighlightAlpha = 0.19;
+      const customLilacBlendAmount = 0.42;
       final customLayout = KidLayoutTheme(
         button: KidLayoutTheme.defaults.button,
         panel: KidLayoutTheme.defaults.panel,
         chrome: const KidChromeTokens(
           button: KidButtonChromeTokens(),
-          panel: KidPanelChromeTokens(lilacBackgroundAlpha: customLilacAlpha),
+          panel: KidPanelChromeTokens(
+            lilacBackgroundAlpha: customLilacAlpha,
+            lilacHighlightAlpha: customLilacHighlightAlpha,
+            lilacShellGradientWhiteBlendAmount: customLilacBlendAmount,
+          ),
         ),
       );
 
@@ -214,57 +228,65 @@ void main() {
           alpha: customLilacAlpha,
         ),
         expectedBorderColor: KidPalette.stroke,
+        expectedShellGradientWhiteBlendAmount: customLilacBlendAmount,
+        expectedHighlightAlpha: customLilacHighlightAlpha,
       );
     });
 
-    testWidgets('lets explicit colors override tone defaults', (
-      WidgetTester tester,
-    ) async {
-      const customBackgroundColor = Color(0xFFFEDCBA);
-      const customBorderColor = Color(0xFF345678);
+    testWidgets(
+      'lets explicit colors override tone fill but keep tone-aware chrome',
+      (WidgetTester tester) async {
+        const customBackgroundColor = Color(0xFFFEDCBA);
+        const customBorderColor = Color(0xFF345678);
 
-      await _pumpToyPanel(
-        tester,
-        tone: ToyPanelTone.airy,
-        backgroundColor: customBackgroundColor,
-        borderColor: customBorderColor,
-      );
+        await _pumpToyPanel(
+          tester,
+          tone: ToyPanelTone.airy,
+          backgroundColor: customBackgroundColor,
+          borderColor: customBorderColor,
+        );
 
-      _expectResolvedColors(
-        tester,
-        expectedBackgroundColor: customBackgroundColor,
-        expectedBorderColor: customBorderColor,
-      );
-    });
+        _expectResolvedColors(
+          tester,
+          expectedBackgroundColor: customBackgroundColor,
+          expectedBorderColor: customBorderColor,
+          expectedShellGradientWhiteBlendAmount: 0.46,
+          expectedHighlightAlpha: 0.34,
+        );
+      },
+    );
 
-    testWidgets('reads shell gradient blend overrides from kid theme tokens', (
-      WidgetTester tester,
-    ) async {
-      const customBackgroundColor = Color(0xFF9AC7FF);
-      const customBlendAmount = 0.72;
-      final customLayout = KidLayoutTheme.defaults.copyWith(
-        chrome: KidLayoutTheme.defaults.chrome.copyWith(
-          panel: KidLayoutTheme.defaults.chrome.panel.copyWith(
-            shellGradientWhiteBlendAmount: customBlendAmount,
+    testWidgets(
+      'reads tone-specific shell gradient blend overrides from kid theme tokens',
+      (WidgetTester tester) async {
+        const customBackgroundColor = Color(0xFF9AC7FF);
+        const customBlendAmount = 0.72;
+        final customLayout = KidLayoutTheme.defaults.copyWith(
+          chrome: KidLayoutTheme.defaults.chrome.copyWith(
+            panel: KidLayoutTheme.defaults.chrome.panel.copyWith(
+              warmShellGradientWhiteBlendAmount: customBlendAmount,
+            ),
           ),
-        ),
-      );
+        );
 
-      await _pumpToyPanel(
-        tester,
-        backgroundColor: customBackgroundColor,
-        theme: buildKidTheme().copyWith(extensions: [customLayout]),
-      );
+        await _pumpToyPanel(
+          tester,
+          tone: ToyPanelTone.warm,
+          backgroundColor: customBackgroundColor,
+          theme: buildKidTheme().copyWith(extensions: [customLayout]),
+        );
 
-      _expectResolvedColors(
-        tester,
-        expectedBackgroundColor: customBackgroundColor,
-        expectedBorderColor: KidPalette.stroke,
-        expectedShellGradientWhiteBlendAmount: customBlendAmount,
-      );
-    });
+        _expectResolvedColors(
+          tester,
+          expectedBackgroundColor: customBackgroundColor,
+          expectedBorderColor: KidPalette.stroke,
+          expectedShellGradientWhiteBlendAmount: customBlendAmount,
+          expectedHighlightAlpha: 0.2,
+        );
+      },
+    );
 
-    testWidgets('reads chrome alpha overrides from kid theme tokens', (
+    testWidgets('reads tone-aware chrome overrides from kid theme tokens', (
       WidgetTester tester,
     ) async {
       const customBorderColor = Color(0xFF345678);
@@ -276,8 +298,9 @@ void main() {
           panel: KidPanelChromeTokens(
             strokeBorderAlpha: 0.88,
             customBorderAlpha: 0.43,
-            highlightAlpha: 0.31,
+            airyHighlightAlpha: 0.31,
             airyBackgroundAlpha: 0.66,
+            airyShellGradientWhiteBlendAmount: 0.52,
           ),
         ),
       );
@@ -289,18 +312,13 @@ void main() {
         theme: buildKidTheme().copyWith(extensions: [customLayout]),
       );
 
-      final decoration = _panelDecoration(tester, find.byType(ToyPanel));
-      final gradient = decoration.gradient! as LinearGradient;
-      final border = decoration.border! as Border;
-      final highlight = tester.widget<Container>(_panelHighlightFinder());
-      final highlightGradient =
-          (highlight.decoration! as BoxDecoration).gradient! as LinearGradient;
-
-      expect(gradient.colors.last, KidPalette.white.withValues(alpha: 0.66));
-      expect(border.top.color, customBorderColor.withValues(alpha: 0.43));
-      expect(
-        highlightGradient.colors.first,
-        KidPalette.white.withValues(alpha: 0.31),
+      _expectResolvedColors(
+        tester,
+        expectedBackgroundColor: KidPalette.white.withValues(alpha: 0.66),
+        expectedBorderColor: customBorderColor,
+        expectedBorderAlpha: 0.43,
+        expectedShellGradientWhiteBlendAmount: 0.52,
+        expectedHighlightAlpha: 0.31,
       );
     });
 
@@ -464,10 +482,15 @@ void _expectResolvedColors(
   required Color expectedBackgroundColor,
   required Color expectedBorderColor,
   double expectedShellGradientWhiteBlendAmount = 0.34,
+  double expectedHighlightAlpha = 0.28,
+  double? expectedBorderAlpha,
 }) {
   final decoration = _panelDecoration(tester, find.byType(ToyPanel));
   final gradient = decoration.gradient! as LinearGradient;
   final border = decoration.border! as Border;
+  final highlight = tester.widget<Container>(_panelHighlightFinder());
+  final highlightGradient =
+      (highlight.decoration! as BoxDecoration).gradient! as LinearGradient;
   final expectedGradientColors = [
     Color.lerp(
       expectedBackgroundColor,
@@ -477,7 +500,9 @@ void _expectResolvedColors(
     expectedBackgroundColor,
   ];
   final expectedResolvedBorderColor = expectedBorderColor.withValues(
-    alpha: expectedBorderColor == KidPalette.stroke ? 0.88 : 0.72,
+    alpha:
+        expectedBorderAlpha ??
+        (expectedBorderColor == KidPalette.stroke ? 0.88 : 0.72),
   );
 
   expect(gradient.colors, expectedGradientColors);
@@ -485,6 +510,11 @@ void _expectResolvedColors(
   expect(border.right.color, expectedResolvedBorderColor);
   expect(border.bottom.color, expectedResolvedBorderColor);
   expect(border.left.color, expectedResolvedBorderColor);
+  expect(
+    highlightGradient.colors.first,
+    KidPalette.white.withValues(alpha: expectedHighlightAlpha),
+  );
+  expect(highlightGradient.colors.last, KidPalette.white.withValues(alpha: 0));
 }
 
 BoxDecoration _panelDecoration(WidgetTester tester, Finder finder) {

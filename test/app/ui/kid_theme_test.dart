@@ -64,19 +64,40 @@ void main() {
   });
 
   test(
-    'KidPanelChromeTokens exposes lilac background alpha and keeps it through copyWith and lerp',
+    'KidPanelChromeTokens exposes tone-aware chrome defaults and keeps them through copyWith and lerp',
     () {
       final layout = buildKidTheme().extension<KidLayoutTheme>();
 
       expect(layout, isNotNull);
-      expect(layout!.chrome.panel.lilacBackgroundAlpha, 0.75);
+      expect(layout!.chrome.panel.surfaceHighlightAlpha, 0.28);
+      expect(layout.chrome.panel.airyHighlightAlpha, 0.34);
+      expect(layout.chrome.panel.warmHighlightAlpha, 0.2);
+      expect(layout.chrome.panel.lilacHighlightAlpha, 0.24);
+      expect(layout.chrome.panel.surfaceShellGradientWhiteBlendAmount, 0.34);
+      expect(layout.chrome.panel.airyShellGradientWhiteBlendAmount, 0.46);
+      expect(layout.chrome.panel.warmShellGradientWhiteBlendAmount, 0.18);
+      expect(layout.chrome.panel.lilacShellGradientWhiteBlendAmount, 0.3);
+      expect(layout.chrome.panel.lilacBackgroundAlpha, 0.75);
 
-      final preserved = layout.chrome.panel.copyWith(highlightAlpha: 0.44);
-      const updated = KidPanelChromeTokens(lilacBackgroundAlpha: 0.52);
+      final copied = layout.chrome.panel.copyWith(
+        airyHighlightAlpha: 0.39,
+        lilacShellGradientWhiteBlendAmount: 0.27,
+      );
+      const updated = KidPanelChromeTokens(
+        surfaceHighlightAlpha: 0.31,
+        airyShellGradientWhiteBlendAmount: 0.5,
+        warmHighlightAlpha: 0.16,
+        lilacBackgroundAlpha: 0.52,
+      );
+      final lerped = layout.chrome.panel.lerp(updated, 1);
 
-      expect(preserved.lilacBackgroundAlpha, 0.75);
-      expect(updated.lilacBackgroundAlpha, 0.52);
-      expect(layout.chrome.panel.lerp(updated, 1).lilacBackgroundAlpha, 0.52);
+      expect(copied.airyHighlightAlpha, 0.39);
+      expect(copied.lilacShellGradientWhiteBlendAmount, 0.27);
+      expect(copied.lilacBackgroundAlpha, 0.75);
+      expect(lerped.surfaceHighlightAlpha, 0.31);
+      expect(lerped.airyShellGradientWhiteBlendAmount, 0.5);
+      expect(lerped.warmHighlightAlpha, 0.16);
+      expect(lerped.lilacBackgroundAlpha, 0.52);
     },
   );
 
@@ -412,8 +433,17 @@ void main() {
     expect(layout.chrome.panel.strokeBorderAlpha, 0.88);
     expect(layout.chrome.panel.customBorderAlpha, 0.72);
     expect(layout.chrome.panel.highlightAlpha, 0.28);
+    expect(layout.chrome.panel.surfaceHighlightAlpha, 0.28);
+    expect(layout.chrome.panel.airyHighlightAlpha, 0.34);
+    expect(layout.chrome.panel.warmHighlightAlpha, 0.2);
+    expect(layout.chrome.panel.lilacHighlightAlpha, 0.24);
     expect(layout.chrome.panel.airyBackgroundAlpha, 0.94);
+    expect(layout.chrome.panel.lilacBackgroundAlpha, 0.75);
     expect(layout.chrome.panel.shellGradientWhiteBlendAmount, 0.34);
+    expect(layout.chrome.panel.surfaceShellGradientWhiteBlendAmount, 0.34);
+    expect(layout.chrome.panel.airyShellGradientWhiteBlendAmount, 0.46);
+    expect(layout.chrome.panel.warmShellGradientWhiteBlendAmount, 0.18);
+    expect(layout.chrome.panel.lilacShellGradientWhiteBlendAmount, 0.3);
   });
 
   test('KidButtonChromeTokens exposes secondary shell and border tokens', () {

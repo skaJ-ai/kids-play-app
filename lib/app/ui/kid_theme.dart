@@ -509,18 +509,55 @@ class KidPanelChromeTokens {
   const KidPanelChromeTokens({
     this.strokeBorderAlpha = 0.88,
     this.customBorderAlpha = 0.72,
-    this.highlightAlpha = 0.28,
+    double? highlightAlpha,
     this.airyBackgroundAlpha = 0.94,
     this.lilacBackgroundAlpha = 0.75,
-    this.shellGradientWhiteBlendAmount = 0.34,
-  });
+    double? shellGradientWhiteBlendAmount,
+    double? surfaceHighlightAlpha,
+    double? airyHighlightAlpha,
+    double? warmHighlightAlpha,
+    double? lilacHighlightAlpha,
+    double? surfaceShellGradientWhiteBlendAmount,
+    double? airyShellGradientWhiteBlendAmount,
+    double? warmShellGradientWhiteBlendAmount,
+    double? lilacShellGradientWhiteBlendAmount,
+  }) : surfaceHighlightAlpha = surfaceHighlightAlpha ?? highlightAlpha ?? 0.28,
+       airyHighlightAlpha = airyHighlightAlpha ?? highlightAlpha ?? 0.34,
+       warmHighlightAlpha = warmHighlightAlpha ?? highlightAlpha ?? 0.2,
+       lilacHighlightAlpha = lilacHighlightAlpha ?? highlightAlpha ?? 0.24,
+       surfaceShellGradientWhiteBlendAmount =
+           surfaceShellGradientWhiteBlendAmount ??
+           shellGradientWhiteBlendAmount ??
+           0.34,
+       airyShellGradientWhiteBlendAmount =
+           airyShellGradientWhiteBlendAmount ??
+           shellGradientWhiteBlendAmount ??
+           0.46,
+       warmShellGradientWhiteBlendAmount =
+           warmShellGradientWhiteBlendAmount ??
+           shellGradientWhiteBlendAmount ??
+           0.18,
+       lilacShellGradientWhiteBlendAmount =
+           lilacShellGradientWhiteBlendAmount ??
+           shellGradientWhiteBlendAmount ??
+           0.3;
 
   final double strokeBorderAlpha;
   final double customBorderAlpha;
-  final double highlightAlpha;
+  final double surfaceHighlightAlpha;
+  final double airyHighlightAlpha;
+  final double warmHighlightAlpha;
+  final double lilacHighlightAlpha;
   final double airyBackgroundAlpha;
   final double lilacBackgroundAlpha;
-  final double shellGradientWhiteBlendAmount;
+  final double surfaceShellGradientWhiteBlendAmount;
+  final double airyShellGradientWhiteBlendAmount;
+  final double warmShellGradientWhiteBlendAmount;
+  final double lilacShellGradientWhiteBlendAmount;
+
+  double get highlightAlpha => surfaceHighlightAlpha;
+  double get shellGradientWhiteBlendAmount =>
+      surfaceShellGradientWhiteBlendAmount;
 
   KidPanelChromeTokens copyWith({
     double? strokeBorderAlpha,
@@ -529,15 +566,44 @@ class KidPanelChromeTokens {
     double? airyBackgroundAlpha,
     double? lilacBackgroundAlpha,
     double? shellGradientWhiteBlendAmount,
+    double? surfaceHighlightAlpha,
+    double? airyHighlightAlpha,
+    double? warmHighlightAlpha,
+    double? lilacHighlightAlpha,
+    double? surfaceShellGradientWhiteBlendAmount,
+    double? airyShellGradientWhiteBlendAmount,
+    double? warmShellGradientWhiteBlendAmount,
+    double? lilacShellGradientWhiteBlendAmount,
   }) {
     return KidPanelChromeTokens(
       strokeBorderAlpha: strokeBorderAlpha ?? this.strokeBorderAlpha,
       customBorderAlpha: customBorderAlpha ?? this.customBorderAlpha,
-      highlightAlpha: highlightAlpha ?? this.highlightAlpha,
+      surfaceHighlightAlpha:
+          surfaceHighlightAlpha ?? highlightAlpha ?? this.surfaceHighlightAlpha,
+      airyHighlightAlpha:
+          airyHighlightAlpha ?? highlightAlpha ?? this.airyHighlightAlpha,
+      warmHighlightAlpha:
+          warmHighlightAlpha ?? highlightAlpha ?? this.warmHighlightAlpha,
+      lilacHighlightAlpha:
+          lilacHighlightAlpha ?? highlightAlpha ?? this.lilacHighlightAlpha,
       airyBackgroundAlpha: airyBackgroundAlpha ?? this.airyBackgroundAlpha,
       lilacBackgroundAlpha: lilacBackgroundAlpha ?? this.lilacBackgroundAlpha,
-      shellGradientWhiteBlendAmount:
-          shellGradientWhiteBlendAmount ?? this.shellGradientWhiteBlendAmount,
+      surfaceShellGradientWhiteBlendAmount:
+          surfaceShellGradientWhiteBlendAmount ??
+          shellGradientWhiteBlendAmount ??
+          this.surfaceShellGradientWhiteBlendAmount,
+      airyShellGradientWhiteBlendAmount:
+          airyShellGradientWhiteBlendAmount ??
+          shellGradientWhiteBlendAmount ??
+          this.airyShellGradientWhiteBlendAmount,
+      warmShellGradientWhiteBlendAmount:
+          warmShellGradientWhiteBlendAmount ??
+          shellGradientWhiteBlendAmount ??
+          this.warmShellGradientWhiteBlendAmount,
+      lilacShellGradientWhiteBlendAmount:
+          lilacShellGradientWhiteBlendAmount ??
+          shellGradientWhiteBlendAmount ??
+          this.lilacShellGradientWhiteBlendAmount,
     );
   }
 
@@ -549,22 +615,56 @@ class KidPanelChromeTokens {
       customBorderAlpha:
           ui.lerpDouble(customBorderAlpha, other.customBorderAlpha, t) ??
           customBorderAlpha,
-      highlightAlpha:
-          ui.lerpDouble(highlightAlpha, other.highlightAlpha, t) ??
-          highlightAlpha,
+      surfaceHighlightAlpha:
+          ui.lerpDouble(
+            surfaceHighlightAlpha,
+            other.surfaceHighlightAlpha,
+            t,
+          ) ??
+          surfaceHighlightAlpha,
+      airyHighlightAlpha:
+          ui.lerpDouble(airyHighlightAlpha, other.airyHighlightAlpha, t) ??
+          airyHighlightAlpha,
+      warmHighlightAlpha:
+          ui.lerpDouble(warmHighlightAlpha, other.warmHighlightAlpha, t) ??
+          warmHighlightAlpha,
+      lilacHighlightAlpha:
+          ui.lerpDouble(lilacHighlightAlpha, other.lilacHighlightAlpha, t) ??
+          lilacHighlightAlpha,
       airyBackgroundAlpha:
           ui.lerpDouble(airyBackgroundAlpha, other.airyBackgroundAlpha, t) ??
           airyBackgroundAlpha,
       lilacBackgroundAlpha:
           ui.lerpDouble(lilacBackgroundAlpha, other.lilacBackgroundAlpha, t) ??
           lilacBackgroundAlpha,
-      shellGradientWhiteBlendAmount:
+      surfaceShellGradientWhiteBlendAmount:
           ui.lerpDouble(
-            shellGradientWhiteBlendAmount,
-            other.shellGradientWhiteBlendAmount,
+            surfaceShellGradientWhiteBlendAmount,
+            other.surfaceShellGradientWhiteBlendAmount,
             t,
           ) ??
-          shellGradientWhiteBlendAmount,
+          surfaceShellGradientWhiteBlendAmount,
+      airyShellGradientWhiteBlendAmount:
+          ui.lerpDouble(
+            airyShellGradientWhiteBlendAmount,
+            other.airyShellGradientWhiteBlendAmount,
+            t,
+          ) ??
+          airyShellGradientWhiteBlendAmount,
+      warmShellGradientWhiteBlendAmount:
+          ui.lerpDouble(
+            warmShellGradientWhiteBlendAmount,
+            other.warmShellGradientWhiteBlendAmount,
+            t,
+          ) ??
+          warmShellGradientWhiteBlendAmount,
+      lilacShellGradientWhiteBlendAmount:
+          ui.lerpDouble(
+            lilacShellGradientWhiteBlendAmount,
+            other.lilacShellGradientWhiteBlendAmount,
+            t,
+          ) ??
+          lilacShellGradientWhiteBlendAmount,
     );
   }
 }
