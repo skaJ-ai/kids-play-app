@@ -63,6 +63,69 @@ void main() {
     expect(layout.panel.tight.insetRadius, 14);
   });
 
+  test('buildKidTheme exposes the kid typography token defaults', () {
+    final theme = buildKidTheme();
+    final typography = theme.extension<KidTypographyTheme>();
+
+    expect(typography, isNotNull);
+    expect(typography!.headlineLarge, theme.textTheme.headlineLarge);
+    expect(typography.headlineMedium, theme.textTheme.headlineMedium);
+    expect(typography.headlineSmall, theme.textTheme.headlineSmall);
+    expect(typography.titleLarge, theme.textTheme.titleLarge);
+    expect(typography.titleMedium, theme.textTheme.titleMedium);
+    expect(typography.titleSmall, theme.textTheme.titleSmall);
+    expect(typography.bodyLarge, theme.textTheme.bodyLarge);
+    expect(typography.bodyMedium, theme.textTheme.bodyMedium);
+    expect(typography.bodySmall, theme.textTheme.bodySmall);
+    expect(typography.labelLarge, theme.textTheme.labelLarge);
+    expect(typography.labelMedium, theme.textTheme.labelMedium);
+    expect(typography.labelSmall, theme.textTheme.labelSmall);
+  });
+
+  test(
+    'KidTypographyTheme copyWith and lerp preserve and override styles',
+    () {
+      final customized = KidTypographyTheme.defaults.copyWith(
+        titleLarge: const TextStyle(
+          fontSize: 30,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 1.5,
+          color: Colors.deepPurple,
+          height: 1.4,
+          fontStyle: FontStyle.italic,
+        ),
+        bodySmall: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          color: Colors.teal,
+          height: 1.6,
+        ),
+      );
+
+      expect(customized.titleLarge.fontSize, 30);
+      expect(customized.titleLarge.letterSpacing, 1.5);
+      expect(customized.titleLarge.height, 1.4);
+      expect(customized.titleLarge.fontStyle, FontStyle.italic);
+      expect(customized.bodySmall.fontSize, 12);
+      expect(
+        customized.headlineLarge,
+        KidTypographyTheme.defaults.headlineLarge,
+      );
+      expect(customized.labelMedium, KidTypographyTheme.defaults.labelMedium);
+
+      final lerped = KidTypographyTheme.defaults.lerp(customized, 0.5);
+
+      expect(lerped.titleLarge.fontSize, closeTo(25, 0.001));
+      expect(lerped.titleLarge.letterSpacing, closeTo(0.65, 0.001));
+      expect(lerped.titleLarge.height, closeTo(1.29, 0.001));
+      expect(lerped.titleLarge.fontStyle, FontStyle.italic);
+      expect(lerped.bodySmall.fontSize, closeTo(12.5, 0.001));
+      expect(lerped.bodySmall.height, closeTo(1.46, 0.001));
+      expect(lerped.headlineLarge, KidTypographyTheme.defaults.headlineLarge);
+      expect(lerped.labelMedium, KidTypographyTheme.defaults.labelMedium);
+    },
+  );
+
   test(
     'KidPanelChromeTokens exposes tone-aware chrome defaults and keeps them through copyWith and lerp',
     () {

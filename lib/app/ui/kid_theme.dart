@@ -968,9 +968,247 @@ class KidLayoutTheme extends ThemeExtension<KidLayoutTheme> {
   }
 }
 
+@immutable
+class KidTypographyTheme extends ThemeExtension<KidTypographyTheme> {
+  const KidTypographyTheme({
+    required this.headlineLarge,
+    required this.headlineMedium,
+    required this.headlineSmall,
+    required this.titleLarge,
+    required this.titleMedium,
+    required this.titleSmall,
+    required this.bodyLarge,
+    required this.bodyMedium,
+    required this.bodySmall,
+    required this.labelLarge,
+    required this.labelMedium,
+    required this.labelSmall,
+  });
+
+  static const defaults = KidTypographyTheme(
+    headlineLarge: TextStyle(
+      fontSize: 40,
+      fontWeight: FontWeight.w800,
+      letterSpacing: -1.0,
+      color: KidPalette.navy,
+      height: 1.02,
+    ),
+    headlineMedium: TextStyle(
+      fontSize: 32,
+      fontWeight: FontWeight.w800,
+      letterSpacing: -0.6,
+      color: KidPalette.navy,
+      height: 1.08,
+    ),
+    headlineSmall: TextStyle(
+      fontSize: 24,
+      fontWeight: FontWeight.w700,
+      letterSpacing: -0.3,
+      color: KidPalette.navy,
+      height: 1.12,
+    ),
+    titleLarge: TextStyle(
+      fontSize: 20,
+      fontWeight: FontWeight.w700,
+      letterSpacing: -0.2,
+      color: KidPalette.navy,
+      height: 1.18,
+    ),
+    titleMedium: TextStyle(
+      fontSize: 17,
+      fontWeight: FontWeight.w700,
+      letterSpacing: -0.1,
+      color: KidPalette.navy,
+      height: 1.22,
+    ),
+    titleSmall: TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w700,
+      letterSpacing: 0,
+      color: KidPalette.navy,
+      height: 1.20,
+    ),
+    bodyLarge: TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+      color: KidPalette.body,
+      height: 1.38,
+    ),
+    bodyMedium: TextStyle(
+      fontSize: 15,
+      fontWeight: FontWeight.w400,
+      color: KidPalette.body,
+      height: 1.36,
+    ),
+    bodySmall: TextStyle(
+      fontSize: 13,
+      fontWeight: FontWeight.w400,
+      color: KidPalette.body,
+      height: 1.32,
+    ),
+    labelLarge: TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w700,
+      letterSpacing: -0.1,
+      color: KidPalette.navy,
+      height: 1.15,
+    ),
+    labelMedium: TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 0.05,
+      color: KidPalette.body,
+      height: 1.18,
+    ),
+    labelSmall: TextStyle(
+      fontSize: 11,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 0.05,
+      color: KidPalette.body,
+      height: 1.16,
+    ),
+  );
+
+  factory KidTypographyTheme.fromTextTheme(TextTheme textTheme) {
+    return KidTypographyTheme(
+      headlineLarge: textTheme.headlineLarge ?? defaults.headlineLarge,
+      headlineMedium: textTheme.headlineMedium ?? defaults.headlineMedium,
+      headlineSmall: textTheme.headlineSmall ?? defaults.headlineSmall,
+      titleLarge: textTheme.titleLarge ?? defaults.titleLarge,
+      titleMedium: textTheme.titleMedium ?? defaults.titleMedium,
+      titleSmall: textTheme.titleSmall ?? defaults.titleSmall,
+      bodyLarge: textTheme.bodyLarge ?? defaults.bodyLarge,
+      bodyMedium: textTheme.bodyMedium ?? defaults.bodyMedium,
+      bodySmall: textTheme.bodySmall ?? defaults.bodySmall,
+      labelLarge: textTheme.labelLarge ?? defaults.labelLarge,
+      labelMedium: textTheme.labelMedium ?? defaults.labelMedium,
+      labelSmall: textTheme.labelSmall ?? defaults.labelSmall,
+    );
+  }
+
+  final TextStyle headlineLarge;
+  final TextStyle headlineMedium;
+  final TextStyle headlineSmall;
+  final TextStyle titleLarge;
+  final TextStyle titleMedium;
+  final TextStyle titleSmall;
+  final TextStyle bodyLarge;
+  final TextStyle bodyMedium;
+  final TextStyle bodySmall;
+  final TextStyle labelLarge;
+  final TextStyle labelMedium;
+  final TextStyle labelSmall;
+
+  @override
+  KidTypographyTheme copyWith({
+    TextStyle? headlineLarge,
+    TextStyle? headlineMedium,
+    TextStyle? headlineSmall,
+    TextStyle? titleLarge,
+    TextStyle? titleMedium,
+    TextStyle? titleSmall,
+    TextStyle? bodyLarge,
+    TextStyle? bodyMedium,
+    TextStyle? bodySmall,
+    TextStyle? labelLarge,
+    TextStyle? labelMedium,
+    TextStyle? labelSmall,
+  }) {
+    return KidTypographyTheme(
+      headlineLarge: headlineLarge ?? this.headlineLarge,
+      headlineMedium: headlineMedium ?? this.headlineMedium,
+      headlineSmall: headlineSmall ?? this.headlineSmall,
+      titleLarge: titleLarge ?? this.titleLarge,
+      titleMedium: titleMedium ?? this.titleMedium,
+      titleSmall: titleSmall ?? this.titleSmall,
+      bodyLarge: bodyLarge ?? this.bodyLarge,
+      bodyMedium: bodyMedium ?? this.bodyMedium,
+      bodySmall: bodySmall ?? this.bodySmall,
+      labelLarge: labelLarge ?? this.labelLarge,
+      labelMedium: labelMedium ?? this.labelMedium,
+      labelSmall: labelSmall ?? this.labelSmall,
+    );
+  }
+
+  KidTypographyTheme resolveFrom(TextTheme textTheme) {
+    final inherited = KidTypographyTheme.fromTextTheme(textTheme);
+
+    return KidTypographyTheme(
+      headlineLarge: headlineLarge == defaults.headlineLarge
+          ? inherited.headlineLarge
+          : headlineLarge,
+      headlineMedium: headlineMedium == defaults.headlineMedium
+          ? inherited.headlineMedium
+          : headlineMedium,
+      headlineSmall: headlineSmall == defaults.headlineSmall
+          ? inherited.headlineSmall
+          : headlineSmall,
+      titleLarge: titleLarge == defaults.titleLarge
+          ? inherited.titleLarge
+          : titleLarge,
+      titleMedium: titleMedium == defaults.titleMedium
+          ? inherited.titleMedium
+          : titleMedium,
+      titleSmall: titleSmall == defaults.titleSmall
+          ? inherited.titleSmall
+          : titleSmall,
+      bodyLarge: bodyLarge == defaults.bodyLarge ? inherited.bodyLarge : bodyLarge,
+      bodyMedium: bodyMedium == defaults.bodyMedium
+          ? inherited.bodyMedium
+          : bodyMedium,
+      bodySmall: bodySmall == defaults.bodySmall ? inherited.bodySmall : bodySmall,
+      labelLarge: labelLarge == defaults.labelLarge
+          ? inherited.labelLarge
+          : labelLarge,
+      labelMedium: labelMedium == defaults.labelMedium
+          ? inherited.labelMedium
+          : labelMedium,
+      labelSmall: labelSmall == defaults.labelSmall
+          ? inherited.labelSmall
+          : labelSmall,
+    );
+  }
+
+  @override
+  KidTypographyTheme lerp(ThemeExtension<KidTypographyTheme>? other, double t) {
+    if (other is! KidTypographyTheme) {
+      return this;
+    }
+
+    return KidTypographyTheme(
+      headlineLarge:
+          TextStyle.lerp(headlineLarge, other.headlineLarge, t) ??
+          headlineLarge,
+      headlineMedium:
+          TextStyle.lerp(headlineMedium, other.headlineMedium, t) ??
+          headlineMedium,
+      headlineSmall:
+          TextStyle.lerp(headlineSmall, other.headlineSmall, t) ??
+          headlineSmall,
+      titleLarge: TextStyle.lerp(titleLarge, other.titleLarge, t) ?? titleLarge,
+      titleMedium:
+          TextStyle.lerp(titleMedium, other.titleMedium, t) ?? titleMedium,
+      titleSmall: TextStyle.lerp(titleSmall, other.titleSmall, t) ?? titleSmall,
+      bodyLarge: TextStyle.lerp(bodyLarge, other.bodyLarge, t) ?? bodyLarge,
+      bodyMedium: TextStyle.lerp(bodyMedium, other.bodyMedium, t) ?? bodyMedium,
+      bodySmall: TextStyle.lerp(bodySmall, other.bodySmall, t) ?? bodySmall,
+      labelLarge: TextStyle.lerp(labelLarge, other.labelLarge, t) ?? labelLarge,
+      labelMedium:
+          TextStyle.lerp(labelMedium, other.labelMedium, t) ?? labelMedium,
+      labelSmall: TextStyle.lerp(labelSmall, other.labelSmall, t) ?? labelSmall,
+    );
+  }
+}
+
 extension KidThemeDataX on ThemeData {
   KidLayoutTheme get kidLayout =>
       extension<KidLayoutTheme>() ?? KidLayoutTheme.defaults;
+
+  KidTypographyTheme get kidTypography {
+    final typography = extension<KidTypographyTheme>();
+    return typography?.resolveFrom(textTheme) ??
+        KidTypographyTheme.fromTextTheme(textTheme);
+  }
 }
 
 ThemeData buildKidTheme() {
@@ -991,6 +1229,7 @@ ThemeData buildKidTheme() {
     shadow: const Color(0x24182230),
   );
 
+  const kidTypography = KidTypographyTheme.defaults;
   final textTheme = base.textTheme.copyWith(
     displayLarge: const TextStyle(
       fontSize: 56,
@@ -999,92 +1238,26 @@ ThemeData buildKidTheme() {
       color: KidPalette.navy,
       height: 0.98,
     ),
-    headlineLarge: const TextStyle(
-      fontSize: 40,
-      fontWeight: FontWeight.w800,
-      letterSpacing: -1.0,
-      color: KidPalette.navy,
-      height: 1.02,
-    ),
-    headlineMedium: const TextStyle(
-      fontSize: 32,
-      fontWeight: FontWeight.w800,
-      letterSpacing: -0.6,
-      color: KidPalette.navy,
-      height: 1.08,
-    ),
-    headlineSmall: const TextStyle(
-      fontSize: 24,
-      fontWeight: FontWeight.w700,
-      letterSpacing: -0.3,
-      color: KidPalette.navy,
-      height: 1.12,
-    ),
-    titleLarge: const TextStyle(
-      fontSize: 20,
-      fontWeight: FontWeight.w700,
-      letterSpacing: -0.2,
-      color: KidPalette.navy,
-      height: 1.18,
-    ),
-    titleMedium: const TextStyle(
-      fontSize: 17,
-      fontWeight: FontWeight.w700,
-      letterSpacing: -0.1,
-      color: KidPalette.navy,
-      height: 1.22,
-    ),
-    titleSmall: const TextStyle(
-      fontSize: 14,
-      fontWeight: FontWeight.w700,
-      letterSpacing: 0,
-      color: KidPalette.navy,
-      height: 1.20,
-    ),
-    bodyLarge: const TextStyle(
-      fontSize: 16,
-      fontWeight: FontWeight.w500,
-      color: KidPalette.body,
-      height: 1.38,
-    ),
-    bodyMedium: const TextStyle(
-      fontSize: 15,
-      fontWeight: FontWeight.w400,
-      color: KidPalette.body,
-      height: 1.36,
-    ),
-    bodySmall: const TextStyle(
-      fontSize: 13,
-      fontWeight: FontWeight.w400,
-      color: KidPalette.body,
-      height: 1.32,
-    ),
-    labelLarge: const TextStyle(
-      fontSize: 14,
-      fontWeight: FontWeight.w700,
-      letterSpacing: -0.1,
-      color: KidPalette.navy,
-      height: 1.15,
-    ),
-    labelMedium: const TextStyle(
-      fontSize: 12,
-      fontWeight: FontWeight.w600,
-      letterSpacing: 0.05,
-      color: KidPalette.body,
-      height: 1.18,
-    ),
-    labelSmall: const TextStyle(
-      fontSize: 11,
-      fontWeight: FontWeight.w600,
-      letterSpacing: 0.05,
-      color: KidPalette.body,
-      height: 1.16,
-    ),
+    headlineLarge: kidTypography.headlineLarge,
+    headlineMedium: kidTypography.headlineMedium,
+    headlineSmall: kidTypography.headlineSmall,
+    titleLarge: kidTypography.titleLarge,
+    titleMedium: kidTypography.titleMedium,
+    titleSmall: kidTypography.titleSmall,
+    bodyLarge: kidTypography.bodyLarge,
+    bodyMedium: kidTypography.bodyMedium,
+    bodySmall: kidTypography.bodySmall,
+    labelLarge: kidTypography.labelLarge,
+    labelMedium: kidTypography.labelMedium,
+    labelSmall: kidTypography.labelSmall,
   );
 
   return base.copyWith(
     colorScheme: colorScheme,
-    extensions: const <ThemeExtension<dynamic>>[KidLayoutTheme.defaults],
+    extensions: const <ThemeExtension<dynamic>>[
+      KidLayoutTheme.defaults,
+      KidTypographyTheme.defaults,
+    ],
     scaffoldBackgroundColor: KidPalette.skyTop,
     dividerColor: KidPalette.stroke,
     splashColor: KidPalette.white.withValues(alpha: 0.14),
@@ -1094,7 +1267,7 @@ ThemeData buildKidTheme() {
       shape: const StadiumBorder(),
       side: BorderSide.none,
       backgroundColor: KidPalette.white.withValues(alpha: 0.88),
-      labelStyle: textTheme.labelLarge,
+      labelStyle: kidTypography.labelLarge,
     ),
   );
 }

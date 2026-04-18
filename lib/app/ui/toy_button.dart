@@ -104,8 +104,7 @@ class ToyButton extends StatelessWidget {
           );
     final chipSize = densityTokens.iconChipSize;
     final iconSize = densityTokens.iconSize;
-    final baseLabelStyle =
-        Theme.of(context).textTheme.titleLarge ?? const TextStyle();
+    final baseLabelStyle = Theme.of(context).kidTypography.titleLarge;
     final labelStyle = baseLabelStyle.copyWith(
       color: foregroundColor,
       fontSize: densityTokens.labelFontSize,

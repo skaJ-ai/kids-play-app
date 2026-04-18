@@ -370,6 +370,144 @@ void main() {
     },
   );
 
+  testWidgets(
+    'keeps textTheme titleLarge overrides when the typography extension stays at defaults',
+    (WidgetTester tester) async {
+      final baseTheme = buildKidTheme();
+      final customLayout = KidLayoutTheme(
+        button: KidButtonTokens(
+          regular: const KidButtonDensityTokens(
+            height: 72,
+            horizontalPadding: 26,
+            iconGap: 14,
+            iconChipSize: 40,
+            iconSize: 24,
+            labelFontSize: 24,
+          ),
+          compact: const KidButtonDensityTokens(
+            height: 48,
+            horizontalPadding: 12,
+            iconGap: 6,
+            iconChipSize: 28,
+            iconSize: 16,
+            labelFontSize: 18,
+          ),
+        ),
+        panel: KidLayoutTheme.defaults.panel,
+      );
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          ToyButton(
+            key: const Key('text-theme-override-button'),
+            label: '텍스트 테마 버튼',
+            icon: Icons.play_arrow_rounded,
+            onPressed: () {},
+          ),
+          theme: baseTheme.copyWith(
+            textTheme: baseTheme.textTheme.copyWith(
+              titleLarge: baseTheme.textTheme.titleLarge?.copyWith(
+                letterSpacing: 1.8,
+                height: 1.42,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+            extensions: <ThemeExtension<dynamic>>[
+              customLayout,
+              baseTheme.kidTypography,
+            ],
+          ),
+        ),
+      );
+
+      final labelStyle = _buttonLabelStyle(
+        tester,
+        find.byKey(const Key('text-theme-override-button')),
+        '텍스트 테마 버튼',
+      );
+
+      expect(labelStyle.fontSize, 24);
+      expect(labelStyle.letterSpacing, 1.8);
+      expect(labelStyle.height, 1.42);
+      expect(labelStyle.fontStyle, FontStyle.italic);
+    },
+  );
+
+  testWidgets(
+    'prefers kid typography tokens over textTheme titleLarge for fallback label styling',
+    (WidgetTester tester) async {
+      final baseTheme = buildKidTheme();
+      final customLayout = KidLayoutTheme(
+        button: KidButtonTokens(
+          regular: const KidButtonDensityTokens(
+            height: 72,
+            horizontalPadding: 26,
+            iconGap: 14,
+            iconChipSize: 40,
+            iconSize: 24,
+            labelFontSize: 24,
+          ),
+          compact: const KidButtonDensityTokens(
+            height: 48,
+            horizontalPadding: 12,
+            iconGap: 6,
+            iconChipSize: 28,
+            iconSize: 16,
+            labelFontSize: 18,
+          ),
+        ),
+        panel: KidLayoutTheme.defaults.panel,
+      );
+      final customTypography = KidTypographyTheme.defaults.copyWith(
+        titleLarge: KidTypographyTheme.defaults.titleLarge.copyWith(
+          letterSpacing: 2.5,
+          height: 1.4,
+          fontStyle: FontStyle.italic,
+        ),
+      );
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          ToyButton(
+            key: const Key('kid-typography-button'),
+            label: '토큰 타이포 버튼',
+            icon: Icons.play_arrow_rounded,
+            onPressed: () {},
+          ),
+          theme: baseTheme.copyWith(
+            textTheme: baseTheme.textTheme.copyWith(
+              titleLarge: baseTheme.textTheme.titleLarge?.copyWith(
+                letterSpacing: 8.8,
+                height: 1.9,
+                fontStyle: FontStyle.normal,
+              ),
+            ),
+            extensions: <ThemeExtension<dynamic>>[
+              customLayout,
+              customTypography,
+            ],
+          ),
+        ),
+      );
+
+      final labelStyle = _buttonLabelStyle(
+        tester,
+        find.byKey(const Key('kid-typography-button')),
+        '토큰 타이포 버튼',
+      );
+
+      expect(
+        _buttonHeight(tester, find.byKey(const Key('kid-typography-button'))),
+        customLayout.button.regular.height,
+      );
+      expect(labelStyle.fontSize, 24);
+      expect(labelStyle.letterSpacing, 2.5);
+      expect(labelStyle.height, 1.4);
+      expect(labelStyle.fontStyle, FontStyle.italic);
+      expect(labelStyle.color, KidPalette.white);
+    },
+  );
+
   testWidgets('keeps explicit height overrides ahead of density presets', (
     WidgetTester tester,
   ) async {
