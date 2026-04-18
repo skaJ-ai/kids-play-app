@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'kid_theme.dart';
+import 'toy_button.dart';
 import 'toy_panel.dart';
 
 class AudioPromptPanel extends StatelessWidget {
@@ -26,28 +27,15 @@ class AudioPromptPanel extends StatelessWidget {
       density: compact ? ToyPanelDensity.compact : ToyPanelDensity.regular,
       child: Row(
         children: [
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(compact ? 18 : 24),
-              onTap: onReplay,
-              child: Container(
-                width: compact ? 60 : 78,
-                height: compact ? 60 : 78,
-                decoration: BoxDecoration(
-                  color: KidPalette.white.withValues(alpha: 0.92),
-                  borderRadius: BorderRadius.circular(compact ? 18 : 24),
-                  boxShadow: KidShadows.button,
-                ),
-                child: Icon(
-                  Icons.volume_up_rounded,
-                  color: KidPalette.coralDark,
-                  size: compact ? 30 : 36,
-                ),
-              ),
-            ),
+          ToyButton(
+            label: '다시',
+            icon: Icons.volume_up_rounded,
+            density: ToyButtonDensity.tight,
+            tone: ToyButtonTone.secondary,
+            cooldown: Duration.zero,
+            onPressed: onReplay,
           ),
-          SizedBox(width: compact ? 10 : 14),
+          SizedBox(width: compact ? 10 : 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

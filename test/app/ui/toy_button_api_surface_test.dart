@@ -6,6 +6,7 @@ void main() {
     're-exports ToyButtonDensity for callers importing only toy_button.dart',
     () {
       expect(ToyButtonDensity.compact, isA<ToyButtonDensity>());
+      expect(ToyButtonDensity.tight, isA<ToyButtonDensity>());
     },
   );
 }

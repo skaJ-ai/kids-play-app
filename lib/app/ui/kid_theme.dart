@@ -45,7 +45,7 @@ class KidShadows {
   ];
 }
 
-enum ToyButtonDensity { regular, compact }
+enum ToyButtonDensity { regular, compact, tight }
 
 enum ToyPanelDensity { regular, compact, tight }
 
@@ -196,25 +196,33 @@ class KidButtonDensityTokens {
 
 @immutable
 class KidButtonTokens {
-  const KidButtonTokens({required this.regular, required this.compact});
+  const KidButtonTokens({
+    required this.regular,
+    required this.compact,
+    KidButtonDensityTokens? tight,
+  }) : tight = tight ?? compact;
 
   final KidButtonDensityTokens regular;
   final KidButtonDensityTokens compact;
+  final KidButtonDensityTokens tight;
 
   KidButtonDensityTokens forDensity(ToyButtonDensity density) {
     return switch (density) {
       ToyButtonDensity.regular => regular,
       ToyButtonDensity.compact => compact,
+      ToyButtonDensity.tight => tight,
     };
   }
 
   KidButtonTokens copyWith({
     KidButtonDensityTokens? regular,
     KidButtonDensityTokens? compact,
+    KidButtonDensityTokens? tight,
   }) {
     return KidButtonTokens(
       regular: regular ?? this.regular,
       compact: compact ?? this.compact,
+      tight: tight ?? this.tight,
     );
   }
 
@@ -222,6 +230,7 @@ class KidButtonTokens {
     return KidButtonTokens(
       regular: regular.lerp(other.regular, t),
       compact: compact.lerp(other.compact, t),
+      tight: tight.lerp(other.tight, t),
     );
   }
 }
@@ -941,6 +950,24 @@ class KidLayoutTheme extends ThemeExtension<KidLayoutTheme> {
         highlightHorizontalInset: 12,
         iconChipRadius: 11,
       ),
+      tight: KidButtonDensityTokens(
+        height: 42,
+        horizontalPadding: 12,
+        iconGap: 6,
+        iconChipSize: 24,
+        iconSize: 14,
+        labelFontSize: 14,
+        labelFontWeight: FontWeight.w700,
+        labelLetterSpacing: 0,
+        labelHeight: 1.0,
+        primaryBorderWidth: 1.0,
+        secondaryBorderWidth: 0.9,
+        radius: 18,
+        highlightTopInset: 1,
+        highlightHeight: 6,
+        highlightHorizontalInset: 10,
+        iconChipRadius: 9,
+      ),
     ),
     panel: KidPanelTokens(
       regular: KidPanelDensityTokens(
@@ -1189,11 +1216,15 @@ class KidTypographyTheme extends ThemeExtension<KidTypographyTheme> {
       titleSmall: titleSmall == defaults.titleSmall
           ? inherited.titleSmall
           : titleSmall,
-      bodyLarge: bodyLarge == defaults.bodyLarge ? inherited.bodyLarge : bodyLarge,
+      bodyLarge: bodyLarge == defaults.bodyLarge
+          ? inherited.bodyLarge
+          : bodyLarge,
       bodyMedium: bodyMedium == defaults.bodyMedium
           ? inherited.bodyMedium
           : bodyMedium,
-      bodySmall: bodySmall == defaults.bodySmall ? inherited.bodySmall : bodySmall,
+      bodySmall: bodySmall == defaults.bodySmall
+          ? inherited.bodySmall
+          : bodySmall,
       labelLarge: labelLarge == defaults.labelLarge
           ? inherited.labelLarge
           : labelLarge,

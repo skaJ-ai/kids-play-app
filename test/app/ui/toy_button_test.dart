@@ -370,6 +370,143 @@ void main() {
     },
   );
 
+  testWidgets('reads tight layout metrics from kid theme tokens', (
+    WidgetTester tester,
+  ) async {
+    final customLayout = KidLayoutTheme(
+      button: KidButtonTokens(
+        regular: KidLayoutTheme.defaults.button.regular,
+        compact: KidLayoutTheme.defaults.button.compact,
+        tight: const KidButtonDensityTokens(
+          height: 42,
+          horizontalPadding: 10,
+          iconGap: 6,
+          iconChipSize: 24,
+          iconSize: 14,
+          labelFontSize: 14,
+          labelFontWeight: FontWeight.w800,
+          labelLetterSpacing: -0.2,
+          labelHeight: 1.0,
+          primaryBorderWidth: 0.9,
+          secondaryBorderWidth: 0.8,
+          radius: 18,
+          highlightTopInset: 1,
+          highlightHeight: 6,
+          highlightHorizontalInset: 10,
+          iconChipRadius: 8,
+        ),
+      ),
+      panel: KidLayoutTheme.defaults.panel,
+    );
+
+    await tester.pumpWidget(
+      _buildTestApp(
+        ToyButton(
+          key: const Key('tight-button'),
+          label: '다시',
+          icon: Icons.volume_up_rounded,
+          density: ToyButtonDensity.tight,
+          onPressed: () {},
+        ),
+        theme: buildKidTheme().copyWith(extensions: [customLayout]),
+      ),
+    );
+
+    final tightButton = find.byKey(const Key('tight-button'));
+
+    expect(
+      _buttonHeight(tester, tightButton),
+      customLayout.button.tight.height,
+    );
+    expect(
+      _buttonPadding(tester, tightButton),
+      const EdgeInsets.symmetric(horizontal: 10),
+    );
+    expect(
+      _buttonIconChipSize(tester, tightButton, Icons.volume_up_rounded),
+      customLayout.button.tight.iconChipSize,
+    );
+    expect(
+      _buttonIconGapWidth(tester, tightButton),
+      customLayout.button.tight.iconGap,
+    );
+    expect(
+      _buttonIconSize(tester, tightButton, Icons.volume_up_rounded),
+      customLayout.button.tight.iconSize,
+    );
+    expect(
+      _buttonLabelFontSize(tester, tightButton, '다시'),
+      customLayout.button.tight.labelFontSize,
+    );
+    expect(
+      _buttonBorderWidth(tester, tightButton),
+      customLayout.button.tight.primaryBorderWidth,
+    );
+    expect(
+      _buttonBorderRadius(tester, tightButton),
+      customLayout.button.tight.radius,
+    );
+    expect(
+      _buttonHighlightHeight(tester, tightButton),
+      customLayout.button.tight.highlightHeight,
+    );
+    expect(
+      _buttonIconChipRadius(tester, tightButton, Icons.volume_up_rounded),
+      customLayout.button.tight.iconChipRadius,
+    );
+  });
+
+  testWidgets(
+    'uses kid typography titleMedium fallback for tight button labels when token overrides are absent',
+    (WidgetTester tester) async {
+      final baseTheme = buildKidTheme();
+      final customLayout = KidLayoutTheme.defaults.copyWith(
+        button: KidLayoutTheme.defaults.button.copyWith(
+          tight: KidLayoutTheme.defaults.button.tight.copyWith(
+            clearLabelFontWeight: true,
+            clearLabelLetterSpacing: true,
+            clearLabelHeight: true,
+          ),
+        ),
+      );
+      final customTypography = baseTheme.kidTypography.copyWith(
+        titleMedium: baseTheme.kidTypography.titleMedium.copyWith(
+          fontWeight: FontWeight.w400,
+          letterSpacing: 1.4,
+          height: 1.44,
+          fontStyle: FontStyle.italic,
+        ),
+      );
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          ToyButton(
+            key: const Key('tight-fallback-typography-button'),
+            label: '다시',
+            icon: Icons.volume_up_rounded,
+            density: ToyButtonDensity.tight,
+            onPressed: () {},
+          ),
+          theme: baseTheme.copyWith(
+            extensions: <ThemeExtension<dynamic>>[customLayout, customTypography],
+          ),
+        ),
+      );
+
+      final labelStyle = _buttonLabelStyle(
+        tester,
+        find.byKey(const Key('tight-fallback-typography-button')),
+        '다시',
+      );
+
+      expect(labelStyle.fontSize, customLayout.button.tight.labelFontSize);
+      expect(labelStyle.fontWeight, customTypography.titleMedium.fontWeight);
+      expect(labelStyle.letterSpacing, customTypography.titleMedium.letterSpacing);
+      expect(labelStyle.height, customTypography.titleMedium.height);
+      expect(labelStyle.fontStyle, customTypography.titleMedium.fontStyle);
+    },
+  );
+
   testWidgets(
     'keeps textTheme titleLarge overrides when the typography extension stays at defaults',
     (WidgetTester tester) async {

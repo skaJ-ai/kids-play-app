@@ -19,6 +19,10 @@ class TapCooldownGate {
     try {
       await action();
     } finally {
+      if (cooldown == Duration.zero) {
+        _locked = false;
+        return;
+      }
       Future<void>.delayed(cooldown).then((_) {
         _locked = false;
       });
@@ -61,6 +65,16 @@ class _CooldownInkWellState extends State<CooldownInkWell> {
     try {
       await widget.onTap?.call();
     } finally {
+      if (widget.cooldown == Duration.zero) {
+        if (!mounted) {
+          _locked = false;
+          return;
+        }
+        setState(() {
+          _locked = false;
+        });
+        return;
+      }
       _unlockTimer = Timer(widget.cooldown, () {
         if (!mounted) {
           _locked = false;
