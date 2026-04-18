@@ -322,39 +322,109 @@ void main() {
       );
     });
 
-    testWidgets('reads panel shadow overrides from kid theme tokens', (
+    testWidgets(
+      'reads tone-aware panel shadow overrides from kid theme tokens',
+      (WidgetTester tester) async {
+        const customPanelShadows = [
+          BoxShadow(
+            color: Color(0x28112233),
+            blurRadius: 24,
+            offset: Offset(0, 14),
+          ),
+          BoxShadow(
+            color: Color(0x10000000),
+            blurRadius: 5,
+            offset: Offset(1, 2),
+          ),
+        ];
+        const customAiryPanelShadows = [
+          BoxShadow(
+            color: Color(0x14182230),
+            blurRadius: 18,
+            offset: Offset(0, 10),
+          ),
+          BoxShadow(
+            color: Color(0x08000000),
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          ),
+        ];
+        final customLayout = KidLayoutTheme(
+          button: KidLayoutTheme.defaults.button,
+          panel: KidLayoutTheme.defaults.panel,
+          chrome: KidChromeTokens(
+            button: KidButtonChromeTokens(),
+            panel: KidPanelChromeTokens(),
+            shadows: KidShadowTokens(
+              panel: customPanelShadows,
+              airyPanel: customAiryPanelShadows,
+            ),
+          ),
+        );
+
+        await _pumpToyPanel(
+          tester,
+          theme: buildKidTheme().copyWith(extensions: [customLayout]),
+        );
+
+        expect(
+          _panelDecoration(tester, find.byType(ToyPanel)).boxShadow,
+          customPanelShadows,
+        );
+
+        await _pumpToyPanel(
+          tester,
+          tone: ToyPanelTone.airy,
+          theme: buildKidTheme().copyWith(extensions: [customLayout]),
+        );
+
+        expect(
+          _panelDecoration(tester, find.byType(ToyPanel)).boxShadow,
+          customAiryPanelShadows,
+        );
+
+        await _pumpToyPanel(
+          tester,
+          tone: ToyPanelTone.warm,
+          theme: buildKidTheme().copyWith(extensions: [customLayout]),
+        );
+
+        expect(
+          _panelDecoration(tester, find.byType(ToyPanel)).boxShadow,
+          customPanelShadows,
+        );
+      },
+    );
+
+    testWidgets('uses tone-aware panel shadow defaults', (
       WidgetTester tester,
     ) async {
-      const customPanelShadows = [
-        BoxShadow(
-          color: Color(0x28112233),
-          blurRadius: 24,
-          offset: Offset(0, 14),
-        ),
-        BoxShadow(
-          color: Color(0x10000000),
-          blurRadius: 5,
-          offset: Offset(1, 2),
-        ),
-      ];
-      final customLayout = KidLayoutTheme(
-        button: KidLayoutTheme.defaults.button,
-        panel: KidLayoutTheme.defaults.panel,
-        chrome: KidChromeTokens(
-          button: KidButtonChromeTokens(),
-          panel: KidPanelChromeTokens(),
-          shadows: KidShadowTokens(panel: customPanelShadows),
-        ),
-      );
-
-      await _pumpToyPanel(
-        tester,
-        theme: buildKidTheme().copyWith(extensions: [customLayout]),
-      );
+      await _pumpToyPanel(tester);
 
       expect(
         _panelDecoration(tester, find.byType(ToyPanel)).boxShadow,
-        customPanelShadows,
+        KidShadows.panel,
+      );
+
+      await _pumpToyPanel(tester, tone: ToyPanelTone.airy);
+
+      expect(
+        _panelDecoration(tester, find.byType(ToyPanel)).boxShadow,
+        KidShadows.panelAiry,
+      );
+
+      await _pumpToyPanel(tester, tone: ToyPanelTone.warm);
+
+      expect(
+        _panelDecoration(tester, find.byType(ToyPanel)).boxShadow,
+        KidShadows.panel,
+      );
+
+      await _pumpToyPanel(tester, tone: ToyPanelTone.lilac);
+
+      expect(
+        _panelDecoration(tester, find.byType(ToyPanel)).boxShadow,
+        KidShadows.panel,
       );
     });
   });

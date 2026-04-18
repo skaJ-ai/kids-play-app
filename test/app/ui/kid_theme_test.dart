@@ -470,6 +470,59 @@ void main() {
     );
   });
 
+  test(
+    'KidShadowTokens exposes tone-aware defaults while preserving generic panel overrides',
+    () {
+      const genericPanelOverride = [
+        BoxShadow(
+          color: Color(0x28112233),
+          blurRadius: 24,
+          offset: Offset(0, 14),
+        ),
+        BoxShadow(
+          color: Color(0x10000000),
+          blurRadius: 5,
+          offset: Offset(1, 2),
+        ),
+      ];
+
+      expect(KidShadowTokens.defaults.panel, KidShadows.panel);
+      expect(KidShadowTokens.defaults.surfacePanel, KidShadows.panel);
+      expect(KidShadowTokens.defaults.airyPanel, KidShadows.panelAiry);
+      expect(KidShadowTokens.defaults.warmPanel, KidShadows.panel);
+      expect(KidShadowTokens.defaults.lilacPanel, KidShadows.panel);
+
+      final overridden = KidShadowTokens(panel: genericPanelOverride);
+
+      expect(overridden.panel, genericPanelOverride);
+      expect(overridden.surfacePanel, genericPanelOverride);
+      expect(overridden.airyPanel, genericPanelOverride);
+      expect(overridden.warmPanel, genericPanelOverride);
+      expect(overridden.lilacPanel, genericPanelOverride);
+    },
+  );
+
+  test('KidShadowTokens keeps panel alias synced with surfacePanel updates', () {
+    const surfaceOverride = [
+      BoxShadow(
+        color: Color(0x22102030),
+        blurRadius: 19,
+        offset: Offset(0, 9),
+      ),
+    ];
+
+    final constructed = KidShadowTokens(surfacePanel: surfaceOverride);
+    final copied = KidShadowTokens.defaults.copyWith(surfacePanel: surfaceOverride);
+    final lerped = KidShadowTokens.defaults.lerp(constructed, 1);
+
+    expect(constructed.panel, surfaceOverride);
+    expect(constructed.surfacePanel, surfaceOverride);
+    expect(copied.panel, surfaceOverride);
+    expect(copied.surfacePanel, surfaceOverride);
+    expect(lerped.panel, lerped.surfacePanel);
+    expect(lerped.surfacePanel.first, surfaceOverride.first);
+  });
+
   test('KidShadowTokens copyWith and lerp keep frozen shadow snapshots', () {
     final replacementPrimary = <BoxShadow>[
       const BoxShadow(
@@ -478,8 +531,24 @@ void main() {
         offset: Offset(0, 10),
       ),
     ];
+    final replacementPanel = <BoxShadow>[
+      const BoxShadow(
+        color: Color(0x11182230),
+        blurRadius: 20,
+        offset: Offset(0, 11),
+      ),
+    ];
+    final replacementAiryPanel = <BoxShadow>[
+      const BoxShadow(
+        color: Color(0x16182230),
+        blurRadius: 16,
+        offset: Offset(0, 9),
+      ),
+    ];
     final copied = KidShadowTokens.defaults.copyWith(
       buttonPrimary: replacementPrimary,
+      panel: replacementPanel,
+      airyPanel: replacementAiryPanel,
     );
 
     replacementPrimary.add(
@@ -489,10 +558,24 @@ void main() {
         offset: Offset(0, 4),
       ),
     );
+    replacementPanel.add(
+      const BoxShadow(
+        color: Color(0x22182230),
+        blurRadius: 10,
+        offset: Offset(0, 4),
+      ),
+    );
+    replacementAiryPanel.add(
+      const BoxShadow(
+        color: Color(0x26182230),
+        blurRadius: 6,
+        offset: Offset(0, 3),
+      ),
+    );
 
     final lerped =
         KidShadowTokens(
-          panel: <BoxShadow>[
+          airyPanel: <BoxShadow>[
             const BoxShadow(
               color: Color(0x14182230),
               blurRadius: 18,
@@ -501,7 +584,7 @@ void main() {
           ],
         ).lerp(
           KidShadowTokens(
-            panel: <BoxShadow>[
+            airyPanel: <BoxShadow>[
               const BoxShadow(
                 color: Color(0x24182230),
                 blurRadius: 24,
@@ -513,6 +596,11 @@ void main() {
         );
 
     expect(copied.buttonPrimary, hasLength(1));
+    expect(copied.panel, replacementPanel.take(1).toList());
+    expect(copied.surfacePanel, replacementPanel.take(1).toList());
+    expect(copied.airyPanel, replacementAiryPanel.take(1).toList());
+    expect(copied.warmPanel, replacementPanel.take(1).toList());
+    expect(copied.lilacPanel, replacementPanel.take(1).toList());
     expect(
       () => copied.buttonPrimary.add(
         const BoxShadow(
@@ -524,9 +612,19 @@ void main() {
       throwsUnsupportedError,
     );
     expect(
-      () => lerped.panel.add(
+      () => copied.airyPanel.add(
         const BoxShadow(
           color: Color(0x34182230),
+          blurRadius: 5,
+          offset: Offset(0, 2),
+        ),
+      ),
+      throwsUnsupportedError,
+    );
+    expect(
+      () => lerped.airyPanel.add(
+        const BoxShadow(
+          color: Color(0x44182230),
           blurRadius: 5,
           offset: Offset(0, 2),
         ),

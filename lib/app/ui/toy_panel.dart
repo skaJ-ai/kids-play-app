@@ -40,6 +40,7 @@ class ToyPanel extends StatelessWidget {
     final highlightHorizontalInset = densityTokens.highlightHorizontalInset;
     final resolvedTone = tone ?? ToyPanelTone.surface;
     final toneColors = _toneColorsFor(resolvedTone, chromeTokens);
+    final resolvedShadows = _panelShadowsFor(resolvedTone, shadowTokens);
     final resolvedBackgroundColor =
         backgroundColor ?? toneColors.backgroundColor;
     final resolvedBorderColor = borderColor ?? toneColors.borderColor;
@@ -70,7 +71,7 @@ class ToyPanel extends StatelessWidget {
         ),
         borderRadius: borderRadius,
         border: Border.all(color: resolvedBorder, width: resolvedBorderWidth),
-        boxShadow: shadowTokens.panel,
+        boxShadow: resolvedShadows,
       ),
       child: ClipRRect(
         borderRadius: borderRadius,
@@ -105,6 +106,18 @@ class ToyPanel extends StatelessWidget {
       ),
     );
   }
+}
+
+List<BoxShadow> _panelShadowsFor(
+  ToyPanelTone tone,
+  KidShadowTokens shadowTokens,
+) {
+  return switch (tone) {
+    ToyPanelTone.surface => shadowTokens.surfacePanel,
+    ToyPanelTone.airy => shadowTokens.airyPanel,
+    ToyPanelTone.warm => shadowTokens.warmPanel,
+    ToyPanelTone.lilac => shadowTokens.lilacPanel,
+  };
 }
 
 class _ToyPanelToneColors {

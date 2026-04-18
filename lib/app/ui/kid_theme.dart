@@ -29,6 +29,11 @@ class KidShadows {
     BoxShadow(color: Color(0x0D182230), blurRadius: 10, offset: Offset(0, 4)),
   ];
 
+  static const panelAiry = [
+    BoxShadow(color: Color(0x10182230), blurRadius: 22, offset: Offset(0, 12)),
+    BoxShadow(color: Color(0x08182230), blurRadius: 8, offset: Offset(0, 3)),
+  ];
+
   static const button = [
     BoxShadow(color: Color(0x241B4FA7), blurRadius: 24, offset: Offset(0, 12)),
     BoxShadow(color: Color(0x14182230), blurRadius: 10, offset: Offset(0, 4)),
@@ -777,48 +782,80 @@ class KidShadowTokens {
   KidShadowTokens({
     List<BoxShadow> buttonPrimary = KidShadows.button,
     List<BoxShadow> buttonSecondary = KidShadows.buttonSoft,
-    List<BoxShadow> panel = KidShadows.panel,
+    List<BoxShadow>? panel,
+    List<BoxShadow>? surfacePanel,
+    List<BoxShadow>? airyPanel,
+    List<BoxShadow>? warmPanel,
+    List<BoxShadow>? lilacPanel,
   }) : this._(
          buttonPrimary: List<BoxShadow>.unmodifiable(buttonPrimary),
          buttonSecondary: List<BoxShadow>.unmodifiable(buttonSecondary),
-         panel: List<BoxShadow>.unmodifiable(panel),
+         surfacePanel: List<BoxShadow>.unmodifiable(
+           surfacePanel ?? panel ?? KidShadows.panel,
+         ),
+         airyPanel: List<BoxShadow>.unmodifiable(
+           airyPanel ?? panel ?? KidShadows.panelAiry,
+         ),
+         warmPanel: List<BoxShadow>.unmodifiable(
+           warmPanel ?? panel ?? KidShadows.panel,
+         ),
+         lilacPanel: List<BoxShadow>.unmodifiable(
+           lilacPanel ?? panel ?? KidShadows.panel,
+         ),
        );
 
   const KidShadowTokens._({
     this.buttonPrimary = KidShadows.button,
     this.buttonSecondary = KidShadows.buttonSoft,
-    this.panel = KidShadows.panel,
+    this.surfacePanel = KidShadows.panel,
+    this.airyPanel = KidShadows.panelAiry,
+    this.warmPanel = KidShadows.panel,
+    this.lilacPanel = KidShadows.panel,
   });
 
   static const defaults = KidShadowTokens._();
 
   final List<BoxShadow> buttonPrimary;
   final List<BoxShadow> buttonSecondary;
-  final List<BoxShadow> panel;
+  final List<BoxShadow> surfacePanel;
+  final List<BoxShadow> airyPanel;
+  final List<BoxShadow> warmPanel;
+  final List<BoxShadow> lilacPanel;
+
+  List<BoxShadow> get panel => surfacePanel;
 
   KidShadowTokens copyWith({
     List<BoxShadow>? buttonPrimary,
     List<BoxShadow>? buttonSecondary,
     List<BoxShadow>? panel,
+    List<BoxShadow>? surfacePanel,
+    List<BoxShadow>? airyPanel,
+    List<BoxShadow>? warmPanel,
+    List<BoxShadow>? lilacPanel,
   }) {
     return KidShadowTokens(
       buttonPrimary: buttonPrimary ?? this.buttonPrimary,
       buttonSecondary: buttonSecondary ?? this.buttonSecondary,
       panel: panel ?? this.panel,
+      surfacePanel: surfacePanel ?? panel ?? this.surfacePanel,
+      airyPanel: airyPanel ?? panel ?? this.airyPanel,
+      warmPanel: warmPanel ?? panel ?? this.warmPanel,
+      lilacPanel: lilacPanel ?? panel ?? this.lilacPanel,
     );
   }
 
   KidShadowTokens lerp(KidShadowTokens other, double t) {
+    List<BoxShadow> lerpList(List<BoxShadow> a, List<BoxShadow> b) {
+      return BoxShadow.lerpList(a, b, t) ?? (t < 0.5 ? a : b);
+    }
+
     return KidShadowTokens(
-      buttonPrimary:
-          BoxShadow.lerpList(buttonPrimary, other.buttonPrimary, t) ??
-          (t < 0.5 ? buttonPrimary : other.buttonPrimary),
-      buttonSecondary:
-          BoxShadow.lerpList(buttonSecondary, other.buttonSecondary, t) ??
-          (t < 0.5 ? buttonSecondary : other.buttonSecondary),
-      panel:
-          BoxShadow.lerpList(panel, other.panel, t) ??
-          (t < 0.5 ? panel : other.panel),
+      buttonPrimary: lerpList(buttonPrimary, other.buttonPrimary),
+      buttonSecondary: lerpList(buttonSecondary, other.buttonSecondary),
+      surfacePanel: lerpList(surfacePanel, other.surfacePanel),
+      airyPanel: lerpList(airyPanel, other.airyPanel),
+      warmPanel: lerpList(warmPanel, other.warmPanel),
+      lilacPanel: lerpList(lilacPanel, other.lilacPanel),
     );
   }
 }
