@@ -88,49 +88,43 @@ void main() {
     expect(typography.labelSmall, theme.textTheme.labelSmall);
   });
 
-  test(
-    'KidTypographyTheme copyWith and lerp preserve and override styles',
-    () {
-      final customized = KidTypographyTheme.defaults.copyWith(
-        titleLarge: const TextStyle(
-          fontSize: 30,
-          fontWeight: FontWeight.w800,
-          letterSpacing: 1.5,
-          color: Colors.deepPurple,
-          height: 1.4,
-          fontStyle: FontStyle.italic,
-        ),
-        bodySmall: const TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: Colors.teal,
-          height: 1.6,
-        ),
-      );
+  test('KidTypographyTheme copyWith and lerp preserve and override styles', () {
+    final customized = KidTypographyTheme.defaults.copyWith(
+      titleLarge: const TextStyle(
+        fontSize: 30,
+        fontWeight: FontWeight.w800,
+        letterSpacing: 1.5,
+        color: Colors.deepPurple,
+        height: 1.4,
+        fontStyle: FontStyle.italic,
+      ),
+      bodySmall: const TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w500,
+        color: Colors.teal,
+        height: 1.6,
+      ),
+    );
 
-      expect(customized.titleLarge.fontSize, 30);
-      expect(customized.titleLarge.letterSpacing, 1.5);
-      expect(customized.titleLarge.height, 1.4);
-      expect(customized.titleLarge.fontStyle, FontStyle.italic);
-      expect(customized.bodySmall.fontSize, 12);
-      expect(
-        customized.headlineLarge,
-        KidTypographyTheme.defaults.headlineLarge,
-      );
-      expect(customized.labelMedium, KidTypographyTheme.defaults.labelMedium);
+    expect(customized.titleLarge.fontSize, 30);
+    expect(customized.titleLarge.letterSpacing, 1.5);
+    expect(customized.titleLarge.height, 1.4);
+    expect(customized.titleLarge.fontStyle, FontStyle.italic);
+    expect(customized.bodySmall.fontSize, 12);
+    expect(customized.headlineLarge, KidTypographyTheme.defaults.headlineLarge);
+    expect(customized.labelMedium, KidTypographyTheme.defaults.labelMedium);
 
-      final lerped = KidTypographyTheme.defaults.lerp(customized, 0.5);
+    final lerped = KidTypographyTheme.defaults.lerp(customized, 0.5);
 
-      expect(lerped.titleLarge.fontSize, closeTo(25, 0.001));
-      expect(lerped.titleLarge.letterSpacing, closeTo(0.65, 0.001));
-      expect(lerped.titleLarge.height, closeTo(1.29, 0.001));
-      expect(lerped.titleLarge.fontStyle, FontStyle.italic);
-      expect(lerped.bodySmall.fontSize, closeTo(12.5, 0.001));
-      expect(lerped.bodySmall.height, closeTo(1.46, 0.001));
-      expect(lerped.headlineLarge, KidTypographyTheme.defaults.headlineLarge);
-      expect(lerped.labelMedium, KidTypographyTheme.defaults.labelMedium);
-    },
-  );
+    expect(lerped.titleLarge.fontSize, closeTo(25, 0.001));
+    expect(lerped.titleLarge.letterSpacing, closeTo(0.65, 0.001));
+    expect(lerped.titleLarge.height, closeTo(1.29, 0.001));
+    expect(lerped.titleLarge.fontStyle, FontStyle.italic);
+    expect(lerped.bodySmall.fontSize, closeTo(12.5, 0.001));
+    expect(lerped.bodySmall.height, closeTo(1.46, 0.001));
+    expect(lerped.headlineLarge, KidTypographyTheme.defaults.headlineLarge);
+    expect(lerped.labelMedium, KidTypographyTheme.defaults.labelMedium);
+  });
 
   test(
     'KidPanelChromeTokens exposes tone-aware chrome defaults and keeps them through copyWith and lerp',
@@ -138,7 +132,15 @@ void main() {
       final layout = buildKidTheme().extension<KidLayoutTheme>();
 
       expect(layout, isNotNull);
-      expect(layout!.chrome.panel.surfaceHighlightAlpha, 0.28);
+      expect(layout!.chrome.panel.surfaceBackgroundColor, KidPalette.cream);
+      expect(layout.chrome.panel.surfaceBorderColor, KidPalette.stroke);
+      expect(layout.chrome.panel.airyBackgroundColor, KidPalette.white);
+      expect(layout.chrome.panel.airyBorderColor, KidPalette.stroke);
+      expect(layout.chrome.panel.warmBackgroundColor, KidPalette.creamWarm);
+      expect(layout.chrome.panel.warmBorderColor, KidPalette.stroke);
+      expect(layout.chrome.panel.lilacBackgroundColor, KidPalette.lilac);
+      expect(layout.chrome.panel.lilacBorderColor, KidPalette.stroke);
+      expect(layout.chrome.panel.surfaceHighlightAlpha, 0.28);
       expect(layout.chrome.panel.airyHighlightAlpha, 0.34);
       expect(layout.chrome.panel.warmHighlightAlpha, 0.2);
       expect(layout.chrome.panel.lilacHighlightAlpha, 0.24);
@@ -149,10 +151,14 @@ void main() {
       expect(layout.chrome.panel.lilacBackgroundAlpha, 0.75);
 
       final copied = layout.chrome.panel.copyWith(
+        surfaceBackgroundColor: const Color(0xFFFFE7C2),
+        airyBorderColor: const Color(0xFF3A8D82),
         airyHighlightAlpha: 0.39,
         lilacShellGradientWhiteBlendAmount: 0.27,
       );
       const updated = KidPanelChromeTokens(
+        warmBackgroundColor: Color(0xFFFFD1A0),
+        warmBorderColor: Color(0xFFB06B3B),
         surfaceHighlightAlpha: 0.31,
         airyShellGradientWhiteBlendAmount: 0.5,
         warmHighlightAlpha: 0.16,
@@ -160,9 +166,13 @@ void main() {
       );
       final lerped = layout.chrome.panel.lerp(updated, 1);
 
+      expect(copied.surfaceBackgroundColor, const Color(0xFFFFE7C2));
+      expect(copied.airyBorderColor, const Color(0xFF3A8D82));
       expect(copied.airyHighlightAlpha, 0.39);
       expect(copied.lilacShellGradientWhiteBlendAmount, 0.27);
       expect(copied.lilacBackgroundAlpha, 0.75);
+      expect(lerped.warmBackgroundColor, const Color(0xFFFFD1A0));
+      expect(lerped.warmBorderColor, const Color(0xFFB06B3B));
       expect(lerped.surfaceHighlightAlpha, 0.31);
       expect(lerped.airyShellGradientWhiteBlendAmount, 0.5);
       expect(lerped.warmHighlightAlpha, 0.16);
@@ -218,7 +228,10 @@ void main() {
       );
       expect(copied.secondaryShellGradientStart, KidPalette.cream);
       expect(copied.secondaryShellGradientEnd, KidPalette.creamWarm);
-      expect(lerped.primaryShellGradientStart, updated.primaryShellGradientStart);
+      expect(
+        lerped.primaryShellGradientStart,
+        updated.primaryShellGradientStart,
+      );
       expect(lerped.primaryShellGradientEnd, updated.primaryShellGradientEnd);
       expect(
         lerped.primaryDisabledGradientBlendTargetColor,
@@ -518,26 +531,31 @@ void main() {
     },
   );
 
-  test('KidShadowTokens keeps panel alias synced with surfacePanel updates', () {
-    const surfaceOverride = [
-      BoxShadow(
-        color: Color(0x22102030),
-        blurRadius: 19,
-        offset: Offset(0, 9),
-      ),
-    ];
+  test(
+    'KidShadowTokens keeps panel alias synced with surfacePanel updates',
+    () {
+      const surfaceOverride = [
+        BoxShadow(
+          color: Color(0x22102030),
+          blurRadius: 19,
+          offset: Offset(0, 9),
+        ),
+      ];
 
-    final constructed = KidShadowTokens(surfacePanel: surfaceOverride);
-    final copied = KidShadowTokens.defaults.copyWith(surfacePanel: surfaceOverride);
-    final lerped = KidShadowTokens.defaults.lerp(constructed, 1);
+      final constructed = KidShadowTokens(surfacePanel: surfaceOverride);
+      final copied = KidShadowTokens.defaults.copyWith(
+        surfacePanel: surfaceOverride,
+      );
+      final lerped = KidShadowTokens.defaults.lerp(constructed, 1);
 
-    expect(constructed.panel, surfaceOverride);
-    expect(constructed.surfacePanel, surfaceOverride);
-    expect(copied.panel, surfaceOverride);
-    expect(copied.surfacePanel, surfaceOverride);
-    expect(lerped.panel, lerped.surfacePanel);
-    expect(lerped.surfacePanel.first, surfaceOverride.first);
-  });
+      expect(constructed.panel, surfaceOverride);
+      expect(constructed.surfacePanel, surfaceOverride);
+      expect(copied.panel, surfaceOverride);
+      expect(copied.surfacePanel, surfaceOverride);
+      expect(lerped.panel, lerped.surfacePanel);
+      expect(lerped.surfacePanel.first, surfaceOverride.first);
+    },
+  );
 
   test('KidShadowTokens copyWith and lerp keep frozen shadow snapshots', () {
     final replacementPrimary = <BoxShadow>[

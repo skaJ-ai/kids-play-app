@@ -640,6 +640,14 @@ class KidPanelChromeTokens {
   const KidPanelChromeTokens({
     this.strokeBorderAlpha = 0.88,
     this.customBorderAlpha = 0.72,
+    this.surfaceBackgroundColor = KidPalette.cream,
+    this.surfaceBorderColor = KidPalette.stroke,
+    this.airyBackgroundColor = KidPalette.white,
+    this.airyBorderColor = KidPalette.stroke,
+    this.warmBackgroundColor = KidPalette.creamWarm,
+    this.warmBorderColor = KidPalette.stroke,
+    this.lilacBackgroundColor = KidPalette.lilac,
+    this.lilacBorderColor = KidPalette.stroke,
     double? highlightAlpha,
     this.airyBackgroundAlpha = 0.94,
     this.lilacBackgroundAlpha = 0.75,
@@ -675,6 +683,14 @@ class KidPanelChromeTokens {
 
   final double strokeBorderAlpha;
   final double customBorderAlpha;
+  final Color surfaceBackgroundColor;
+  final Color surfaceBorderColor;
+  final Color airyBackgroundColor;
+  final Color airyBorderColor;
+  final Color warmBackgroundColor;
+  final Color warmBorderColor;
+  final Color lilacBackgroundColor;
+  final Color lilacBorderColor;
   final double surfaceHighlightAlpha;
   final double airyHighlightAlpha;
   final double warmHighlightAlpha;
@@ -693,6 +709,14 @@ class KidPanelChromeTokens {
   KidPanelChromeTokens copyWith({
     double? strokeBorderAlpha,
     double? customBorderAlpha,
+    Color? surfaceBackgroundColor,
+    Color? surfaceBorderColor,
+    Color? airyBackgroundColor,
+    Color? airyBorderColor,
+    Color? warmBackgroundColor,
+    Color? warmBorderColor,
+    Color? lilacBackgroundColor,
+    Color? lilacBorderColor,
     double? highlightAlpha,
     double? airyBackgroundAlpha,
     double? lilacBackgroundAlpha,
@@ -709,6 +733,15 @@ class KidPanelChromeTokens {
     return KidPanelChromeTokens(
       strokeBorderAlpha: strokeBorderAlpha ?? this.strokeBorderAlpha,
       customBorderAlpha: customBorderAlpha ?? this.customBorderAlpha,
+      surfaceBackgroundColor:
+          surfaceBackgroundColor ?? this.surfaceBackgroundColor,
+      surfaceBorderColor: surfaceBorderColor ?? this.surfaceBorderColor,
+      airyBackgroundColor: airyBackgroundColor ?? this.airyBackgroundColor,
+      airyBorderColor: airyBorderColor ?? this.airyBorderColor,
+      warmBackgroundColor: warmBackgroundColor ?? this.warmBackgroundColor,
+      warmBorderColor: warmBorderColor ?? this.warmBorderColor,
+      lilacBackgroundColor: lilacBackgroundColor ?? this.lilacBackgroundColor,
+      lilacBorderColor: lilacBorderColor ?? this.lilacBorderColor,
       surfaceHighlightAlpha:
           surfaceHighlightAlpha ?? highlightAlpha ?? this.surfaceHighlightAlpha,
       airyHighlightAlpha:
@@ -746,6 +779,30 @@ class KidPanelChromeTokens {
       customBorderAlpha:
           ui.lerpDouble(customBorderAlpha, other.customBorderAlpha, t) ??
           customBorderAlpha,
+      surfaceBackgroundColor:
+          Color.lerp(surfaceBackgroundColor, other.surfaceBackgroundColor, t) ??
+          surfaceBackgroundColor,
+      surfaceBorderColor:
+          Color.lerp(surfaceBorderColor, other.surfaceBorderColor, t) ??
+          surfaceBorderColor,
+      airyBackgroundColor:
+          Color.lerp(airyBackgroundColor, other.airyBackgroundColor, t) ??
+          airyBackgroundColor,
+      airyBorderColor:
+          Color.lerp(airyBorderColor, other.airyBorderColor, t) ??
+          airyBorderColor,
+      warmBackgroundColor:
+          Color.lerp(warmBackgroundColor, other.warmBackgroundColor, t) ??
+          warmBackgroundColor,
+      warmBorderColor:
+          Color.lerp(warmBorderColor, other.warmBorderColor, t) ??
+          warmBorderColor,
+      lilacBackgroundColor:
+          Color.lerp(lilacBackgroundColor, other.lilacBackgroundColor, t) ??
+          lilacBackgroundColor,
+      lilacBorderColor:
+          Color.lerp(lilacBorderColor, other.lilacBorderColor, t) ??
+          lilacBorderColor,
       surfaceHighlightAlpha:
           ui.lerpDouble(
             surfaceHighlightAlpha,

@@ -140,33 +140,33 @@ _ToyPanelToneColors _toneColorsFor(
 ) {
   return switch (tone) {
     ToyPanelTone.surface => _ToyPanelToneColors(
-      backgroundColor: KidPalette.cream,
-      borderColor: KidPalette.stroke,
+      backgroundColor: chromeTokens.surfaceBackgroundColor,
+      borderColor: chromeTokens.surfaceBorderColor,
       shellGradientWhiteBlendAmount:
           chromeTokens.surfaceShellGradientWhiteBlendAmount,
       highlightAlpha: chromeTokens.surfaceHighlightAlpha,
     ),
     ToyPanelTone.airy => _ToyPanelToneColors(
-      backgroundColor: KidPalette.white.withValues(
+      backgroundColor: chromeTokens.airyBackgroundColor.withValues(
         alpha: chromeTokens.airyBackgroundAlpha,
       ),
-      borderColor: KidPalette.stroke,
+      borderColor: chromeTokens.airyBorderColor,
       shellGradientWhiteBlendAmount:
           chromeTokens.airyShellGradientWhiteBlendAmount,
       highlightAlpha: chromeTokens.airyHighlightAlpha,
     ),
     ToyPanelTone.warm => _ToyPanelToneColors(
-      backgroundColor: KidPalette.creamWarm,
-      borderColor: KidPalette.stroke,
+      backgroundColor: chromeTokens.warmBackgroundColor,
+      borderColor: chromeTokens.warmBorderColor,
       shellGradientWhiteBlendAmount:
           chromeTokens.warmShellGradientWhiteBlendAmount,
       highlightAlpha: chromeTokens.warmHighlightAlpha,
     ),
     ToyPanelTone.lilac => _ToyPanelToneColors(
-      backgroundColor: KidPalette.lilac.withValues(
+      backgroundColor: chromeTokens.lilacBackgroundColor.withValues(
         alpha: chromeTokens.lilacBackgroundAlpha,
       ),
-      borderColor: KidPalette.stroke,
+      borderColor: chromeTokens.lilacBorderColor,
       shellGradientWhiteBlendAmount:
           chromeTokens.lilacShellGradientWhiteBlendAmount,
       highlightAlpha: chromeTokens.lilacHighlightAlpha,

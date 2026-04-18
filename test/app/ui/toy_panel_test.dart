@@ -238,6 +238,80 @@ void main() {
       );
     });
 
+    testWidgets('reads tone base colors from kid theme chrome tokens', (
+      WidgetTester tester,
+    ) async {
+      const customSurfaceBackgroundColor = Color(0xFFF7E7D4);
+      const customSurfaceBorderColor = Color(0xFF9F7B51);
+      const customAiryBackgroundColor = Color(0xFFB8F0E7);
+      const customAiryBorderColor = Color(0xFF2A8F7A);
+      const customWarmBackgroundColor = Color(0xFFFFD7A8);
+      const customWarmBorderColor = Color(0xFFB5692F);
+      const customLilacBackgroundColor = Color(0xFFD7C7FF);
+      const customLilacBorderColor = Color(0xFF6E56B8);
+      const customAiryAlpha = 0.67;
+      const customLilacAlpha = 0.58;
+      final customLayout = KidLayoutTheme.defaults.copyWith(
+        chrome: KidLayoutTheme.defaults.chrome.copyWith(
+          panel: KidLayoutTheme.defaults.chrome.panel.copyWith(
+            surfaceBackgroundColor: customSurfaceBackgroundColor,
+            surfaceBorderColor: customSurfaceBorderColor,
+            airyBackgroundColor: customAiryBackgroundColor,
+            airyBorderColor: customAiryBorderColor,
+            warmBackgroundColor: customWarmBackgroundColor,
+            warmBorderColor: customWarmBorderColor,
+            lilacBackgroundColor: customLilacBackgroundColor,
+            lilacBorderColor: customLilacBorderColor,
+            airyBackgroundAlpha: customAiryAlpha,
+            lilacBackgroundAlpha: customLilacAlpha,
+          ),
+        ),
+      );
+      final theme = buildKidTheme().copyWith(extensions: [customLayout]);
+
+      await _pumpToyPanel(tester, theme: theme);
+      _expectResolvedColors(
+        tester,
+        expectedBackgroundColor: customSurfaceBackgroundColor,
+        expectedBorderColor: customSurfaceBorderColor,
+        expectedBorderAlpha: 0.72,
+      );
+
+      await _pumpToyPanel(tester, tone: ToyPanelTone.airy, theme: theme);
+      _expectResolvedColors(
+        tester,
+        expectedBackgroundColor: customAiryBackgroundColor.withValues(
+          alpha: customAiryAlpha,
+        ),
+        expectedBorderColor: customAiryBorderColor,
+        expectedBorderAlpha: 0.72,
+        expectedShellGradientWhiteBlendAmount: 0.46,
+        expectedHighlightAlpha: 0.34,
+      );
+
+      await _pumpToyPanel(tester, tone: ToyPanelTone.warm, theme: theme);
+      _expectResolvedColors(
+        tester,
+        expectedBackgroundColor: customWarmBackgroundColor,
+        expectedBorderColor: customWarmBorderColor,
+        expectedBorderAlpha: 0.72,
+        expectedShellGradientWhiteBlendAmount: 0.18,
+        expectedHighlightAlpha: 0.2,
+      );
+
+      await _pumpToyPanel(tester, tone: ToyPanelTone.lilac, theme: theme);
+      _expectResolvedColors(
+        tester,
+        expectedBackgroundColor: customLilacBackgroundColor.withValues(
+          alpha: customLilacAlpha,
+        ),
+        expectedBorderColor: customLilacBorderColor,
+        expectedBorderAlpha: 0.72,
+        expectedShellGradientWhiteBlendAmount: 0.3,
+        expectedHighlightAlpha: 0.24,
+      );
+    });
+
     testWidgets('reads lilac tone chrome overrides from kid theme tokens', (
       WidgetTester tester,
     ) async {
