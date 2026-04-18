@@ -18,6 +18,8 @@ class HomeHeaderPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final typography = Theme.of(context).kidTypography;
+
     return DecoratedBox(
       decoration: BoxDecoration(
         color: KidPalette.white.withValues(alpha: 0.92),
@@ -37,7 +39,7 @@ class HomeHeaderPill extends StatelessWidget {
             SizedBox(width: compact ? 6 : 8),
             Text(
               label,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              style: typography.titleSmall.copyWith(
                 color: KidPalette.navy,
                 fontWeight: FontWeight.w900,
               ),
@@ -65,6 +67,8 @@ class HomeAccentPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final typography = Theme.of(context).kidTypography;
+
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: compact ? 10 : 12,
@@ -76,7 +80,7 @@ class HomeAccentPill extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+        style: typography.labelLarge.copyWith(
           color: textColor,
           fontWeight: FontWeight.w900,
         ),
