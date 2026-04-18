@@ -9,5 +9,5 @@
 기본 사용 순서:
 1. `public/` 에 placeholder 유지
 2. 필요 시 `local_private/` 에 override 파일 배치
-3. `./scripts/prepare_assets.sh` 실행
+3. repo root(예: `/home/openc/kids-play-app`, `assets/` 내부가 아님)에서 `./scripts/prepare_assets.sh` 실행
 4. 앱은 `generated/` 경로만 사용

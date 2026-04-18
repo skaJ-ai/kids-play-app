@@ -93,8 +93,12 @@ GitHub Actions
 
 자산 준비
 ```bash
+REPO_ROOT=/home/openc/kids-play-app # 다른 머신에서는 자신의 checkout root로 교체
+cd "$REPO_ROOT"
 ./scripts/prepare_assets.sh
 ```
+
+이 머신에서는 위처럼 repo root(`/home/openc/kids-play-app`)를 기준으로 실행한다. 다른 머신도 같은 순서로 자신의 checkout root에서 실행하면 된다.
 
 ## 참고 문서
 
