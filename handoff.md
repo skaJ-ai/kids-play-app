@@ -49,7 +49,7 @@
 ### queue 기준 상태
 - A-E 범위(숫자 feature/라우팅, home/category 연결, design-system theme/button/panel 정리, hero/home/category 리디자인, 보호자 summary/settings/retry/unlock 흐름)는 live repo 기준으로 완료 상태이며, 일부 핵심 흐름은 선별 테스트로 다시 확인된 상태다
 - F 문서 정리는 진행 중인 cleanup 범위다
-- G 최종 통합 게이트(full `flutter test` / `flutter analyze` / release APK build / current-head APK artifact 확인)는 아직 남아 있다
+- G 최종 통합 게이트 중 full `flutter test`는 이번 docs 정리 직전 HEAD `c5879e9`(README-only docs commit, 앱 코드는 마지막 코드 커밋 `a7767c8` 이후 동일)에서 다시 통과했고, full `flutter analyze` / release APK build / current-head APK artifact 확인은 아직 남아 있다
 
 ### 1. 문서/CI 정합성
 - docs/script 변경도 APK workflow에 포함되도록 정리됨
@@ -83,7 +83,7 @@
 
 ---
 
-## 선별 검증 메모
+## 선별 검증 + recent full test 메모
 
 최근 문서화된 선별 재확인 기록 (최종 통합 게이트 아님)
 - numbers + routing
@@ -95,9 +95,13 @@
 - hero / home / parent entry + parent summary controls
   - `/home/openc/sdk/flutter/bin/flutter test test/features/hero/presentation/hero_screen_test.dart test/features/home/presentation/home_redesign_test.dart test/features/avatar/presentation/avatar_setup_screen_test.dart`
   - 결과: passed
+- docs 정리 직전 HEAD 기준 full test 재확인 (`c5879e9`, README-only docs commit; 앱 코드는 마지막 코드 커밋 `a7767c8` 이후 동일)
+  - `./scripts/prepare_assets.sh`
+  - 결과: succeeded
+  - full `/home/openc/sdk/flutter/bin/flutter test`
+  - 결과: `00:32 +227: All tests passed!`
 
 아직 남은 최종 통합 확인
-- full `/home/openc/sdk/flutter/bin/flutter test`
 - full `/home/openc/sdk/flutter/bin/flutter analyze`
 - `/home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64`
 - current-head GitHub Actions APK artifact 확인

@@ -16,7 +16,8 @@
 현재 큐 기준 상태
 - 우선순위 A-E 범위는 live repo와 targeted tests 기준으로 완료 상태
 - F — docs cleanup 진행 중
-- G — final full `flutter test` / `flutter analyze` / release build / current-head APK artifact verification pending
+- G — full `flutter test`는 이번 docs 정리 직전 HEAD `c5879e9`(README-only docs commit, 앱 코드는 마지막 코드 커밋 `a7767c8` 이후 동일)에서 재통과했고, full `flutter analyze` / release build / current-head APK artifact 확인은 아직 남아 있음
+- HEAD `c5879e9`에서 `./scripts/prepare_assets.sh` 후 full `/home/openc/sdk/flutter/bin/flutter test`가 `00:32 +227: All tests passed!`로 끝난 상태
 
 남은 확장 후보
 - 오답 다시 풀기 결과를 별도 통계/보상과 연결
@@ -82,7 +83,7 @@
 - home/category/hub garage UI 정리 완료
 - 기본 summary/reward 흐름 정리 완료
 - docs cleanup 진행 중
-- final full test/analyze/release build + Actions/APK 확인은 마지막 게이트로 남아 있음
+- final full `flutter test`는 이번 docs 정리 직전 HEAD `c5879e9`(README-only docs commit, 앱 코드는 마지막 코드 커밋 `a7767c8` 이후 동일)에서 재통과했고, analyze/release build + Actions/APK 확인은 마지막 게이트로 남아 있음
 
 ## Verification checklist for every slice
 
