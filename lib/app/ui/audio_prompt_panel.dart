@@ -22,8 +22,8 @@ class AudioPromptPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ToyPanel(
-      padding: EdgeInsets.all(compact ? 12 : 16),
-      backgroundColor: KidPalette.creamWarm,
+      tone: ToyPanelTone.warm,
+      density: compact ? ToyPanelDensity.compact : ToyPanelDensity.regular,
       child: Row(
         children: [
           Material(
@@ -78,22 +78,23 @@ class AudioPromptPanel extends StatelessWidget {
                   title,
                   maxLines: compact ? 1 : 2,
                   overflow: TextOverflow.ellipsis,
-                  style: (compact
-                          ? Theme.of(context).textTheme.titleMedium
-                          : Theme.of(context).textTheme.titleLarge)
-                      ?.copyWith(
-                        color: KidPalette.navy,
-                        fontWeight: FontWeight.w900,
-                      ),
+                  style:
+                      (compact
+                              ? Theme.of(context).textTheme.titleMedium
+                              : Theme.of(context).textTheme.titleLarge)
+                          ?.copyWith(
+                            color: KidPalette.navy,
+                            fontWeight: FontWeight.w900,
+                          ),
                 ),
                 SizedBox(height: compact ? 2 : 4),
                 Text(
                   subtitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: KidPalette.body,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: KidPalette.body),
                 ),
               ],
             ),
