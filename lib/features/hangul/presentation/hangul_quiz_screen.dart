@@ -481,9 +481,22 @@ class _HangulQuizScreenState extends State<HangulQuizScreen> {
       return cards;
     }
 
-    return cards
-        .where((card) => symbols.contains(card.symbol))
-        .toList(growable: false);
+    final cardsBySymbol = {for (final card in cards) card.symbol: card};
+    final orderedCards = <HangulCard>[];
+    final seenSymbols = <String>{};
+
+    for (final symbol in symbols) {
+      if (!seenSymbols.add(symbol)) {
+        continue;
+      }
+      final card = cardsBySymbol[symbol];
+      if (card == null) {
+        continue;
+      }
+      orderedCards.add(card);
+    }
+
+    return orderedCards.toList(growable: false);
   }
 
   String _displayNameFor(HangulCard question) {

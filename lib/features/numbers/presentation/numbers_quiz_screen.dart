@@ -536,9 +536,22 @@ class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
       return cards;
     }
 
-    return cards
-        .where((card) => symbols.contains(card.symbol))
-        .toList(growable: false);
+    final cardsBySymbol = {for (final card in cards) card.symbol: card};
+    final orderedCards = <NumbersCard>[];
+    final seenSymbols = <String>{};
+
+    for (final symbol in symbols) {
+      if (!seenSymbols.add(symbol)) {
+        continue;
+      }
+      final card = cardsBySymbol[symbol];
+      if (card == null) {
+        continue;
+      }
+      orderedCards.add(card);
+    }
+
+    return orderedCards.toList(growable: false);
   }
 
   String _displayNameFor(NumbersCard question) {

@@ -261,6 +261,7 @@ class _AvatarSetupScreenState extends State<AvatarSetupScreen> {
                           _ParentSummaryPanel(
                             compact: compact,
                             snapshot: progress,
+                            onOpenLessonRetry: _openLessonRetry,
                           ),
                           SizedBox(height: compact ? 10 : 14),
                           _ParentLessonManagementPanel(
@@ -390,10 +391,16 @@ class _AvatarSetupScreenState extends State<AvatarSetupScreen> {
 }
 
 class _ParentSummaryPanel extends StatelessWidget {
-  const _ParentSummaryPanel({required this.compact, required this.snapshot});
+  const _ParentSummaryPanel({
+    required this.compact,
+    required this.snapshot,
+    required this.onOpenLessonRetry,
+  });
 
   final bool compact;
   final AppProgressSnapshot snapshot;
+  final Future<void> Function(String lessonId, List<String> mistakes)
+  onOpenLessonRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -402,6 +409,9 @@ class _ParentSummaryPanel extends StatelessWidget {
         .toSet()
         .length;
     final mostConfusingLesson = _mostConfusingLessonMetadataFor(snapshot);
+    final mostConfusingLessonMistakes = mostConfusingLesson == null
+        ? const <String>[]
+        : snapshot.progressFor(mostConfusingLesson.lessonId).recentMistakes;
 
     return ToyPanel(
       key: const Key('parent-summary-panel'),
@@ -503,6 +513,17 @@ class _ParentSummaryPanel extends StatelessWidget {
                             ),
                           ),
                         ],
+                      ),
+                      SizedBox(height: compact ? 8 : 10),
+                      _ParentMiniActionButton(
+                        key: const Key('parent-summary-confusion-retry'),
+                        label: '이 세트 다시 보기',
+                        icon: Icons.refresh_rounded,
+                        color: KidPalette.blue,
+                        onPressed: () => onOpenLessonRetry(
+                          mostConfusingLesson.lessonId,
+                          mostConfusingLessonMistakes,
+                        ),
                       ),
                     ],
                   ),
@@ -1382,7 +1403,9 @@ _LessonMetadata? _mostConfusingLessonMetadataFor(AppProgressSnapshot snapshot) {
 
     final leftMetadata = _lessonMetadataFor(a.key);
     final rightMetadata = _lessonMetadataFor(b.key);
-    final sortCompare = leftMetadata.sortOrder.compareTo(rightMetadata.sortOrder);
+    final sortCompare = leftMetadata.sortOrder.compareTo(
+      rightMetadata.sortOrder,
+    );
     if (sortCompare != 0) {
       return sortCompare;
     }

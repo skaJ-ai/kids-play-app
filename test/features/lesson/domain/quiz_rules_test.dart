@@ -31,14 +31,34 @@ void main() {
     });
 
     test('keeps only items whose symbol is in the mistake list', () {
-      final filtered =
-          resolveQuizQuestions(items, mistakeSymbols: const ['B', 'C']);
+      final filtered = resolveQuizQuestions(
+        items,
+        mistakeSymbols: const ['B', 'C'],
+      );
       expect(filtered.map((item) => item.symbol), ['B', 'C']);
     });
 
+    test('preserves the provided mistake symbol order', () {
+      final filtered = resolveQuizQuestions(
+        items,
+        mistakeSymbols: const ['C', 'A'],
+      );
+      expect(filtered.map((item) => item.symbol), ['C', 'A']);
+    });
+
+    test(
+      'ignores missing and duplicate mistake symbols without reordering',
+      () {
+        final filtered = resolveQuizQuestions(
+          items,
+          mistakeSymbols: const ['C', 'Z', 'A', 'C'],
+        );
+        expect(filtered.map((item) => item.symbol), ['C', 'A']);
+      },
+    );
+
     test('returns an empty list when no symbols match', () {
-      final filtered =
-          resolveQuizQuestions(items, mistakeSymbols: const ['Z']);
+      final filtered = resolveQuizQuestions(items, mistakeSymbols: const ['Z']);
       expect(filtered, isEmpty);
     });
   });

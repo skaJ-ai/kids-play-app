@@ -82,10 +82,7 @@ void main() {
         findsOneWidget,
       );
       expect(
-        find.descendant(
-          of: summaryPanel,
-          matching: find.text('한글 차고'),
-        ),
+        find.descendant(of: summaryPanel, matching: find.text('한글 차고')),
         findsOneWidget,
       );
       expect(
@@ -96,10 +93,7 @@ void main() {
         findsOneWidget,
       );
       expect(
-        find.descendant(
-          of: summaryPanel,
-          matching: find.text('기본 자음 1'),
-        ),
+        find.descendant(of: summaryPanel, matching: find.text('기본 자음 1')),
         findsOneWidget,
       );
       expect(
@@ -108,6 +102,70 @@ void main() {
           matching: find.text('지금은 헷갈린 세트가 없어요.'),
         ),
         findsNothing,
+      );
+    },
+  );
+
+  testWidgets(
+    'shows a quick retry entry in the confusion summary and opens the matching retry flow',
+    (WidgetTester tester) async {
+      final progressStore = MemoryProgressStore(
+        const AppProgressSnapshot(
+          stickerCount: 2,
+          lessons: {
+            'hangul:basic_consonants_1': LessonProgress(
+              bestScore: 3,
+              totalQuestions: 5,
+              lastViewedIndex: 0,
+              recentMistakes: ['ㄷ', 'ㄴ'],
+            ),
+            'alphabet:alphabet_letters_1': LessonProgress(
+              bestScore: 4,
+              totalQuestions: 5,
+              lastViewedIndex: 2,
+              recentMistakes: ['A a'],
+            ),
+          },
+        ),
+      );
+      String? openedLessonId;
+      List<String>? openedMistakes;
+
+      await tester.pumpWidget(
+        _wrapWithServices(
+          progressStore: progressStore,
+          child: AvatarSetupScreen(
+            onOpenLessonRetry: (context, lessonId, mistakes) async {
+              openedLessonId = lessonId;
+              openedMistakes = List<String>.from(mistakes);
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final summaryPanel = find.byKey(const Key('parent-summary-panel'));
+      expect(summaryPanel, findsOneWidget);
+      final summaryRetryButton = find.descendant(
+        of: summaryPanel,
+        matching: find.byKey(const Key('parent-summary-confusion-retry')),
+      );
+      expect(summaryRetryButton, findsOneWidget);
+      expect(
+        find.descendant(of: summaryPanel, matching: find.text('기본 자음 1')),
+        findsOneWidget,
+      );
+
+      await tester.scrollUntilVisible(summaryRetryButton, 120);
+      await tester.tap(summaryRetryButton);
+      await tester.pumpAndSettle();
+
+      expect(openedLessonId, 'hangul:basic_consonants_1');
+      expect(openedMistakes, ['ㄷ', 'ㄴ']);
+      final snapshot = await progressStore.loadSnapshot();
+      expect(
+        snapshot.progressFor('hangul:basic_consonants_1').lastViewedIndex,
+        2,
       );
     },
   );
@@ -162,6 +220,13 @@ void main() {
         find.descendant(
           of: summaryPanel,
           matching: find.byKey(const Key('parent-summary-confusion-lesson')),
+        ),
+        findsNothing,
+      );
+      expect(
+        find.descendant(
+          of: summaryPanel,
+          matching: find.byKey(const Key('parent-summary-confusion-retry')),
         ),
         findsNothing,
       );
@@ -357,26 +422,27 @@ void main() {
     },
   );
 
-  testWidgets('shows unlock controls for all later lessons in the generated manifests', (
-    WidgetTester tester,
-  ) async {
-    final progressStore = MemoryProgressStore();
+  testWidgets(
+    'shows unlock controls for all later lessons in the generated manifests',
+    (WidgetTester tester) async {
+      final progressStore = MemoryProgressStore();
 
-    await tester.pumpWidget(
-      _wrapWithServices(
-        progressStore: progressStore,
-        child: const AvatarSetupScreen(),
-      ),
-    );
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        _wrapWithServices(
+          progressStore: progressStore,
+          child: const AvatarSetupScreen(),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    for (final lesson in _generatedManifestLaterLessons()) {
-      final unlockButton = find.byKey(Key('lesson-unlock-${lesson.id}'));
-      await tester.scrollUntilVisible(unlockButton, 200);
-      expect(unlockButton, findsOneWidget);
-      expect(find.text(lesson.title), findsWidgets);
-    }
-  });
+      for (final lesson in _generatedManifestLaterLessons()) {
+        final unlockButton = find.byKey(Key('lesson-unlock-${lesson.id}'));
+        await tester.scrollUntilVisible(unlockButton, 200);
+        expect(unlockButton, findsOneWidget);
+        expect(find.text(lesson.title), findsWidgets);
+      }
+    },
+  );
 
   testWidgets(
     'keeps the avatar setup screen stable on a compact landscape phone',

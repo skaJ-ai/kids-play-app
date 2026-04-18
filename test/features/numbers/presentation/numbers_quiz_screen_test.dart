@@ -218,6 +218,39 @@ void main() {
   );
 
   testWidgets(
+    'respects provided numbers retry order for reversed mistake lists',
+    (WidgetTester tester) async {
+      final repository = NumbersLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          NumbersLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_numbersLesson],
+          }),
+        }),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: NumbersQuizScreen(
+            repository: repository,
+            lessonId: 'numbers_count_1',
+            mistakeSymbols: const ['5', '2'],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('1 / 2'), findsOneWidget);
+      expect(find.text("'5' 숫자를 찾아봐!"), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('quiz-choice-5')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('2 / 2'), findsOneWidget);
+      expect(find.text("'2' 숫자를 찾아봐!"), findsOneWidget);
+    },
+  );
+
+  testWidgets(
     'shows a sticker reward summary after finishing the numbers quiz',
     (WidgetTester tester) async {
       final repository = NumbersLessonRepository(
