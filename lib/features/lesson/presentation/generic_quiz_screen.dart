@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../../app/services/app_services.dart';
 import '../../../app/ui/answer_feedback_overlay.dart';
-import '../../../app/ui/audio_prompt_panel.dart';
 import '../../../app/ui/kid_theme.dart';
+import '../../../app/ui/mascot_view.dart';
 import '../../../app/ui/playground_scaffold.dart';
+import '../../../app/ui/signal_light.dart';
 import '../../../app/ui/tap_cooldown.dart';
 import '../../../app/ui/toy_button.dart';
 import '../../../app/ui/toy_panel.dart';
@@ -80,7 +81,6 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
       lessonId: widget.lessonId,
       questions: questions,
       pool: lesson.items,
-      isMistakeReplay: widget.mistakeSymbols?.isNotEmpty ?? false,
     )..addListener(_onControllerChanged);
     _controller = controller;
     return controller;
@@ -91,6 +91,24 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
       return;
     }
     setState(() {});
+  }
+
+  MascotState _mascotStateFor(QuizController controller) {
+    if (!controller.feedbackVisible) {
+      return MascotState.idle;
+    }
+    return controller.feedbackCorrect
+        ? MascotState.correct
+        : MascotState.wrong;
+  }
+
+  SignalLightState _signalStateFor(QuizController controller) {
+    if (!controller.feedbackVisible) {
+      return SignalLightState.idle;
+    }
+    return controller.feedbackCorrect
+        ? SignalLightState.correct
+        : SignalLightState.wrong;
   }
 
   @override
@@ -114,7 +132,9 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
           final lesson = snapshot.data!;
           if (lesson.items.length < 4) {
             return Center(
-              child: Text(widget.notEnoughItemsMessage ?? '퀴즈 문제가 아직 부족해요.'),
+              child: Text(
+                widget.notEnoughItemsMessage ?? '퀴즈 문제가 아직 부족해요.',
+              ),
             );
           }
 
@@ -212,7 +232,7 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
                       ),
                       SizedBox(height: isTight ? 8 : (isCompact ? 12 : 18)),
                       Text(
-                        widget.category.quizPromptHeadline,
+                        widget.category.promptFor(question.spoken),
                         textAlign: TextAlign.center,
                         style:
                             (isTight
@@ -226,146 +246,21 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
                                             ).textTheme.headlineMedium))
                                 ?.copyWith(color: KidPalette.navy),
                       ),
-                      if (!isTight) ...[
-                        SizedBox(height: isCompact ? 4 : 8),
-                        Text(
-                          widget.category.quizInstruction,
-                          textAlign: TextAlign.center,
-                          style:
-                              (isCompact
-                                      ? Theme.of(context).textTheme.titleSmall
-                                      : Theme.of(context).textTheme.titleMedium)
-                                  ?.copyWith(color: KidPalette.body),
-                        ),
-                      ],
                       SizedBox(height: sectionGap),
                       Expanded(
                         child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Expanded(
                               flex: 4,
-                              child: isTight
-                                  ? _TightQuizPromptPanel(
-                                      displayName: question.spoken,
-                                      prompt: widget.category.promptFor(
-                                        question.spoken,
-                                      ),
-                                      symbol: question.display,
-                                      onReplay: controller.replayPrompt,
-                                    )
-                                  : Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.stretch,
-                                      children: [
-                                        AudioPromptPanel(
-                                          key: const Key('quiz-prompt-panel'),
-                                          badge: '문제 듣기',
-                                          title: widget.category.promptFor(
-                                            question.spoken,
-                                          ),
-                                          subtitle: isCompact
-                                              ? '스피커를 눌러 다시 들어봐요.'
-                                              : '스피커를 누르면 문제를 다시 들을 수 있어요.',
-                                          onReplay: controller.replayPrompt,
-                                          compact: isCompact,
-                                        ),
-                                        SizedBox(height: isCompact ? 10 : 14),
-                                        Expanded(
-                                          child: ToyPanel(
-                                            padding: EdgeInsets.all(
-                                              isCompact ? 14 : 24,
-                                            ),
-                                            backgroundColor: KidPalette.white
-                                                .withValues(alpha: 0.94),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Container(
-                                                  padding: EdgeInsets.symmetric(
-                                                    horizontal: isCompact
-                                                        ? 12
-                                                        : 14,
-                                                    vertical: isCompact ? 6 : 8,
-                                                  ),
-                                                  decoration: BoxDecoration(
-                                                    color: KidPalette.creamWarm,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          999,
-                                                        ),
-                                                  ),
-                                                  child: Text(
-                                                    widget
-                                                        .category
-                                                        .quizTargetBadge,
-                                                    style: Theme.of(context)
-                                                        .textTheme
-                                                        .titleSmall
-                                                        ?.copyWith(
-                                                          color: KidPalette
-                                                              .coralDark,
-                                                          fontWeight:
-                                                              FontWeight.w900,
-                                                        ),
-                                                  ),
-                                                ),
-                                                SizedBox(
-                                                  height: isCompact ? 8 : 12,
-                                                ),
-                                                Text(
-                                                  question.spoken,
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  style:
-                                                      (isCompact
-                                                              ? Theme.of(
-                                                                      context,
-                                                                    )
-                                                                    .textTheme
-                                                                    .titleSmall
-                                                              : Theme.of(
-                                                                      context,
-                                                                    )
-                                                                    .textTheme
-                                                                    .titleMedium)
-                                                          ?.copyWith(
-                                                            color: KidPalette
-                                                                .coralDark,
-                                                            fontWeight:
-                                                                FontWeight.w900,
-                                                          ),
-                                                ),
-                                                SizedBox(
-                                                  height: isCompact ? 6 : 10,
-                                                ),
-                                                Expanded(
-                                                  child: Center(
-                                                    child: FittedBox(
-                                                      fit: BoxFit.scaleDown,
-                                                      child: Text(
-                                                        question.display,
-                                                        style: TextStyle(
-                                                          fontSize: isCompact
-                                                              ? 86
-                                                              : 118,
-                                                          fontWeight:
-                                                              FontWeight.w900,
-                                                          color:
-                                                              KidPalette.navy,
-                                                          height: 1,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                              child: _QuizMascotPanel(
+                                mascotState: _mascotStateFor(controller),
+                                signalState: _signalStateFor(controller),
+                                spoken: question.spoken,
+                                onReplay: controller.replayPrompt,
+                                compact: isCompact,
+                                tight: isTight,
+                              ),
                             ),
                             SizedBox(
                               width: isTight ? 10 : (isCompact ? 14 : 18),
@@ -375,20 +270,21 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
                               child: LayoutBuilder(
                                 builder: (context, gridConstraints) {
                                   const crossAxisCount = 2;
-                                  final mainAxisSpacing = isTight ? 12.0 : 16.0;
-                                  final crossAxisSpacing = isTight
-                                      ? 12.0
-                                      : 16.0;
+                                  final mainAxisSpacing =
+                                      isTight ? 12.0 : 16.0;
+                                  final crossAxisSpacing =
+                                      isTight ? 12.0 : 16.0;
                                   final rowCount =
                                       (choices.length / crossAxisCount).ceil();
                                   final tileWidth =
                                       (gridConstraints.maxWidth -
-                                          crossAxisSpacing) /
-                                      crossAxisCount;
+                                              crossAxisSpacing) /
+                                          crossAxisCount;
                                   final tileHeight =
                                       (gridConstraints.maxHeight -
-                                          (rowCount - 1) * mainAxisSpacing) /
-                                      rowCount;
+                                              (rowCount - 1) *
+                                                  mainAxisSpacing) /
+                                          rowCount;
                                   final childAspectRatio = tileHeight <= 0
                                       ? 1.0
                                       : tileWidth / tileHeight;
@@ -411,9 +307,8 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
                                           accentIndex: i,
                                           disabled:
                                               controller.isResolvingChoice,
-                                          onTap: () => controller.selectChoice(
-                                            choices[i],
-                                          ),
+                                          onTap: () => controller
+                                              .selectChoice(choices[i]),
                                         ),
                                     ],
                                   );
@@ -440,93 +335,115 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
   }
 }
 
-class _TightQuizPromptPanel extends StatelessWidget {
-  const _TightQuizPromptPanel({
-    required this.displayName,
-    required this.prompt,
-    required this.symbol,
+class _QuizMascotPanel extends StatelessWidget {
+  const _QuizMascotPanel({
+    required this.mascotState,
+    required this.signalState,
+    required this.spoken,
     required this.onReplay,
+    required this.compact,
+    required this.tight,
   });
 
-  final String displayName;
-  final String prompt;
-  final String symbol;
+  final MascotState mascotState;
+  final SignalLightState signalState;
+  final String spoken;
   final VoidCallback onReplay;
+  final bool compact;
+  final bool tight;
 
   @override
   Widget build(BuildContext context) {
+    final mascotSize = tight ? 96.0 : (compact ? 132.0 : 184.0);
+    final signalSize = tight ? 26.0 : (compact ? 34.0 : 44.0);
+    final speakerSize = tight ? 44.0 : (compact ? 50.0 : 60.0);
+
     return ToyPanel(
-      key: const Key('quiz-prompt-panel'),
-      padding: const EdgeInsets.all(12),
-      tone: ToyPanelTone.warm,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      key: const Key('quiz-mascot-panel'),
+      padding: EdgeInsets.all(tight ? 12 : (compact ? 16 : 22)),
+      backgroundColor: KidPalette.creamWarm,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  prompt,
+          SignalLight(
+            key: const Key('quiz-signal-light'),
+            state: signalState,
+            size: signalSize,
+          ),
+          SizedBox(width: tight ? 10 : 14),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: Center(
+                    child: MascotView(
+                      key: const Key('quiz-mascot'),
+                      state: mascotState,
+                      size: mascotSize,
+                    ),
+                  ),
+                ),
+                SizedBox(height: tight ? 6 : 10),
+                Text(
+                  spoken,
+                  textAlign: TextAlign.center,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: KidPalette.navy,
-                    fontWeight: FontWeight.w900,
-                  ),
+                  style:
+                      (compact
+                              ? Theme.of(context).textTheme.titleMedium
+                              : Theme.of(context).textTheme.headlineSmall)
+                          ?.copyWith(
+                            color: KidPalette.coralDark,
+                            fontWeight: FontWeight.w900,
+                          ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(18),
-                  onTap: onReplay,
-                  child: Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: KidPalette.white.withValues(alpha: 0.92),
-                      borderRadius: BorderRadius.circular(18),
-                      boxShadow: KidShadows.button,
-                    ),
-                    child: const Icon(
-                      Icons.volume_up_rounded,
-                      color: KidPalette.coralDark,
-                      size: 24,
-                    ),
-                  ),
+                SizedBox(height: tight ? 6 : 10),
+                _SpeakerButton(
+                  onReplay: onReplay,
+                  size: speakerSize,
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            displayName,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              color: KidPalette.coralDark,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Expanded(
-            child: Center(
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  symbol,
-                  style: const TextStyle(
-                    fontSize: 72,
-                    fontWeight: FontWeight.w900,
-                    color: KidPalette.navy,
-                    height: 1,
-                  ),
-                ),
-              ),
+              ],
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SpeakerButton extends StatelessWidget {
+  const _SpeakerButton({required this.onReplay, required this.size});
+
+  final VoidCallback onReplay;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          key: const Key('quiz-replay-button'),
+          borderRadius: BorderRadius.circular(size / 2),
+          onTap: onReplay,
+          child: Container(
+            width: size,
+            height: size,
+            decoration: BoxDecoration(
+              color: KidPalette.white.withValues(alpha: 0.94),
+              shape: BoxShape.circle,
+              boxShadow: KidShadows.button,
+            ),
+            child: Icon(
+              Icons.volume_up_rounded,
+              color: KidPalette.coralDark,
+              size: size * 0.55,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -585,9 +502,9 @@ class _QuizChoiceTile extends StatelessWidget {
                   child: Text(
                     '콕!',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: KidPalette.white.withValues(alpha: 0.92),
-                      fontWeight: FontWeight.w900,
-                    ),
+                          color: KidPalette.white.withValues(alpha: 0.92),
+                          fontWeight: FontWeight.w900,
+                        ),
                   ),
                 ),
                 Center(
@@ -647,10 +564,18 @@ class _QuizSummary extends StatelessWidget {
       child: SizedBox(
         width: 560,
         child: ToyPanel(
-          tone: ToyPanelTone.warm,
+          backgroundColor: KidPalette.creamWarm,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              MascotView(
+                key: const Key('quiz-summary-mascot'),
+                state: sticker
+                    ? MascotState.missionClear
+                    : MascotState.idle,
+                size: 160,
+              ),
+              const SizedBox(height: 14),
               Text(
                 category.quizSummaryTitle,
                 textAlign: TextAlign.center,
@@ -660,9 +585,9 @@ class _QuizSummary extends StatelessWidget {
               Text(
                 '$totalQuestions문제 중 $correctCount문제 맞았어요!',
                 textAlign: TextAlign.center,
-                style: Theme.of(
-                  context,
-                ).textTheme.headlineSmall?.copyWith(color: KidPalette.navy),
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: KidPalette.navy,
+                    ),
               ),
               const SizedBox(height: 14),
               Text(
@@ -670,9 +595,9 @@ class _QuizSummary extends StatelessWidget {
                     ? category.quizStickerCopy
                     : category.quizStickerMissedCopy,
                 textAlign: TextAlign.center,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(color: KidPalette.coralDark),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: KidPalette.coralDark,
+                    ),
               ),
               const SizedBox(height: 22),
               ToyButton(
@@ -706,9 +631,9 @@ class _QuizLoadError extends StatelessWidget {
               Text(
                 message,
                 textAlign: TextAlign.center,
-                style: Theme.of(
-                  context,
-                ).textTheme.headlineSmall?.copyWith(color: KidPalette.navy),
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: KidPalette.navy,
+                    ),
               ),
               const SizedBox(height: 20),
               ToyButton(
