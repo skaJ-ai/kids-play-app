@@ -299,9 +299,9 @@ class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
                                                   child: Text(
                                                     '찾아볼 숫자',
                                                     style: Theme.of(context)
-                                                        .textTheme
-                                                        .titleSmall
-                                                        ?.copyWith(
+                                                        .kidTypography
+                                                        .labelLarge
+                                                        .copyWith(
                                                           color: KidPalette
                                                               .coralDark,
                                                           fontWeight:

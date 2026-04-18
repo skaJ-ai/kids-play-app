@@ -145,6 +145,60 @@ void main() {
   );
 
   testWidgets(
+    'uses kid typography labelLarge override for the target badge copy',
+    (WidgetTester tester) async {
+      final repository = NumbersLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          NumbersLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_numbersLesson],
+          }),
+        }),
+      );
+      final baseTheme = buildKidTheme();
+      final customTypography = KidTypographyTheme.defaults.copyWith(
+        labelLarge: const TextStyle(
+          fontSize: 19,
+          fontWeight: FontWeight.w300,
+          letterSpacing: 3.1,
+          height: 1.6,
+          fontStyle: FontStyle.italic,
+          color: Colors.pink,
+        ),
+      );
+      final theme = baseTheme.copyWith(
+        extensions: <ThemeExtension<dynamic>>[
+          baseTheme.kidLayout,
+          customTypography,
+        ],
+      );
+
+      expect(theme.textTheme.labelLarge, baseTheme.textTheme.labelLarge);
+      expect(theme.textTheme.titleSmall, baseTheme.textTheme.titleSmall);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: NumbersQuizScreen(
+            repository: repository,
+            lessonId: 'numbers_count_1',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final badgeText = tester.widget<Text>(find.text('찾아볼 숫자'));
+
+      expect(
+        badgeText.style,
+        customTypography.labelLarge.copyWith(
+          color: KidPalette.coralDark,
+          fontWeight: FontWeight.w900,
+        ),
+      );
+    },
+  );
+
+  testWidgets(
     'keeps all numbers answer choices fully visible on a compact landscape screen',
     (WidgetTester tester) async {
       tester.view.physicalSize = const Size(780, 360);
