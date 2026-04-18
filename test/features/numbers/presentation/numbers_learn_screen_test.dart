@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kids_play_app/app/audio/audio_cue.dart';
+import 'package:kids_play_app/app/audio/audio_service.dart';
 import 'package:kids_play_app/app/services/app_services.dart';
 import 'package:kids_play_app/app/services/progress_store.dart';
 import 'package:kids_play_app/app/services/speech_cue_service.dart';
@@ -79,6 +81,38 @@ void main() {
     expect(find.text('4 / 5'), findsOneWidget);
     expect(find.text('하나, 1'), findsNothing);
   });
+
+  testWidgets(
+    'replays the current numbers learn prompt through the injected audio service',
+    (WidgetTester tester) async {
+      final repository = NumbersLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          NumbersLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_numbersLesson],
+          }),
+        }),
+      );
+      final audioService = _FakeAudioService();
+
+      await tester.pumpWidget(
+        _wrapWithServices(
+          progressStore: MemoryProgressStore(),
+          audioService: audioService,
+          child: NumbersLearnScreen(
+            repository: repository,
+            lessonId: 'numbers_count_1',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(audioService.promptCalls, hasLength(1));
+      expect(audioService.promptCalls.single.categoryId, 'numbers');
+      expect(audioService.promptCalls.single.lessonId, 'numbers_count_1');
+      expect(audioService.promptCalls.single.symbol, '1');
+      expect(audioService.promptCalls.single.fallbackText, '하나, 1');
+    },
+  );
 
   testWidgets(
     'keeps the numbers learn screen stable on a compact landscape phone',
@@ -171,6 +205,7 @@ class _FakeAssetBundle extends CachingAssetBundle {
 
 Widget _wrapWithServices({
   required ProgressStore progressStore,
+  AudioService? audioService,
   required Widget child,
 }) {
   return MaterialApp(
@@ -178,8 +213,30 @@ Widget _wrapWithServices({
       services: AppServices(
         progressStore: progressStore,
         speechCueService: NoopSpeechCueService(),
+        audioService: audioService,
       ),
       child: child,
     ),
   );
+}
+
+class _FakeAudioService implements AudioService {
+  final List<AudioPromptRequest> promptCalls = <AudioPromptRequest>[];
+  final List<AudioCue> cueCalls = <AudioCue>[];
+  int stopCount = 0;
+
+  @override
+  Future<void> playPrompt(AudioPromptRequest request) async {
+    promptCalls.add(request);
+  }
+
+  @override
+  Future<void> playCue(AudioCue cue) async {
+    cueCalls.add(cue);
+  }
+
+  @override
+  Future<void> stop() async {
+    stopCount += 1;
+  }
 }
