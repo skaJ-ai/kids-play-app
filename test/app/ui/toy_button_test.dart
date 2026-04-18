@@ -1500,24 +1500,14 @@ void main() {
     },
   );
 
-  testWidgets('renders a calmer secondary tone with surface styling', (
+  testWidgets('renders restrained default chrome for secondary buttons', (
     WidgetTester tester,
   ) async {
-    final customLayout = KidLayoutTheme(
-      button: KidButtonTokens(
-        regular: KidButtonDensityTokens(
-          height: 64,
-          horizontalPadding: 18,
-          iconGap: 12,
-          iconChipSize: 36,
-          iconSize: 20,
-          labelFontSize: 22,
-          secondaryBorderWidth: 1.6,
-        ),
-        compact: KidLayoutTheme.defaults.button.compact,
-      ),
-      panel: KidLayoutTheme.defaults.panel,
-    );
+    const expectedSecondaryBorderAlpha = 0.68;
+    const expectedSecondaryIconChipAlpha = 0.76;
+    const expectedSecondaryIconChipBorderAlpha = 0.56;
+    const expectedSecondaryHighlightAlpha = 0.08;
+    final button = find.byType(ToyButton);
 
     await tester.pumpWidget(
       _buildTestApp(
@@ -1527,24 +1517,43 @@ void main() {
           tone: ToyButtonTone.secondary,
           onPressed: () {},
         ),
-        theme: buildKidTheme().copyWith(extensions: [customLayout]),
       ),
     );
 
-    final decoration = _buttonDecoration(tester, find.byType(ToyButton));
+    final decoration = _buttonDecoration(tester, button);
     final gradient = decoration.gradient! as LinearGradient;
     final border = decoration.border! as Border;
+    final chipDecoration = _buttonIconChipDecoration(
+      tester,
+      button,
+      Icons.settings_rounded,
+    );
+    final chipBorder = chipDecoration.border! as Border;
+    final highlight = tester.widget<Container>(_buttonHighlightFinder(button));
+    final highlightGradient =
+        (highlight.decoration! as BoxDecoration).gradient! as LinearGradient;
     final label = tester.widget<Text>(find.text('보호자 메뉴'));
     final icon = tester.widget<Icon>(find.byIcon(Icons.settings_rounded));
 
     expect(gradient.colors, const [KidPalette.cream, KidPalette.creamWarm]);
     expect(
       border.top.color,
+      KidPalette.stroke.withValues(alpha: expectedSecondaryBorderAlpha),
+    );
+    expect(
+      chipDecoration.color,
+      KidPalette.white.withValues(alpha: expectedSecondaryIconChipAlpha),
+    );
+    expect(
+      chipBorder.top.color,
       KidPalette.stroke.withValues(
-        alpha: customLayout.chrome.button.secondaryBorderAlpha,
+        alpha: expectedSecondaryIconChipBorderAlpha,
       ),
     );
-    expect(border.top.width, customLayout.button.regular.secondaryBorderWidth);
+    expect(
+      highlightGradient.colors.first,
+      KidPalette.white.withValues(alpha: expectedSecondaryHighlightAlpha),
+    );
     expect(decoration.boxShadow, KidShadows.buttonSoft);
     expect(label.style?.color, KidPalette.navy);
     expect(icon.color, KidPalette.navy);

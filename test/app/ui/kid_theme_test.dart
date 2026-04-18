@@ -685,8 +685,8 @@ void main() {
       layout.chrome.button.secondaryShellGradientEnd,
       KidPalette.creamWarm,
     );
-    expect(layout.chrome.button.secondaryIconChipAlpha, 0.88);
-    expect(layout.chrome.button.secondaryHighlightAlpha, 0.14);
+    expect(layout.chrome.button.secondaryIconChipAlpha, 0.76);
+    expect(layout.chrome.button.secondaryHighlightAlpha, 0.08);
     expect(layout.chrome.button.primaryDisabledGradientBlendAmount, 0.36);
     expect(layout.chrome.button.secondaryDisabledGradientBlendAmount, 0.16);
     expect(layout.chrome.button.disabledOpacity, 0.58);
@@ -717,8 +717,8 @@ void main() {
       layout.chrome.button.secondaryShellGradientEnd,
       KidPalette.creamWarm,
     );
-    expect(layout.chrome.button.secondaryBorderAlpha, 0.82);
-    expect(layout.chrome.button.secondaryIconChipBorderAlpha, 0.72);
+    expect(layout.chrome.button.secondaryBorderAlpha, 0.68);
+    expect(layout.chrome.button.secondaryIconChipBorderAlpha, 0.56);
 
     final preserved = layout.chrome.button.copyWith(primaryBorderAlpha: 0.44);
     const updated = KidButtonChromeTokens(
@@ -730,8 +730,8 @@ void main() {
 
     expect(preserved.secondaryShellGradientStart, KidPalette.cream);
     expect(preserved.secondaryShellGradientEnd, KidPalette.creamWarm);
-    expect(preserved.secondaryBorderAlpha, 0.82);
-    expect(preserved.secondaryIconChipBorderAlpha, 0.72);
+    expect(preserved.secondaryBorderAlpha, 0.68);
+    expect(preserved.secondaryIconChipBorderAlpha, 0.56);
     expect(
       layout.chrome.button.lerp(updated, 1).secondaryShellGradientStart,
       updatedStart,
