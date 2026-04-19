@@ -1,12 +1,21 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kids_play_app/app/services/app_services.dart';
+import 'package:kids_play_app/app/services/progress_store.dart';
+import 'package:kids_play_app/app/services/speech_cue_service.dart';
 import 'package:kids_play_app/app/ui/kid_theme.dart';
 import 'package:kids_play_app/app/ui/toy_button.dart';
 import 'package:kids_play_app/app/ui/toy_panel.dart';
+import 'package:kids_play_app/features/avatar/application/avatar_photo_service.dart';
+import 'package:kids_play_app/features/avatar/data/avatar_photo_repository.dart';
+import 'package:kids_play_app/features/avatar/data/avatar_photo_store.dart';
+import 'package:kids_play_app/features/avatar/domain/avatar_expression.dart';
+import 'package:kids_play_app/features/avatar/domain/avatar_photo_snapshot.dart';
 import 'package:kids_play_app/features/avatar/presentation/avatar_setup_screen.dart';
 import 'package:kids_play_app/features/hero/presentation/hero_screen.dart';
 import 'package:kids_play_app/features/home/data/home_catalog_repository.dart';
@@ -161,41 +170,40 @@ void main() {
     },
   );
 
-  testWidgets(
-    'expires hidden parent-entry taps after a short idle gap',
-    (WidgetTester tester) async {
-      tester.view.physicalSize = const Size(1200, 720);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(() {
-        tester.view.resetPhysicalSize();
-        tester.view.resetDevicePixelRatio();
-      });
+  testWidgets('expires hidden parent-entry taps after a short idle gap', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(1200, 720);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
 
-      await tester.pumpWidget(_buildHeroScreen());
-      await tester.pumpAndSettle();
+    await tester.pumpWidget(_buildHeroScreen());
+    await tester.pumpAndSettle();
 
-      for (var i = 0; i < 4; i += 1) {
-        await tester.tap(find.byKey(const Key('hero-face-parent-entry')));
-        await tester.pump();
-      }
-
-      expect(find.byType(AvatarSetupScreen), findsNothing);
-
-      await tester.pump(const Duration(seconds: 3));
+    for (var i = 0; i < 4; i += 1) {
       await tester.tap(find.byKey(const Key('hero-face-parent-entry')));
-      await tester.pumpAndSettle();
+      await tester.pump();
+    }
 
-      expect(find.byType(AvatarSetupScreen), findsNothing);
+    expect(find.byType(AvatarSetupScreen), findsNothing);
 
-      for (var i = 0; i < 4; i += 1) {
-        await tester.tap(find.byKey(const Key('hero-face-parent-entry')));
-        await tester.pump();
-      }
-      await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 3));
+    await tester.tap(find.byKey(const Key('hero-face-parent-entry')));
+    await tester.pumpAndSettle();
 
-      expect(find.byType(AvatarSetupScreen), findsOneWidget);
-    },
-  );
+    expect(find.byType(AvatarSetupScreen), findsNothing);
+
+    for (var i = 0; i < 4; i += 1) {
+      await tester.tap(find.byKey(const Key('hero-face-parent-entry')));
+      await tester.pump();
+    }
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AvatarSetupScreen), findsOneWidget);
+  });
 
   testWidgets(
     'does not stack the parent screen when the hero face is over-tapped during entry',
@@ -273,6 +281,90 @@ void main() {
   );
 
   testWidgets(
+    'uses saved avatar photo before falling back to bundled hero asset',
+    (WidgetTester tester) async {
+      final avatarPhotoHarness = await _createAvatarPhotoHarness();
+      addTearDown(avatarPhotoHarness.dispose);
+      await avatarPhotoHarness.service.saveExpressionPhoto(
+        expression: AvatarExpression.neutral,
+        bytes: _neutralPhotoPngBytes,
+      );
+      await avatarPhotoHarness.service.saveExpressionPhoto(
+        expression: AvatarExpression.smile,
+        bytes: _smilePhotoPngBytes,
+      );
+
+      tester.view.physicalSize = const Size(1200, 720);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await tester.pumpWidget(
+        _buildHeroScreen(avatarPhotoService: avatarPhotoHarness.service),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      final heroFaceImage = _heroFaceImage(tester);
+
+      expect(heroFaceImage.key, const Key('hero-face-image'));
+      expect(heroFaceImage.excludeFromSemantics, isTrue);
+      expect(heroFaceImage.fit, BoxFit.contain);
+      expect(heroFaceImage.image, isA<MemoryImage>());
+      expect(
+        (heroFaceImage.image as MemoryImage).bytes,
+        orderedEquals(_smilePhotoPngBytes),
+      );
+    },
+  );
+
+  testWidgets(
+    'refreshes the hero face after returning from the parent setup screen',
+    (WidgetTester tester) async {
+      final avatarPhotoHarness = await _createAvatarPhotoHarness();
+      addTearDown(avatarPhotoHarness.dispose);
+
+      tester.view.physicalSize = const Size(1200, 720);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await tester.pumpWidget(
+        _buildHeroScreen(avatarPhotoService: avatarPhotoHarness.service),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(_heroFaceImage(tester).image, isA<AssetImage>());
+
+      await _openHiddenParentEntry(tester);
+
+      expect(find.byType(AvatarSetupScreen), findsOneWidget);
+
+      await avatarPhotoHarness.service.saveExpressionPhoto(
+        expression: AvatarExpression.neutral,
+        bytes: _neutralPhotoPngBytes,
+      );
+
+      Navigator.of(tester.element(find.byType(AvatarSetupScreen))).pop();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pump(const Duration(milliseconds: 100));
+
+      final heroFaceImage = _heroFaceImage(tester);
+      expect(heroFaceImage.image, isA<MemoryImage>());
+      expect(
+        (heroFaceImage.image as MemoryImage).bytes,
+        orderedEquals(_neutralPhotoPngBytes),
+      );
+    },
+  );
+
+  testWidgets(
     'keeps the hidden parent-entry face out of accessibility semantics',
     (WidgetTester tester) async {
       final semantics = tester.ensureSemantics();
@@ -295,7 +387,9 @@ void main() {
         isFalse,
       );
       expect(
-        heroFaceImageSemantics.getSemanticsData().hasAction(SemanticsAction.tap),
+        heroFaceImageSemantics.getSemanticsData().hasAction(
+          SemanticsAction.tap,
+        ),
         isFalse,
       );
       semantics.dispose();
@@ -429,14 +523,112 @@ ThemeData _buildHeroThemeWithPanelTokens() {
   );
 }
 
-Widget _buildHeroScreen({ThemeData? theme}) {
-  return MaterialApp(
-    theme: theme ?? buildKidTheme(),
-    home: DefaultAssetBundle(
-      bundle: _FakeHeroAssetBundle(),
-      child: const HeroScreen(),
+Widget _buildHeroScreen({
+  ThemeData? theme,
+  AvatarPhotoService? avatarPhotoService,
+}) {
+  return DefaultAssetBundle(
+    bundle: _FakeHeroAssetBundle(),
+    child: AppServicesScope(
+      services: AppServices(
+        progressStore: MemoryProgressStore(),
+        speechCueService: NoopSpeechCueService(),
+        avatarPhotoService: avatarPhotoService,
+      ),
+      child: MaterialApp(
+        theme: theme ?? buildKidTheme(),
+        home: const HeroScreen(),
+      ),
     ),
   );
+}
+
+Future<void> _openHiddenParentEntry(WidgetTester tester) async {
+  for (var i = 0; i < 5; i += 1) {
+    await tester.tap(find.byKey(const Key('hero-face-parent-entry')));
+    await tester.pump();
+  }
+  await tester.pumpAndSettle();
+}
+
+Image _heroFaceImage(WidgetTester tester) {
+  return tester.widget<Image>(find.byKey(const Key('hero-face-image')));
+}
+
+Future<_AvatarPhotoHarness> _createAvatarPhotoHarness() async {
+  final repository = _TestAvatarPhotoRepository();
+  final store = _TestAvatarPhotoStore();
+
+  return _AvatarPhotoHarness(
+    service: AvatarPhotoService(photoStore: store, repository: repository),
+    repository: repository,
+  );
+}
+
+class _AvatarPhotoHarness {
+  _AvatarPhotoHarness({required this.service, required this.repository});
+
+  final AvatarPhotoService service;
+  final _TestAvatarPhotoRepository repository;
+
+  Future<void> dispose() async {}
+}
+
+class _TestAvatarPhotoStore implements AvatarPhotoStore {
+  AvatarPhotoSnapshot snapshot = const AvatarPhotoSnapshot();
+
+  @override
+  Future<AvatarPhotoSnapshot> loadSnapshot() async => snapshot;
+
+  @override
+  Future<void> saveSnapshot(AvatarPhotoSnapshot snapshot) async {
+    this.snapshot = snapshot;
+  }
+}
+
+class _TestAvatarPhotoRepository implements AvatarPhotoRepository {
+  final Map<String, Uint8List> _savedBytesByPath = <String, Uint8List>{};
+
+  @override
+  Future<void> deletePhoto(String relativePath) async {
+    _savedBytesByPath.remove(relativePath);
+  }
+
+  @override
+  Future<File?> resolveFile(String relativePath) async {
+    final bytes = _savedBytesByPath[relativePath];
+    if (bytes == null) {
+      return null;
+    }
+
+    return _FakeAvatarFile(path: relativePath, bytes: bytes);
+  }
+
+  @override
+  Future<String> saveExpressionPhoto({
+    required AvatarExpression expression,
+    required Uint8List bytes,
+  }) async {
+    final relativePath = avatarPhotoRelativePathFor(expression);
+    _savedBytesByPath[relativePath] = Uint8List.fromList(bytes);
+    return relativePath;
+  }
+}
+
+class _FakeAvatarFile implements File {
+  _FakeAvatarFile({required this.path, required Uint8List bytes})
+    : _bytes = Uint8List.fromList(bytes);
+
+  final Uint8List _bytes;
+
+  @override
+  final String path;
+
+  @override
+  Future<Uint8List> readAsBytes() async => Uint8List.fromList(_bytes);
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 class _FakeHeroAssetBundle extends CachingAssetBundle {
@@ -504,3 +696,11 @@ class _FakeHeroAssetBundle extends CachingAssetBundle {
     return message;
   }
 }
+
+final Uint8List _smilePhotoPngBytes = base64Decode(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4////fwAJ+wP9KobjigAAAABJRU5ErkJggg==',
+);
+
+final Uint8List _neutralPhotoPngBytes = base64Decode(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGD4DwABBAEAX+XDSwAAAABJRU5ErkJggg==',
+);

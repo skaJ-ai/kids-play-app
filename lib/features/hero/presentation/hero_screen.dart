@@ -6,7 +6,9 @@ import '../../../app/ui/kid_theme.dart';
 import '../../../app/ui/playground_scaffold.dart';
 import '../../../app/ui/toy_button.dart';
 import '../../../app/ui/toy_panel.dart';
+import '../../avatar/domain/avatar_expression.dart';
 import '../../avatar/presentation/avatar_setup_screen.dart';
+import '../../avatar/presentation/widgets/avatar_face_image.dart';
 import '../../home/presentation/home_screen.dart';
 
 class HeroScreen extends StatefulWidget {
@@ -51,9 +53,12 @@ class _HeroScreenState extends State<HeroScreen> {
     _isOpeningParentEntry = true;
     _clearParentEntryProgress();
     try {
-      await Navigator.of(
-        context,
-      ).push(MaterialPageRoute<void>(builder: (_) => const AvatarSetupScreen()));
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(builder: (_) => const AvatarSetupScreen()),
+      );
+      if (mounted) {
+        setState(() {});
+      }
     } finally {
       _isOpeningParentEntry = false;
     }
@@ -283,11 +288,16 @@ class _HeroScreenState extends State<HeroScreen> {
                               boxShadow: KidShadows.panel,
                             ),
                             padding: EdgeInsets.all(compact ? 14 : 22),
-                            child: Image.asset(
-                              'assets/generated/images/hero/hero_face.png',
-                              key: const Key('hero-face-image'),
+                            child: AvatarFaceImage(
+                              expressions: const [
+                                AvatarExpression.smile,
+                                AvatarExpression.neutral,
+                              ],
+                              imageKey: const Key('hero-face-image'),
                               excludeFromSemantics: true,
                               fit: BoxFit.contain,
+                              fallbackAssetPath:
+                                  AvatarFaceImage.placeholderAssetPath,
                             ),
                           ),
                         ),

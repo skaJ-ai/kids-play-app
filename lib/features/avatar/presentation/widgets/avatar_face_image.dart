@@ -10,9 +10,9 @@ Future<File?> resolveAvatarFaceFile(
   BuildContext context,
   Iterable<AvatarExpression> expressions,
 ) {
-  return AppServicesScope.of(context).avatarPhotoService.resolveBestPhoto(
-    expressions,
-  );
+  return AppServicesScope.of(
+    context,
+  ).avatarPhotoService.resolveBestPhoto(expressions);
 }
 
 class AvatarFaceImage extends StatefulWidget {
@@ -20,6 +20,9 @@ class AvatarFaceImage extends StatefulWidget {
     super.key,
     required this.expressions,
     this.fit = BoxFit.contain,
+    this.imageKey,
+    this.excludeFromSemantics = false,
+    this.fallbackAssetPath = placeholderAssetPath,
   });
 
   static const placeholderAssetPath =
@@ -27,6 +30,9 @@ class AvatarFaceImage extends StatefulWidget {
 
   final Iterable<AvatarExpression> expressions;
   final BoxFit fit;
+  final Key? imageKey;
+  final bool excludeFromSemantics;
+  final String fallbackAssetPath;
 
   @override
   State<AvatarFaceImage> createState() => _AvatarFaceImageState();
@@ -65,10 +71,12 @@ class _AvatarFaceImageState extends State<AvatarFaceImage> {
         final ImageProvider<Object> imageProvider =
             bytes != null && bytes.isNotEmpty
             ? MemoryImage(bytes)
-            : const AssetImage(AvatarFaceImage.placeholderAssetPath);
+            : AssetImage(widget.fallbackAssetPath);
 
         return Image(
+          key: widget.imageKey,
           image: imageProvider,
+          excludeFromSemantics: widget.excludeFromSemantics,
           fit: widget.fit,
           gaplessPlayback: true,
         );
