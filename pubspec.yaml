@@ -34,6 +34,7 @@ flutter:
     - assets/generated/audio/music/
     - assets/generated/manifest/
     - assets/mascot/faces/
+    - assets/mascot/companion/
     - assets/vectors/
   fonts:
     - family: KCCMurukmuruk

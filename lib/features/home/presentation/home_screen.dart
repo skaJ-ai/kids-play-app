@@ -81,6 +81,16 @@ class _HomeScreenState extends State<HomeScreen> {
                       state: MascotState.idle,
                       size: 48,
                     ),
+                    const SizedBox(width: 6),
+                    Image.asset(
+                      'assets/mascot/companion/giraffe.png',
+                      key: const Key('home-hero-companion'),
+                      width: 44,
+                      height: 44,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stack) =>
+                          const SizedBox.shrink(),
+                    ),
                   ],
                   const Spacer(),
                   _CollectionPill(
