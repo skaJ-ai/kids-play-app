@@ -14,11 +14,11 @@
 - Slice 6 기능 범위 중 home/category/hub garage UI 정리, 보호자 진행 요약/진도 제어/오답 다시 풀기/오답 비우기/수동 해금, 다중 세트와 3개 카테고리 라우팅 확장까지 반영 및 재확인됨
 
 현재 큐 기준 상태
-- 우선순위 A-E 범위는 live repo와 targeted tests 기준으로 완료 상태
-- F — docs cleanup 진행 중이며, 이 범위는 문서 정합성을 맞추는 작은 committable slice들로 나눠 진행하고 각 run에서는 바뀐 문서/명령에 맞는 최소 검증만 남김
-- G — final integration gate. docs-only HEAD `c5879e9`에서 full `flutter test`는 재통과했지만, 그 뒤 코드 커밋 `5696c1f` (`fix(ui): remove tap cooldown analyze blocker`)가 `lib/app/ui/tap_cooldown.dart`, `test/app/ui/tap_cooldown_test.dart`를 변경했으므로 검증 기준 코드 스냅샷은 더 이상 `c5879e9`가 아니라 `5696c1f`임
+- 우선순위 A-F 범위는 live repo와 targeted tests/문서 정합성 기준으로 완료 상태
+- F — docs cleanup 완료. README / handoff / plan 상태 wording 정합성까지 current HEAD 기준으로 반영됨
+- G — final integration gate만 남아 있음. docs-only HEAD `c5879e9`에서 full `flutter test`는 재통과했지만, 그 뒤 코드 커밋 `5696c1f` (`fix(ui): remove tap cooldown analyze blocker`)가 `lib/app/ui/tap_cooldown.dart`, `test/app/ui/tap_cooldown_test.dart`를 변경했으므로 검증 기준 코드 스냅샷은 더 이상 `c5879e9`가 아니라 `5696c1f`임
 - provenance 메모: `c5879e9`에서 `./scripts/prepare_assets.sh` 후 full `/home/openc/sdk/flutter/bin/flutter test`가 `00:32 +227: All tests passed!`로 끝났고, 이후 검증 기준 코드 스냅샷은 `5696c1f`로 이동했다. 이 코드 스냅샷에서는 `/home/openc/sdk/flutter/bin/flutter test test/app/ui/tap_cooldown_test.dart` => `00:00 +9: All tests passed!`, `/home/openc/sdk/flutter/bin/flutter analyze lib/app/ui/tap_cooldown.dart test/app/ui/tap_cooldown_test.dart` => `No issues found!`까지 재확인된 상태
-- 따라서 Gate G에 남아 있는 것은 `5696c1f` 기준 코드 스냅샷에 대한 full `flutter test`, full `flutter analyze`, release build, GitHub Actions APK artifact 확인
+- 따라서 현재 queue에 남아 있는 것은 Gate G에서 수행할 `5696c1f` 기준 코드 스냅샷에 대한 full `flutter test`, full `flutter analyze`, release build, GitHub Actions APK artifact 확인
 
 남은 확장 후보
 - 오답 다시 풀기 결과를 별도 통계/보상과 연결
@@ -85,7 +85,7 @@
 - parent dashboard 정보 정리 완료
 - home/category/hub garage UI 정리 완료
 - 기본 summary/reward 흐름 정리 완료
-- docs cleanup 진행 중
+- docs cleanup 완료
 - docs-only HEAD `c5879e9`의 full `flutter test` 재통과 기록은 유지하되, 이후 코드 커밋 `5696c1f` 기준 코드 스냅샷의 targeted test/analyze 재검증과 별도로 Gate G의 full `flutter test` / full `flutter analyze` / release build / Actions artifact 확인이 마지막 게이트로 남아 있음
 
 ## Verification approach
@@ -98,7 +98,7 @@
 
 ### Gate G — final integration checklist
 
-이 게이트는 F docs cleanup까지 끝난 뒤 current HEAD에서 README / `handoff.md` / `docs/local-dev-setup.md` / `.github/workflows/build-apk.yml` 와 같은 순서(`./scripts/prepare_assets.sh` → `/home/openc/sdk/flutter/bin/flutter pub get` → `flutter test` → `flutter analyze` → release APK build)로 한 번에 수행하는 최종 통합 확인이다.
+이 게이트는 현재 queue에 남아 있는 유일한 작업으로, current HEAD에서 README / `handoff.md` / `docs/local-dev-setup.md` / `.github/workflows/build-apk.yml` 와 같은 순서(`./scripts/prepare_assets.sh` → `/home/openc/sdk/flutter/bin/flutter pub get` → `flutter test` → `flutter analyze` → release APK build)로 한 번에 수행하는 최종 통합 확인이다.
 
 ```bash
 cd /home/openc/kids-play-app

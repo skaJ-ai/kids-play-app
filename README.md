@@ -14,8 +14,8 @@
 
 ## 현재 상태
 
-- 우선순위 큐 A-E 범위는 live repo 기준으로 완료 상태이며, 숫자/라우팅·design-system UI·hero/home/parent 핵심 흐름은 선별 테스트로 다시 확인했습니다.
-- 현재 진행 중인 작업은 README·handoff·plan 정합성을 맞추는 docs cleanup입니다.
+- 우선순위 큐 A-F 범위는 live repo 기준으로 완료 상태이며, 숫자/라우팅·design-system UI·hero/home/parent 핵심 흐름은 선별 테스트로 다시 확인했고 README·handoff·plan 정합성 cleanup도 현재 상태 기준으로 반영 완료했습니다.
+- 따라서 현재 큐에 남아 있는 작업은 Gate G 최종 통합 검증뿐입니다.
 - docs-only HEAD `c5879e9`에서는 `./scripts/prepare_assets.sh` 이후 full `/home/openc/sdk/flutter/bin/flutter test`를 다시 돌려 `00:32 +227: All tests passed!`로 통과했습니다.
 - 다만 검증 기준 코드 스냅샷은 그 뒤 코드 커밋 `5696c1f` (`fix(ui): remove tap cooldown analyze blocker`)로 이동했습니다. 이 커밋은 `lib/app/ui/tap_cooldown.dart`, `test/app/ui/tap_cooldown_test.dart`를 변경했습니다.
 - `5696c1f` 기준 코드 스냅샷에 대해서는 `/home/openc/sdk/flutter/bin/flutter test test/app/ui/tap_cooldown_test.dart`를 다시 실행해 `00:00 +9: All tests passed!`, `/home/openc/sdk/flutter/bin/flutter analyze lib/app/ui/tap_cooldown.dart test/app/ui/tap_cooldown_test.dart`를 실행해 `No issues found!`를 확인했습니다.
@@ -68,11 +68,11 @@ cd "$REPO_ROOT"
 
 ### 테스트 / 최종 검증
 현재 기준
-- A-E 범위는 live repo와 핵심 선별 테스트 기준으로 재확인 완료
+- A-F 범위는 live repo 기준으로 완료 상태이며, 코드 관련 핵심 흐름은 선별 테스트로 재확인했고 문서 정합성 cleanup도 반영 완료
 - full `/home/openc/sdk/flutter/bin/flutter test` 재실행 기록은 docs-only HEAD `c5879e9`에서 `./scripts/prepare_assets.sh` 후 `00:32 +227: All tests passed!`였습니다.
 - 이후 검증 기준 코드 스냅샷은 `5696c1f`로 이동했습니다. `5696c1f`는 `lib/app/ui/tap_cooldown.dart`, `test/app/ui/tap_cooldown_test.dart`를 변경했습니다. 따라서 위 full test 기록은 `5696c1f` 기준 코드 스냅샷 전체를 대체하는 증거는 아닙니다.
 - 대신 `5696c1f` 기준 코드 스냅샷에 대해서는 `/home/openc/sdk/flutter/bin/flutter test test/app/ui/tap_cooldown_test.dart` => `00:00 +9: All tests passed!`, `/home/openc/sdk/flutter/bin/flutter analyze lib/app/ui/tap_cooldown.dart test/app/ui/tap_cooldown_test.dart` => `No issues found!`까지 선별 재검증했습니다.
-- 아래 순서는 `docs/local-dev-setup.md` 및 `.github/workflows/build-apk.yml` 기준의 현재 최종 통합 게이트이며, 아직 pending인 것은 `5696c1f` 기준 코드 스냅샷에 대한 full `flutter test` / full `flutter analyze` / release build / GitHub Actions artifact `kids-play-app-arm64-v8a-release` 확인입니다.
+- 아래 순서는 `docs/local-dev-setup.md` 및 `.github/workflows/build-apk.yml` 기준의 현재 최종 통합 Gate G이며, 지금 큐에 남아 있는 유일한 작업은 `5696c1f` 기준 코드 스냅샷에 대한 full `flutter test` / full `flutter analyze` / release build / GitHub Actions artifact `kids-play-app-arm64-v8a-release` 확인입니다.
 
 ```bash
 REPO_ROOT=/home/openc/kids-play-app
