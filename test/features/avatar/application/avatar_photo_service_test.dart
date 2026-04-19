@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kids_play_app/features/avatar/application/avatar_photo_service.dart';
+import 'package:kids_play_app/features/avatar/data/avatar_photo_repository.dart';
 import 'package:kids_play_app/features/avatar/data/avatar_photo_store.dart';
 import 'package:kids_play_app/features/avatar/data/local_avatar_photo_repository.dart';
 import 'package:kids_play_app/features/avatar/domain/avatar_expression.dart';
@@ -156,6 +158,39 @@ void main() {
     expect(File('${tempDir.path}/$smilePath').existsSync(), isFalse);
     expect(File('${tempDir.path}/$sadPath').existsSync(), isFalse);
   });
+
+  test(
+    'concurrent saves preserve both entries by serializing snapshot mutations',
+    () async {
+      final photoStore = DelayedFirstSaveAvatarPhotoStore();
+      final service = AvatarPhotoService(
+        photoStore: photoStore,
+        repository: FakeAvatarPhotoRepository(),
+        now: () => DateTime.utc(2026, 4, 19, 15),
+      );
+
+      final smileSave = service.saveExpressionPhoto(
+        expression: AvatarExpression.smile,
+        bytes: Uint8List.fromList(const [1]),
+      );
+      await photoStore.firstSaveStarted.future;
+
+      final sadSave = service.saveExpressionPhoto(
+        expression: AvatarExpression.sad,
+        bytes: Uint8List.fromList(const [2]),
+      );
+
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+      photoStore.releaseFirstSave();
+
+      await Future.wait([smileSave, sadSave]);
+
+      expect(photoStore.snapshot.entries.length, 2);
+      expect(photoStore.snapshot.entryFor(AvatarExpression.smile), isNotNull);
+      expect(photoStore.snapshot.entryFor(AvatarExpression.sad), isNotNull);
+    },
+  );
 }
 
 class FakeAvatarPhotoStore implements AvatarPhotoStore {
@@ -170,5 +205,48 @@ class FakeAvatarPhotoStore implements AvatarPhotoStore {
   @override
   Future<void> saveSnapshot(AvatarPhotoSnapshot snapshot) async {
     this.snapshot = snapshot;
+  }
+}
+
+class DelayedFirstSaveAvatarPhotoStore implements AvatarPhotoStore {
+  AvatarPhotoSnapshot snapshot = const AvatarPhotoSnapshot();
+  final Completer<void> firstSaveStarted = Completer<void>();
+  final Completer<void> _allowFirstSaveToComplete = Completer<void>();
+  int _saveCount = 0;
+
+  void releaseFirstSave() {
+    if (!_allowFirstSaveToComplete.isCompleted) {
+      _allowFirstSaveToComplete.complete();
+    }
+  }
+
+  @override
+  Future<AvatarPhotoSnapshot> loadSnapshot() async => snapshot;
+
+  @override
+  Future<void> saveSnapshot(AvatarPhotoSnapshot snapshot) async {
+    _saveCount += 1;
+    if (_saveCount == 1) {
+      firstSaveStarted.complete();
+      await _allowFirstSaveToComplete.future;
+    }
+
+    this.snapshot = snapshot;
+  }
+}
+
+class FakeAvatarPhotoRepository implements AvatarPhotoRepository {
+  @override
+  Future<void> deletePhoto(String relativePath) async {}
+
+  @override
+  Future<File?> resolveFile(String relativePath) async => null;
+
+  @override
+  Future<String> saveExpressionPhoto({
+    required AvatarExpression expression,
+    required Uint8List bytes,
+  }) async {
+    return avatarPhotoRelativePathFor(expression);
   }
 }

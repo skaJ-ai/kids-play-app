@@ -17,6 +17,9 @@ class LocalAvatarPhotoRepository implements AvatarPhotoRepository {
   }) async {
     final relativePath = avatarPhotoRelativePathFor(expression);
     final file = await _fileFor(relativePath);
+    if (file == null) {
+      throw StateError('Generated avatar photo path escaped the root directory.');
+    }
 
     await file.parent.create(recursive: true);
     await file.writeAsBytes(bytes, flush: true);
@@ -27,6 +30,9 @@ class LocalAvatarPhotoRepository implements AvatarPhotoRepository {
   @override
   Future<File?> resolveFile(String relativePath) async {
     final file = await _fileFor(relativePath);
+    if (file == null) {
+      return null;
+    }
     if (await file.exists()) {
       return file;
     }
@@ -37,13 +43,26 @@ class LocalAvatarPhotoRepository implements AvatarPhotoRepository {
   @override
   Future<void> deletePhoto(String relativePath) async {
     final file = await _fileFor(relativePath);
+    if (file == null) {
+      return;
+    }
     if (await file.exists()) {
       await file.delete();
     }
   }
 
-  Future<File> _fileFor(String relativePath) async {
+  Future<File?> _fileFor(String relativePath) async {
+    if (path.isAbsolute(relativePath)) {
+      return null;
+    }
+
     final root = await _rootDirectory();
-    return File(path.normalize(path.join(root.path, relativePath)));
+    final rootPath = path.normalize(root.path);
+    final resolvedPath = path.normalize(path.join(rootPath, relativePath));
+    if (!path.isWithin(rootPath, resolvedPath)) {
+      return null;
+    }
+
+    return File(resolvedPath);
   }
 }
