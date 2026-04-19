@@ -53,7 +53,7 @@ void main() {
   });
 
   test(
-    'memory progress store keeps full-lesson score summary when replay results are recorded',
+    'memory progress store keeps full-lesson score summary when replay results are recorded, increments replay count, and leaves it unchanged for normal quiz results',
     () async {
       final store = MemoryProgressStore(
         const AppProgressSnapshot(
@@ -63,6 +63,7 @@ void main() {
               totalQuestions: 5,
               lastViewedIndex: 4,
               recentMistakes: ['A a'],
+              mistakeReplayCount: 1,
             ),
           },
         ),
@@ -82,6 +83,23 @@ void main() {
       expect(progress.bestScore, 4);
       expect(progress.totalQuestions, 5);
       expect(progress.recentMistakes, const ['C c']);
+      expect(progress.mistakeReplayCount, 2);
+
+      await store.recordQuizResult(
+        lessonId: 'alphabet:alphabet_letters_1',
+        correctCount: 5,
+        totalQuestions: 5,
+        recentMistakes: const [],
+      );
+
+      final normalSnapshot = await store.loadSnapshot();
+      final normalProgress = normalSnapshot.progressFor(
+        'alphabet:alphabet_letters_1',
+      );
+
+      expect(normalProgress.bestScore, 5);
+      expect(normalProgress.totalQuestions, 5);
+      expect(normalProgress.mistakeReplayCount, 2);
     },
   );
 
@@ -99,6 +117,13 @@ void main() {
       correctCount: 5,
       totalQuestions: 5,
       recentMistakes: const ['B'],
+    );
+    await store.recordQuizResult(
+      lessonId: 'alphabet:a_to_e',
+      correctCount: 1,
+      totalQuestions: 1,
+      recentMistakes: const ['C'],
+      isMistakeReplay: true,
     );
     await store.setLessonUnlocked('alphabet:f_to_j', true);
     await store.addStickers(1);
@@ -120,10 +145,26 @@ void main() {
     expect(snapshot.lastEarnedReward?.earnedAt, earnedAt);
     expect(snapshot.unlockedLessonIds, contains('alphabet:f_to_j'));
     expect(snapshot.progressFor('alphabet:a_to_e').bestScore, 5);
-    expect(snapshot.progressFor('alphabet:a_to_e').recentMistakes, const ['B']);
+    expect(snapshot.progressFor('alphabet:a_to_e').recentMistakes, const ['C']);
+    expect(snapshot.progressFor('alphabet:a_to_e').mistakeReplayCount, 1);
 
-    await store.reset();
-    final resetSnapshot = await store.loadSnapshot();
+    final reloadedStore = SharedPreferencesProgressStore(preferences);
+    await reloadedStore.recordQuizResult(
+      lessonId: 'alphabet:a_to_e',
+      correctCount: 4,
+      totalQuestions: 5,
+      recentMistakes: const ['D'],
+    );
+
+    final persistedSnapshot = await reloadedStore.loadSnapshot();
+    expect(persistedSnapshot.progressFor('alphabet:a_to_e').bestScore, 5);
+    expect(
+      persistedSnapshot.progressFor('alphabet:a_to_e').mistakeReplayCount,
+      1,
+    );
+
+    await reloadedStore.reset();
+    final resetSnapshot = await reloadedStore.loadSnapshot();
     expect(resetSnapshot.stickerCount, 0);
     expect(resetSnapshot.lessons, isEmpty);
     expect(resetSnapshot.unlockedLessonIds, isEmpty);
@@ -148,6 +189,7 @@ void main() {
           'totalQuestions': 5,
           'lastViewedIndex': 1,
           'recentMistakes': ['B'],
+          'mistakeReplayCount': 'oops',
         },
       },
     });
@@ -159,6 +201,7 @@ void main() {
     expect(snapshot.unlockedLessonIds, ['alphabet:f_to_j']);
     expect(snapshot.progressFor('alphabet:a_to_e').bestScore, 4);
     expect(snapshot.progressFor('alphabet:a_to_e').lastViewedIndex, 1);
+    expect(snapshot.progressFor('alphabet:a_to_e').mistakeReplayCount, 0);
   });
 
   test(
@@ -167,7 +210,7 @@ void main() {
       final preferences = await SharedPreferences.getInstance();
       await preferences.setString(
         SharedPreferencesProgressStore.storageKey,
-        '{"stickerCount":4,"lastEarnedReward":{"kind":"sticker","amount":"two","lessonId":"alphabet:a_to_e","earnedAt":"2026-04-17T12:30:00Z"},"voicePromptsEnabled":false,"effectsEnabled":false,"unlockedLessonIds":["alphabet:f_to_j"],"lessons":{"alphabet:a_to_e":{"bestScore":5,"totalQuestions":5,"lastViewedIndex":1,"recentMistakes":["B"]}}}',
+        '{"stickerCount":4,"lastEarnedReward":{"kind":"sticker","amount":"two","lessonId":"alphabet:a_to_e","earnedAt":"2026-04-17T12:30:00Z"},"voicePromptsEnabled":false,"effectsEnabled":false,"unlockedLessonIds":["alphabet:f_to_j"],"lessons":{"alphabet:a_to_e":{"bestScore":5,"totalQuestions":5,"lastViewedIndex":1,"recentMistakes":["B"],"mistakeReplayCount":"oops"}}}',
       );
 
       final store = SharedPreferencesProgressStore(preferences);
@@ -180,6 +223,7 @@ void main() {
       expect(snapshot.unlockedLessonIds, ['alphabet:f_to_j']);
       expect(snapshot.progressFor('alphabet:a_to_e').bestScore, 5);
       expect(snapshot.progressFor('alphabet:a_to_e').lastViewedIndex, 1);
+      expect(snapshot.progressFor('alphabet:a_to_e').mistakeReplayCount, 0);
       expect(snapshot.progressFor('alphabet:a_to_e').recentMistakes, const [
         'B',
       ]);

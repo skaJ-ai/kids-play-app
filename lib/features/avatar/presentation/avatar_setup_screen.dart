@@ -408,6 +408,10 @@ class _ParentSummaryPanel extends StatelessWidget {
         .expand((lesson) => lesson.recentMistakes)
         .toSet()
         .length;
+    final mistakeReplayCount = snapshot.lessons.values.fold<int>(
+      0,
+      (total, lesson) => total + lesson.mistakeReplayCount,
+    );
     final recentReward = snapshot.lastEarnedReward;
     final recentRewardLesson = recentReward == null
         ? null
@@ -450,6 +454,11 @@ class _ParentSummaryPanel extends StatelessWidget {
                 label: '최근 헷갈림',
                 value: '$mistakeCount개',
                 color: KidPalette.lilac,
+              ),
+              _SummaryChip(
+                label: '오답 다시 보기',
+                value: '$mistakeReplayCount번',
+                color: KidPalette.blue,
               ),
             ],
           ),

@@ -81,6 +81,7 @@ class LessonProgress {
     this.totalQuestions = 0,
     this.lastViewedIndex = 0,
     this.recentMistakes = const [],
+    this.mistakeReplayCount = 0,
   });
 
   factory LessonProgress.fromJson(Map<String, dynamic> json) {
@@ -91,6 +92,7 @@ class LessonProgress {
       recentMistakes: (json['recentMistakes'] as List<dynamic>? ?? const [])
           .map((item) => item.toString())
           .toList(growable: false),
+      mistakeReplayCount: _jsonIntOrZero(json['mistakeReplayCount']),
     );
   }
 
@@ -98,18 +100,21 @@ class LessonProgress {
   final int totalQuestions;
   final int lastViewedIndex;
   final List<String> recentMistakes;
+  final int mistakeReplayCount;
 
   LessonProgress copyWith({
     int? bestScore,
     int? totalQuestions,
     int? lastViewedIndex,
     List<String>? recentMistakes,
+    int? mistakeReplayCount,
   }) {
     return LessonProgress(
       bestScore: bestScore ?? this.bestScore,
       totalQuestions: totalQuestions ?? this.totalQuestions,
       lastViewedIndex: lastViewedIndex ?? this.lastViewedIndex,
       recentMistakes: recentMistakes ?? this.recentMistakes,
+      mistakeReplayCount: mistakeReplayCount ?? this.mistakeReplayCount,
     );
   }
 
@@ -119,6 +124,7 @@ class LessonProgress {
       'totalQuestions': totalQuestions,
       'lastViewedIndex': lastViewedIndex,
       'recentMistakes': recentMistakes,
+      'mistakeReplayCount': mistakeReplayCount,
     };
   }
 }
@@ -301,6 +307,9 @@ class MemoryProgressStore implements ProgressStore {
               ? current.totalQuestions
               : totalQuestions,
           recentMistakes: _normalizedMistakes(recentMistakes),
+          mistakeReplayCount: isMistakeReplay
+              ? current.mistakeReplayCount + 1
+              : current.mistakeReplayCount,
         ),
       },
     );
@@ -422,6 +431,9 @@ class SharedPreferencesProgressStore implements ProgressStore {
                 ? current.totalQuestions
                 : totalQuestions,
             recentMistakes: _normalizedMistakes(recentMistakes),
+            mistakeReplayCount: isMistakeReplay
+                ? current.mistakeReplayCount + 1
+                : current.mistakeReplayCount,
           ),
         },
       );
@@ -468,6 +480,14 @@ class SharedPreferencesProgressStore implements ProgressStore {
     final next = transform(snapshot);
     await _preferences.setString(storageKey, jsonEncode(next.toJson()));
   }
+}
+
+int _jsonIntOrZero(Object? value) {
+  return switch (value) {
+    int parsed => parsed,
+    num parsed when parsed == parsed.roundToDouble() => parsed.toInt(),
+    _ => 0,
+  };
 }
 
 List<String> _normalizedMistakes(List<String> mistakes) {

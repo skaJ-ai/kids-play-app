@@ -139,7 +139,7 @@ void main() {
   );
 
   test(
-    'mistake replay completion preserves full-lesson stats and records a replay reward kind',
+    'mistake replay completion preserves full-lesson stats, increments replay count, and records a replay reward kind',
     () async {
       final progressLessonId = _category.progressIdFor('alphabet_letters_1');
       final store = MemoryProgressStore(
@@ -152,6 +152,7 @@ void main() {
               totalQuestions: 5,
               lastViewedIndex: 4,
               recentMistakes: ['A'],
+              mistakeReplayCount: 1,
             ),
           },
         ),
@@ -176,6 +177,7 @@ void main() {
       expect(progress.bestScore, 4);
       expect(progress.totalQuestions, 5);
       expect(progress.recentMistakes, isEmpty);
+      expect(progress.mistakeReplayCount, 2);
       expect(snapshot.stickerCount, 1);
       expect(snapshot.lastEarnedReward, isNotNull);
       expect(snapshot.lastEarnedReward!.kind, 'mistakeReplaySticker');

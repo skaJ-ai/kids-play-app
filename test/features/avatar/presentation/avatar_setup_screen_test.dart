@@ -210,6 +210,49 @@ void main() {
   });
 
   testWidgets(
+    'shows the aggregate mistake replay count in the parent summary',
+    (WidgetTester tester) async {
+      final progressStore = MemoryProgressStore(
+        const AppProgressSnapshot(
+          lessons: {
+            'alphabet:alphabet_letters_1': LessonProgress(
+              bestScore: 5,
+              totalQuestions: 5,
+              lastViewedIndex: 4,
+              mistakeReplayCount: 2,
+            ),
+            'hangul:basic_consonants_1': LessonProgress(
+              bestScore: 4,
+              totalQuestions: 5,
+              lastViewedIndex: 3,
+              mistakeReplayCount: 1,
+            ),
+          },
+        ),
+      );
+
+      await tester.pumpWidget(
+        _wrapWithServices(
+          progressStore: progressStore,
+          child: const AvatarSetupScreen(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final summaryPanel = find.byKey(const Key('parent-summary-panel'));
+      expect(summaryPanel, findsOneWidget);
+      expect(
+        find.descendant(of: summaryPanel, matching: find.text('오답 다시 보기')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: summaryPanel, matching: find.text('3번')),
+        findsOneWidget,
+      );
+    },
+  );
+
+  testWidgets(
     'shows the scoped confusion summary for the most confusing lesson and tie breaks by metadata order',
     (WidgetTester tester) async {
       final progressStore = MemoryProgressStore(
