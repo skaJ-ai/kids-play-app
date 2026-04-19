@@ -47,13 +47,10 @@
 ## 현재 큐 기준 상태
 
 ### queue 기준 상태
-- A-F 범위(숫자 feature/라우팅, home/category 연결, design-system theme/button/panel 정리, hero/home/category 리디자인, 보호자 summary/settings/retry/unlock 흐름, README/handoff/plan 문서 정합성 cleanup)는 live repo 기준으로 완료 상태이며, 현재 HEAD에는 replay-reward parent-summary follow-up도 포함된다
-- Gate G 최종 통합 게이트는 docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`에서 완료된 과거 기록이다
-- 현재 HEAD 기준으로 `progress_store.dart`는 lesson별 `mistakeReplayCount`와 앱 전체 `replayRewardStickerCount`를 저장하고, `avatar_setup_screen.dart` 보호자 요약은 해당 집계를 summary chip으로 노출하며 recent reward callout은 latest reward kind에 따라 일반/replay copy를 보여준다
-- 현재 HEAD에서 다시 확인된 검증은 replay-reward 범위 targeted test/analyze뿐이다
-  - `/home/openc/sdk/flutter/bin/flutter test test/app/services/progress_store_test.dart test/features/avatar/presentation/avatar_setup_screen_test.dart test/features/lesson/application/quiz_controller_test.dart` => `00:05 +33: All tests passed!`
-  - `/home/openc/sdk/flutter/bin/flutter analyze lib/app/services/progress_store.dart lib/features/avatar/presentation/avatar_setup_screen.dart test/app/services/progress_store_test.dart test/features/avatar/presentation/avatar_setup_screen_test.dart test/features/lesson/application/quiz_controller_test.dart` => `No issues found!`
-- 따라서 full Gate G provenance는 historical evidence로만 유지되고, current HEAD에는 아직 같은 범위의 full gate 재실행 기록이 없다
+- A-F 범위(숫자 feature/라우팅, home/category 연결, design-system theme/button/panel 정리, hero/home/category 리디자인, 보호자 summary/settings/retry/unlock 흐름, README/handoff/plan 문서 정합성 cleanup)는 live repo 기준으로 완료 상태이며, 최신 앱 코드 스냅샷은 `d81a2ec`다
+- full Gate G provenance는 두 docs-only 기록으로 관리한다: historical docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`, 그리고 docs-only checkout `f1e23c3` fresh local rerun
+- `f1e23c3` fresh rerun이 커버한 앱 코드는 `0c15caf`와 동일했고, 후속 app-code snapshot `d81a2ec` 기준 full Gate G 재실행은 아직 없다
+- historical Gate G / fresh local rerun / later `d81a2ec` targeted verification 세부 결과는 아래 `선별 검증 + Gate G provenance 메모` 섹션에 정리돼 있다
 
 ### 1. 문서/CI 정합성
 - docs/script 변경도 APK workflow에 포함되도록 정리됨
@@ -88,9 +85,9 @@
 
 ---
 
-## 선별 검증 + recent full test 메모
+## 선별 검증 + Gate G provenance 메모
 
-최근 문서화된 선별 재확인 기록 (최종 통합 게이트 아님)
+최근 문서화된 선별 재확인 기록과 full Gate G provenance 메모
 - numbers + routing
   - `/home/openc/sdk/flutter/bin/flutter test test/features/numbers/data/numbers_lesson_repository_test.dart test/features/numbers/presentation/numbers_learn_screen_test.dart test/features/numbers/presentation/numbers_quiz_screen_test.dart test/features/home/presentation/category_lesson_picker_flow_test.dart`
   - 결과: passed
@@ -125,19 +122,28 @@
   - `06d5098` `feat: preserve replay reward lesson stats`
   - `109ba9e` `feat(parent): track mistake replay sessions`
   - `0c15caf` `feat(parent): surface replay reward totals`
-- current HEAD replay-reward targeted verification
+- replay-reward follow-up targeted verification
   - `/home/openc/sdk/flutter/bin/flutter test test/app/services/progress_store_test.dart test/features/avatar/presentation/avatar_setup_screen_test.dart test/features/lesson/application/quiz_controller_test.dart`
   - 결과: `00:05 +33: All tests passed!`
   - `/home/openc/sdk/flutter/bin/flutter analyze lib/app/services/progress_store.dart lib/features/avatar/presentation/avatar_setup_screen.dart test/app/services/progress_store_test.dart test/features/avatar/presentation/avatar_setup_screen_test.dart test/features/lesson/application/quiz_controller_test.dart`
   - 결과: `No issues found!`
-- current HEAD에는 아직 같은 범위의 full Gate G 재실행 기록이 없다
-
-과거 최종 통합 확인 (docs-only HEAD `1523559`, 검증 대상 코드 스냅샷 `5696c1f`)
-- `./scripts/prepare_assets.sh` + `/home/openc/sdk/flutter/bin/flutter pub get` 성공
-- full `/home/openc/sdk/flutter/bin/flutter test` => `00:33 +236: All tests passed!`
-- full `/home/openc/sdk/flutter/bin/flutter analyze` => `No issues found!`
-- `/home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64` => `build/app/outputs/flutter-apk/app-release.apk` (16.8MB)
-- GitHub Actions run `24617840783` 성공 / artifact `kids-play-app-arm64-v8a-release` 확인
+- historical Gate G reference (docs-only HEAD `1523559`, 검증 대상 코드 스냅샷 `5696c1f`)
+  - `./scripts/prepare_assets.sh` + `/home/openc/sdk/flutter/bin/flutter pub get` 성공
+  - full `/home/openc/sdk/flutter/bin/flutter test` => `00:33 +236: All tests passed!`
+  - full `/home/openc/sdk/flutter/bin/flutter analyze` => `No issues found!`
+  - `/home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64` => `build/app/outputs/flutter-apk/app-release.apk` (16.8MB)
+  - GitHub Actions run `24617840783` 성공 / artifact `kids-play-app-arm64-v8a-release` 확인
+- fresh Gate G rerun on docs-only checkout `f1e23c3` (app code matched `0c15caf`)
+  - `./scripts/prepare_assets.sh` + `/home/openc/sdk/flutter/bin/flutter pub get` 성공
+  - full `/home/openc/sdk/flutter/bin/flutter test` => `00:33 +249: All tests passed!`
+  - full `/home/openc/sdk/flutter/bin/flutter analyze` => `No issues found! (ran in 3.1s)`
+  - `/home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64` => `build/app/outputs/flutter-apk/app-release.apk` (16.8MB / `16774218` bytes)
+- later app-code verification after the fresh rerun
+  - `d81a2ec` `feat(lesson): route generic learn prompts through audio service`
+  - `/home/openc/sdk/flutter/bin/flutter test test/features/lesson/presentation/generic_learn_screen_test.dart`
+  - 결과: `00:01 +6: All tests passed!`
+  - `/home/openc/sdk/flutter/bin/flutter analyze lib/features/lesson/presentation/generic_learn_screen.dart test/features/lesson/presentation/generic_learn_screen_test.dart`
+  - 결과: `No issues found! (ran in 1.1s)`
 
 release build output path (when generated)
 - `build/app/outputs/flutter-apk/app-release.apk`
@@ -205,7 +211,7 @@ artifact
 ## 다음 작업자가 바로 이어갈 포인트
 
 우선순위 추천
-1. historical Gate G provenance는 이미 있다. 현재 HEAD는 replay-reward follow-up에 대한 targeted verification만 기록돼 있으니, 다음 run은 아래 남은 확장 후보를 작은 slice로 진행하거나 fresh release handoff가 필요하면 current HEAD에서 full Gate G를 다시 돌리는 편이 안전하다.
+1. fresh Gate G rerun은 `f1e23c3` checkout에서 확보됐지만 그때 검증된 앱 코드는 `0c15caf`와 동일했다. 후속 app-code snapshot `d81a2ec`는 generic learn audio-service 변경 targeted verification만 있으니, 그 코드 기준 release-handoff가 필요하면 full Gate G를 다시 돌리는 편이 안전하다. 그 전까지는 아래 남은 확장 후보를 작은 slice로 이어가면 된다.
 
 남은 확장 후보
 - 실제 표정 사진 업로드/크롭

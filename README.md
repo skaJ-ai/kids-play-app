@@ -14,18 +14,19 @@
 
 ## 현재 상태
 
-- 우선순위 큐 A-F 범위는 live repo 기준으로 완료 상태이며, 이후 보호자 replay-reward follow-up까지 main에 반영됐습니다.
-- 현재 HEAD 기준으로 `progress_store.dart`는 lesson별 오답 다시 풀기 횟수와 앱 전체 다시 풀기 보상 스티커 합계를 저장하고, `avatar_setup_screen.dart` 보호자 요약은 오답 다시 보기 횟수 / 다시 풀기 보상 합계를 summary chip으로 노출하며 최근 보상 callout은 latest reward kind에 따라 일반/replay copy를 보여줍니다.
-- Gate G 최종 통합 검증은 docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`에서 완료된 과거 기록입니다.
-- 현재 HEAD에서 다시 확인된 것은 replay-reward 범위 targeted verification뿐입니다.
-  - `/home/openc/sdk/flutter/bin/flutter test test/app/services/progress_store_test.dart test/features/avatar/presentation/avatar_setup_screen_test.dart test/features/lesson/application/quiz_controller_test.dart` => `00:05 +33: All tests passed!`
-  - `/home/openc/sdk/flutter/bin/flutter analyze lib/app/services/progress_store.dart lib/features/avatar/presentation/avatar_setup_screen.dart test/app/services/progress_store_test.dart test/features/avatar/presentation/avatar_setup_screen_test.dart test/features/lesson/application/quiz_controller_test.dart` => `No issues found!`
-- Historical Gate G 실행 결과 (`1523559` / `5696c1f`):
+- 우선순위 큐 A-F 범위는 live repo 기준으로 완료 상태이며, 최신 code-changing commit은 `d81a2ec`(`feat(lesson): route generic learn prompts through audio service`)입니다.
+- `0c15caf`까지 반영된 replay-reward 보호자 요약 흐름 위에, `d81a2ec`는 `generic_learn_screen.dart`의 일반 학습 prompt를 audio service로 연결했습니다.
+- full Gate G provenance는 두 건으로 유지합니다.
+  - fresh local rerun: docs-only checkout `f1e23c3`에서 실행했고, 당시 checkout의 앱 코드는 `0c15caf`와 동일했습니다.
+  - historical artifact-backed record: docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`, GitHub Actions run `24617840783`, artifact `kids-play-app-arm64-v8a-release`.
+- 후속 app-code snapshot `d81a2ec`는 아직 full Gate G로 다시 돌리지 않았고, 아래 targeted verification만 재확인됐습니다.
+  - `/home/openc/sdk/flutter/bin/flutter test test/features/lesson/presentation/generic_learn_screen_test.dart` => `00:01 +6: All tests passed!`
+  - `/home/openc/sdk/flutter/bin/flutter analyze lib/features/lesson/presentation/generic_learn_screen.dart test/features/lesson/presentation/generic_learn_screen_test.dart` => `No issues found! (ran in 1.1s)`
+- fresh local rerun 결과 (`f1e23c3` checkout, 당시 앱 코드는 `0c15caf`와 동일):
   - `./scripts/prepare_assets.sh` + `/home/openc/sdk/flutter/bin/flutter pub get` 성공
-  - full `/home/openc/sdk/flutter/bin/flutter test` => `00:33 +236: All tests passed!`
-  - full `/home/openc/sdk/flutter/bin/flutter analyze` => `No issues found!`
-  - `/home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64` => `build/app/outputs/flutter-apk/app-release.apk` (16.8MB)
-  - GitHub Actions run `24617840783` 성공, artifact `kids-play-app-arm64-v8a-release` 확인
+  - full `/home/openc/sdk/flutter/bin/flutter test` => `00:33 +249: All tests passed!`
+  - full `/home/openc/sdk/flutter/bin/flutter analyze` => `No issues found! (ran in 3.1s)`
+  - `/home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64` => `build/app/outputs/flutter-apk/app-release.apk` (16.8MB / `16774218` bytes)
 
 ## 현재 구현 범위
 
@@ -74,14 +75,17 @@ cd "$REPO_ROOT"
 
 ### 테스트 / 최종 검증
 현재 기준
-- A-F 범위는 live repo 기준으로 완료 상태이며, 현재 HEAD에는 replay-reward parent-summary follow-up도 포함됩니다.
-- 이전 기록으로 docs-only HEAD `c5879e9`에서는 `./scripts/prepare_assets.sh` 후 full `/home/openc/sdk/flutter/bin/flutter test`가 `00:32 +227: All tests passed!`로 통과했습니다.
-- historical Gate G는 docs-only HEAD `1523559`에서 코드 스냅샷 `5696c1f`를 대상으로 다시 실행됐습니다.
-- 그 이후 main에는 replay-reward 관련 후속 코드가 반영됐고, 현재 HEAD에서 다시 확인된 것은 아래 targeted verification입니다.
-- current HEAD replay-reward targeted verification:
-  - `/home/openc/sdk/flutter/bin/flutter test test/app/services/progress_store_test.dart test/features/avatar/presentation/avatar_setup_screen_test.dart test/features/lesson/application/quiz_controller_test.dart` => `00:05 +33: All tests passed!`
-  - `/home/openc/sdk/flutter/bin/flutter analyze lib/app/services/progress_store.dart lib/features/avatar/presentation/avatar_setup_screen.dart test/app/services/progress_store_test.dart test/features/avatar/presentation/avatar_setup_screen_test.dart test/features/lesson/application/quiz_controller_test.dart` => `No issues found!`
-- Historical Gate G 결과 (`1523559` / `5696c1f`):
+- A-F 범위는 live repo 기준으로 완료 상태이며, 최신 code-changing commit은 `d81a2ec`입니다.
+- 후속 app-code snapshot `d81a2ec`는 아래 targeted verification만 재확인됐습니다.
+  - `/home/openc/sdk/flutter/bin/flutter test test/features/lesson/presentation/generic_learn_screen_test.dart` => `00:01 +6: All tests passed!`
+  - `/home/openc/sdk/flutter/bin/flutter analyze lib/features/lesson/presentation/generic_learn_screen.dart test/features/lesson/presentation/generic_learn_screen_test.dart` => `No issues found! (ran in 1.1s)`
+- fresh local Gate G rerun은 docs-only checkout `f1e23c3`에서 실행됐고, 당시 앱 코드는 `0c15caf`와 동일했습니다.
+- fresh local rerun 결과 (`f1e23c3` checkout, 후속 app-code snapshot `d81a2ec` 미포함):
+  - `./scripts/prepare_assets.sh` + `/home/openc/sdk/flutter/bin/flutter pub get` 성공
+  - full `/home/openc/sdk/flutter/bin/flutter test` => `00:33 +249: All tests passed!`
+  - full `/home/openc/sdk/flutter/bin/flutter analyze` => `No issues found! (ran in 3.1s)`
+  - `/home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64` => `build/app/outputs/flutter-apk/app-release.apk` (16.8MB / `16774218` bytes)
+- historical artifact-backed Gate G reference (`1523559` / `5696c1f`):
   - `./scripts/prepare_assets.sh` + `/home/openc/sdk/flutter/bin/flutter pub get` 성공
   - full `/home/openc/sdk/flutter/bin/flutter test` => `00:33 +236: All tests passed!`
   - full `/home/openc/sdk/flutter/bin/flutter analyze` => `No issues found!`
@@ -102,7 +106,7 @@ cd "$REPO_ROOT"
 "$FLUTTER_BIN" build apk --release --target-platform android-arm64
 ```
 
-- 아래 명령 블록은 `docs/local-dev-setup.md` 및 `.github/workflows/build-apk.yml` 과 같은 순서의 재현용 체크리스트입니다. Historical Gate G 완료 기준 증거는 docs-only HEAD `1523559`의 full test/analyze/release build와 해당 HEAD의 GitHub Actions run `24617840783` / artifact `kids-play-app-arm64-v8a-release`입니다. 현재 HEAD에는 아직 같은 범위의 full gate 재실행 기록이 없고, replay-reward 범위 targeted test/analyze만 재확인됐습니다.
+- 아래 명령 블록은 `docs/local-dev-setup.md` 및 `.github/workflows/build-apk.yml` 과 같은 순서의 재현용 체크리스트입니다. full rerun provenance는 docs-only checkout `f1e23c3`(당시 앱 코드는 `0c15caf`와 동일)와 historical docs-only HEAD `1523559` / code snapshot `5696c1f`로 읽어야 합니다. 후속 app-code snapshot `d81a2ec`는 generic learn audio-service 변경에 대한 targeted test/analyze만 다시 확인됐습니다.
 
 ## APK 확인 방법
 
