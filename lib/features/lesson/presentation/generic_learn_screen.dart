@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/audio/audio_cue.dart';
 import '../../../app/services/app_services.dart';
 import '../../../app/ui/audio_prompt_panel.dart';
 import '../../../app/ui/kid_theme.dart';
@@ -75,20 +76,44 @@ class _GenericLearnScreenState extends State<GenericLearnScreen> {
     });
   }
 
-  Future<void> _replayPrompt(LessonItem item) async {
-    await _speakIfEnabled(item.label);
+  Future<void> _replayPrompt(LessonItem item, {int? itemIndex}) async {
+    await _playPromptIfEnabled(_promptCueFor(item, itemIndex ?? _currentIndex));
   }
 
-  Future<void> _speakIfEnabled(String text) async {
+  Future<void> _playPromptIfEnabled(PromptCue cue) async {
     final snapshot = await _services.progressStore.loadSnapshot();
     if (!snapshot.voicePromptsEnabled) {
       return;
     }
-    await _services.speechCueService.speak(text, locale: 'ko-KR');
+    await _services.audioService.play(cue);
+  }
+
+  PromptCue _promptCueFor(LessonItem item, int itemIndex) {
+    final slug = _promptSlugFor(item.symbol, itemIndex);
+    return PromptCue(
+      AudioCueRef(
+        assetPath:
+            'assets/generated/audio/voice/prompts/${widget.category.id}/${widget.lessonId}_$slug.mp3',
+        fallbackText: item.label,
+      ),
+    );
+  }
+
+  String _promptSlugFor(String symbol, int itemIndex) {
+    final slug = symbol
+        .trim()
+        .toLowerCase()
+        .replaceAll(RegExp(r'\s+'), '_')
+        .replaceAll(RegExp(r'[^a-z0-9_-]'), '');
+    if (slug.isEmpty) {
+      return 'item_${itemIndex + 1}';
+    }
+    return slug;
   }
 
   void _queuePrompt(LessonItem item) {
-    final promptKey = '${widget.lessonId}:${item.symbol}:$_currentIndex';
+    final itemIndex = _currentIndex;
+    final promptKey = '${widget.lessonId}:${item.symbol}:$itemIndex';
     if (_lastPromptKey == promptKey) {
       return;
     }
@@ -97,7 +122,7 @@ class _GenericLearnScreenState extends State<GenericLearnScreen> {
       if (!mounted) {
         return;
       }
-      _replayPrompt(item);
+      _replayPrompt(item, itemIndex: itemIndex);
     });
   }
 
@@ -132,9 +157,7 @@ class _GenericLearnScreenState extends State<GenericLearnScreen> {
 
           final lesson = snapshot.data!;
           if (lesson.items.isEmpty) {
-            return Center(
-              child: Text(widget.emptyMessage ?? '준비 중인 세트예요.'),
-            );
+            return Center(child: Text(widget.emptyMessage ?? '준비 중인 세트예요.'));
           }
 
           final item = lesson.items[_currentIndex];
@@ -160,8 +183,7 @@ class _GenericLearnScreenState extends State<GenericLearnScreen> {
                       ),
                       const Spacer(),
                       _HeaderPill(
-                        label:
-                            '${_currentIndex + 1} / ${lesson.items.length}',
+                        label: '${_currentIndex + 1} / ${lesson.items.length}',
                         compact: compact,
                         labelColor: KidPalette.coralDark,
                       ),
@@ -222,7 +244,8 @@ class _GenericLearnScreenState extends State<GenericLearnScreen> {
                                 subtitle: compact
                                     ? widget.category.learnSubtitleCompact
                                     : '스피커를 누르면 이름을 다시 들을 수 있어요.',
-                                onReplay: () => _replayPrompt(item),
+                                onReplay: () =>
+                                    _replayPrompt(item, itemIndex: _currentIndex),
                                 compact: compact,
                               ),
                               SizedBox(height: compact ? 6 : 14),
@@ -334,19 +357,15 @@ class _HeaderPill extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
-            Icon(
-              icon,
-              color: KidPalette.navy,
-              size: compact ? 18 : 24,
-            ),
+            Icon(icon, color: KidPalette.navy, size: compact ? 18 : 24),
             SizedBox(width: compact ? 6 : 8),
           ],
           Text(
             label,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: labelColor ?? KidPalette.navy,
-                  fontWeight: FontWeight.w900,
-                ),
+              color: labelColor ?? KidPalette.navy,
+              fontWeight: FontWeight.w900,
+            ),
           ),
         ],
       ),
