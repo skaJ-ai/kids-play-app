@@ -48,7 +48,7 @@
 
 ### queue 기준 상태
 - A-F 범위(숫자 feature/라우팅, home/category 연결, design-system theme/button/panel 정리, hero/home/category 리디자인, 보호자 summary/settings/retry/unlock 흐름, README/handoff/plan 문서 정합성 cleanup)는 live repo 기준으로 완료 상태이며, 코드 관련 핵심 흐름은 선별 테스트로 다시 확인된 상태다
-- 현재 queue에 남아 있는 작업은 G 최종 통합 게이트뿐이다. docs-only HEAD `c5879e9`에서 full `flutter test` 재통과 기록은 남아 있지만, 이후 코드 커밋 `5696c1f` (`fix(ui): remove tap cooldown analyze blocker`)가 `lib/app/ui/tap_cooldown.dart`, `test/app/ui/tap_cooldown_test.dart`를 변경했다. 검증 기준 코드 스냅샷은 `5696c1f`이며, 이 코드 스냅샷에서는 targeted test/analyze만 다시 확인됐다. `5696c1f` 기준 코드 스냅샷에 대한 full `flutter test` / full `flutter analyze` / release APK build / APK artifact 확인은 아직 남아 있다
+- Gate G 최종 통합 게이트는 docs-only HEAD `1523559`에서 완료됐다. 앱 코드는 마지막 코드 커밋 `5696c1f` (`fix(ui): remove tap cooldown analyze blocker`) 이후 바뀌지 않았고, 이 기준에서 `./scripts/prepare_assets.sh` → `flutter pub get` → full `flutter test` (`00:33 +236: All tests passed!`) → full `flutter analyze` (`No issues found!`) → arm64 release build (`build/app/outputs/flutter-apk/app-release.apk`, 16.8MB) → GitHub Actions run `24617840783` / artifact `kids-play-app-arm64-v8a-release` 확인까지 끝났다
 
 ### 1. 문서/CI 정합성
 - docs/script 변경도 APK workflow에 포함되도록 정리됨
@@ -116,8 +116,12 @@
   - `/home/openc/sdk/flutter/bin/flutter analyze lib/app/ui/tap_cooldown.dart test/app/ui/tap_cooldown_test.dart`
   - 결과: `No issues found!`
 
-아직 남은 최종 통합 확인
-- 아래 `로컬 실행 / 검증` 블록과 같은 변수 기준으로 `5696c1f` 기준 코드 스냅샷에 대한 full `flutter test`, full `flutter analyze`, release APK build, GitHub Actions APK artifact 확인이 아직 남아 있다
+완료된 최종 통합 확인 (docs-only HEAD `1523559`, 앱 코드는 `5696c1f` 이후 변경 없음)
+- `./scripts/prepare_assets.sh` + `/home/openc/sdk/flutter/bin/flutter pub get` 성공
+- full `/home/openc/sdk/flutter/bin/flutter test` => `00:33 +236: All tests passed!`
+- full `/home/openc/sdk/flutter/bin/flutter analyze` => `No issues found!`
+- `/home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64` => `build/app/outputs/flutter-apk/app-release.apk` (16.8MB)
+- GitHub Actions run `24617840783` 성공 / artifact `kids-play-app-arm64-v8a-release` 확인
 
 release build output path (when generated)
 - `build/app/outputs/flutter-apk/app-release.apk`
@@ -185,7 +189,7 @@ artifact
 ## 다음 작업자가 바로 이어갈 포인트
 
 우선순위 추천
-1. Gate G 최종 통합 게이트 실행 (`./scripts/prepare_assets.sh` → `flutter pub get` → full `flutter test` → full `flutter analyze` → release APK build → GitHub Actions artifact `kids-play-app-arm64-v8a-release` 확인)
+1. Gate G는 완료됐다. 다음 run은 아래 확장 후보 중 하나를 작은 slice로 선택해서 진행하면 된다.
 
 Gate G 이후 확장 후보
 - 오답 다시 풀기 결과를 별도 통계/보상과 연결

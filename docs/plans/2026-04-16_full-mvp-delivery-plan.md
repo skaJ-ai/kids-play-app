@@ -15,10 +15,10 @@
 
 현재 큐 기준 상태
 - 우선순위 A-F 범위는 live repo와 targeted tests/문서 정합성 기준으로 완료 상태
-- F — docs cleanup 완료. README / handoff / plan 상태 wording 정합성까지 current HEAD 기준으로 반영됨
-- G — final integration gate만 남아 있음. docs-only HEAD `c5879e9`에서 full `flutter test`는 재통과했지만, 그 뒤 코드 커밋 `5696c1f` (`fix(ui): remove tap cooldown analyze blocker`)가 `lib/app/ui/tap_cooldown.dart`, `test/app/ui/tap_cooldown_test.dart`를 변경했으므로 검증 기준 코드 스냅샷은 더 이상 `c5879e9`가 아니라 `5696c1f`임
-- provenance 메모: `c5879e9`에서 `./scripts/prepare_assets.sh` 후 full `/home/openc/sdk/flutter/bin/flutter test`가 `00:32 +227: All tests passed!`로 끝났고, 이후 검증 기준 코드 스냅샷은 `5696c1f`로 이동했다. 이 코드 스냅샷에서는 `/home/openc/sdk/flutter/bin/flutter test test/app/ui/tap_cooldown_test.dart` => `00:00 +9: All tests passed!`, `/home/openc/sdk/flutter/bin/flutter analyze lib/app/ui/tap_cooldown.dart test/app/ui/tap_cooldown_test.dart` => `No issues found!`까지 재확인된 상태
-- 따라서 현재 queue에 남아 있는 것은 Gate G에서 수행할 `5696c1f` 기준 코드 스냅샷에 대한 full `flutter test`, full `flutter analyze`, release build, GitHub Actions APK artifact 확인
+- F — docs cleanup 완료. README / handoff / plan 상태 wording 정합성까지 live repo 기준으로 반영됨
+- G — final integration gate 완료. docs-only HEAD `1523559`에서 Gate G를 실행했고, 앱 코드는 마지막 코드 커밋 `5696c1f` (`fix(ui): remove tap cooldown analyze blocker`) 이후 변경되지 않았음
+- provenance 메모: `c5879e9`에서 `./scripts/prepare_assets.sh` 후 full `/home/openc/sdk/flutter/bin/flutter test`가 `00:32 +227: All tests passed!`로 끝났고, 이후 검증 기준 코드 스냅샷은 `5696c1f`로 이동했다. 이 코드 스냅샷에서는 `/home/openc/sdk/flutter/bin/flutter test test/app/ui/tap_cooldown_test.dart` => `00:00 +9: All tests passed!`, `/home/openc/sdk/flutter/bin/flutter analyze lib/app/ui/tap_cooldown.dart test/app/ui/tap_cooldown_test.dart` => `No issues found!`를 선별 재확인한 뒤, docs-only HEAD `1523559`에서 `./scripts/prepare_assets.sh` + `flutter pub get` + full `flutter test` (`00:33 +236: All tests passed!`) + full `flutter analyze` (`No issues found!`) + release build (`build/app/outputs/flutter-apk/app-release.apk`, 16.8MB) + GitHub Actions run `24617840783` / artifact `kids-play-app-arm64-v8a-release` 확인까지 완료했다
+- 따라서 현재 queue에는 필수 마감 게이트가 남아 있지 않고, 다음 run은 아래 확장 후보 중 하나를 작은 slice로 선택하면 된다
 
 남은 확장 후보
 - 오답 다시 풀기 결과를 별도 통계/보상과 연결
@@ -86,7 +86,7 @@
 - home/category/hub garage UI 정리 완료
 - 기본 summary/reward 흐름 정리 완료
 - docs cleanup 완료
-- docs-only HEAD `c5879e9`의 full `flutter test` 재통과 기록은 유지하되, 이후 코드 커밋 `5696c1f` 기준 코드 스냅샷의 targeted test/analyze 재검증과 별도로 Gate G의 full `flutter test` / full `flutter analyze` / release build / Actions artifact 확인이 마지막 게이트로 남아 있음
+- docs-only HEAD `1523559`에서 Gate G를 완료했고, 앱 코드는 마지막 코드 커밋 `5696c1f` 이후 변경되지 않은 상태에서 full `flutter test` / full `flutter analyze` / release build / Actions artifact 확인까지 마감함
 
 ## Verification approach
 
@@ -98,7 +98,7 @@
 
 ### Gate G — final integration checklist
 
-이 게이트는 현재 queue에 남아 있는 유일한 작업으로, current HEAD에서 README / `handoff.md` / `docs/local-dev-setup.md` / `.github/workflows/build-apk.yml` 와 같은 순서(`./scripts/prepare_assets.sh` → `/home/openc/sdk/flutter/bin/flutter pub get` → `flutter test` → `flutter analyze` → release APK build)로 한 번에 수행하는 최종 통합 확인이다.
+이 게이트는 docs-only HEAD `1523559`에서 완료됐다. 실행 순서는 README / `handoff.md` / `docs/local-dev-setup.md` / `.github/workflows/build-apk.yml` 와 같은 순서(`./scripts/prepare_assets.sh` → `/home/openc/sdk/flutter/bin/flutter pub get` → `flutter test` → `flutter analyze` → release APK build)였고, 앱 코드는 마지막 코드 커밋 `5696c1f` 이후 변경되지 않았다.
 
 ```bash
 cd /home/openc/kids-play-app
@@ -109,7 +109,7 @@ cd /home/openc/kids-play-app
 /home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64
 ```
 
-- 위 순서의 명령과 current-head GitHub Actions APK artifact 확인까지 끝나야 G를 완료로 기록한다.
+- 완료 기록: docs-only HEAD `1523559`에서 위 순서의 명령이 모두 성공했고, GitHub Actions run `24617840783` / artifact `kids-play-app-arm64-v8a-release` 확인까지 끝났다.
 
 ## Release handoff expectation
 
