@@ -11,6 +11,9 @@ import '../../alphabet/presentation/alphabet_quiz_screen.dart';
 import '../../hangul/presentation/hangul_quiz_screen.dart';
 import '../../numbers/presentation/numbers_quiz_screen.dart';
 import '../domain/avatar_expression.dart';
+import '../domain/avatar_photo_snapshot.dart';
+import 'avatar_crop_screen.dart';
+import 'widgets/avatar_expression_card.dart';
 
 typedef LessonRetryRouteOpener =
     Future<void> Function(
@@ -29,21 +32,28 @@ class AvatarSetupScreen extends StatefulWidget {
 }
 
 class _AvatarSetupScreenState extends State<AvatarSetupScreen> {
-  Future<AppProgressSnapshot>? _snapshotFuture;
+  Future<_AvatarSetupViewData>? _screenDataFuture;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _snapshotFuture ??= _loadSnapshot();
+    _screenDataFuture ??= _loadScreenData();
   }
 
-  Future<AppProgressSnapshot> _loadSnapshot() {
-    return AppServicesScope.of(context).progressStore.loadSnapshot();
+  Future<_AvatarSetupViewData> _loadScreenData() async {
+    final services = AppServicesScope.of(context);
+    final progressFuture = services.progressStore.loadSnapshot();
+    final avatarPhotoFuture = services.avatarPhotoService.loadSnapshot();
+
+    return _AvatarSetupViewData(
+      progress: await progressFuture,
+      avatarPhotos: await avatarPhotoFuture,
+    );
   }
 
-  Future<void> _refreshSnapshot() async {
+  Future<void> _refreshScreenData() async {
     setState(() {
-      _snapshotFuture = _loadSnapshot();
+      _screenDataFuture = _loadScreenData();
     });
   }
 
@@ -51,19 +61,19 @@ class _AvatarSetupScreenState extends State<AvatarSetupScreen> {
     await AppServicesScope.of(
       context,
     ).progressStore.setVoicePromptsEnabled(enabled);
-    await _refreshSnapshot();
+    await _refreshScreenData();
   }
 
   Future<void> _toggleEffects(bool enabled) async {
     await AppServicesScope.of(context).progressStore.setEffectsEnabled(enabled);
-    await _refreshSnapshot();
+    await _refreshScreenData();
   }
 
   Future<void> _resetProgress() async {
     final services = AppServicesScope.of(context);
     await services.speechCueService.stop();
     await services.progressStore.reset();
-    await _refreshSnapshot();
+    await _refreshScreenData();
   }
 
   Future<void> _adjustLessonIndex(String lessonId, int delta) async {
@@ -84,14 +94,14 @@ class _AvatarSetupScreenState extends State<AvatarSetupScreen> {
       lessonId: lessonId,
       lastViewedIndex: nextIndex,
     );
-    await _refreshSnapshot();
+    await _refreshScreenData();
   }
 
   Future<void> _setLessonUnlocked(String lessonId, bool unlocked) async {
     await AppServicesScope.of(
       context,
     ).progressStore.setLessonUnlocked(lessonId, unlocked);
-    await _refreshSnapshot();
+    await _refreshScreenData();
   }
 
   Future<void> _clearLessonMistakes(String lessonId) async {
@@ -112,7 +122,7 @@ class _AvatarSetupScreenState extends State<AvatarSetupScreen> {
       totalQuestions: totalQuestions,
       recentMistakes: const [],
     );
-    await _refreshSnapshot();
+    await _refreshScreenData();
   }
 
   Future<void> _openLessonRetry(String lessonId, List<String> mistakes) async {
@@ -131,7 +141,7 @@ class _AvatarSetupScreenState extends State<AvatarSetupScreen> {
       lessonId: lessonId,
       lastViewedIndex: reviewIndex,
     );
-    await _refreshSnapshot();
+    await _refreshScreenData();
     if (!mounted) {
       return;
     }
@@ -150,6 +160,49 @@ class _AvatarSetupScreenState extends State<AvatarSetupScreen> {
     await Navigator.of(
       context,
     ).push(MaterialPageRoute<void>(builder: (_) => destination));
+  }
+
+  Future<void> _importExpressionPhoto(AvatarExpression expression) async {
+    final services = AppServicesScope.of(context);
+    final sourceBytes = await services.avatarPhotoPicker.pickFromGallery();
+    if (sourceBytes == null || sourceBytes.isEmpty) {
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    final croppedBytes = await Navigator.of(context).push<Uint8List>(
+      MaterialPageRoute<Uint8List>(
+        builder: (_) =>
+            AvatarCropScreen(expression: expression, sourceBytes: sourceBytes),
+      ),
+    );
+    if (croppedBytes == null || croppedBytes.isEmpty) {
+      return;
+    }
+
+    await services.avatarPhotoService.saveExpressionPhoto(
+      expression: expression,
+      bytes: croppedBytes,
+    );
+    if (!mounted) {
+      return;
+    }
+
+    await _refreshScreenData();
+  }
+
+  Future<void> _clearExpressionPhoto(AvatarExpression expression) async {
+    await AppServicesScope.of(
+      context,
+    ).avatarPhotoService.clearExpression(expression);
+    if (!mounted) {
+      return;
+    }
+
+    await _refreshScreenData();
   }
 
   Future<void> _exitApp() async {
@@ -229,11 +282,13 @@ class _AvatarSetupScreenState extends State<AvatarSetupScreen> {
               ),
               SizedBox(height: compact ? 12 : 18),
               Expanded(
-                child: FutureBuilder<AppProgressSnapshot>(
-                  future: _snapshotFuture,
+                child: FutureBuilder<_AvatarSetupViewData>(
+                  future: _screenDataFuture,
                   builder: (context, snapshot) {
-                    final progress =
-                        snapshot.data ?? const AppProgressSnapshot();
+                    final screenData =
+                        snapshot.data ?? const _AvatarSetupViewData();
+                    final progress = screenData.progress;
+                    final avatarPhotos = screenData.avatarPhotos;
                     return SingleChildScrollView(
                       child: Column(
                         children: [
@@ -250,8 +305,18 @@ class _AvatarSetupScreenState extends State<AvatarSetupScreen> {
                                     in AvatarExpression.values)
                                   SizedBox(
                                     width: compact ? 206 : 220,
-                                    child: _ExpressionCard(
+                                    child: AvatarExpressionCard(
+                                      key: Key(
+                                        'avatar-card-${expression.name}',
+                                      ),
                                       expression: expression,
+                                      hasSavedPhoto:
+                                          avatarPhotos.entryFor(expression) !=
+                                          null,
+                                      onImportPressed: () =>
+                                          _importExpressionPhoto(expression),
+                                      onClearPressed: () =>
+                                          _clearExpressionPhoto(expression),
                                     ),
                                   ),
                               ],
@@ -1151,137 +1216,14 @@ class _SummaryChip extends StatelessWidget {
   }
 }
 
-class _ExpressionCard extends StatelessWidget {
-  const _ExpressionCard({required this.expression});
+class _AvatarSetupViewData {
+  const _AvatarSetupViewData({
+    this.progress = const AppProgressSnapshot(),
+    this.avatarPhotos = const AvatarPhotoSnapshot(),
+  });
 
-  final AvatarExpression expression;
-
-  @override
-  Widget build(BuildContext context) {
-    return ToyPanel(
-      padding: const EdgeInsets.all(14),
-      backgroundColor: KidPalette.creamWarm,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final compact = constraints.maxWidth < 210;
-
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: KidPalette.white.withValues(alpha: 0.85),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Text(
-                      expression.label,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: KidPalette.coralDark,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  Icon(
-                    Icons.add_a_photo_rounded,
-                    color: KidPalette.navy.withValues(alpha: 0.7),
-                    size: 20,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: KidPalette.white.withValues(alpha: 0.92),
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                padding: EdgeInsets.all(compact ? 12 : 16),
-                child: compact
-                    ? Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SizedBox(
-                            height: 68,
-                            child: Image.asset(
-                              'assets/generated/images/hero/hero_face.png',
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            expression.shortPrompt,
-                            textAlign: TextAlign.center,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.titleSmall
-                                ?.copyWith(
-                                  color: KidPalette.navy,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            '아직 넣지 않았어요',
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(color: KidPalette.body),
-                          ),
-                        ],
-                      )
-                    : Row(
-                        children: [
-                          Expanded(
-                            child: SizedBox(
-                              height: 88,
-                              child: Image.asset(
-                                'assets/generated/images/hero/hero_face.png',
-                                fit: BoxFit.contain,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  expression.shortPrompt,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: Theme.of(context).textTheme.titleSmall
-                                      ?.copyWith(
-                                        color: KidPalette.navy,
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  '아직 넣지 않았어요',
-                                  style: Theme.of(context).textTheme.bodyMedium
-                                      ?.copyWith(color: KidPalette.body),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
+  final AppProgressSnapshot progress;
+  final AvatarPhotoSnapshot avatarPhotos;
 }
 
 class _LessonMetadata {

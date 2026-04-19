@@ -7,6 +7,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kids_play_app/app/services/app_services.dart';
 import 'package:kids_play_app/app/services/progress_store.dart';
 import 'package:kids_play_app/app/services/speech_cue_service.dart';
+import 'package:kids_play_app/app/ui/toy_button.dart';
+import 'package:kids_play_app/features/avatar/application/avatar_photo_picker.dart';
+import 'package:kids_play_app/features/avatar/application/avatar_photo_service.dart';
+import 'package:kids_play_app/features/avatar/data/avatar_photo_repository.dart';
+import 'package:kids_play_app/features/avatar/data/avatar_photo_store.dart';
+import 'package:kids_play_app/features/avatar/domain/avatar_expression.dart';
+import 'package:kids_play_app/features/avatar/domain/avatar_photo_entry.dart';
+import 'package:kids_play_app/features/avatar/domain/avatar_photo_snapshot.dart';
+import 'package:kids_play_app/features/avatar/presentation/avatar_crop_screen.dart';
 import 'package:kids_play_app/features/avatar/presentation/avatar_setup_screen.dart';
 import 'package:kids_play_app/features/hangul/data/hangul_lesson_repository.dart';
 import 'package:kids_play_app/features/hangul/presentation/hangul_learn_screen.dart';
@@ -31,6 +40,120 @@ void main() {
     expect(find.textContaining('5개 표정'), findsOneWidget);
     expect(find.text('아직 넣지 않았어요'), findsNWidgets(5));
   });
+
+  testWidgets(
+    "shows saved-photo copy instead of '아직 넣지 않았어요' when a slot exists",
+    (WidgetTester tester) async {
+      final repository = _TestAvatarPhotoRepository();
+      final relativePath = await repository.saveExpressionPhoto(
+        expression: AvatarExpression.smile,
+        bytes: _heroFacePngBytes,
+      );
+      final avatarPhotoService = AvatarPhotoService(
+        photoStore: _TestAvatarPhotoStore(
+          AvatarPhotoSnapshot(
+            entries: {
+              AvatarExpression.smile: AvatarPhotoEntry(
+                expression: AvatarExpression.smile,
+                relativePath: relativePath,
+                updatedAt: DateTime.utc(2026, 4, 19, 9),
+              ),
+            },
+          ),
+        ),
+        repository: repository,
+      );
+
+      await tester.pumpWidget(
+        _wrapWithServices(
+          progressStore: MemoryProgressStore(),
+          avatarPhotoService: avatarPhotoService,
+          child: const AvatarSetupScreen(),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(find.text('사진이 준비됐어요'), findsOneWidget);
+      expect(find.text('아직 넣지 않았어요'), findsNWidgets(4));
+      expect(find.text('다시 자르기'), findsOneWidget);
+      expect(find.text('지우기'), findsOneWidget);
+      expect(find.text('사진 넣기'), findsNWidgets(4));
+    },
+  );
+
+  testWidgets(
+    'imports and clears an expression photo from the parent dashboard',
+    (WidgetTester tester) async {
+      final navigatorKey = GlobalKey<NavigatorState>();
+      final sourceBytes = Uint8List.fromList(_heroFacePngBytes);
+      final croppedBytes = Uint8List.fromList(_heroFacePngBytes);
+      final repository = _TestAvatarPhotoRepository();
+      final photoStore = _TestAvatarPhotoStore();
+      final picker = _FakeAvatarPhotoPicker(sourceBytes);
+      final avatarPhotoService = AvatarPhotoService(
+        photoStore: photoStore,
+        repository: repository,
+      );
+
+      await tester.pumpWidget(
+        _wrapWithServices(
+          progressStore: MemoryProgressStore(),
+          avatarPhotoService: avatarPhotoService,
+          avatarPhotoPicker: picker,
+          navigatorKey: navigatorKey,
+          child: const AvatarSetupScreen(),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(find.byKey(const Key('avatar-card-smile')), findsOneWidget);
+
+      final importButton = find.byKey(const Key('avatar-import-smile'));
+      expect(importButton, findsOneWidget);
+
+      await tester.tap(importButton);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(picker.pickCount, 1);
+      expect(find.byType(AvatarCropScreen), findsOneWidget);
+      final cropScreen = tester.widget<AvatarCropScreen>(
+        find.byType(AvatarCropScreen),
+      );
+      expect(cropScreen.expression, AvatarExpression.smile);
+      expect(cropScreen.sourceBytes, orderedEquals(sourceBytes));
+
+      navigatorKey.currentState!.pop<Uint8List>(croppedBytes);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(photoStore.snapshot.entryFor(AvatarExpression.smile), isNotNull);
+      expect(
+        repository.savedBytesByExpression[AvatarExpression.smile],
+        orderedEquals(croppedBytes),
+      );
+      expect(find.text('사진이 준비됐어요'), findsOneWidget);
+      expect(find.byKey(const Key('avatar-clear-smile')), findsOneWidget);
+      expect(find.text('다시 자르기'), findsOneWidget);
+
+      final clearButton = find.byKey(const Key('avatar-clear-smile'));
+      await tester.ensureVisible(clearButton);
+      await tester.pump();
+      final clearAction = tester.widget<ToyButton>(clearButton);
+      clearAction.onPressed!.call();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(photoStore.snapshot.entryFor(AvatarExpression.smile), isNull);
+      expect(repository.deletedPaths, contains('avatar_photos/smile.png'));
+      expect(find.byKey(const Key('avatar-clear-smile')), findsNothing);
+      expect(find.text('지우기'), findsNothing);
+      expect(find.text('아직 넣지 않았어요'), findsNWidgets(5));
+      expect(find.text('사진 넣기'), findsNWidgets(5));
+    },
+  );
 
   testWidgets(
     'shows the recent reward callout with reward amount and lesson metadata',
@@ -782,13 +905,20 @@ Widget _wrapWithAvatarAssets({required Widget child}) {
 Widget _wrapWithServices({
   required ProgressStore progressStore,
   required Widget child,
+  AvatarPhotoService? avatarPhotoService,
+  AvatarPhotoPicker? avatarPhotoPicker,
+  GlobalKey<NavigatorState>? navigatorKey,
 }) {
   return AppServicesScope(
     services: AppServices(
       progressStore: progressStore,
       speechCueService: NoopSpeechCueService(),
+      avatarPhotoService: avatarPhotoService,
+      avatarPhotoPicker: avatarPhotoPicker,
     ),
-    child: _wrapWithAvatarAssets(child: MaterialApp(home: child)),
+    child: _wrapWithAvatarAssets(
+      child: MaterialApp(navigatorKey: navigatorKey, home: child),
+    ),
   );
 }
 
@@ -886,6 +1016,64 @@ class _FakeAssetBundle extends CachingAssetBundle {
     final string = await loadString(key);
     final bytes = Uint8List.fromList(utf8.encode(string));
     return ByteData.view(bytes.buffer);
+  }
+}
+
+class _TestAvatarPhotoStore implements AvatarPhotoStore {
+  _TestAvatarPhotoStore([AvatarPhotoSnapshot? snapshot])
+    : snapshot = snapshot ?? const AvatarPhotoSnapshot();
+
+  AvatarPhotoSnapshot snapshot;
+
+  @override
+  Future<AvatarPhotoSnapshot> loadSnapshot() async => snapshot;
+
+  @override
+  Future<void> saveSnapshot(AvatarPhotoSnapshot snapshot) async {
+    this.snapshot = snapshot;
+  }
+}
+
+class _TestAvatarPhotoRepository implements AvatarPhotoRepository {
+  _TestAvatarPhotoRepository();
+
+  final Map<AvatarExpression, Uint8List> savedBytesByExpression = {};
+  final List<String> deletedPaths = [];
+
+  @override
+  Future<void> deletePhoto(String relativePath) async {
+    deletedPaths.add(relativePath);
+    savedBytesByExpression.removeWhere(
+      (expression, _) => avatarPhotoRelativePathFor(expression) == relativePath,
+    );
+  }
+
+  @override
+  Future<File?> resolveFile(String relativePath) async {
+    return null;
+  }
+
+  @override
+  Future<String> saveExpressionPhoto({
+    required AvatarExpression expression,
+    required Uint8List bytes,
+  }) async {
+    final relativePath = avatarPhotoRelativePathFor(expression);
+    savedBytesByExpression[expression] = Uint8List.fromList(bytes);
+    return relativePath;
+  }
+}
+
+class _FakeAvatarPhotoPicker implements AvatarPhotoPicker {
+  _FakeAvatarPhotoPicker(this.result);
+
+  final Uint8List? result;
+  int pickCount = 0;
+
+  @override
+  Future<Uint8List?> pickFromGallery() async {
+    pickCount += 1;
+    return result == null ? null : Uint8List.fromList(result!);
   }
 }
 
