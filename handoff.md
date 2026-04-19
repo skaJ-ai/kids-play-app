@@ -47,10 +47,10 @@
 ## 현재 큐 기준 상태
 
 ### queue 기준 상태
-- A-F 범위(숫자 feature/라우팅, home/category 연결, design-system theme/button/panel 정리, hero/home/category 리디자인, 보호자 summary/settings/retry/unlock 흐름, README/handoff/plan 문서 정합성 cleanup)는 live repo 기준으로 완료 상태이며, 최신 앱 코드 스냅샷은 `d81a2ec`다
-- full Gate G provenance는 두 docs-only 기록으로 관리한다: historical docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`, 그리고 docs-only checkout `f1e23c3` fresh local rerun
-- `f1e23c3` fresh rerun이 커버한 앱 코드는 `0c15caf`와 동일했고, 후속 app-code snapshot `d81a2ec` 기준 full Gate G 재실행은 아직 없다
-- historical Gate G / fresh local rerun / later `d81a2ec` targeted verification 세부 결과는 아래 `선별 검증 + Gate G provenance 메모` 섹션에 정리돼 있다
+- A-G 범위(숫자 feature/라우팅, home/category 연결, design-system theme/button/panel 정리, hero/home/category 리디자인, 보호자 summary/settings/retry/unlock 흐름, README/handoff/plan 문서 정합성 cleanup, final Gate G rerun)는 live repo 기준으로 완료 상태이며, 최신 앱 코드 스냅샷은 `d81a2ec`다
+- 최신 full Gate G provenance는 docs-only HEAD `9d4c035` 로컬 full rerun이다. 이 HEAD의 변경은 `README.md`, `handoff.md`, `docs/plans/2026-04-16_full-mvp-delivery-plan.md`뿐이어서 검증된 앱 코드는 latest code-changing commit `d81a2ec`와 동일하다
+- historical provenance는 docs-only checkout `f1e23c3` 로컬 full rerun(`0c15caf` 코드 일치)과 historical docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`까지 함께 유지한다
+- 최신 rerun / historical rerun / artifact-backed reference 세부 결과는 아래 `선별 검증 + Gate G provenance 메모` 섹션에 정리돼 있다
 
 ### 1. 문서/CI 정합성
 - docs/script 변경도 APK workflow에 포함되도록 정리됨
@@ -88,6 +88,11 @@
 ## 선별 검증 + Gate G provenance 메모
 
 최근 문서화된 선별 재확인 기록과 full Gate G provenance 메모
+- 최신 Gate G 로컬 full rerun (`9d4c035` docs-only HEAD, 검증된 앱 코드는 `d81a2ec`와 동일)
+  - `./scripts/prepare_assets.sh` + `/home/openc/sdk/flutter/bin/flutter pub get` 성공
+  - full `/home/openc/sdk/flutter/bin/flutter test` => `00:34 +253: All tests passed!`
+  - full `/home/openc/sdk/flutter/bin/flutter analyze` => `No issues found! (ran in 2.1s)`
+  - `/home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64` => `build/app/outputs/flutter-apk/app-release.apk` (16.8MB / `16774218` bytes)
 - numbers + routing
   - `/home/openc/sdk/flutter/bin/flutter test test/features/numbers/data/numbers_lesson_repository_test.dart test/features/numbers/presentation/numbers_learn_screen_test.dart test/features/numbers/presentation/numbers_quiz_screen_test.dart test/features/home/presentation/category_lesson_picker_flow_test.dart`
   - 결과: passed
@@ -211,7 +216,7 @@ artifact
 ## 다음 작업자가 바로 이어갈 포인트
 
 우선순위 추천
-1. fresh Gate G rerun은 `f1e23c3` checkout에서 확보됐지만 그때 검증된 앱 코드는 `0c15caf`와 동일했다. 후속 app-code snapshot `d81a2ec`는 generic learn audio-service 변경 targeted verification만 있으니, 그 코드 기준 release-handoff가 필요하면 full Gate G를 다시 돌리는 편이 안전하다. 그 전까지는 아래 남은 확장 후보를 작은 slice로 이어가면 된다.
+1. 최신 full Gate G rerun은 docs-only HEAD `9d4c035`에서 확보됐고, 해당 rerun이 검증한 앱 코드는 latest code-changing commit `d81a2ec`와 동일하다. 따라서 다음 작업은 아래 남은 확장 후보를 작은 slice로 바로 이어가면 된다.
 
 남은 확장 후보
 - 실제 표정 사진 업로드/크롭

@@ -14,19 +14,17 @@
 
 ## 현재 상태
 
-- 우선순위 큐 A-F 범위는 live repo 기준으로 완료 상태이며, 최신 code-changing commit은 `d81a2ec`(`feat(lesson): route generic learn prompts through audio service`)입니다.
+- 우선순위 큐 A-G 범위는 live repo 기준으로 완료 상태이며, 최신 code-changing commit은 `d81a2ec`(`feat(lesson): route generic learn prompts through audio service`)입니다.
 - `0c15caf`까지 반영된 replay-reward 보호자 요약 흐름 위에, `d81a2ec`는 `generic_learn_screen.dart`의 일반 학습 prompt를 audio service로 연결했습니다.
-- full Gate G provenance는 두 건으로 유지합니다.
-  - fresh local rerun: docs-only checkout `f1e23c3`에서 실행했고, 당시 checkout의 앱 코드는 `0c15caf`와 동일했습니다.
-  - historical artifact-backed record: docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`, GitHub Actions run `24617840783`, artifact `kids-play-app-arm64-v8a-release`.
-- 후속 app-code snapshot `d81a2ec`는 아직 full Gate G로 다시 돌리지 않았고, 아래 targeted verification만 재확인됐습니다.
-  - `/home/openc/sdk/flutter/bin/flutter test test/features/lesson/presentation/generic_learn_screen_test.dart` => `00:01 +6: All tests passed!`
-  - `/home/openc/sdk/flutter/bin/flutter analyze lib/features/lesson/presentation/generic_learn_screen.dart test/features/lesson/presentation/generic_learn_screen_test.dart` => `No issues found! (ran in 1.1s)`
-- fresh local rerun 결과 (`f1e23c3` checkout, 당시 앱 코드는 `0c15caf`와 동일):
+- 최신 full Gate G provenance는 docs-only HEAD `9d4c035` 로컬 full rerun으로 갱신됐습니다. 이 HEAD의 변경 파일은 `README.md`, `handoff.md`, `docs/plans/2026-04-16_full-mvp-delivery-plan.md`뿐이어서 검증된 앱 코드는 latest code-changing commit `d81a2ec`와 동일합니다.
+- 최신 로컬 full rerun 결과 (`9d4c035` docs-only HEAD, 검증된 앱 코드는 `d81a2ec`와 동일):
   - `./scripts/prepare_assets.sh` + `/home/openc/sdk/flutter/bin/flutter pub get` 성공
-  - full `/home/openc/sdk/flutter/bin/flutter test` => `00:33 +249: All tests passed!`
-  - full `/home/openc/sdk/flutter/bin/flutter analyze` => `No issues found! (ran in 3.1s)`
+  - full `/home/openc/sdk/flutter/bin/flutter test` => `00:34 +253: All tests passed!`
+  - full `/home/openc/sdk/flutter/bin/flutter analyze` => `No issues found! (ran in 2.1s)`
   - `/home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64` => `build/app/outputs/flutter-apk/app-release.apk` (16.8MB / `16774218` bytes)
+- 추가 provenance 참고
+  - docs-only checkout `f1e23c3` fresh local rerun: 당시 checkout의 앱 코드는 `0c15caf`와 동일했습니다.
+  - historical artifact-backed record: docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`, GitHub Actions run `24617840783`, artifact `kids-play-app-arm64-v8a-release`.
 
 ## 현재 구현 범위
 
@@ -75,12 +73,14 @@ cd "$REPO_ROOT"
 
 ### 테스트 / 최종 검증
 현재 기준
-- A-F 범위는 live repo 기준으로 완료 상태이며, 최신 code-changing commit은 `d81a2ec`입니다.
-- 후속 app-code snapshot `d81a2ec`는 아래 targeted verification만 재확인됐습니다.
-  - `/home/openc/sdk/flutter/bin/flutter test test/features/lesson/presentation/generic_learn_screen_test.dart` => `00:01 +6: All tests passed!`
-  - `/home/openc/sdk/flutter/bin/flutter analyze lib/features/lesson/presentation/generic_learn_screen.dart test/features/lesson/presentation/generic_learn_screen_test.dart` => `No issues found! (ran in 1.1s)`
-- fresh local Gate G rerun은 docs-only checkout `f1e23c3`에서 실행됐고, 당시 앱 코드는 `0c15caf`와 동일했습니다.
-- fresh local rerun 결과 (`f1e23c3` checkout, 후속 app-code snapshot `d81a2ec` 미포함):
+- A-G 범위는 live repo 기준으로 완료 상태이며, 최신 code-changing commit은 `d81a2ec`입니다.
+- 최신 full Gate G rerun은 docs-only HEAD `9d4c035`에서 실행됐고, 이 HEAD의 변경은 `README.md`, `handoff.md`, `docs/plans/2026-04-16_full-mvp-delivery-plan.md`뿐이라 검증된 앱 코드는 `d81a2ec`와 동일합니다.
+- 최신 로컬 full rerun 결과 (`9d4c035` docs-only HEAD, 검증된 앱 코드는 `d81a2ec`와 동일):
+  - `./scripts/prepare_assets.sh` + `/home/openc/sdk/flutter/bin/flutter pub get` 성공
+  - full `/home/openc/sdk/flutter/bin/flutter test` => `00:34 +253: All tests passed!`
+  - full `/home/openc/sdk/flutter/bin/flutter analyze` => `No issues found! (ran in 2.1s)`
+  - `/home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64` => `build/app/outputs/flutter-apk/app-release.apk` (16.8MB / `16774218` bytes)
+- 이전 로컬 full rerun 기록 (`f1e23c3`, 검증된 앱 코드는 `0c15caf`와 동일):
   - `./scripts/prepare_assets.sh` + `/home/openc/sdk/flutter/bin/flutter pub get` 성공
   - full `/home/openc/sdk/flutter/bin/flutter test` => `00:33 +249: All tests passed!`
   - full `/home/openc/sdk/flutter/bin/flutter analyze` => `No issues found! (ran in 3.1s)`
@@ -106,7 +106,7 @@ cd "$REPO_ROOT"
 "$FLUTTER_BIN" build apk --release --target-platform android-arm64
 ```
 
-- 아래 명령 블록은 `docs/local-dev-setup.md` 및 `.github/workflows/build-apk.yml` 과 같은 순서의 재현용 체크리스트입니다. full rerun provenance는 docs-only checkout `f1e23c3`(당시 앱 코드는 `0c15caf`와 동일)와 historical docs-only HEAD `1523559` / code snapshot `5696c1f`로 읽어야 합니다. 후속 app-code snapshot `d81a2ec`는 generic learn audio-service 변경에 대한 targeted test/analyze만 다시 확인됐습니다.
+- 아래 명령 블록은 `docs/local-dev-setup.md` 및 `.github/workflows/build-apk.yml` 과 같은 순서의 재현용 체크리스트입니다. 최신 기준 full rerun provenance는 docs-only HEAD `9d4c035`(검증된 앱 코드는 `d81a2ec`와 동일)이고, 그 이전 로컬 rerun은 docs-only checkout `f1e23c3`(검증된 앱 코드는 `0c15caf`와 동일)입니다. historical artifact-backed 기준은 docs-only HEAD `1523559` / code snapshot `5696c1f`입니다.
 
 ## APK 확인 방법
 
