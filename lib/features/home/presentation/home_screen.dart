@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/ui/kid_theme.dart';
+import '../../../app/ui/mascot_view.dart';
 import '../../../app/ui/playground_scaffold.dart';
 import '../../../app/ui/tap_cooldown.dart';
 import '../../../app/ui/toy_button.dart';
@@ -73,6 +74,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     iconColor: KidPalette.blue,
                     compact: compact,
                   ),
+                  if (!compact) ...[
+                    const SizedBox(width: 12),
+                    const MascotView(
+                      key: Key('home-hero-mascot'),
+                      state: MascotState.idle,
+                      size: 48,
+                    ),
+                  ],
                   const Spacer(),
                   _CollectionPill(
                     compact: compact,

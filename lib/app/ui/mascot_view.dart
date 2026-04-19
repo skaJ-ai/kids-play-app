@@ -83,7 +83,11 @@ class _MascotViewState extends State<MascotView>
             ),
           );
         },
-        child: Image.asset(_assetFor(widget.state), fit: BoxFit.contain),
+        child: Image.asset(
+          _assetFor(widget.state),
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stack) => const SizedBox.shrink(),
+        ),
       ),
     );
   }
