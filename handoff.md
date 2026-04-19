@@ -9,7 +9,7 @@
 - 텍스트 최소화, 소리/즉시 피드백 중심
 - 한글 / 알파벳 / 숫자 3개 카테고리
 - 보호자 메뉴는 숨김 진입
-- GitHub Actions에서 매 라운드 APK artifact 유지
+- GitHub Actions `build-apk.yml`은 `workflow_dispatch` 또는 main 브랜치의 `push.paths` 범위 변경에서 APK artifact를 생성
 
 ---
 
@@ -178,7 +178,7 @@ artifact
 - `kids-play-app-arm64-v8a-release`
 
 원칙
-- 구현 라운드마다 가능한 한 Actions에서 APK artifact가 계속 생성되어야 한다.
+- `build-apk.yml`의 `push.paths` 범위 변경은 main에 push되면, 또는 `workflow_dispatch`로 실행하면 Actions APK artifact로 계속 확인 가능해야 한다.
 - 사용자는 다음날 커밋/푸시 순서대로 작업물을 확인한다.
 
 ---

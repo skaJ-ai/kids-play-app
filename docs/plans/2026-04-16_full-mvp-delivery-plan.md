@@ -1,6 +1,6 @@
 # Full MVP Delivery Plan
 
-> For Hermes: execute this plan incrementally with small, committable slices, keep GitHub Actions generating an APK artifact after each meaningful slice, use the smallest relevant verification for each run, and reserve the full `./scripts/prepare_assets.sh` + `/home/openc/sdk/flutter/bin/flutter pub get` + `flutter test` / `flutter analyze` / release build gate for final integration gate G.
+> For Hermes: execute this plan incrementally with small, committable slices, keep GitHub Actions generating an APK artifact for slices that land in the workflow `push.paths` scope on `main` or when `build-apk.yml` is run via `workflow_dispatch`, use the smallest relevant verification for each run, and reserve the full `./scripts/prepare_assets.sh` + `/home/openc/sdk/flutter/bin/flutter pub get` + `flutter test` / `flutter analyze` / release build gate for final integration gate G.
 
 ## Status update
 
@@ -34,7 +34,7 @@
 - child 화면은 탭만 사용
 - 텍스트보다 큰 시각 요소와 소리 중심
 - 첫 탭은 즉시 반응, 연타는 방어
-- 가능한 모든 변경은 GitHub Actions APK artifact까지 이어지게 유지
+- `build-apk.yml`의 `push.paths` 범위 변경은 main에 push되면, 또는 `workflow_dispatch`로 실행하면 GitHub Actions APK artifact까지 이어지게 유지
 - 작은 커밋으로 자주 push
 - 각 run은 review/push 가능한 작은 slice 하나를 목표로 하고, slice마다 바뀐 범위에 맞는 smallest relevant verification만 수행
 - full `./scripts/prepare_assets.sh` + `/home/openc/sdk/flutter/bin/flutter pub get` + full `/home/openc/sdk/flutter/bin/flutter test` / `/home/openc/sdk/flutter/bin/flutter analyze` / release APK build는 final integration gate G에서만 요구

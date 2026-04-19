@@ -10,7 +10,7 @@
 - 한글 / 알파벳 / 숫자 3개 카테고리
 - child 화면은 텍스트 최소화, 소리/즉시 피드백 중심
 - 보호자 메뉴는 숨김 진입(히어로 얼굴 5회 탭)
-- GitHub Actions에서 매 변경마다 설치 가능한 APK artifact를 계속 생성
+- GitHub Actions `build-apk.yml`은 `workflow_dispatch` 또는 main 브랜치의 `push.paths` 범위 변경에서 설치 가능한 APK artifact를 생성
 
 ## 현재 상태
 
