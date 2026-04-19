@@ -137,6 +137,7 @@ class AppProgressSnapshot {
     this.lastEarnedReward,
     this.voicePromptsEnabled = true,
     this.effectsEnabled = true,
+    this.bgmEnabled = true,
     this.unlockedLessonIds = const [],
     this.lessons = const {},
   });
@@ -157,6 +158,7 @@ class AppProgressSnapshot {
       lastEarnedReward: _recentRewardFromJson(rewardJson),
       voicePromptsEnabled: json['voicePromptsEnabled'] as bool? ?? true,
       effectsEnabled: json['effectsEnabled'] as bool? ?? true,
+      bgmEnabled: json['bgmEnabled'] as bool? ?? true,
       unlockedLessonIds:
           (json['unlockedLessonIds'] as List<dynamic>? ?? const [])
               .map((item) => item.toString())
@@ -176,6 +178,7 @@ class AppProgressSnapshot {
   final RecentReward? lastEarnedReward;
   final bool voicePromptsEnabled;
   final bool effectsEnabled;
+  final bool bgmEnabled;
   final List<String> unlockedLessonIds;
   final Map<String, LessonProgress> lessons;
 
@@ -190,6 +193,7 @@ class AppProgressSnapshot {
     Object? lastEarnedReward = _noRecentRewardChange,
     bool? voicePromptsEnabled,
     bool? effectsEnabled,
+    bool? bgmEnabled,
     List<String>? unlockedLessonIds,
     Map<String, LessonProgress>? lessons,
   }) {
@@ -205,6 +209,7 @@ class AppProgressSnapshot {
           : lastEarnedReward as RecentReward?,
       voicePromptsEnabled: voicePromptsEnabled ?? this.voicePromptsEnabled,
       effectsEnabled: effectsEnabled ?? this.effectsEnabled,
+      bgmEnabled: bgmEnabled ?? this.bgmEnabled,
       unlockedLessonIds: unlockedLessonIds ?? this.unlockedLessonIds,
       lessons: lessons ?? this.lessons,
     );
@@ -219,6 +224,7 @@ class AppProgressSnapshot {
       'lastEarnedReward': lastEarnedReward?.toJson(),
       'voicePromptsEnabled': voicePromptsEnabled,
       'effectsEnabled': effectsEnabled,
+      'bgmEnabled': bgmEnabled,
       'unlockedLessonIds': unlockedLessonIds,
       'lessons': lessons.map((key, value) => MapEntry(key, value.toJson())),
     };
@@ -253,6 +259,8 @@ abstract class ProgressStore {
   Future<void> setVoicePromptsEnabled(bool enabled);
 
   Future<void> setEffectsEnabled(bool enabled);
+
+  Future<void> setBgmEnabled(bool enabled);
 
   Future<void> setLessonUnlocked(String lessonId, bool unlocked);
 
@@ -351,6 +359,11 @@ class MemoryProgressStore implements ProgressStore {
   @override
   Future<void> setEffectsEnabled(bool enabled) async {
     _snapshot = _snapshot.copyWith(effectsEnabled: enabled);
+  }
+
+  @override
+  Future<void> setBgmEnabled(bool enabled) async {
+    _snapshot = _snapshot.copyWith(bgmEnabled: enabled);
   }
 
   @override
@@ -484,6 +497,13 @@ class SharedPreferencesProgressStore implements ProgressStore {
   Future<void> setEffectsEnabled(bool enabled) async {
     await _mutate((snapshot) {
       return snapshot.copyWith(effectsEnabled: enabled);
+    });
+  }
+
+  @override
+  Future<void> setBgmEnabled(bool enabled) async {
+    await _mutate((snapshot) {
+      return snapshot.copyWith(bgmEnabled: enabled);
     });
   }
 

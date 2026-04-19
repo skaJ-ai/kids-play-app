@@ -180,6 +180,56 @@ void main() {
     },
   );
 
+  test(
+    'memory progress store setBgmEnabled persists the flag and reset restores true',
+    () async {
+      final store = MemoryProgressStore();
+
+      await store.setBgmEnabled(false);
+      expect((await store.loadSnapshot()).bgmEnabled, isFalse);
+
+      await store.reset();
+      expect((await store.loadSnapshot()).bgmEnabled, isTrue);
+    },
+  );
+
+  test(
+    'shared preferences progress store persists bgm across reload and reset restores true',
+    () async {
+      final preferences = await SharedPreferences.getInstance();
+      final store = SharedPreferencesProgressStore(preferences);
+
+      await store.setBgmEnabled(false);
+
+      expect((await store.loadSnapshot()).bgmEnabled, isFalse);
+
+      final reloadedStore = SharedPreferencesProgressStore(preferences);
+      expect((await reloadedStore.loadSnapshot()).bgmEnabled, isFalse);
+
+      await reloadedStore.reset();
+      expect((await reloadedStore.loadSnapshot()).bgmEnabled, isTrue);
+    },
+  );
+
+  test(
+    'snapshot json and copyWith preserve bgm and default missing payloads to true',
+    () {
+      final missingSnapshot = AppProgressSnapshot.fromJson({
+        'voicePromptsEnabled': false,
+        'effectsEnabled': false,
+      });
+
+      expect(missingSnapshot.bgmEnabled, isTrue);
+
+      final updatedSnapshot = missingSnapshot.copyWith(bgmEnabled: false);
+      final json = updatedSnapshot.toJson();
+
+      expect(updatedSnapshot.bgmEnabled, isFalse);
+      expect(json['bgmEnabled'], isFalse);
+      expect(AppProgressSnapshot.fromJson(json).bgmEnabled, isFalse);
+    },
+  );
+
   test('shared preferences progress store persists and resets state', () async {
     final preferences = await SharedPreferences.getInstance();
     final store = SharedPreferencesProgressStore(preferences);
