@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:kids_play_app/features/avatar/application/avatar_photo_picker.dart';
 import 'package:kids_play_app/features/avatar/application/avatar_photo_service.dart';
 import 'package:kids_play_app/features/avatar/data/avatar_photo_repository.dart';
 import 'package:kids_play_app/features/avatar/data/avatar_photo_store.dart';
@@ -16,6 +17,7 @@ class AppServices {
     AvatarPhotoStore? avatarPhotoStore,
     AvatarPhotoRepository? avatarPhotoRepository,
     AvatarPhotoService? avatarPhotoService,
+    AvatarPhotoPicker? avatarPhotoPicker,
   }) {
     final resolvedAvatarPhotoStore =
         avatarPhotoStore ?? _MemoryAvatarPhotoStore();
@@ -34,6 +36,7 @@ class AppServices {
             photoStore: resolvedAvatarPhotoStore,
             repository: resolvedAvatarPhotoRepository,
           ),
+      avatarPhotoPicker: avatarPhotoPicker ?? const NoopAvatarPhotoPicker(),
     );
   }
 
@@ -44,6 +47,7 @@ class AppServices {
     required this.avatarPhotoStore,
     required this.avatarPhotoRepository,
     required this.avatarPhotoService,
+    required this.avatarPhotoPicker,
   });
 
   factory AppServices.fallback() {
@@ -59,6 +63,7 @@ class AppServices {
   final AvatarPhotoStore avatarPhotoStore;
   final AvatarPhotoRepository avatarPhotoRepository;
   final AvatarPhotoService avatarPhotoService;
+  final AvatarPhotoPicker avatarPhotoPicker;
 }
 
 class AppServicesScope extends InheritedWidget {

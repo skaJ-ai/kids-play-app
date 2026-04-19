@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -9,6 +10,7 @@ import 'app/audio/tts_fallback_audio_service.dart';
 import 'app/services/app_services.dart';
 import 'app/services/progress_store.dart';
 import 'app/services/speech_cue_service.dart';
+import 'features/avatar/application/avatar_photo_picker.dart';
 import 'features/avatar/application/avatar_photo_service.dart';
 import 'features/avatar/data/avatar_photo_store.dart';
 import 'features/avatar/data/local_avatar_photo_repository.dart';
@@ -33,6 +35,7 @@ Future<void> main() async {
     photoStore: avatarPhotoStore,
     repository: avatarPhotoRepository,
   );
+  final avatarPhotoPicker = ImagePickerAvatarPhotoPicker(ImagePicker());
   final services = AppServices(
     progressStore: SharedPreferencesProgressStore(preferences),
     speechCueService: speech,
@@ -40,6 +43,7 @@ Future<void> main() async {
     avatarPhotoStore: avatarPhotoStore,
     avatarPhotoRepository: avatarPhotoRepository,
     avatarPhotoService: avatarPhotoService,
+    avatarPhotoPicker: avatarPhotoPicker,
   );
 
   runApp(KidsPlayApp(services: services));
