@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/services/app_services.dart';
+import '../../../app/services/progress_store.dart';
 import '../../../app/ui/kid_theme.dart';
 import '../../../app/ui/playground_scaffold.dart';
 import '../../../app/ui/tap_cooldown.dart';
@@ -8,7 +10,7 @@ import '../data/home_catalog_repository.dart';
 import 'home_category_config.dart';
 import 'home_pills.dart';
 
-class CategoryHubScreen extends StatelessWidget {
+class CategoryHubScreen extends StatefulWidget {
   const CategoryHubScreen({
     super.key,
     required this.category,
@@ -18,11 +20,34 @@ class CategoryHubScreen extends StatelessWidget {
   final HomeCategory category;
   final HomeCategoryDependencies categoryDependencies;
 
-  HomeCategoryConfig get _config => HomeCategoryConfig.resolve(category);
+  @override
+  State<CategoryHubScreen> createState() => _CategoryHubScreenState();
+}
+
+class _CategoryHubScreenState extends State<CategoryHubScreen> {
+  Future<AppProgressSnapshot>? _rewardSnapshotFuture;
+
+  HomeCategoryConfig get _config => HomeCategoryConfig.resolve(widget.category);
 
   bool get _supportsLearnMode => _config.supportsLearnMode;
 
   bool get _supportsGameMode => _config.supportsGameMode;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _rewardSnapshotFuture ??= _loadRewardSnapshot();
+  }
+
+  Future<AppProgressSnapshot> _loadRewardSnapshot() {
+    return AppServicesScope.of(context).progressStore.loadSnapshot();
+  }
+
+  void _refreshRewardSnapshot() {
+    setState(() {
+      _rewardSnapshotFuture = _loadRewardSnapshot();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,8 +66,8 @@ class CategoryHubScreen extends StatelessWidget {
               Row(
                 children: [
                   HomeHeaderPill(
-                    icon: category.icon,
-                    label: '${category.label} 차고',
+                    icon: widget.category.icon,
+                    label: '${widget.category.label} 차고',
                     iconColor: accentColor,
                     compact: compact,
                   ),
@@ -68,11 +93,34 @@ class CategoryHubScreen extends StatelessWidget {
               Text(
                 _config.hubDescription,
                 textAlign: TextAlign.center,
-                maxLines: compact ? 2 : 2,
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: compact
                     ? theme.textTheme.titleSmall
                     : theme.textTheme.titleMedium,
+              ),
+              FutureBuilder<AppProgressSnapshot>(
+                future: _rewardSnapshotFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return const SizedBox.shrink();
+                  }
+                  final recentReward = _recentRewardForCategory(
+                    snapshot.data,
+                    widget.category.id,
+                  );
+                  if (recentReward == null) {
+                    return const SizedBox.shrink();
+                  }
+                  return Padding(
+                    padding: EdgeInsets.only(top: compact ? 10 : 14),
+                    child: _CategoryRewardStrip(
+                      compact: compact,
+                      accentColor: accentColor,
+                      reward: recentReward,
+                    ),
+                  );
+                },
               ),
               SizedBox(height: compact ? 14 : 22),
               Expanded(
@@ -91,9 +139,7 @@ class CategoryHubScreen extends StatelessWidget {
                         accentColor: KidPalette.yellowDark,
                         icon: Icons.menu_book_rounded,
                         compact: compact,
-                        onTap: _supportsLearnMode
-                            ? () => _openLearnMode(context)
-                            : null,
+                        onTap: _supportsLearnMode ? _openLearnMode : null,
                       ),
                     ),
                     SizedBox(width: compact ? 12 : 18),
@@ -110,9 +156,7 @@ class CategoryHubScreen extends StatelessWidget {
                         accentColor: KidPalette.blue,
                         icon: Icons.videogame_asset_rounded,
                         compact: compact,
-                        onTap: _supportsGameMode
-                            ? () => _openGameMode(context)
-                            : null,
+                        onTap: _supportsGameMode ? _openGameMode : null,
                       ),
                     ),
                   ],
@@ -125,28 +169,91 @@ class CategoryHubScreen extends StatelessWidget {
     );
   }
 
-  void _openLearnMode(BuildContext context) {
+  Future<void> _openLearnMode() async {
     final destinationBuilder = _config.learnScreenBuilder;
     if (destinationBuilder == null) {
       return;
     }
-    final destination = destinationBuilder(categoryDependencies);
+    final destination = destinationBuilder(widget.categoryDependencies);
 
-    Navigator.of(
+    await Navigator.of(
       context,
     ).push(MaterialPageRoute<void>(builder: (_) => destination));
+    if (!mounted) {
+      return;
+    }
+    _refreshRewardSnapshot();
   }
 
-  void _openGameMode(BuildContext context) {
+  Future<void> _openGameMode() async {
     final destinationBuilder = _config.gameScreenBuilder;
     if (destinationBuilder == null) {
       return;
     }
-    final destination = destinationBuilder(categoryDependencies);
+    final destination = destinationBuilder(widget.categoryDependencies);
 
-    Navigator.of(
+    await Navigator.of(
       context,
     ).push(MaterialPageRoute<void>(builder: (_) => destination));
+    if (!mounted) {
+      return;
+    }
+    _refreshRewardSnapshot();
+  }
+}
+
+RecentReward? _recentRewardForCategory(
+  AppProgressSnapshot? snapshot,
+  String categoryId,
+) {
+  final reward = snapshot?.lastEarnedReward;
+  if (reward == null || !reward.lessonId.startsWith('$categoryId:')) {
+    return null;
+  }
+  return reward;
+}
+
+class _CategoryRewardStrip extends StatelessWidget {
+  const _CategoryRewardStrip({
+    required this.compact,
+    required this.accentColor,
+    required this.reward,
+  });
+
+  final bool compact;
+  final Color accentColor;
+  final RecentReward reward;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: compact ? 8 : 10,
+      runSpacing: compact ? 8 : 10,
+      children: [
+        HomeAccentPill(
+          label: '최근 보상',
+          textColor: accentColor,
+          backgroundColor: KidPalette.white.withValues(alpha: 0.86),
+          compact: compact,
+        ),
+        HomeAccentPill(
+          label: _recentRewardLabel(reward),
+          textColor: KidPalette.navy,
+          backgroundColor: accentColor.withValues(alpha: 0.16),
+          compact: compact,
+        ),
+      ],
+    );
+  }
+}
+
+String _recentRewardLabel(RecentReward reward) {
+  switch (reward.kind) {
+    case 'sticker':
+      return '스티커 ${reward.amount}개';
+    default:
+      return '${reward.amount}개';
   }
 }
 

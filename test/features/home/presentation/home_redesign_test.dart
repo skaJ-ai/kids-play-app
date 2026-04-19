@@ -3,8 +3,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kids_play_app/app/services/app_services.dart';
+import 'package:kids_play_app/app/services/progress_store.dart';
+import 'package:kids_play_app/app/services/speech_cue_service.dart';
+import 'package:kids_play_app/features/hangul/data/hangul_lesson_repository.dart';
 import 'package:kids_play_app/features/home/data/home_catalog_repository.dart';
 import 'package:kids_play_app/features/home/presentation/category_hub_screen.dart';
+import 'package:kids_play_app/features/home/presentation/home_category_config.dart';
 import 'package:kids_play_app/features/home/presentation/home_screen.dart';
 
 void main() {
@@ -73,6 +78,91 @@ void main() {
       expect(find.byIcon(Icons.arrow_outward_rounded), findsNothing);
     },
   );
+
+  testWidgets('category hub shows the recent reward summary for its category', (
+    WidgetTester tester,
+  ) async {
+    final progressStore = MemoryProgressStore(
+      AppProgressSnapshot(
+        lastEarnedReward: RecentReward(
+          kind: 'sticker',
+          amount: 2,
+          lessonId: 'hangul:basic_consonants_1',
+          earnedAt: DateTime.utc(2026, 4, 19, 9, 0),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(
+      _wrapWithServices(
+        progressStore: progressStore,
+        child: const CategoryHubScreen(
+          category: HomeCategory(
+            id: 'hangul',
+            label: '한글',
+            description: '자음과 모음을 만나요',
+            backgroundColorHex: '#FFE699',
+            iconName: 'text_fields_rounded',
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('최근 보상'), findsOneWidget);
+    expect(find.text('스티커 2개'), findsOneWidget);
+  });
+
+  testWidgets(
+    'category hub refreshes the recent reward summary after returning from a child route',
+    (WidgetTester tester) async {
+      final progressStore = MemoryProgressStore();
+      final repository = HangulLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          HangulLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_hangulLessonOne],
+          }),
+        }),
+      );
+
+      await tester.pumpWidget(
+        _wrapWithServices(
+          progressStore: progressStore,
+          child: CategoryHubScreen(
+            category: const HomeCategory(
+              id: 'hangul',
+              label: '한글',
+              description: '자음과 모음을 만나요',
+              backgroundColorHex: '#FFE699',
+              iconName: 'text_fields_rounded',
+            ),
+            categoryDependencies: HomeCategoryDependencies(
+              hangulLessonRepository: repository,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('최근 보상'), findsNothing);
+
+      await tester.tap(find.text('배우기'));
+      await tester.pumpAndSettle();
+      expect(find.text('기본 자음 1'), findsOneWidget);
+
+      await progressStore.recordRewardEarned(
+        kind: 'sticker',
+        amount: 1,
+        lessonId: 'hangul:basic_consonants_1',
+        earnedAt: DateTime.utc(2026, 4, 19, 9, 30),
+      );
+      Navigator.of(tester.element(find.text('기본 자음 1'))).pop();
+      await tester.pumpAndSettle();
+
+      expect(find.text('최근 보상'), findsOneWidget);
+      expect(find.text('스티커 1개'), findsOneWidget);
+    },
+  );
 }
 
 HomeCatalogRepository _fakeHomeCatalogRepository() {
@@ -107,6 +197,17 @@ HomeCatalogRepository _fakeHomeCatalogRepository() {
   );
 }
 
+const Map<String, dynamic> _hangulLessonOne = {
+  'id': 'basic_consonants_1',
+  'title': '기본 자음 1',
+  'cards': [
+    {'symbol': 'ㄱ', 'label': '기역, ㄱ', 'hint': '기역을 천천히 봐요'},
+    {'symbol': 'ㄴ', 'label': '니은, ㄴ', 'hint': '니은을 천천히 봐요'},
+    {'symbol': 'ㄷ', 'label': '디귿, ㄷ', 'hint': '디귿을 천천히 봐요'},
+    {'symbol': 'ㄹ', 'label': '리을, ㄹ', 'hint': '리을을 천천히 봐요'},
+  ],
+};
+
 class _FakeAssetBundle extends CachingAssetBundle {
   _FakeAssetBundle(this._assets);
 
@@ -127,4 +228,17 @@ class _FakeAssetBundle extends CachingAssetBundle {
     final bytes = Uint8List.fromList(utf8.encode(string));
     return ByteData.view(bytes.buffer);
   }
+}
+
+Widget _wrapWithServices({
+  required ProgressStore progressStore,
+  required Widget child,
+}) {
+  return AppServicesScope(
+    services: AppServices(
+      progressStore: progressStore,
+      speechCueService: NoopSpeechCueService(),
+    ),
+    child: MaterialApp(home: child),
+  );
 }
