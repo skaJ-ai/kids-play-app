@@ -568,12 +568,29 @@ class _QuizSummary extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              MascotView(
-                key: const Key('quiz-summary-mascot'),
-                state: sticker
-                    ? MascotState.missionClear
-                    : MascotState.idle,
-                size: 160,
+              SizedBox(
+                height: 200,
+                child: Stack(
+                  alignment: Alignment.center,
+                  clipBehavior: Clip.none,
+                  children: [
+                    MascotView(
+                      key: const Key('quiz-summary-mascot'),
+                      state: sticker
+                          ? MascotState.missionClear
+                          : MascotState.idle,
+                      size: 160,
+                    ),
+                    if (sticker)
+                      const Positioned(
+                        top: 0,
+                        right: 48,
+                        child: _VictorySticker(
+                          key: Key('quiz-summary-sticker'),
+                        ),
+                      ),
+                  ],
+                ),
               ),
               const SizedBox(height: 14),
               Text(
@@ -645,6 +662,80 @@ class _QuizLoadError extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _VictorySticker extends StatefulWidget {
+  const _VictorySticker({super.key});
+
+  @override
+  State<_VictorySticker> createState() => _VictoryStickerState();
+}
+
+class _VictoryStickerState extends State<_VictorySticker>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _scale;
+  late final Animation<double> _wiggle;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    );
+    _scale = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0, 0.55, curve: Curves.elasticOut),
+    );
+    _wiggle = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.55, 1, curve: Curves.easeInOut),
+      ),
+    );
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) {
+        final angle = (_wiggle.value * 2 - 1) * 0.08;
+        return Transform.rotate(
+          angle: angle,
+          child: Transform.scale(
+            scale: _scale.value,
+            child: Container(
+              width: 96,
+              height: 96,
+              decoration: BoxDecoration(
+                color: KidPalette.yellow,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: KidPalette.white,
+                  width: 4,
+                ),
+                boxShadow: KidShadows.button,
+              ),
+              child: const Icon(
+                Icons.star_rounded,
+                color: KidPalette.coralDark,
+                size: 60,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
