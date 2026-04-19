@@ -1493,7 +1493,7 @@ ThemeData buildKidTheme() {
   );
 
   const kidTypography = KidTypographyTheme.defaults;
-  final textTheme = base.textTheme.copyWith(
+  final baseTextTheme = base.textTheme.copyWith(
     displayLarge: const TextStyle(
       fontSize: 56,
       fontWeight: FontWeight.w800,
@@ -1515,6 +1515,8 @@ ThemeData buildKidTheme() {
     labelSmall: kidTypography.labelSmall,
   );
 
+  final textTheme = baseTextTheme.apply(fontFamily: 'KCCMurukmuruk');
+
   return base.copyWith(
     colorScheme: colorScheme,
     extensions: const <ThemeExtension<dynamic>>[
@@ -1526,6 +1528,7 @@ ThemeData buildKidTheme() {
     splashColor: KidPalette.white.withValues(alpha: 0.14),
     highlightColor: Colors.transparent,
     textTheme: textTheme,
+    primaryTextTheme: textTheme,
     chipTheme: base.chipTheme.copyWith(
       shape: const StadiumBorder(),
       side: BorderSide.none,

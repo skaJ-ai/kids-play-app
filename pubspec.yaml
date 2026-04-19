@@ -35,3 +35,7 @@ flutter:
     - assets/generated/manifest/
     - assets/mascot/faces/
     - assets/vectors/
+  fonts:
+    - family: KCCMurukmuruk
+      fonts:
+        - asset: assets/fonts/KCCMurukmuruk.ttf
