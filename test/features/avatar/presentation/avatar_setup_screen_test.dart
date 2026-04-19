@@ -827,6 +827,53 @@ void main() {
   );
 
   testWidgets(
+    'lets parent toggle background music separately',
+    (WidgetTester tester) async {
+      final progressStore = MemoryProgressStore(
+        const AppProgressSnapshot(
+          voicePromptsEnabled: false,
+          effectsEnabled: true,
+          bgmEnabled: true,
+        ),
+      );
+
+      await tester.pumpWidget(
+        _wrapWithServices(
+          progressStore: progressStore,
+          child: const AvatarSetupScreen(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final resetButton = find.text('진도 초기화');
+      await tester.scrollUntilVisible(resetButton, 200);
+
+      expect(find.text('음성 안내 꺼짐'), findsOneWidget);
+      expect(find.text('피드백 효과 켜짐'), findsOneWidget);
+      final bgmToggle = find.widgetWithText(ToyButton, '배경 음악 켜짐');
+      expect(bgmToggle, findsOneWidget);
+      expect(
+        find.descendant(
+          of: bgmToggle,
+          matching: find.byIcon(Icons.music_note_rounded),
+        ),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.text('배경 음악 켜짐'));
+      await tester.pumpAndSettle();
+
+      final snapshot = await progressStore.loadSnapshot();
+      expect(snapshot.voicePromptsEnabled, isFalse);
+      expect(snapshot.effectsEnabled, isTrue);
+      expect(snapshot.bgmEnabled, isFalse);
+      expect(find.text('배경 음악 꺼짐'), findsOneWidget);
+      expect(find.text('음성 안내 꺼짐'), findsOneWidget);
+      expect(find.text('피드백 효과 켜짐'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
     'shows unlock controls for later sets and lets parent unlock one',
     (WidgetTester tester) async {
       final progressStore = MemoryProgressStore();

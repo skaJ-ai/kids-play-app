@@ -69,6 +69,11 @@ class _AvatarSetupScreenState extends State<AvatarSetupScreen> {
     await _refreshScreenData();
   }
 
+  Future<void> _toggleBgm(bool enabled) async {
+    await AppServicesScope.of(context).progressStore.setBgmEnabled(enabled);
+    await _refreshScreenData();
+  }
+
   Future<void> _resetProgress() async {
     final services = AppServicesScope.of(context);
     await services.speechCueService.stop();
@@ -391,6 +396,19 @@ class _AvatarSetupScreenState extends State<AvatarSetupScreen> {
                                         ],
                                         onPressed: () => _toggleEffects(
                                           !progress.effectsEnabled,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: compact ? 188 : 220,
+                                      child: ToyButton(
+                                        label: progress.bgmEnabled
+                                            ? '배경 음악 켜짐'
+                                            : '배경 음악 꺼짐',
+                                        icon: Icons.music_note_rounded,
+                                        height: compact ? 56 : 66,
+                                        onPressed: () => _toggleBgm(
+                                          !progress.bgmEnabled,
                                         ),
                                       ),
                                     ),
