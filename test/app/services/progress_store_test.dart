@@ -103,6 +103,83 @@ void main() {
     },
   );
 
+  test(
+    'memory progress store tracks aggregate replay reward stickers only for replay reward kinds',
+    () async {
+      final store = MemoryProgressStore(
+        const AppProgressSnapshot(replayRewardStickerCount: 1),
+      );
+      final earnedAt = DateTime.utc(2026, 4, 18, 9);
+
+      await store.recordRewardEarned(
+        kind: rewardKindSticker,
+        amount: 2,
+        lessonId: 'alphabet:alphabet_letters_1',
+        earnedAt: earnedAt,
+      );
+
+      var snapshot = await store.loadSnapshot();
+      expect(snapshot.replayRewardStickerCount, 1);
+      expect(snapshot.replayRewardStickerCountTracked, isTrue);
+
+      await store.recordRewardEarned(
+        kind: rewardKindMistakeReplaySticker,
+        amount: 1,
+        lessonId: 'alphabet:alphabet_letters_1',
+        earnedAt: earnedAt.add(const Duration(minutes: 5)),
+      );
+
+      snapshot = await store.loadSnapshot();
+      expect(snapshot.replayRewardStickerCount, 2);
+      expect(snapshot.replayRewardStickerCountTracked, isTrue);
+      expect(snapshot.lastEarnedReward?.kind, rewardKindMistakeReplaySticker);
+    },
+  );
+
+  test(
+    'older snapshots keep replay reward tracking unknown until a replay reward is earned',
+    () async {
+      final store = MemoryProgressStore(
+        AppProgressSnapshot.fromJson({
+          'lessons': {
+            'alphabet:alphabet_letters_1': {
+              'bestScore': 4,
+              'totalQuestions': 5,
+              'lastViewedIndex': 1,
+            },
+          },
+        }),
+      );
+      final earnedAt = DateTime.utc(2026, 4, 18, 9, 30);
+
+      var snapshot = await store.loadSnapshot();
+      expect(snapshot.replayRewardStickerCount, 0);
+      expect(snapshot.replayRewardStickerCountTracked, isFalse);
+
+      await store.recordRewardEarned(
+        kind: rewardKindSticker,
+        amount: 1,
+        lessonId: 'alphabet:alphabet_letters_1',
+        earnedAt: earnedAt,
+      );
+
+      snapshot = await store.loadSnapshot();
+      expect(snapshot.replayRewardStickerCount, 0);
+      expect(snapshot.replayRewardStickerCountTracked, isFalse);
+
+      await store.recordRewardEarned(
+        kind: rewardKindMistakeReplaySticker,
+        amount: 2,
+        lessonId: 'alphabet:alphabet_letters_1',
+        earnedAt: earnedAt.add(const Duration(minutes: 5)),
+      );
+
+      snapshot = await store.loadSnapshot();
+      expect(snapshot.replayRewardStickerCount, 2);
+      expect(snapshot.replayRewardStickerCountTracked, isTrue);
+    },
+  );
+
   test('shared preferences progress store persists and resets state', () async {
     final preferences = await SharedPreferences.getInstance();
     final store = SharedPreferencesProgressStore(preferences);
@@ -202,7 +279,78 @@ void main() {
     expect(snapshot.progressFor('alphabet:a_to_e').bestScore, 4);
     expect(snapshot.progressFor('alphabet:a_to_e').lastViewedIndex, 1);
     expect(snapshot.progressFor('alphabet:a_to_e').mistakeReplayCount, 0);
+    expect(snapshot.replayRewardStickerCountTracked, isFalse);
+    expect(snapshot.replayRewardStickerCount, 0);
   });
+
+  test('snapshot defaults malformed replay reward sticker totals to zero', () {
+    final snapshot = AppProgressSnapshot.fromJson({
+      'stickerCount': 3,
+      'replayRewardStickerCount': 'oops',
+      'lessons': {
+        'alphabet:a_to_e': {
+          'bestScore': 4,
+          'totalQuestions': 5,
+          'lastViewedIndex': 1,
+          'recentMistakes': ['B'],
+        },
+      },
+    });
+
+    expect(snapshot.stickerCount, 3);
+    expect(snapshot.replayRewardStickerCount, 0);
+    expect(snapshot.replayRewardStickerCountTracked, isTrue);
+    expect(snapshot.progressFor('alphabet:a_to_e').bestScore, 4);
+  });
+
+  test(
+    'snapshot treats malformed replay reward tracked flags as untracked even when the aggregate key exists',
+    () {
+      final snapshot = AppProgressSnapshot.fromJson({
+        'stickerCount': 3,
+        'replayRewardStickerCount': 2,
+        'replayRewardStickerCountTracked': 'oops',
+        'lessons': {
+          'alphabet:a_to_e': {
+            'bestScore': 4,
+            'totalQuestions': 5,
+            'lastViewedIndex': 1,
+            'recentMistakes': ['B'],
+          },
+        },
+      });
+
+      expect(snapshot.stickerCount, 3);
+      expect(snapshot.replayRewardStickerCount, 2);
+      expect(snapshot.replayRewardStickerCountTracked, isFalse);
+      expect(snapshot.progressFor('alphabet:a_to_e').bestScore, 4);
+    },
+  );
+
+  test(
+    'shared preferences store ignores malformed replay reward tracked payloads without losing snapshot data',
+    () async {
+      final preferences = await SharedPreferences.getInstance();
+      await preferences.setString(
+        SharedPreferencesProgressStore.storageKey,
+        '{"stickerCount":4,"replayRewardStickerCountTracked":"oops","voicePromptsEnabled":false,"effectsEnabled":false,"lessons":{"alphabet:a_to_e":{"bestScore":5,"totalQuestions":5,"lastViewedIndex":1,"recentMistakes":["B"]}}}',
+      );
+
+      final store = SharedPreferencesProgressStore(preferences);
+      final snapshot = await store.loadSnapshot();
+
+      expect(snapshot.stickerCount, 4);
+      expect(snapshot.voicePromptsEnabled, isFalse);
+      expect(snapshot.effectsEnabled, isFalse);
+      expect(snapshot.replayRewardStickerCount, 0);
+      expect(snapshot.replayRewardStickerCountTracked, isFalse);
+      expect(snapshot.progressFor('alphabet:a_to_e').bestScore, 5);
+      expect(snapshot.progressFor('alphabet:a_to_e').lastViewedIndex, 1);
+      expect(snapshot.progressFor('alphabet:a_to_e').recentMistakes, const [
+        'B',
+      ]);
+    },
+  );
 
   test(
     'shared preferences store ignores malformed persisted reward payloads without losing snapshot data',
@@ -224,9 +372,40 @@ void main() {
       expect(snapshot.progressFor('alphabet:a_to_e').bestScore, 5);
       expect(snapshot.progressFor('alphabet:a_to_e').lastViewedIndex, 1);
       expect(snapshot.progressFor('alphabet:a_to_e').mistakeReplayCount, 0);
+      expect(snapshot.replayRewardStickerCountTracked, isFalse);
+      expect(snapshot.replayRewardStickerCount, 0);
       expect(snapshot.progressFor('alphabet:a_to_e').recentMistakes, const [
         'B',
       ]);
+    },
+  );
+
+  test(
+    'shared preferences progress store persists replay reward sticker totals only for replay rewards',
+    () async {
+      final preferences = await SharedPreferences.getInstance();
+      final store = SharedPreferencesProgressStore(preferences);
+      final earnedAt = DateTime.utc(2026, 4, 18, 10);
+
+      await store.recordRewardEarned(
+        kind: rewardKindSticker,
+        amount: 1,
+        lessonId: 'numbers:numbers_count_1',
+        earnedAt: earnedAt,
+      );
+      await store.recordRewardEarned(
+        kind: rewardKindMistakeReplaySticker,
+        amount: 1,
+        lessonId: 'numbers:numbers_count_1',
+        earnedAt: earnedAt.add(const Duration(minutes: 5)),
+      );
+
+      final persistedStore = SharedPreferencesProgressStore(preferences);
+      final snapshot = await persistedStore.loadSnapshot();
+
+      expect(snapshot.replayRewardStickerCount, 1);
+      expect(snapshot.replayRewardStickerCountTracked, isTrue);
+      expect(snapshot.lastEarnedReward?.kind, rewardKindMistakeReplaySticker);
     },
   );
 }

@@ -210,10 +210,11 @@ void main() {
   });
 
   testWidgets(
-    'shows the aggregate mistake replay count in the parent summary',
+    'shows the aggregate replay summary counts in the parent summary',
     (WidgetTester tester) async {
       final progressStore = MemoryProgressStore(
         const AppProgressSnapshot(
+          replayRewardStickerCount: 7,
           lessons: {
             'alphabet:alphabet_letters_1': LessonProgress(
               bestScore: 5,
@@ -247,6 +248,61 @@ void main() {
       );
       expect(
         find.descendant(of: summaryPanel, matching: find.text('3번')),
+        findsOneWidget,
+      );
+      final replayRewardChip = find.descendant(
+        of: summaryPanel,
+        matching: find.byKey(const Key('parent-summary-replay-reward-chip')),
+      );
+      expect(replayRewardChip, findsOneWidget);
+      expect(
+        find.descendant(of: replayRewardChip, matching: find.text('다시 풀기 보상')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: replayRewardChip, matching: find.text('7개')),
+        findsOneWidget,
+      );
+    },
+  );
+
+  testWidgets(
+    'shows a fresh-tracking replay reward summary label for older snapshots missing the aggregate',
+    (WidgetTester tester) async {
+      final progressStore = MemoryProgressStore(
+        AppProgressSnapshot.fromJson({
+          'lessons': {
+            'alphabet:alphabet_letters_1': {
+              'bestScore': 5,
+              'totalQuestions': 5,
+              'lastViewedIndex': 4,
+              'mistakeReplayCount': 2,
+            },
+          },
+        }),
+      );
+
+      await tester.pumpWidget(
+        _wrapWithServices(
+          progressStore: progressStore,
+          child: const AvatarSetupScreen(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final summaryPanel = find.byKey(const Key('parent-summary-panel'));
+      expect(summaryPanel, findsOneWidget);
+      final replayRewardChip = find.descendant(
+        of: summaryPanel,
+        matching: find.byKey(const Key('parent-summary-replay-reward-chip')),
+      );
+      expect(replayRewardChip, findsOneWidget);
+      expect(
+        find.descendant(of: replayRewardChip, matching: find.text('다시 풀기 보상')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: replayRewardChip, matching: find.text('새로 집계')),
         findsOneWidget,
       );
     },

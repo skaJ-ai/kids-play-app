@@ -132,6 +132,8 @@ class LessonProgress {
 class AppProgressSnapshot {
   const AppProgressSnapshot({
     this.stickerCount = 0,
+    this.replayRewardStickerCount = 0,
+    this.replayRewardStickerCountTracked = true,
     this.lastEarnedReward,
     this.voicePromptsEnabled = true,
     this.effectsEnabled = true,
@@ -142,8 +144,16 @@ class AppProgressSnapshot {
   factory AppProgressSnapshot.fromJson(Map<String, dynamic> json) {
     final lessonJson = (json['lessons'] as Map<String, dynamic>? ?? const {});
     final rewardJson = json['lastEarnedReward'];
+    final replayRewardStickerCountTracked =
+        json.containsKey('replayRewardStickerCountTracked')
+        ? _jsonBoolOrFalse(json['replayRewardStickerCountTracked'])
+        : json.containsKey('replayRewardStickerCount');
     return AppProgressSnapshot(
       stickerCount: json['stickerCount'] as int? ?? 0,
+      replayRewardStickerCount: _jsonIntOrZero(
+        json['replayRewardStickerCount'],
+      ),
+      replayRewardStickerCountTracked: replayRewardStickerCountTracked,
       lastEarnedReward: _recentRewardFromJson(rewardJson),
       voicePromptsEnabled: json['voicePromptsEnabled'] as bool? ?? true,
       effectsEnabled: json['effectsEnabled'] as bool? ?? true,
@@ -161,6 +171,8 @@ class AppProgressSnapshot {
   }
 
   final int stickerCount;
+  final int replayRewardStickerCount;
+  final bool replayRewardStickerCountTracked;
   final RecentReward? lastEarnedReward;
   final bool voicePromptsEnabled;
   final bool effectsEnabled;
@@ -173,6 +185,8 @@ class AppProgressSnapshot {
 
   AppProgressSnapshot copyWith({
     int? stickerCount,
+    int? replayRewardStickerCount,
+    bool? replayRewardStickerCountTracked,
     Object? lastEarnedReward = _noRecentRewardChange,
     bool? voicePromptsEnabled,
     bool? effectsEnabled,
@@ -181,6 +195,11 @@ class AppProgressSnapshot {
   }) {
     return AppProgressSnapshot(
       stickerCount: stickerCount ?? this.stickerCount,
+      replayRewardStickerCount:
+          replayRewardStickerCount ?? this.replayRewardStickerCount,
+      replayRewardStickerCountTracked:
+          replayRewardStickerCountTracked ??
+          this.replayRewardStickerCountTracked,
       lastEarnedReward: identical(lastEarnedReward, _noRecentRewardChange)
           ? this.lastEarnedReward
           : lastEarnedReward as RecentReward?,
@@ -195,6 +214,8 @@ class AppProgressSnapshot {
     return {
       'version': 1,
       'stickerCount': stickerCount,
+      'replayRewardStickerCount': replayRewardStickerCount,
+      'replayRewardStickerCountTracked': replayRewardStickerCountTracked,
       'lastEarnedReward': lastEarnedReward?.toJson(),
       'voicePromptsEnabled': voicePromptsEnabled,
       'effectsEnabled': effectsEnabled,
@@ -258,7 +279,14 @@ class MemoryProgressStore implements ProgressStore {
     required String lessonId,
     required DateTime earnedAt,
   }) async {
+    final isReplayReward = kind == rewardKindMistakeReplaySticker;
     _snapshot = _snapshot.copyWith(
+      replayRewardStickerCount: isReplayReward
+          ? _snapshot.replayRewardStickerCount + amount
+          : _snapshot.replayRewardStickerCount,
+      replayRewardStickerCountTracked: isReplayReward
+          ? true
+          : _snapshot.replayRewardStickerCountTracked,
       lastEarnedReward: RecentReward(
         kind: kind,
         amount: amount,
@@ -364,8 +392,15 @@ class SharedPreferencesProgressStore implements ProgressStore {
     required String lessonId,
     required DateTime earnedAt,
   }) async {
+    final isReplayReward = kind == rewardKindMistakeReplaySticker;
     await _mutate((snapshot) {
       return snapshot.copyWith(
+        replayRewardStickerCount: isReplayReward
+            ? snapshot.replayRewardStickerCount + amount
+            : snapshot.replayRewardStickerCount,
+        replayRewardStickerCountTracked: isReplayReward
+            ? true
+            : snapshot.replayRewardStickerCountTracked,
         lastEarnedReward: RecentReward(
           kind: kind,
           amount: amount,
@@ -487,6 +522,13 @@ int _jsonIntOrZero(Object? value) {
     int parsed => parsed,
     num parsed when parsed == parsed.roundToDouble() => parsed.toInt(),
     _ => 0,
+  };
+}
+
+bool _jsonBoolOrFalse(Object? value) {
+  return switch (value) {
+    bool parsed => parsed,
+    _ => false,
   };
 }
 

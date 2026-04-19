@@ -179,6 +179,8 @@ void main() {
       expect(progress.recentMistakes, isEmpty);
       expect(progress.mistakeReplayCount, 2);
       expect(snapshot.stickerCount, 1);
+      expect(snapshot.replayRewardStickerCount, 1);
+      expect(snapshot.replayRewardStickerCountTracked, isTrue);
       expect(snapshot.lastEarnedReward, isNotNull);
       expect(snapshot.lastEarnedReward!.kind, 'mistakeReplaySticker');
     },

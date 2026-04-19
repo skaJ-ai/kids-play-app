@@ -460,6 +460,16 @@ class _ParentSummaryPanel extends StatelessWidget {
                 value: '$mistakeReplayCount번',
                 color: KidPalette.blue,
               ),
+              KeyedSubtree(
+                key: const Key('parent-summary-replay-reward-chip'),
+                child: _SummaryChip(
+                  label: '다시 풀기 보상',
+                  value: snapshot.replayRewardStickerCountTracked
+                      ? '${snapshot.replayRewardStickerCount}개'
+                      : '새로 집계',
+                  color: KidPalette.coral,
+                ),
+              ),
             ],
           ),
           if (recentReward != null && recentRewardLesson != null) ...[
