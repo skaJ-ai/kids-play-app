@@ -12,17 +12,18 @@
 - Slice 4 — numbers playable MVP
 - Slice 5 — audio-first prompt layer
 - Slice 6 기능 범위 중 home/category/hub garage UI 정리, 보호자 진행 요약/진도 제어/오답 다시 풀기/오답 비우기/수동 해금, 다중 세트와 3개 카테고리 라우팅 확장까지 반영 및 재확인됨
+- live repo follow-up으로 avatar runtime photo flow(`2c78d5f`~`faff2ce`), quiz prompt replay audio service(`19a6f1d`), numbers learn prompt audio service(`610a6aa`)까지 main에 반영됨
 
 현재 큐 기준 상태
-- 우선순위 A-G 범위는 live repo와 targeted tests/문서 정합성 기준으로 완료 상태
-- F — docs cleanup 완료. README / handoff / plan 상태 wording 정합성까지 live repo 기준으로 반영됨
-- 최신 앱 코드 스냅샷은 `d81a2ec`이며, `generic_learn_screen.dart`의 일반 학습 prompt를 audio service로 연결한 상태다. replay-reward parent-summary follow-up(`0c15caf`)와 보호자 요약의 최근 헷갈림 / 오답 다시 보기 집계 chip, 최근 보상 callout, 가장 헷갈린 세트 요약 callout(카테고리/세트 메타데이터 + `이 세트 다시 보기` quick retry)도 그대로 포함된다
-- G — full integration provenance는 최신 docs-only HEAD `9d4c035` 로컬 full rerun까지 반영됐다. 이 HEAD의 변경은 `README.md`, `handoff.md`, `docs/plans/2026-04-16_full-mvp-delivery-plan.md`뿐이어서 검증된 앱 코드는 latest code-changing commit `d81a2ec`와 동일하다
+- 우선순위 A-E 앱 기능은 latest live app-code snapshot `610a6aa`에 반영돼 있다
+- F — docs cleanup은 이번 refresh에서 README / handoff / plan provenance wording을 latest live app-code snapshot `610a6aa`와 current targeted verification evidence에 맞춰 다시 정리했다
+- latest live app-code snapshot은 `610a6aa`(`fix(numbers): route learn prompts through audio service`)이고, historical full Gate G provenance는 docs-only HEAD `9d4c035`가 검증한 앱 code snapshot `d81a2ec`로 별도 유지된다
+- 이번 docs-only refresh에서는 latest live app-code snapshot `610a6aa`에 대해 numbers / home flow / design-system / parent-summary 관련 targeted recheck만 다시 남겼다
+- G — fresh full integration rerun on latest live app-code snapshot `610a6aa` (`./scripts/prepare_assets.sh` + full `flutter test` / `flutter analyze` / release build) 은 아직 pending이다. 따라서 current app-code snapshot 기준으로 A-G 전체 완료를 새로 주장하지 않는다
 - provenance 메모: historical progression은 `c5879e9`(README-only full test 재확인) → docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`(Gate G + historical GitHub Actions provenance) → docs-only checkout `f1e23c3` 로컬 full rerun(`0c15caf` 코드 일치) → docs-only HEAD `9d4c035` 로컬 full rerun(`d81a2ec` 코드 일치) 순서로 누적됐다. 세부 명령 결과는 아래 Gate G checklist에 정리한다
 - parent summary 관련 `test/features/avatar/presentation/avatar_setup_screen_test.dart`에는 가장 헷갈린 세트 요약 렌더링과 `이 세트 다시 보기` quick retry가 해당 retry flow를 여는 케이스가 포함된다
 
 남은 확장 후보
-- 실제 표정 사진 업로드/크롭
 - richer reward / 효과음 / 배경음악 polish
 
 ## Goal
@@ -86,7 +87,7 @@
 - home/category/hub garage UI 정리 완료
 - 집계 chip / 최근 보상 / 가장 헷갈린 세트 요약 callout(카테고리/세트 메타데이터) + `이 세트 다시 보기` quick retry 흐름 정리 완료
 - docs cleanup 완료
-- docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`의 historical Gate G provenance, docs-only checkout `f1e23c3` 로컬 full rerun(`0c15caf` 코드 일치), docs-only HEAD `9d4c035` 로컬 full rerun(`d81a2ec` 코드 일치)까지 확보됐다
+- docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`의 historical Gate G provenance, docs-only checkout `f1e23c3` 로컬 full rerun(`0c15caf` 코드 일치), docs-only HEAD `9d4c035` 로컬 full rerun(`d81a2ec` 코드 일치)까지 historical reference로 확보됐다
 
 ## Verification approach
 
@@ -98,7 +99,15 @@
 
 ### Gate G — final integration checklist
 
-- 이 게이트는 historical docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`, docs-only checkout `f1e23c3` 로컬 full rerun, 그리고 최신 docs-only HEAD `9d4c035` 로컬 full rerun까지 확보됐다. `9d4c035`의 HEAD diff는 README / handoff / plan docs뿐이어서 그 Gate G rerun이 검증한 앱 코드는 latest code-changing commit `d81a2ec`와 동일하다. 아래 명령 순서는 README / `handoff.md` / `docs/local-dev-setup.md` / `.github/workflows/build-apk.yml` 와 같은 순서(`./scripts/prepare_assets.sh` → `/home/openc/sdk/flutter/bin/flutter pub get` → `flutter test` → `flutter analyze` → release APK build`)다.
+- 이 게이트의 historical provenance는 docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`, docs-only checkout `f1e23c3` 로컬 full rerun, 그리고 docs-only HEAD `9d4c035` 로컬 full rerun까지 확보됐다. `9d4c035`의 HEAD diff는 README / handoff / plan docs뿐이어서 그 Gate G rerun이 검증한 앱 코드는 latest code-changing commit `d81a2ec`와 동일하다. latest live app-code snapshot `610a6aa`에서는 아래 targeted recheck만 새로 확보됐고, full Gate G sequence는 아직 rerun pending이다. 아래 명령 순서는 current app-code snapshot에서 Gate G를 다시 돌릴 때 쓰는 reference checklist다.
+
+- current app-code snapshot targeted recheck (`610a6aa`, numbers / home flow / design-system / parent-summary spot checks, full Gate G 재실행 아님)
+  - `./scripts/prepare_assets.sh` => succeeded
+  - `/home/openc/sdk/flutter/bin/flutter test test/features/numbers` => passed
+  - `/home/openc/sdk/flutter/bin/flutter test test/widget_test.dart` => passed
+  - `/home/openc/sdk/flutter/bin/flutter test test/app/ui` => passed
+  - `/home/openc/sdk/flutter/bin/flutter test test/features/avatar/presentation/avatar_setup_screen_test.dart` => passed
+  - `/home/openc/sdk/flutter/bin/flutter test test/app/services/progress_store_test.dart` => passed
 
 ```bash
 cd /home/openc/kids-play-app

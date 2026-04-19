@@ -22,7 +22,7 @@
 대표 기능 커밋 예시
 - `2a71734` `feat(avatar): add gallery pick and crop flow`
 - `faff2ce` `feat(hero): use saved avatar photo fallback chain`
-- `19a6f1d` `feat(lesson): route quiz prompt replay through audio service`
+- `610a6aa` `fix(numbers): route learn prompts through audio service`
 
 현재 이미 동작하는 것
 - landscape 고정 + immersive full-screen
@@ -50,9 +50,12 @@
 ## 현재 큐 기준 상태
 
 ### queue 기준 상태
-- A-G 범위(숫자 feature/라우팅, home/category 연결, design-system theme/button/panel 정리, hero/home/category 리디자인, 보호자 summary/settings/retry/unlock 흐름, README/handoff/plan 문서 정합성 cleanup, final Gate G rerun)는 historical full Gate G provenance 기준으로 완료 상태다. full rerun reference는 docs-only HEAD `9d4c035`이고, 당시 검증된 앱 코드 스냅샷은 `d81a2ec`였다
-- live repo HEAD는 이번 docs refresh 시점 기준 `19a6f1d`이며, 그 사이 avatar photo snapshot store / runtime file repository / gallery pick+crop / expression cards / hero fallback chain(`2c78d5f`~`faff2ce`)이 이미 반영돼 있다
-- 이번 docs-only slice는 `19a6f1d` 전체 Gate G를 다시 주장하지 않고, 아래에 적은 avatar/hero runtime photo 관련 targeted verification만 재확인했다
+- A-E 범위(숫자 feature/라우팅, home/category 연결, design-system theme/button/panel 정리, hero/home/category 리디자인, 보호자 summary/settings/retry/unlock 흐름) 앱 기능은 latest live app-code snapshot `610a6aa`에 반영돼 있다
+- F에 해당하는 README / handoff / plan 문서 정합성 cleanup은 이번 docs-only refresh에서 반영됐다
+- historical full Gate G provenance는 docs-only HEAD `9d4c035` / 검증된 앱 코드 스냅샷 `d81a2ec`로 별도 유지된다
+- 이번 docs-only refresh에서는 latest live app-code snapshot `610a6aa`에 대해 numbers / home flow / design-system / parent-summary 관련 targeted recheck만 다시 남겼다
+- G에 해당하는 latest live app-code snapshot `610a6aa` fresh full integration rerun(`flutter test` / `flutter analyze` / release build)은 아직 pending이므로, current app-code snapshot 기준으로 A-G 전체 완료를 새로 주장하지 않는다
+- latest live app-code snapshot `610a6aa`에는 avatar runtime photo flow(`2c78d5f`~`faff2ce`), quiz prompt replay audio service(`19a6f1d`), numbers learn prompt audio service(`610a6aa`)가 반영돼 있다
 - historical provenance는 docs-only checkout `f1e23c3` 로컬 full rerun(`0c15caf` 코드 일치)과 historical docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`까지 함께 유지한다
 - current targeted recheck / historical full rerun / artifact-backed reference 세부 결과는 아래 `선별 검증 + Gate G provenance 메모` 섹션에 정리돼 있다
 
@@ -91,11 +94,14 @@
 
 ## 선별 검증 + Gate G provenance 메모
 
-최근 문서화된 선별 재확인 기록과 full Gate G provenance 메모
-- current live repo avatar/hero runtime photo targeted verification (`19a6f1d`)
-  - `./scripts/prepare_assets.sh` + `/home/openc/sdk/flutter/bin/flutter pub get` 성공
-  - targeted `/home/openc/sdk/flutter/bin/flutter test test/features/avatar/application/avatar_photo_service_test.dart test/features/avatar/data/avatar_photo_store_test.dart test/features/avatar/data/local_avatar_photo_repository_test.dart test/features/avatar/presentation/avatar_crop_screen_test.dart test/features/avatar/presentation/avatar_setup_screen_test.dart test/features/avatar/presentation/widgets/avatar_face_image_test.dart test/features/hero/presentation/hero_screen_test.dart` => passed
-  - targeted `/home/openc/sdk/flutter/bin/flutter analyze lib/features/avatar lib/features/hero/presentation/hero_screen.dart test/features/avatar test/features/hero/presentation/hero_screen_test.dart` => clean (`No issues found!`)
+최근 문서화된 current app-code snapshot targeted recheck와 historical full Gate G provenance 메모
+- current app-code snapshot targeted recheck (`610a6aa`, numbers / home flow / design-system / parent-summary spot checks, full Gate G 재실행 아님)
+  - `./scripts/prepare_assets.sh` => succeeded
+  - `/home/openc/sdk/flutter/bin/flutter test test/features/numbers` => passed
+  - `/home/openc/sdk/flutter/bin/flutter test test/widget_test.dart` => passed
+  - `/home/openc/sdk/flutter/bin/flutter test test/app/ui` => passed
+  - `/home/openc/sdk/flutter/bin/flutter test test/features/avatar/presentation/avatar_setup_screen_test.dart` => passed
+  - `/home/openc/sdk/flutter/bin/flutter test test/app/services/progress_store_test.dart` => passed
 - historical full Gate G 로컬 rerun (`9d4c035` docs-only HEAD, 당시 검증된 앱 코드는 `d81a2ec`와 동일)
   - `./scripts/prepare_assets.sh` + `/home/openc/sdk/flutter/bin/flutter pub get` 성공
   - full `/home/openc/sdk/flutter/bin/flutter test` => `00:34 +253: All tests passed!`
@@ -226,7 +232,7 @@ artifact
 ## 다음 작업자가 바로 이어갈 포인트
 
 우선순위 추천
-1. historical full Gate G rerun reference는 docs-only HEAD `9d4c035` / code snapshot `d81a2ec`다. current live repo HEAD `19a6f1d`에는 avatar runtime photo flow가 이미 들어와 있고 이번 slice에서는 targeted avatar/hero verification만 다시 확인했으니, 다음 작업도 아래 남은 확장 후보를 작은 slice로 이어가면 된다.
+1. historical full Gate G rerun reference는 docs-only HEAD `9d4c035` / code snapshot `d81a2ec`다. latest live app-code snapshot `610a6aa`에는 avatar runtime photo flow와 audio-service follow-up(`19a6f1d`, `610a6aa`)가 이미 들어와 있고 이번 slice는 targeted app-code recheck와 docs provenance refresh까지만 반영했다. latest app-code snapshot 기준 fresh full Gate G rerun은 아직 pending이므로, 다음 작업도 아래 남은 확장 후보를 작은 slice로 이어가면 된다.
 
 남은 확장 후보
 - richer reward / 효과음 / 배경음악 polish
