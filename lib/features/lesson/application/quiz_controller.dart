@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../app/services/app_services.dart';
+import '../../../app/services/progress_store.dart';
 import '../domain/lesson.dart';
 import '../domain/lesson_category.dart';
 import '../domain/quiz_rules.dart';
@@ -17,6 +18,7 @@ class QuizController extends ChangeNotifier {
     required this.lessonId,
     required List<LessonItem> questions,
     required List<LessonItem> pool,
+    this.isMistakeReplay = false,
   }) : _services = services,
        _questions = questions,
        _pool = pool;
@@ -24,6 +26,7 @@ class QuizController extends ChangeNotifier {
   final AppServices _services;
   final LessonCategoryConfig category;
   final String lessonId;
+  final bool isMistakeReplay;
   final List<LessonItem> _questions;
   final List<LessonItem> _pool;
 
@@ -109,7 +112,9 @@ class QuizController extends ChangeNotifier {
         final completedAt = DateTime.now().toUtc();
         await _services.progressStore.addStickers(1);
         await _services.progressStore.recordRewardEarned(
-          kind: 'sticker',
+          kind: isMistakeReplay
+              ? rewardKindMistakeReplaySticker
+              : rewardKindSticker,
           amount: 1,
           lessonId: progressLessonId,
           earnedAt: completedAt,
@@ -120,6 +125,7 @@ class QuizController extends ChangeNotifier {
         correctCount: nextCorrectCount,
         totalQuestions: totalQuestions,
         recentMistakes: nextMistakes,
+        isMistakeReplay: isMistakeReplay,
       );
       if (_disposed) {
         return;

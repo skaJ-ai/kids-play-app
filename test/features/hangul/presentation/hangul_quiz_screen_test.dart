@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kids_play_app/app/services/app_services.dart';
+import 'package:kids_play_app/app/services/progress_store.dart';
+import 'package:kids_play_app/app/services/speech_cue_service.dart';
 import 'package:kids_play_app/app/ui/toy_panel.dart';
 import 'package:kids_play_app/features/hangul/data/hangul_lesson_repository.dart';
 import 'package:kids_play_app/features/hangul/presentation/hangul_quiz_screen.dart';
@@ -220,6 +223,67 @@ void main() {
     expect(find.text('2 / 2'), findsOneWidget);
     expect(find.text("'ㄴ' 글자를 찾아봐!"), findsOneWidget);
   });
+
+  testWidgets(
+    'mistake replay completion preserves hangul lesson stats and records a replay sticker reward',
+    (WidgetTester tester) async {
+      final repository = HangulLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          HangulLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_basicConsonantsLesson],
+          }),
+        }),
+      );
+      final progressStore = MemoryProgressStore(
+        const AppProgressSnapshot(
+          stickerCount: 2,
+          voicePromptsEnabled: false,
+          effectsEnabled: false,
+          lessons: {
+            'hangul:basic_consonants_1': LessonProgress(
+              bestScore: 1,
+              totalQuestions: 5,
+              lastViewedIndex: 4,
+              recentMistakes: ['ㄴ', 'ㄹ'],
+            ),
+          },
+        ),
+      );
+
+      await tester.pumpWidget(
+        AppServicesScope(
+          services: AppServices(
+            progressStore: progressStore,
+            speechCueService: NoopSpeechCueService(),
+          ),
+          child: MaterialApp(
+            home: HangulQuizScreen(
+              repository: repository,
+              lessonId: 'basic_consonants_1',
+              mistakeSymbols: const ['ㄴ', 'ㄹ'],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('quiz-choice-ㄴ')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('quiz-choice-ㄹ')));
+      await tester.pumpAndSettle();
+
+      final snapshot = await progressStore.loadSnapshot();
+      final progress = snapshot.progressFor('hangul:basic_consonants_1');
+
+      expect(progress.bestScore, 1);
+      expect(progress.totalQuestions, 5);
+      expect(progress.recentMistakes, isEmpty);
+      expect(snapshot.stickerCount, 3);
+      expect(snapshot.lastEarnedReward, isNotNull);
+      expect(snapshot.lastEarnedReward!.kind, rewardKindMistakeReplaySticker);
+      expect(snapshot.lastEarnedReward!.lessonId, 'hangul:basic_consonants_1');
+    },
+  );
 
   testWidgets('shows a sticker reward summary after finishing the quiz', (
     WidgetTester tester,

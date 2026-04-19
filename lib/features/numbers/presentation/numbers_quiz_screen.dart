@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/services/app_services.dart';
+import '../../../app/services/progress_store.dart';
 import '../../../app/ui/answer_feedback_overlay.dart';
 import '../../../app/ui/audio_prompt_panel.dart';
 import '../../../app/ui/kid_theme.dart';
@@ -37,6 +38,9 @@ class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
   bool _isResolvingChoice = false;
   List<String> _recentMistakes = const [];
   String? _lastPromptKey;
+
+  bool get _isMistakeReplay => widget.mistakeSymbols?.isNotEmpty ?? false;
+  String get _progressLessonId => 'numbers:${widget.lessonId}';
 
   @override
   void didChangeDependencies() {
@@ -482,12 +486,21 @@ class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
       final earnedSticker = nextCorrectCount >= (totalQuestions * 0.8).ceil();
       if (earnedSticker) {
         await services.progressStore.addStickers(1);
+        if (_isMistakeReplay) {
+          await services.progressStore.recordRewardEarned(
+            kind: rewardKindMistakeReplaySticker,
+            amount: 1,
+            lessonId: _progressLessonId,
+            earnedAt: DateTime.now().toUtc(),
+          );
+        }
       }
       await services.progressStore.recordQuizResult(
-        lessonId: 'numbers:${widget.lessonId}',
+        lessonId: _progressLessonId,
         correctCount: nextCorrectCount,
         totalQuestions: totalQuestions,
         recentMistakes: nextMistakes,
+        isMistakeReplay: _isMistakeReplay,
       );
       if (!mounted) {
         return;

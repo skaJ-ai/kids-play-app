@@ -2,6 +2,9 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+const rewardKindSticker = 'sticker';
+const rewardKindMistakeReplaySticker = 'mistakeReplaySticker';
+
 class _RecentRewardUnchanged {
   const _RecentRewardUnchanged();
 }
@@ -217,6 +220,7 @@ abstract class ProgressStore {
     required int correctCount,
     required int totalQuestions,
     required List<String> recentMistakes,
+    bool isMistakeReplay = false,
   });
 
   Future<void> setVoicePromptsEnabled(bool enabled);
@@ -281,16 +285,21 @@ class MemoryProgressStore implements ProgressStore {
     required int correctCount,
     required int totalQuestions,
     required List<String> recentMistakes,
+    bool isMistakeReplay = false,
   }) async {
     final current = _snapshot.progressFor(lessonId);
     _snapshot = _snapshot.copyWith(
       lessons: {
         ..._snapshot.lessons,
         lessonId: current.copyWith(
-          bestScore: correctCount > current.bestScore
+          bestScore: isMistakeReplay
+              ? current.bestScore
+              : correctCount > current.bestScore
               ? correctCount
               : current.bestScore,
-          totalQuestions: totalQuestions,
+          totalQuestions: isMistakeReplay
+              ? current.totalQuestions
+              : totalQuestions,
           recentMistakes: _normalizedMistakes(recentMistakes),
         ),
       },
@@ -396,6 +405,7 @@ class SharedPreferencesProgressStore implements ProgressStore {
     required int correctCount,
     required int totalQuestions,
     required List<String> recentMistakes,
+    bool isMistakeReplay = false,
   }) async {
     await _mutate((snapshot) {
       final current = snapshot.progressFor(lessonId);
@@ -403,10 +413,14 @@ class SharedPreferencesProgressStore implements ProgressStore {
         lessons: {
           ...snapshot.lessons,
           lessonId: current.copyWith(
-            bestScore: correctCount > current.bestScore
+            bestScore: isMistakeReplay
+                ? current.bestScore
+                : correctCount > current.bestScore
                 ? correctCount
                 : current.bestScore,
-            totalQuestions: totalQuestions,
+            totalQuestions: isMistakeReplay
+                ? current.totalQuestions
+                : totalQuestions,
             recentMistakes: _normalizedMistakes(recentMistakes),
           ),
         },

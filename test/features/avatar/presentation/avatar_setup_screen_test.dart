@@ -15,7 +15,11 @@ void main() {
   testWidgets('shows the five expression slots and parent helper copy', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const MaterialApp(home: AvatarSetupScreen()));
+    await tester.pumpWidget(
+      _wrapWithAvatarAssets(
+        child: const MaterialApp(home: AvatarSetupScreen()),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('표정 카드 만들기'), findsOneWidget);
@@ -103,59 +107,107 @@ void main() {
     },
   );
 
-  testWidgets(
-    'shows generic reward copy for unknown recent reward kinds',
-    (WidgetTester tester) async {
-      final progressStore = MemoryProgressStore(
-        AppProgressSnapshot(
-          stickerCount: 5,
-          lastEarnedReward: RecentReward(
-            kind: 'bonus',
-            amount: 2,
-            lessonId: 'alphabet:alphabet_letters_1',
-            earnedAt: DateTime(2026, 4, 18, 16),
+  testWidgets('shows generic reward copy for unknown recent reward kinds', (
+    WidgetTester tester,
+  ) async {
+    final progressStore = MemoryProgressStore(
+      AppProgressSnapshot(
+        stickerCount: 5,
+        lastEarnedReward: RecentReward(
+          kind: 'bonus',
+          amount: 2,
+          lessonId: 'alphabet:alphabet_letters_1',
+          earnedAt: DateTime(2026, 4, 18, 16),
+        ),
+        lessons: const {
+          'alphabet:alphabet_letters_1': LessonProgress(
+            bestScore: 5,
+            totalQuestions: 5,
+            lastViewedIndex: 4,
           ),
-          lessons: const {
-            'alphabet:alphabet_letters_1': LessonProgress(
-              bestScore: 5,
-              totalQuestions: 5,
-              lastViewedIndex: 4,
-            ),
-          },
-        ),
-      );
+        },
+      ),
+    );
 
-      await tester.pumpWidget(
-        _wrapWithServices(
-          progressStore: progressStore,
-          child: const AvatarSetupScreen(),
-        ),
-      );
-      await tester.pumpAndSettle();
+    await tester.pumpWidget(
+      _wrapWithServices(
+        progressStore: progressStore,
+        child: const AvatarSetupScreen(),
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      final summaryPanel = find.byKey(const Key('parent-summary-panel'));
-      expect(summaryPanel, findsOneWidget);
-      expect(
-        find.descendant(
-          of: summaryPanel,
-          matching: find.byKey(const Key('parent-summary-reward-callout')),
+    final summaryPanel = find.byKey(const Key('parent-summary-panel'));
+    expect(summaryPanel, findsOneWidget);
+    expect(
+      find.descendant(
+        of: summaryPanel,
+        matching: find.byKey(const Key('parent-summary-reward-callout')),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: summaryPanel, matching: find.text('보상 2개')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: summaryPanel, matching: find.text('알파벳 차고')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: summaryPanel, matching: find.text('알파벳 1')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('shows replay-specific reward copy for mistake replay rewards', (
+    WidgetTester tester,
+  ) async {
+    final progressStore = MemoryProgressStore(
+      AppProgressSnapshot(
+        stickerCount: 5,
+        lastEarnedReward: RecentReward(
+          kind: 'mistakeReplaySticker',
+          amount: 1,
+          lessonId: 'alphabet:alphabet_letters_1',
+          earnedAt: DateTime(2026, 4, 18, 16, 30),
         ),
-        findsOneWidget,
-      );
-      expect(
-        find.descendant(of: summaryPanel, matching: find.text('보상 2개')),
-        findsOneWidget,
-      );
-      expect(
-        find.descendant(of: summaryPanel, matching: find.text('알파벳 차고')),
-        findsOneWidget,
-      );
-      expect(
-        find.descendant(of: summaryPanel, matching: find.text('알파벳 1')),
-        findsOneWidget,
-      );
-    },
-  );
+        lessons: const {
+          'alphabet:alphabet_letters_1': LessonProgress(
+            bestScore: 5,
+            totalQuestions: 5,
+            lastViewedIndex: 4,
+          ),
+        },
+      ),
+    );
+
+    await tester.pumpWidget(
+      _wrapWithServices(
+        progressStore: progressStore,
+        child: const AvatarSetupScreen(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final summaryPanel = find.byKey(const Key('parent-summary-panel'));
+    expect(summaryPanel, findsOneWidget);
+    expect(
+      find.descendant(
+        of: summaryPanel,
+        matching: find.text('오답 다시 풀기 자동차 스티커 1개'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: summaryPanel, matching: find.text('알파벳 차고')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: summaryPanel, matching: find.text('알파벳 1')),
+      findsOneWidget,
+    );
+  });
 
   testWidgets(
     'shows the scoped confusion summary for the most confusing lesson and tie breaks by metadata order',
@@ -611,13 +663,21 @@ void main() {
         tester.view.resetDevicePixelRatio();
       });
 
-      await tester.pumpWidget(const MaterialApp(home: AvatarSetupScreen()));
+      await tester.pumpWidget(
+        _wrapWithAvatarAssets(
+          child: const MaterialApp(home: AvatarSetupScreen()),
+        ),
+      );
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
       expect(find.text('표정 카드 만들기'), findsOneWidget);
     },
   );
+}
+
+Widget _wrapWithAvatarAssets({required Widget child}) {
+  return DefaultAssetBundle(bundle: _AvatarTestAssetBundle(), child: child);
 }
 
 Widget _wrapWithServices({
@@ -629,7 +689,7 @@ Widget _wrapWithServices({
       progressStore: progressStore,
       speechCueService: NoopSpeechCueService(),
     ),
-    child: MaterialApp(home: child),
+    child: _wrapWithAvatarAssets(child: MaterialApp(home: child)),
   );
 }
 
@@ -687,6 +747,27 @@ const Map<String, dynamic> _hangulLesson = {
   ],
 };
 
+class _AvatarTestAssetBundle extends CachingAssetBundle {
+  static const heroFacePath = 'assets/generated/images/hero/hero_face.png';
+
+  @override
+  Future<ByteData> load(String key) async {
+    if (key == heroFacePath) {
+      return ByteData.view(
+        _heroFacePngBytes.buffer,
+        _heroFacePngBytes.offsetInBytes,
+        _heroFacePngBytes.lengthInBytes,
+      );
+    }
+    return rootBundle.load(key);
+  }
+
+  @override
+  Future<String> loadString(String key, {bool cache = true}) {
+    return rootBundle.loadString(key, cache: cache);
+  }
+}
+
 class _FakeAssetBundle extends CachingAssetBundle {
   _FakeAssetBundle(this._assets);
 
@@ -708,3 +789,7 @@ class _FakeAssetBundle extends CachingAssetBundle {
     return ByteData.view(bytes.buffer);
   }
 }
+
+final Uint8List _heroFacePngBytes = base64Decode(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4////fwAJ+wP9KobjigAAAABJRU5ErkJggg==',
+);

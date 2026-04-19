@@ -82,6 +82,7 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
       lessonId: widget.lessonId,
       questions: questions,
       pool: lesson.items,
+      isMistakeReplay: widget.mistakeSymbols?.isNotEmpty ?? false,
     )..addListener(_onControllerChanged);
     _controller = controller;
     return controller;
@@ -129,9 +130,7 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
           final lesson = snapshot.data!;
           if (lesson.items.length < 4) {
             return Center(
-              child: Text(
-                widget.notEnoughItemsMessage ?? '퀴즈 문제가 아직 부족해요.',
-              ),
+              child: Text(widget.notEnoughItemsMessage ?? '퀴즈 문제가 아직 부족해요.'),
             );
           }
 
@@ -254,12 +253,8 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
                           textAlign: TextAlign.center,
                           style:
                               (isCompact
-                                      ? Theme.of(
-                                          context,
-                                        ).textTheme.titleSmall
-                                      : Theme.of(
-                                          context,
-                                        ).textTheme.titleMedium)
+                                      ? Theme.of(context).textTheme.titleSmall
+                                      : Theme.of(context).textTheme.titleMedium)
                                   ?.copyWith(color: KidPalette.body),
                         ),
                       ],
@@ -271,8 +266,7 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
                               flex: 4,
                               child: isTight
                                   ? _TightQuizPromptPanel(
-                                      displayName:
-                                          _displayNameFor(question),
+                                      displayName: _displayNameFor(question),
                                       prompt: widget.category.promptFor(
                                         question.symbol,
                                       ),
@@ -284,9 +278,7 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
                                           CrossAxisAlignment.stretch,
                                       children: [
                                         AudioPromptPanel(
-                                          key: const Key(
-                                            'quiz-prompt-panel',
-                                          ),
+                                          key: const Key('quiz-prompt-panel'),
                                           badge: '문제 듣기',
                                           title: widget.category.promptFor(
                                             question.symbol,
@@ -297,9 +289,7 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
                                           onReplay: controller.replayPrompt,
                                           compact: isCompact,
                                         ),
-                                        SizedBox(
-                                          height: isCompact ? 10 : 14,
-                                        ),
+                                        SizedBox(height: isCompact ? 10 : 14),
                                         Expanded(
                                           child: ToyPanel(
                                             padding: EdgeInsets.all(
@@ -312,25 +302,22 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Container(
-                                                  padding:
-                                                      EdgeInsets.symmetric(
+                                                  padding: EdgeInsets.symmetric(
                                                     horizontal: isCompact
                                                         ? 12
                                                         : 14,
-                                                    vertical: isCompact
-                                                        ? 6
-                                                        : 8,
+                                                    vertical: isCompact ? 6 : 8,
                                                   ),
                                                   decoration: BoxDecoration(
-                                                    color:
-                                                        KidPalette.creamWarm,
+                                                    color: KidPalette.creamWarm,
                                                     borderRadius:
                                                         BorderRadius.circular(
-                                                      999,
-                                                    ),
+                                                          999,
+                                                        ),
                                                   ),
                                                   child: Text(
-                                                    widget.category
+                                                    widget
+                                                        .category
                                                         .quizTargetBadge,
                                                     style: Theme.of(context)
                                                         .textTheme
@@ -354,21 +341,20 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
                                                   style:
                                                       (isCompact
                                                               ? Theme.of(
-                                                                  context,
-                                                                )
-                                                                  .textTheme
-                                                                  .titleSmall
+                                                                      context,
+                                                                    )
+                                                                    .textTheme
+                                                                    .titleSmall
                                                               : Theme.of(
-                                                                  context,
-                                                                )
-                                                                  .textTheme
-                                                                  .titleMedium)
+                                                                      context,
+                                                                    )
+                                                                    .textTheme
+                                                                    .titleMedium)
                                                           ?.copyWith(
                                                             color: KidPalette
                                                                 .coralDark,
                                                             fontWeight:
-                                                                FontWeight
-                                                                    .w900,
+                                                                FontWeight.w900,
                                                           ),
                                                 ),
                                                 SizedBox(
@@ -409,21 +395,20 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
                               child: LayoutBuilder(
                                 builder: (context, gridConstraints) {
                                   const crossAxisCount = 2;
-                                  final mainAxisSpacing =
-                                      isTight ? 12.0 : 16.0;
-                                  final crossAxisSpacing =
-                                      isTight ? 12.0 : 16.0;
+                                  final mainAxisSpacing = isTight ? 12.0 : 16.0;
+                                  final crossAxisSpacing = isTight
+                                      ? 12.0
+                                      : 16.0;
                                   final rowCount =
                                       (choices.length / crossAxisCount).ceil();
                                   final tileWidth =
                                       (gridConstraints.maxWidth -
-                                              crossAxisSpacing) /
-                                          crossAxisCount;
+                                          crossAxisSpacing) /
+                                      crossAxisCount;
                                   final tileHeight =
                                       (gridConstraints.maxHeight -
-                                              (rowCount - 1) *
-                                                  mainAxisSpacing) /
-                                          rowCount;
+                                          (rowCount - 1) * mainAxisSpacing) /
+                                      rowCount;
                                   final childAspectRatio = tileHeight <= 0
                                       ? 1.0
                                       : tileWidth / tileHeight;
@@ -446,8 +431,9 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
                                           accentIndex: i,
                                           disabled:
                                               controller.isResolvingChoice,
-                                          onTap: () => controller
-                                              .selectChoice(choices[i]),
+                                          onTap: () => controller.selectChoice(
+                                            choices[i],
+                                          ),
                                         ),
                                     ],
                                   );
@@ -507,9 +493,9 @@ class _TightQuizPromptPanel extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: KidPalette.navy,
-                        fontWeight: FontWeight.w900,
-                      ),
+                    color: KidPalette.navy,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
@@ -542,9 +528,9 @@ class _TightQuizPromptPanel extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: KidPalette.coralDark,
-                  fontWeight: FontWeight.w900,
-                ),
+              color: KidPalette.coralDark,
+              fontWeight: FontWeight.w900,
+            ),
           ),
           const SizedBox(height: 10),
           Expanded(
@@ -622,9 +608,9 @@ class _QuizChoiceTile extends StatelessWidget {
                   child: Text(
                     '콕!',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: KidPalette.white.withValues(alpha: 0.92),
-                          fontWeight: FontWeight.w900,
-                        ),
+                      color: KidPalette.white.withValues(alpha: 0.92),
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
                 Center(
@@ -697,9 +683,9 @@ class _QuizSummary extends StatelessWidget {
               Text(
                 '$totalQuestions문제 중 $correctCount문제 맞았어요!',
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: KidPalette.navy,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.headlineSmall?.copyWith(color: KidPalette.navy),
               ),
               const SizedBox(height: 14),
               Text(
@@ -707,9 +693,9 @@ class _QuizSummary extends StatelessWidget {
                     ? category.quizStickerCopy
                     : category.quizStickerMissedCopy,
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: KidPalette.coralDark,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(color: KidPalette.coralDark),
               ),
               const SizedBox(height: 22),
               ToyButton(
@@ -743,9 +729,9 @@ class _QuizLoadError extends StatelessWidget {
               Text(
                 message,
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: KidPalette.navy,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.headlineSmall?.copyWith(color: KidPalette.navy),
               ),
               const SizedBox(height: 20),
               ToyButton(

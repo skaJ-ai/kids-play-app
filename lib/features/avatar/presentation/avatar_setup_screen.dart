@@ -1461,8 +1461,10 @@ _LessonMetadata _lessonMetadataFor(String lessonId) {
 
 String _recentRewardAmountLabel(RecentReward reward) {
   switch (reward.kind) {
-    case 'sticker':
+    case rewardKindSticker:
       return '자동차 스티커 ${reward.amount}개';
+    case rewardKindMistakeReplaySticker:
+      return '오답 다시 풀기 자동차 스티커 ${reward.amount}개';
     default:
       return '보상 ${reward.amount}개';
   }

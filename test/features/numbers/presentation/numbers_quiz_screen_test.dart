@@ -305,6 +305,67 @@ void main() {
   );
 
   testWidgets(
+    'mistake replay completion preserves numbers lesson stats and records a replay sticker reward',
+    (WidgetTester tester) async {
+      final repository = NumbersLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          NumbersLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_numbersLesson],
+          }),
+        }),
+      );
+      final progressStore = MemoryProgressStore(
+        const AppProgressSnapshot(
+          stickerCount: 2,
+          voicePromptsEnabled: false,
+          effectsEnabled: false,
+          lessons: {
+            'numbers:numbers_count_1': LessonProgress(
+              bestScore: 1,
+              totalQuestions: 5,
+              lastViewedIndex: 4,
+              recentMistakes: ['2', '5'],
+            ),
+          },
+        ),
+      );
+
+      await tester.pumpWidget(
+        AppServicesScope(
+          services: AppServices(
+            progressStore: progressStore,
+            speechCueService: NoopSpeechCueService(),
+          ),
+          child: MaterialApp(
+            home: NumbersQuizScreen(
+              repository: repository,
+              lessonId: 'numbers_count_1',
+              mistakeSymbols: const ['2', '5'],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('quiz-choice-2')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('quiz-choice-5')));
+      await tester.pumpAndSettle();
+
+      final snapshot = await progressStore.loadSnapshot();
+      final progress = snapshot.progressFor('numbers:numbers_count_1');
+
+      expect(progress.bestScore, 1);
+      expect(progress.totalQuestions, 5);
+      expect(progress.recentMistakes, isEmpty);
+      expect(snapshot.stickerCount, 3);
+      expect(snapshot.lastEarnedReward, isNotNull);
+      expect(snapshot.lastEarnedReward!.kind, rewardKindMistakeReplaySticker);
+      expect(snapshot.lastEarnedReward!.lessonId, 'numbers:numbers_count_1');
+    },
+  );
+
+  testWidgets(
     'shows a sticker reward summary after finishing the numbers quiz',
     (WidgetTester tester) async {
       final repository = NumbersLessonRepository(

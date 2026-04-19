@@ -52,6 +52,39 @@ void main() {
     );
   });
 
+  test(
+    'memory progress store keeps full-lesson score summary when replay results are recorded',
+    () async {
+      final store = MemoryProgressStore(
+        const AppProgressSnapshot(
+          lessons: {
+            'alphabet:alphabet_letters_1': LessonProgress(
+              bestScore: 4,
+              totalQuestions: 5,
+              lastViewedIndex: 4,
+              recentMistakes: ['A a'],
+            ),
+          },
+        ),
+      );
+
+      await store.recordQuizResult(
+        lessonId: 'alphabet:alphabet_letters_1',
+        correctCount: 1,
+        totalQuestions: 2,
+        recentMistakes: const ['C c'],
+        isMistakeReplay: true,
+      );
+
+      final snapshot = await store.loadSnapshot();
+      final progress = snapshot.progressFor('alphabet:alphabet_letters_1');
+
+      expect(progress.bestScore, 4);
+      expect(progress.totalQuestions, 5);
+      expect(progress.recentMistakes, const ['C c']);
+    },
+  );
+
   test('shared preferences progress store persists and resets state', () async {
     final preferences = await SharedPreferences.getInstance();
     final store = SharedPreferencesProgressStore(preferences);
