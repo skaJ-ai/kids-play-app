@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kids_play_app/app/audio/audio_cue.dart';
+import 'package:kids_play_app/app/audio/audio_service.dart';
 import 'package:kids_play_app/app/services/app_services.dart';
 import 'package:kids_play_app/app/services/progress_store.dart';
 import 'package:kids_play_app/app/services/speech_cue_service.dart';
@@ -16,6 +18,78 @@ void main() {
   test('uses numbers_count_1 as the default lesson id', () {
     expect(const NumbersLearnScreen().lessonId, 'numbers_count_1');
   });
+
+  testWidgets(
+    'queued prompt playback uses audio service prompt metadata instead of speech cue service',
+    (WidgetTester tester) async {
+      final repository = NumbersLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          NumbersLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_numbersLesson],
+          }),
+        }),
+      );
+      final audio = _RecordingAudioService();
+      final speech = _RecordingSpeechCueService();
+
+      await tester.pumpWidget(
+        _wrapWithServices(
+          audioService: audio,
+          speechCueService: speech,
+          child: NumbersLearnScreen(
+            repository: repository,
+            lessonId: 'numbers_count_1',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('하나, 1'), findsOneWidget);
+      expect(audio.played, hasLength(1));
+      final cue = audio.played.single;
+      expect(cue, isA<PromptCue>());
+      final promptCue = cue as PromptCue;
+      expect(
+        promptCue.ref.assetPath,
+        'assets/generated/audio/voice/prompts/numbers/numbers_count_1_1.mp3',
+      );
+      expect(promptCue.ref.fallbackText, '하나, 1');
+      expect(speech.spoken, isEmpty);
+    },
+  );
+
+  testWidgets(
+    'queued prompt playback is suppressed when voice prompts start disabled',
+    (WidgetTester tester) async {
+      final repository = NumbersLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          NumbersLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_numbersLesson],
+          }),
+        }),
+      );
+      final audio = _RecordingAudioService();
+      final speech = _RecordingSpeechCueService();
+
+      await tester.pumpWidget(
+        _wrapWithServices(
+          progressStore: MemoryProgressStore(
+            const AppProgressSnapshot(voicePromptsEnabled: false),
+          ),
+          audioService: audio,
+          speechCueService: speech,
+          child: NumbersLearnScreen(
+            repository: repository,
+            lessonId: 'numbers_count_1',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(audio.played, isEmpty);
+      expect(speech.spoken, isEmpty);
+    },
+  );
 
   testWidgets('shows the first numbers card and advances to the next one', (
     WidgetTester tester,
@@ -321,15 +395,54 @@ class _FakeAssetBundle extends CachingAssetBundle {
   }
 }
 
+class _RecordingAudioService implements AudioService {
+  final List<AudioCue> played = [];
+  bool _isMuted = false;
+
+  @override
+  bool get isMuted => _isMuted;
+
+  @override
+  set isMuted(bool value) => _isMuted = value;
+
+  @override
+  Future<void> play(AudioCue cue) async {
+    played.add(cue);
+  }
+
+  @override
+  Future<void> stop() async {}
+}
+
+class _RecordingSpeechCueService implements SpeechCueService {
+  final List<String> spoken = [];
+
+  @override
+  Future<void> speak(
+    String text, {
+    String locale = 'ko-KR',
+    double rate = 0.42,
+    double pitch = 1.0,
+  }) async {
+    spoken.add(text);
+  }
+
+  @override
+  Future<void> stop() async {}
+}
+
 Widget _wrapWithServices({
-  required ProgressStore progressStore,
   required Widget child,
+  ProgressStore? progressStore,
+  SpeechCueService? speechCueService,
+  AudioService? audioService,
 }) {
   return MaterialApp(
     home: AppServicesScope(
       services: AppServices(
-        progressStore: progressStore,
-        speechCueService: NoopSpeechCueService(),
+        progressStore: progressStore ?? MemoryProgressStore(),
+        speechCueService: speechCueService ?? NoopSpeechCueService(),
+        audioService: audioService,
       ),
       child: child,
     ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/audio/audio_cue.dart';
 import '../../../app/services/app_services.dart';
 import '../../../app/ui/audio_prompt_panel.dart';
 import '../../../app/ui/kid_theme.dart';
@@ -63,20 +64,46 @@ class _NumbersLearnScreenState extends State<NumbersLearnScreen> {
     });
   }
 
-  Future<void> _replayPrompt(NumbersCard card) async {
-    await _speakIfEnabled(card.label);
+  Future<void> _replayPrompt(NumbersCard card, {int? cardIndex}) async {
+    await _playPromptIfEnabled(
+      _promptCueFor(card, cardIndex ?? _currentCardIndex),
+    );
   }
 
-  Future<void> _speakIfEnabled(String text) async {
+  Future<void> _playPromptIfEnabled(PromptCue cue) async {
     final snapshot = await _services.progressStore.loadSnapshot();
     if (!snapshot.voicePromptsEnabled) {
       return;
     }
-    await _services.speechCueService.speak(text, locale: 'ko-KR');
+    await _services.audioService.play(cue);
+  }
+
+  PromptCue _promptCueFor(NumbersCard card, int cardIndex) {
+    final slug = _promptSlugFor(card.symbol, cardIndex);
+    return PromptCue(
+      AudioCueRef(
+        assetPath:
+            'assets/generated/audio/voice/prompts/numbers/${widget.lessonId}_$slug.mp3',
+        fallbackText: card.label,
+      ),
+    );
+  }
+
+  String _promptSlugFor(String symbol, int cardIndex) {
+    final slug = symbol
+        .trim()
+        .toLowerCase()
+        .replaceAll(RegExp(r'\s+'), '_')
+        .replaceAll(RegExp(r'[^a-z0-9_-]'), '');
+    if (slug.isEmpty) {
+      return 'item_${cardIndex + 1}';
+    }
+    return slug;
   }
 
   void _queuePrompt(NumbersCard card) {
-    final promptKey = '${widget.lessonId}:${card.symbol}:$_currentCardIndex';
+    final cardIndex = _currentCardIndex;
+    final promptKey = '${widget.lessonId}:${card.symbol}:$cardIndex';
     if (_lastPromptKey == promptKey) {
       return;
     }
@@ -85,7 +112,7 @@ class _NumbersLearnScreenState extends State<NumbersLearnScreen> {
       if (!mounted) {
         return;
       }
-      _replayPrompt(card);
+      _replayPrompt(card, cardIndex: cardIndex);
     });
   }
 
