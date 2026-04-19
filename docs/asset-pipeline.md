@@ -1,275 +1,122 @@
-# Asset pipeline for 승원이의 빵빵 놀이터
+# Asset pipeline guide
 
-상태: researched / agreed direction
-기준 시각: 2026-04-16 16:08 KST
+이 문서는 현재 레포에서 실제로 사용하는 asset pipeline을 정리한 운영 가이드다.
+앱 코드와 Flutter 번들은 `assets/generated/`만 바라보고, `scripts/prepare_assets.sh`가 `assets/public/`와 선택적인 `assets/local_private/`를 합쳐 최종 자산을 만든다.
 
-## 왜 이 문서가 필요한가
-
-이 프로젝트는 아래 자산이 섞인다.
-- 실제 아이 얼굴 사진
-- 카테고리 음성
-- 효과음
-- 배경음악
-- 향후 교체 가능한 캐릭터/차량/배경 이미지
-
-레포는 private이지만, APK 안에 들어간 자산은 결국 추출 가능하다.
-그래서 "git에 안 올린다"와 "기기 안에서 완전히 비공개다"는 같은 뜻이 아니다.
-이 문서는 안전성과 유지보수성을 동시에 잡는 자산 구조를 정의한다.
-
-## 핵심 원칙
-
-1. 코드가 참조하는 자산 경로는 항상 고정한다.
-2. git에는 placeholder 자산만 올려도 앱이 동작해야 한다.
-3. 실제 얼굴 사진/민감 자산/교체 예정 자산은 git 밖 또는 gitignore 경로에 둔다.
-4. 빌드 직전에 placeholder + private override를 합쳐서 최종 번들 자산을 만든다.
-5. 나중에 자산을 바꾸더라도 앱 코드 수정 없이 파일 교체만으로 대응 가능해야 한다.
-
-## 권장 폴더 구조
+## 현재 디렉터리 계약
 
 ```text
-kids-play-app/
-  assets/
-    public/
-      images/
-        hero/
-          hero_bg_car.webp
-          hero_face.webp
-        categories/
-          hangul_card_placeholder.webp
-          alphabet_card_placeholder.webp
-          numbers_card_placeholder.webp
-      audio/
-        voice/
-          hangul/
-            consonant_giyeok.ogg
-          alphabet/
-            letter_a.ogg
-          prompts/
-            choose_answer.ogg
-        sfx/
-          tap.ogg
-          success.ogg
-          wrong.ogg
-          sticker_reward.ogg
-        music/
-          drive_loop_01.ogg
-      manifest/
-        asset_register.csv
-
-    local_private/
-      images/
-        hero/
-          hero_face.webp
-      audio/
-        voice/
-        music/
-
-    generated/
-      .keep
-
-  asset_sources/
-    README.md
-    private/
-      .keep
-    licensed/
-      .keep
-
-  scripts/
-    prepare_assets.sh
+assets/
+  public/         git에 커밋하는 기본 자산
+  local_private/  머신별 private override
+  generated/      prepare step가 다시 만드는 최종 자산
 ```
 
-## 각 폴더의 역할
+### `assets/public/`
+- 모든 clone에서 안전하게 공유되는 기본 자산 위치다.
+- 현재 레포에는 아래 예시가 이미 있다.
+  - `assets/public/manifest/hangul_lessons.json`
+  - `assets/public/manifest/alphabet_lessons.json`
+  - `assets/public/manifest/numbers_lessons.json`
+  - `assets/public/manifest/home_categories.json`
+  - `assets/public/manifest/asset_register.csv`
+  - `assets/public/images/hero/hero_face.png`
+- `images/categories/`, `audio/voice/prompts/`, `audio/sfx/`, `audio/music/` 같은 경로도 현재 구조에 포함되어 있으며, 지금은 비어 있거나 placeholder만 있더라도 같은 경로 계약 아래에서 나중에 자산을 추가할 수 있다.
 
-### assets/public/
-- git에 커밋하는 안전한 기본 자산
-- placeholder 이미지/음성 포함
-- 이 폴더만으로도 앱이 실행 가능해야 함
+### `assets/local_private/`
+- gitignore되는 로컬 override 위치다.
+- `public/`와 **같은 상대 경로와 파일명**을 사용하면 prepare step에서 덮어쓴다.
+- 예: 개인화된 히어로 이미지를 쓰려면 `assets/local_private/images/hero/hero_face.png`에 둔다.
 
-### assets/local_private/
-- gitignore 대상
-- 같은 상대 경로/파일명으로 public 자산을 덮어씀
-- 실제 승원이 얼굴, 가족 녹음 음성, 테스트용 사설 자산 등을 넣는 곳
+### `assets/generated/`
+- prepare step가 매번 다시 만드는 최종 결과물이다.
+- Flutter `pubspec.yaml`과 앱 코드가 참조해야 하는 경로는 이쪽뿐이다.
+- clean checkout 직후에는 필요한 하위 디렉터리가 아직 없을 수 있으므로, asset 구조를 바꿨거나 새 clone이라면 먼저 prepare step를 실행한다.
 
-### assets/generated/
-- gitignore 대상
-- Flutter가 실제로 번들하는 최종 자산 폴더
-- public을 복사한 뒤 local_private를 overlay 해서 생성
+## 실제 prepare script
 
-### asset_sources/
-- 앱에 바로 넣지 않는 원본 보관용
-- PSD, SVG, WAV 마스터, 라이선스 파일, 영수증, 고해상도 원본 사진 등
-- 가능하면 repo 밖에 별도 보관하는 것이 가장 좋음
-
-## 히어로 연출용 이미지 구조
-
-히어로 화면은 1장의 완성 이미지보다 레이어 분리가 낫다.
-
-권장 레이어:
-- hero_bg_car.webp: 도로/자동차/배경
-- hero_face.webp: 승원이 얼굴 cutout
-
-이유:
-- placeholder 얼굴과 실제 얼굴을 쉽게 교체 가능
-- 사진 없이도 기본 UI 개발 가능
-- 나중에 캐릭터 스타일을 바꿔도 레이아웃 코드 수정이 적음
-
-## git에 올릴 placeholder 원칙
-
-placeholder도 실제 계약과 동일해야 한다.
-즉 아래를 맞춘다.
-- 파일명 동일
-- 대략적인 비율 동일
-- 투명 배경 여부 동일
-- 오디오 길이/용도 비슷
-- BGM은 loop 가능 형태 유지
-
-예:
-- assets/public/images/hero/hero_face.webp
-  - generic cartoon driver silhouette
-- assets/public/audio/prompts/choose_answer.ogg
-  - neutral placeholder voice
-- assets/public/audio/music/drive_loop_01.ogg
-  - short royalty-free placeholder loop
-
-## private/copyrighted 자산을 git에서 분리해야 하는 이유
-
-private repo여도 아래 문제는 남는다.
-- 실수로 공유 가능
-- clone된 로컬/백업/히스토리에 남음
-- APK에 들어가면 추출 가능
-
-그래서 아래 자산은 원칙적으로 git에 올리지 않는 편이 낫다.
-- 실제 아이 얼굴 원본
-- 가족 음성 원본
-- 구매/라이선스 제약 있는 음원/이미지 원본
-- 고해상도 원본 사진/PSD/WAV
-
-## 추천 .gitignore 항목
-
-```gitignore
-assets/local_private/*
-!assets/local_private/.keep
-
-assets/generated/*
-!assets/generated/.keep
-
-asset_sources/private/*
-!asset_sources/private/.keep
-
-asset_sources/licensed/*
-!asset_sources/licensed/.keep
-```
-
-## 빌드 전 자산 합치기 스크립트
-
-예상 스크립트: scripts/prepare_assets.sh
-
-동작:
-1. assets/generated 초기화
-2. assets/public 전체 복사
-3. assets/local_private 존재 시 overlay
-4. Flutter는 generated만 참조
-
-예시:
+현재 레포에서 쓰는 스크립트는 `scripts/prepare_assets.sh`다.
+핵심은 현재 working directory가 아니라 **스크립트 위치 기준으로 repo root를 계산**한다는 점이다.
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-rm -rf assets/generated
-mkdir -p assets/generated
-rsync -a assets/public/ assets/generated/
-if [ -d assets/local_private ]; then
-  rsync -a assets/local_private/ assets/generated/
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PUBLIC_DIR="$ROOT_DIR/assets/public"
+PRIVATE_DIR="$ROOT_DIR/assets/local_private"
+GENERATED_DIR="$ROOT_DIR/assets/generated"
+
+if [[ ! -d "$PUBLIC_DIR" ]]; then
+  echo "Missing public assets directory: $PUBLIC_DIR" >&2
+  exit 1
+fi
+
+rm -rf "$GENERATED_DIR"
+mkdir -p "$GENERATED_DIR"
+
+rsync -a --delete "$PUBLIC_DIR/" "$GENERATED_DIR/"
+
+if [[ -d "$PRIVATE_DIR" ]]; then
+  rsync -a "$PRIVATE_DIR/" "$GENERATED_DIR/"
 fi
 ```
 
-## 추천 파일 포맷
+실제 동작은 아래와 같다.
+1. `assets/public/`가 없으면 바로 실패한다.
+2. `assets/generated/`를 지우고 다시 만든다.
+3. `assets/public/` 전체를 `assets/generated/`로 복사한다.
+4. `assets/local_private/`가 있으면 같은 경로의 파일을 overlay 한다.
+5. private overlay 단계는 `--delete`를 쓰지 않으므로, private 쪽은 public 기본 자산을 선택적으로 덮어쓰는 용도다.
 
-### 이미지
-기본 추천: WebP
+## 복사해서 바로 쓸 수 있는 실행 예시
 
-#### 실제 얼굴 사진
-- WebP lossy
-- 품질: 대략 75~85
-- 긴 변: 보통 1080~1440px
-- EXIF 제거 필수
+`assets/README.md`와 동일하게, 팀 기본 사용법은 **repo root로 이동한 다음** 스크립트를 실행하는 것이다. `assets/` 디렉터리 안으로 들어가서 실행하지 않는다.
 
-#### 배경/차량/일러스트
-- WebP 우선
-- 투명도와 가장자리가 중요하면 PNG 또는 WebP lossless 검토
-
-#### 사용을 줄일 것
-- 원본 휴대폰 사진 그대로
-- 불필요하게 큰 PNG
-- EXIF 남은 사진
-
-### 오디오
-기본 추천: OGG Vorbis
-
-#### 음성 클립
-- mono
-- 24kHz 또는 32kHz
-- 48~64 kbps 정도
-- 앞뒤 무음 최대한 제거
-
-#### 효과음
-- mono 위주
-- 48~96 kbps 정도
-
-#### 배경음악
-- stereo
-- 44.1kHz
-- 96~128 kbps 정도
-- loop 편집 고려
-
-#### 피할 것
-- 대부분의 자산을 WAV로 넣는 것
-- 큰 FLAC를 그대로 넣는 것
-
-## 자산 슬롯 기반 네이밍 규칙
-
-브랜드명이나 소스명을 코드 경로에 박지 않는다.
-논리 슬롯으로 이름 짓는다.
-
-좋은 예:
-- hero_face.webp
-- hero_bg_car.webp
-- drive_loop_01.ogg
-- category_hangul_intro.ogg
-
-피할 예:
-- tayo_main_song.mp3
-- seungwon_real_face_final_final.png
-
-이유:
-- placeholder → private build → licensed replacement 전환이 쉬움
-- 코드가 자산 출처와 결합되지 않음
-
-## 자산 레지스터 권장
-
-assets/public/manifest/asset_register.csv 같은 파일로 관리:
-
-```csv
-asset_id,relative_path,type,current_variant,source,license,private,ship_ok,notes
-hero_face,images/hero/hero_face.webp,image,placeholder,internal,owned,false,true,default placeholder
-hero_face,images/hero/hero_face.webp,image,family_private,family_photo,private,true,false,only for trusted family build
-bgm_drive_01,audio/music/drive_loop_01.ogg,audio,placeholder,internal,owned,false,true,replace later if needed
+```bash
+REPO_ROOT="/path/to/kids-play-app"
+cd "$REPO_ROOT"
+./scripts/prepare_assets.sh
 ```
 
-## 실제 전달/교체 워크플로우
+절대/상대 경로로 스크립트를 직접 호출해도 동작 자체는 repo-root-safe 하다. 그래도 문서와 팀 사용 예시는 위처럼 `cd "$REPO_ROOT"` 후 실행하는 방식을 기준으로 둔다.
 
-1. 코드/placeholder는 repo에 유지
-2. 실제 사진/음성은 별도 보관
-3. 필요 시 local_private에 덮어쓰기용 파일만 넣음
-4. prepare_assets.sh 실행
-5. APK build
+```bash
+REPO_ROOT="/path/to/kids-play-app"
+"$REPO_ROOT/scripts/prepare_assets.sh"
+```
 
-## 이 프로젝트에 대한 최종 추천
+prepare step를 다시 돌려야 하는 대표적인 경우:
+- `assets/public/` 내용을 바꿨을 때
+- `assets/local_private/`에 override를 추가하거나 교체했을 때
+- 새 clone에서 아직 `assets/generated/`가 준비되지 않았을 때
 
-- repo에는 안전한 placeholder만 커밋
-- 실제 승원이 얼굴/민감 음성/교체 예정 자산은 git 밖 또는 local_private에 둠
-- Flutter는 generated만 번들링
-- 이미지 기본 포맷은 WebP
-- 오디오 기본 포맷은 OGG
-- personalized APK는 trusted family device용 build로 취급
+## Flutter asset registration gotcha
+
+현재 `pubspec.yaml`은 `assets/generated/` 전체를 한 번에 등록하지 않고, **구체적인 하위 디렉터리만 명시적으로 등록**한다.
+
+```yaml
+flutter:
+  assets:
+    - assets/generated/images/hero/
+    - assets/generated/images/categories/
+    - assets/generated/audio/voice/prompts/
+    - assets/generated/audio/sfx/
+    - assets/generated/audio/music/
+    - assets/generated/manifest/
+```
+
+이 방식이 현재 레포 기준 권장값이다.
+
+- `assets/generated/` 한 줄로 넓게 등록하면 임시 파일이나 의도하지 않은 산출물을 함께 묶기 쉬워진다.
+- 어떤 generated 하위 트리가 앱 계약의 일부인지 `pubspec.yaml`에서 바로 읽을 수 있다.
+- 현재 레포는 manifest와 hero 이미지 예시가 이미 있고, categories/audio 경로도 같은 generated-path 계약 아래에서 이후 placeholder나 실자산을 추가할 수 있다.
+
+## 자산 추가/교체 규칙
+
+1. 기본 자산은 `assets/public/` 아래에 둔다.
+2. 머신 전용 민감 자산은 `assets/local_private/` 아래의 같은 상대 경로에 둔다.
+3. `./scripts/prepare_assets.sh`를 실행해 `assets/generated/`를 다시 만든다.
+4. 코드와 `pubspec.yaml`은 계속 `assets/generated/...`만 참조한다.
+
+핵심은 **입력 경로(`public`, `local_private`)와 런타임 경로(`generated`)를 분리**하는 것이다. 이렇게 두면 현재처럼 manifest + hero 이미지 중심의 최소 자산 세트로도 앱 계약을 유지할 수 있고, 이후 categories/audio placeholder나 private override를 추가할 때도 코드 경로를 바꿀 필요가 없다.
