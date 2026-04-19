@@ -1,4 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kids_play_app/app/audio/audio_cue.dart';
+import 'package:kids_play_app/app/audio/audio_service.dart';
 import 'package:kids_play_app/app/services/app_services.dart';
 import 'package:kids_play_app/app/services/progress_store.dart';
 import 'package:kids_play_app/app/services/speech_cue_service.dart';
@@ -23,6 +25,25 @@ class _RecordingSpeech implements SpeechCueService {
   Future<void> stop() async {}
 }
 
+class _RecordingAudioService implements AudioService {
+  final List<AudioCue> played = <AudioCue>[];
+  bool _isMuted = false;
+
+  @override
+  bool get isMuted => _isMuted;
+
+  @override
+  set isMuted(bool value) => _isMuted = value;
+
+  @override
+  Future<void> play(AudioCue cue) async {
+    played.add(cue);
+  }
+
+  @override
+  Future<void> stop() async {}
+}
+
 const _category = alphabetLessonCategory;
 
 final _items = [
@@ -35,12 +56,14 @@ final _items = [
 QuizController _buildController({
   AppProgressSnapshot? initialSnapshot,
   _RecordingSpeech? speech,
+  _RecordingAudioService? audioService,
   List<LessonItem>? questions,
 }) {
   final store = MemoryProgressStore(initialSnapshot);
   final services = AppServices(
     progressStore: store,
     speechCueService: speech ?? _RecordingSpeech(),
+    audioService: audioService,
   );
   return QuizController(
     services: services,
@@ -223,13 +246,78 @@ void main() {
     expect(controller.isComplete, isFalse);
   });
 
+  test('replayPrompt routes prompt playback through AudioService', () async {
+    final speech = _RecordingSpeech();
+    final audioService = _RecordingAudioService();
+    final controller = _buildController(
+      speech: speech,
+      audioService: audioService,
+    );
+
+    await controller.replayPrompt();
+
+    expect(speech.spoken, isEmpty);
+    expect(audioService.played, hasLength(1));
+  });
+
   test(
-    'replayPrompt routes category-formatted text to the speech service',
+    'replayPrompt builds stable prompt metadata for the current question',
     () async {
       final speech = _RecordingSpeech();
-      final controller = _buildController(speech: speech);
+      final audioService = _RecordingAudioService();
+      final controller = _buildController(
+        speech: speech,
+        audioService: audioService,
+      );
+
       await controller.replayPrompt();
-      expect(speech.spoken.single, contains("'A'"));
+
+      expect(
+        audioService.played.single,
+        isA<PromptCue>()
+            .having(
+              (cue) => cue.ref.assetPath,
+              'assetPath',
+              'assets/generated/audio/voice/prompts/alphabet/alphabet_letters_1_quiz_a.mp3',
+            )
+            .having(
+              (cue) => cue.ref.fallbackText,
+              'fallbackText',
+              _category.promptFor('A'),
+            ),
+      );
+      expect(speech.spoken, isEmpty);
+    },
+  );
+
+  test(
+    'replayPrompt falls back to item_<index> when slug normalization is empty',
+    () async {
+      final speech = _RecordingSpeech();
+      final audioService = _RecordingAudioService();
+      final controller = _buildController(
+        speech: speech,
+        audioService: audioService,
+        questions: const [LessonItem(symbol: '!!!', label: '!!!', hint: '')],
+      );
+
+      await controller.replayPrompt();
+
+      expect(
+        audioService.played.single,
+        isA<PromptCue>()
+            .having(
+              (cue) => cue.ref.assetPath,
+              'assetPath',
+              'assets/generated/audio/voice/prompts/alphabet/alphabet_letters_1_quiz_item_1.mp3',
+            )
+            .having(
+              (cue) => cue.ref.fallbackText,
+              'fallbackText',
+              _category.promptFor('!!!'),
+            ),
+      );
+      expect(speech.spoken, isEmpty);
     },
   );
 }

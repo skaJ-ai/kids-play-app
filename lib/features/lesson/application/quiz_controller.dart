@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../app/audio/audio_cue.dart';
 import '../../../app/services/app_services.dart';
 import '../../../app/services/progress_store.dart';
 import '../domain/lesson.dart';
@@ -58,14 +59,36 @@ class QuizController extends ChangeNotifier {
   String promptKeyFor(LessonItem question) =>
       '$lessonId:${question.symbol}:$_questionIndex';
 
+  PromptCue _promptCueFor(LessonItem question, int questionIndex) {
+    final slug = _promptSlugFor(question.symbol, questionIndex);
+    return PromptCue(
+      AudioCueRef(
+        assetPath:
+            'assets/generated/audio/voice/prompts/${category.id}/${lessonId}_quiz_$slug.mp3',
+        fallbackText: category.promptFor(question.symbol),
+      ),
+    );
+  }
+
+  String _promptSlugFor(String symbol, int questionIndex) {
+    final slug = symbol
+        .trim()
+        .toLowerCase()
+        .replaceAll(RegExp(r'\s+'), '_')
+        .replaceAll(RegExp(r'[^a-z0-9_-]'), '');
+    if (slug.isEmpty) {
+      return 'item_${questionIndex + 1}';
+    }
+    return slug;
+  }
+
   Future<void> replayPrompt() async {
     final snapshot = await _services.progressStore.loadSnapshot();
     if (!snapshot.voicePromptsEnabled) {
       return;
     }
-    await _services.speechCueService.speak(
-      category.promptFor(currentQuestion.symbol),
-      locale: 'ko-KR',
+    await _services.audioService.play(
+      _promptCueFor(currentQuestion, _questionIndex),
     );
   }
 
