@@ -35,7 +35,7 @@
 - 음성 cue / 다시 듣기 버튼
 - shared_preferences 기반 progress / settings / sticker 저장, lesson별 오답 다시 풀기 횟수 / 다시 풀기 보상 스티커 합계 추적
 - 보호자 메뉴의 진행 요약, 음성/효과 토글, 세트별 진도 조절, 오답 다시 풀기, 오답 비우기, 세트별 수동 해금, 앱 종료/리셋
-- 보호자 진행 요약에서 오답 다시 보기 횟수, 다시 풀기 보상 합계 chip, 최근 보상 callout(최근 보상이 replay reward면 전용 copy) 노출
+- 보호자 진행 요약에서 최근 헷갈림 / 오답 다시 보기 집계 chip, 다시 풀기 보상 합계 chip, 최근 보상 callout(최근 보상이 replay reward면 전용 copy), 가장 헷갈린 세트 요약 callout(카테고리/세트 메타데이터 + `이 세트 다시 보기` quick retry) 노출
 - GitHub Actions APK 빌드
 
 아직 남은 확장 후보
@@ -74,7 +74,7 @@
 - 소리 설정 제공
 - 세트별 진도 앞뒤 조절 제공
 - 세트별 오답 다시 풀기 제공
-- 오답 다시 풀기 누적 횟수 / 다시 풀기 보상 합계 저장 및 보호자 요약 노출
+- lesson별 recentMistakes / 오답 다시 보기 누적 횟수 저장, 전역 다시 풀기 보상 합계 추적 및 이를 바탕으로 보호자 요약에서 최근 헷갈림 수, 최근 보상 callout, 가장 헷갈린 세트 요약 callout + `이 세트 다시 보기` quick retry 노출
 - 세트별 최근 오답 비우기 제공
 - 세트별 수동 해금 제공
 - 앱 종료/리셋 최소 운영 기능 제공
@@ -96,7 +96,7 @@
   - 결과: passed
 - hero / home / parent entry + parent summary controls
   - `/home/openc/sdk/flutter/bin/flutter test test/features/hero/presentation/hero_screen_test.dart test/features/home/presentation/home_redesign_test.dart test/features/avatar/presentation/avatar_setup_screen_test.dart`
-  - 결과: passed
+  - 결과: passed (`avatar_setup_screen_test.dart`에 최근 보상 callout, 가장 헷갈린 세트 요약 렌더링, `이 세트 다시 보기` quick retry 진입 케이스 포함)
 - docs-only HEAD `c5879e9` 기준 full test 재확인 (README-only docs commit)
   - 재실행 예시 (`REPO_ROOT` / `FLUTTER_BIN` 값만 바꾸면 다른 머신에서도 같은 순서로 재현 가능)
     ```bash

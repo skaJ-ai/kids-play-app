@@ -16,10 +16,11 @@
 현재 큐 기준 상태
 - 우선순위 A-F 범위는 live repo와 targeted tests/문서 정합성 기준으로 완료 상태
 - F — docs cleanup 완료. README / handoff / plan 상태 wording 정합성까지 live repo 기준으로 반영됨
-- 최신 앱 코드 스냅샷은 `d81a2ec`이며, `generic_learn_screen.dart`의 일반 학습 prompt를 audio service로 연결한 상태다. replay-reward parent-summary follow-up(`0c15caf`)도 그대로 포함된다
+- 최신 앱 코드 스냅샷은 `d81a2ec`이며, `generic_learn_screen.dart`의 일반 학습 prompt를 audio service로 연결한 상태다. replay-reward parent-summary follow-up(`0c15caf`)와 보호자 요약의 최근 헷갈림 / 오답 다시 보기 집계 chip, 최근 보상 callout, 가장 헷갈린 세트 요약 callout(카테고리/세트 메타데이터 + `이 세트 다시 보기` quick retry)도 그대로 포함된다
 - G — full integration provenance는 historical docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`와 docs-only checkout `f1e23c3` fresh local rerun 두 건이다. 다만 `f1e23c3` rerun의 앱 코드는 `0c15caf`와 동일했고, 후속 app-code snapshot `d81a2ec` 기준 full Gate G 기록은 아직 없다
 - provenance 메모: historical progression은 `c5879e9`(README-only full test 재확인) → docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`(Gate G + historical GitHub Actions provenance) → docs-only checkout `f1e23c3` fresh local rerun(`0c15caf` 코드 일치) 순서로 누적됐다. 그 뒤 `d81a2ec`가 landed했고 후속 app-code snapshot에는 targeted verification만 추가됐다. 세부 명령 결과는 아래 Gate G checklist에 정리한다
 - 후속 app-code snapshot `d81a2ec` targeted verification: `/home/openc/sdk/flutter/bin/flutter test test/features/lesson/presentation/generic_learn_screen_test.dart` => `00:01 +6: All tests passed!`, `/home/openc/sdk/flutter/bin/flutter analyze lib/features/lesson/presentation/generic_learn_screen.dart test/features/lesson/presentation/generic_learn_screen_test.dart` => `No issues found! (ran in 1.1s)`
+- parent summary 관련 `test/features/avatar/presentation/avatar_setup_screen_test.dart`에는 가장 헷갈린 세트 요약 렌더링과 `이 세트 다시 보기` quick retry가 해당 retry flow를 여는 케이스가 포함된다
 
 남은 확장 후보
 - 실제 표정 사진 업로드/크롭
@@ -84,7 +85,7 @@
 ### Slice 6 — end-to-end polish
 - parent dashboard 정보 정리 완료
 - home/category/hub garage UI 정리 완료
-- 기본 summary/reward 흐름 정리 완료
+- 집계 chip / 최근 보상 / 가장 헷갈린 세트 요약 callout(카테고리/세트 메타데이터) + `이 세트 다시 보기` quick retry 흐름 정리 완료
 - docs cleanup 완료
 - docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`의 historical Gate G provenance와 docs-only checkout `f1e23c3` fresh local rerun(`0c15caf` 코드 일치)은 확보됐고, 이후 `d81a2ec`는 generic learn audio-service 배선에 대해 targeted test/analyze만 다시 확인됐다
 

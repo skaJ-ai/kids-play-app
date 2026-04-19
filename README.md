@@ -42,7 +42,7 @@
 - 음성 cue + 문제 다시 듣기 버튼
 - shared_preferences 기반 진도 / 오답 / 스티커 / 설정 저장, lesson별 오답 다시 풀기 횟수 / 다시 풀기 보상 스티커 합계 추적
 - 보호자 메뉴의 진행 요약, 음성/효과 토글, 세트별 진도 조절, 오답 다시 풀기, 오답 비우기, 세트별 수동 해금, 리셋, 종료
-- 보호자 진행 요약에서 오답 다시 보기 횟수, 다시 풀기 보상 합계 chip, 최근 보상 callout(최근 보상이 replay reward면 전용 copy)을 노출
+- 보호자 진행 요약에서 최근 헷갈림 / 오답 다시 보기 집계 chip, 다시 풀기 보상 합계 chip, 최근 보상 callout(최근 보상이 replay reward면 전용 copy), 가장 헷갈린 세트 요약 callout(카테고리/세트 메타데이터 + `이 세트 다시 보기` quick retry)을 노출
 - GitHub Actions APK 빌드 파이프라인
 
 다음 확장 후보
