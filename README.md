@@ -14,11 +14,12 @@
 
 ## 현재 상태
 
-- historical full Gate G provenance는 docs-only HEAD `9d4c035`에 남아 있고, 당시 full rerun이 검증한 앱 코드 스냅샷은 `d81a2ec`였습니다.
-- 이번 docs-only refresh 직전의 latest live app-code snapshot은 `610a6aa`(`fix(numbers): route learn prompts through audio service`)입니다. historical Gate G snapshot 이후 avatar runtime photo flow(`2c78d5f`~`faff2ce`), quiz prompt replay audio service(`19a6f1d`), numbers learn prompt audio service(`610a6aa`) follow-up이 반영됐습니다.
-- queue 관점에서는 A-E 앱 기능이 latest live app-code snapshot에 반영돼 있고, F 문서 정리는 이번 docs-only refresh에서 마무리했습니다. 이번 docs refresh에서는 numbers / home flow / design-system / parent-summary 관련 핵심 선별 테스트만 current app-code snapshot 기준으로 다시 확인했습니다.
-- 다만 latest live app-code snapshot `610a6aa`에 대한 fresh full Gate G rerun(`flutter test`/`flutter analyze`/release build)은 아직 새로 주장하지 않습니다. 이번 run의 targeted verification 기록은 아래 `테스트 / 최종 검증` 섹션과 `handoff.md`에 남겨뒀습니다.
+- latest full Gate G provenance는 docs-only HEAD `7487a97` fresh local rerun입니다. `7487a97`는 README / handoff / plan docs만 바뀐 docs-only HEAD였으므로, 이 rerun이 다시 검증한 앱 코드는 latest live app-code snapshot `610a6aa`(`fix(numbers): route learn prompts through audio service`)와 동일했습니다.
+- latest live app-code snapshot `610a6aa`에는 earlier full Gate G snapshot 이후 avatar runtime photo flow(`2c78d5f`~`faff2ce`), quiz prompt replay audio service(`19a6f1d`), numbers learn prompt audio service(`610a6aa`) follow-up이 반영돼 있습니다.
+- queue 관점에서는 A-F가 이미 latest live app-code snapshot / docs에 반영돼 있었고, verified docs-only HEAD `7487a97`에서 fresh full Gate G rerun이 성공하면서 latest live app-code snapshot `610a6aa` 기준 A-G가 재검증 완료 상태가 됐습니다.
+- 이 docs refresh는 새 docs commit 자체를 검증했다는 뜻이 아니라, verified docs-only HEAD `7487a97`에서 성공한 rerun provenance를 기록합니다.
 - 추가 provenance 참고
+  - 이전 full Gate G rerun: docs-only HEAD `9d4c035`, 당시 검증된 앱 코드 스냅샷 `d81a2ec`
   - docs-only checkout `f1e23c3` fresh local rerun: 당시 checkout의 앱 코드는 `0c15caf`와 동일했습니다.
   - historical artifact-backed record: docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`, GitHub Actions run `24617840783`, artifact `kids-play-app-arm64-v8a-release`.
 
@@ -71,16 +72,14 @@ cd "$REPO_ROOT"
 
 ### 테스트 / 최종 검증
 현재 기준
-- historical full Gate G rerun reference는 docs-only HEAD `9d4c035`이고, 당시 검증된 앱 코드 스냅샷은 `d81a2ec`였습니다.
-- 이번 docs-only refresh 직전의 latest live app-code snapshot은 `610a6aa`(`fix(numbers): route learn prompts through audio service`)입니다. 이 docs-only update는 `610a6aa`의 fresh full Gate G rerun을 다시 주장하지 않고, 아래 targeted recheck만 반영합니다.
-- current app-code snapshot targeted recheck (`610a6aa`, numbers / home flow / design-system / parent-summary spot checks, full Gate G 재실행 아님):
+- latest full Gate G rerun reference는 docs-only HEAD `7487a97`입니다. `7487a97`는 docs-only HEAD였고, 이 rerun이 다시 검증한 앱 코드는 latest live app-code snapshot `610a6aa`와 동일했습니다.
+- 따라서 queue A-G는 verified docs-only HEAD `7487a97`에서 성공한 fresh full Gate G rerun을 근거로 latest live app-code snapshot `610a6aa` 기준 재검증 완료 상태입니다.
+- fresh full Gate G rerun (`7487a97`, app code matched `610a6aa`):
   - `./scripts/prepare_assets.sh` => succeeded
-  - `/home/openc/sdk/flutter/bin/flutter test test/features/numbers` => passed
-  - `/home/openc/sdk/flutter/bin/flutter test test/widget_test.dart` => passed
-  - `/home/openc/sdk/flutter/bin/flutter test test/app/ui` => passed
-  - `/home/openc/sdk/flutter/bin/flutter test test/features/avatar/presentation/avatar_setup_screen_test.dart` => passed
-  - `/home/openc/sdk/flutter/bin/flutter test test/app/services/progress_store_test.dart` => passed
-- latest live app-code snapshot `610a6aa` 기준 fresh full Gate G rerun(`flutter test` / `flutter analyze` / release build)은 아직 pending입니다.
+  - `/home/openc/sdk/flutter/bin/flutter pub get` => succeeded
+  - full `/home/openc/sdk/flutter/bin/flutter test` => `00:39 +275: All tests passed!`
+  - full `/home/openc/sdk/flutter/bin/flutter analyze` => `No issues found! (ran in 5.0s)`
+  - `/home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64` => `build/app/outputs/flutter-apk/app-release.apk` (18.5MB / `18538008` bytes)
 - historical full Gate G rerun (`9d4c035`, 당시 검증된 앱 코드는 `d81a2ec`와 동일):
   - `./scripts/prepare_assets.sh` + `/home/openc/sdk/flutter/bin/flutter pub get` 성공
   - full `/home/openc/sdk/flutter/bin/flutter test` => `00:34 +253: All tests passed!`
@@ -112,7 +111,7 @@ cd "$REPO_ROOT"
 "$FLUTTER_BIN" build apk --release --target-platform android-arm64
 ```
 
-- 아래 명령 블록은 `docs/local-dev-setup.md` 및 `.github/workflows/build-apk.yml` 과 같은 순서의 Gate G 재현용 체크리스트입니다. historical full rerun reference는 docs-only HEAD `9d4c035`(당시 검증된 앱 코드는 `d81a2ec`)이고, latest live app-code snapshot `610a6aa`에는 위의 targeted recheck만 새로 반영했습니다. 그 이전 로컬 rerun은 docs-only checkout `f1e23c3`(검증된 앱 코드는 `0c15caf`와 동일)이며, historical artifact-backed 기준은 docs-only HEAD `1523559` / code snapshot `5696c1f`입니다.
+- 아래 명령 블록은 `docs/local-dev-setup.md` 및 `.github/workflows/build-apk.yml` 과 같은 순서의 Gate G 재현용 체크리스트입니다. latest full rerun reference는 docs-only HEAD `7487a97`(app code matched `610a6aa`)이고, 이전 로컬 full rerun은 docs-only HEAD `9d4c035`(검증된 앱 코드는 `d81a2ec`) 및 docs-only checkout `f1e23c3`(검증된 앱 코드는 `0c15caf`와 동일)입니다. historical artifact-backed 기준은 docs-only HEAD `1523559` / code snapshot `5696c1f`입니다.
 
 ## APK 확인 방법
 

@@ -16,11 +16,11 @@
 
 현재 큐 기준 상태
 - 우선순위 A-E 앱 기능은 latest live app-code snapshot `610a6aa`에 반영돼 있다
-- F — docs cleanup은 이번 refresh에서 README / handoff / plan provenance wording을 latest live app-code snapshot `610a6aa`와 current targeted verification evidence에 맞춰 다시 정리했다
-- latest live app-code snapshot은 `610a6aa`(`fix(numbers): route learn prompts through audio service`)이고, historical full Gate G provenance는 docs-only HEAD `9d4c035`가 검증한 앱 code snapshot `d81a2ec`로 별도 유지된다
-- 이번 docs-only refresh에서는 latest live app-code snapshot `610a6aa`에 대해 numbers / home flow / design-system / parent-summary 관련 targeted recheck만 다시 남겼다
-- G — fresh full integration rerun on latest live app-code snapshot `610a6aa` (`./scripts/prepare_assets.sh` + full `flutter test` / `flutter analyze` / release build) 은 아직 pending이다. 따라서 current app-code snapshot 기준으로 A-G 전체 완료를 새로 주장하지 않는다
-- provenance 메모: historical progression은 `c5879e9`(README-only full test 재확인) → docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`(Gate G + historical GitHub Actions provenance) → docs-only checkout `f1e23c3` 로컬 full rerun(`0c15caf` 코드 일치) → docs-only HEAD `9d4c035` 로컬 full rerun(`d81a2ec` 코드 일치) 순서로 누적됐다. 세부 명령 결과는 아래 Gate G checklist에 정리한다
+- F — docs cleanup은 verified docs-only HEAD `7487a97` Gate G rerun provenance를 latest live app-code snapshot `610a6aa` 기준으로 다시 정리했다
+- latest live app-code snapshot은 `610a6aa`(`fix(numbers): route learn prompts through audio service`)이며, docs-only HEAD `7487a97`에서 fresh full Gate G rerun이 성공했다. `7487a97`는 `610a6aa` 이후 README / handoff / plan docs만 바뀐 docs-only HEAD였으므로, 그 rerun은 app code snapshot `610a6aa`를 다시 검증했다
+- 따라서 queue A-G는 verified docs-only HEAD `7487a97` provenance를 근거로 latest live app-code snapshot `610a6aa` 기준 재검증 완료 상태다
+- 이 plan refresh 자체가 rerun을 실행한 HEAD라는 뜻은 아니고, verified docs-only HEAD `7487a97`에서 확보한 full Gate G provenance를 후속 docs-only commit에서 정리한 것이다
+- provenance 메모: historical progression은 `c5879e9`(README-only full test 재확인) → docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`(Gate G + historical GitHub Actions provenance) → docs-only checkout `f1e23c3` 로컬 full rerun(`0c15caf` 코드 일치) → docs-only HEAD `9d4c035` 로컬 full rerun(`d81a2ec` 코드 일치) → docs-only HEAD `7487a97` 로컬 full rerun(`610a6aa` 코드 일치) 순서로 누적됐다. 세부 명령 결과는 아래 Gate G checklist에 정리한다
 - parent summary 관련 `test/features/avatar/presentation/avatar_setup_screen_test.dart`에는 가장 헷갈린 세트 요약 렌더링과 `이 세트 다시 보기` quick retry가 해당 retry flow를 여는 케이스가 포함된다
 
 남은 확장 후보
@@ -87,7 +87,7 @@
 - home/category/hub garage UI 정리 완료
 - 집계 chip / 최근 보상 / 가장 헷갈린 세트 요약 callout(카테고리/세트 메타데이터) + `이 세트 다시 보기` quick retry 흐름 정리 완료
 - docs cleanup 완료
-- docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`의 historical Gate G provenance, docs-only checkout `f1e23c3` 로컬 full rerun(`0c15caf` 코드 일치), docs-only HEAD `9d4c035` 로컬 full rerun(`d81a2ec` 코드 일치)까지 historical reference로 확보됐다
+- docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`의 historical Gate G provenance, docs-only checkout `f1e23c3` 로컬 full rerun(`0c15caf` 코드 일치), docs-only HEAD `9d4c035` 로컬 full rerun(`d81a2ec` 코드 일치)까지 historical reference로 확보됐고, latest fresh rerun은 docs-only HEAD `7487a97`에서 app code `610a6aa`를 다시 검증했다
 
 ## Verification approach
 
@@ -99,9 +99,16 @@
 
 ### Gate G — final integration checklist
 
-- 이 게이트의 historical provenance는 docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`, docs-only checkout `f1e23c3` 로컬 full rerun, 그리고 docs-only HEAD `9d4c035` 로컬 full rerun까지 확보됐다. `9d4c035`의 HEAD diff는 README / handoff / plan docs뿐이어서 그 Gate G rerun이 검증한 앱 코드는 latest code-changing commit `d81a2ec`와 동일하다. latest live app-code snapshot `610a6aa`에서는 아래 targeted recheck만 새로 확보됐고, full Gate G sequence는 아직 rerun pending이다. 아래 명령 순서는 current app-code snapshot에서 Gate G를 다시 돌릴 때 쓰는 reference checklist다.
+- 이 게이트의 historical provenance는 docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`, docs-only checkout `f1e23c3` 로컬 full rerun, 그리고 docs-only HEAD `9d4c035` 로컬 full rerun까지 확보돼 있었다. latest full Gate G provenance는 docs-only HEAD `7487a97` fresh local rerun이다. `7487a97`의 HEAD diff는 README / handoff / plan docs뿐이어서 그 Gate G rerun이 다시 검증한 앱 코드는 latest code-changing commit `610a6aa`와 동일했다. 따라서 latest live app-code snapshot `610a6aa` 기준 queue A-G는 verified docs-only HEAD `7487a97` provenance로 재검증 완료 상태다. 아래 명령 순서는 그 rerun과 같은 Gate G reference checklist다.
 
-- current app-code snapshot targeted recheck (`610a6aa`, numbers / home flow / design-system / parent-summary spot checks, full Gate G 재실행 아님)
+- latest full Gate G rerun (`7487a97`, app code matched `610a6aa`)
+  - `./scripts/prepare_assets.sh` => succeeded
+  - `/home/openc/sdk/flutter/bin/flutter pub get` => succeeded
+  - full `/home/openc/sdk/flutter/bin/flutter test` => `00:39 +275: All tests passed!`
+  - full `/home/openc/sdk/flutter/bin/flutter analyze` => `No issues found! (ran in 5.0s)`
+  - `/home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64` => `build/app/outputs/flutter-apk/app-release.apk` (18.5MB / `18538008` bytes)
+
+- same app-code snapshot `610a6aa` earlier pre-rerun targeted recheck (numbers / home flow / design-system / parent-summary spot checks, full Gate G 재실행 아님)
   - `./scripts/prepare_assets.sh` => succeeded
   - `/home/openc/sdk/flutter/bin/flutter test test/features/numbers` => passed
   - `/home/openc/sdk/flutter/bin/flutter test test/widget_test.dart` => passed
@@ -118,13 +125,13 @@ cd /home/openc/kids-play-app
 /home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64
 ```
 
-- 최신 로컬 full rerun 기록 (docs-only HEAD `9d4c035`, 검증된 앱 코드는 `d81a2ec`와 동일)
+- 이전 로컬 full rerun 기록 (docs-only HEAD `9d4c035`, 검증된 앱 코드는 `d81a2ec`와 동일)
   - `./scripts/prepare_assets.sh` 성공
   - `/home/openc/sdk/flutter/bin/flutter pub get` 성공
   - full `/home/openc/sdk/flutter/bin/flutter test` => `00:34 +253: All tests passed!`
   - full `/home/openc/sdk/flutter/bin/flutter analyze` => `No issues found! (ran in 2.1s)`
   - `/home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64` => `build/app/outputs/flutter-apk/app-release.apk` (16.8MB / `16774218` bytes)
-- 이전 로컬 full rerun 기록 (docs-only checkout `f1e23c3`, 검증된 앱 코드는 `0c15caf`와 동일)
+- 그 이전 로컬 full rerun 기록 (docs-only checkout `f1e23c3`, 검증된 앱 코드는 `0c15caf`와 동일)
   - `./scripts/prepare_assets.sh` 성공
   - `/home/openc/sdk/flutter/bin/flutter pub get` 성공
   - full `/home/openc/sdk/flutter/bin/flutter test` => `00:33 +249: All tests passed!`

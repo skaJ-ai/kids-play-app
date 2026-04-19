@@ -50,14 +50,14 @@
 ## 현재 큐 기준 상태
 
 ### queue 기준 상태
-- A-E 범위(숫자 feature/라우팅, home/category 연결, design-system theme/button/panel 정리, hero/home/category 리디자인, 보호자 summary/settings/retry/unlock 흐름) 앱 기능은 latest live app-code snapshot `610a6aa`에 반영돼 있다
-- F에 해당하는 README / handoff / plan 문서 정합성 cleanup은 이번 docs-only refresh에서 반영됐다
-- historical full Gate G provenance는 docs-only HEAD `9d4c035` / 검증된 앱 코드 스냅샷 `d81a2ec`로 별도 유지된다
-- 이번 docs-only refresh에서는 latest live app-code snapshot `610a6aa`에 대해 numbers / home flow / design-system / parent-summary 관련 targeted recheck만 다시 남겼다
-- G에 해당하는 latest live app-code snapshot `610a6aa` fresh full integration rerun(`flutter test` / `flutter analyze` / release build)은 아직 pending이므로, current app-code snapshot 기준으로 A-G 전체 완료를 새로 주장하지 않는다
+- A-F 범위(숫자 feature/라우팅, home/category 연결, design-system theme/button/panel 정리, hero/home/category 리디자인, 보호자 summary/settings/retry/unlock 흐름, docs cleanup)는 latest live app-code snapshot `610a6aa`와 문서에 반영돼 있다
+- G는 docs-only HEAD `7487a97`에서 fresh full integration rerun(`./scripts/prepare_assets.sh` + `/home/openc/sdk/flutter/bin/flutter pub get` + full `flutter test` / `flutter analyze` / release build)으로 새로 재확인됐다
+- `7487a97`는 `610a6aa` 이후 README / handoff / plan docs만 바뀐 docs-only HEAD였으므로, 위 rerun은 latest live app-code snapshot `610a6aa`를 다시 검증했다
+- 따라서 queue A-G는 verified docs-only HEAD `7487a97` provenance를 근거로 latest live app-code snapshot `610a6aa` 기준 재검증 완료 상태다
+- 이 handoff 커밋 자체가 rerun을 실행한 HEAD라는 뜻은 아니며, verified docs-only HEAD `7487a97`에서 성공한 full Gate G provenance를 기록한 후속 docs-only refresh다
 - latest live app-code snapshot `610a6aa`에는 avatar runtime photo flow(`2c78d5f`~`faff2ce`), quiz prompt replay audio service(`19a6f1d`), numbers learn prompt audio service(`610a6aa`)가 반영돼 있다
-- historical provenance는 docs-only checkout `f1e23c3` 로컬 full rerun(`0c15caf` 코드 일치)과 historical docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`까지 함께 유지한다
-- current targeted recheck / historical full rerun / artifact-backed reference 세부 결과는 아래 `선별 검증 + Gate G provenance 메모` 섹션에 정리돼 있다
+- historical provenance는 docs-only HEAD `9d4c035` 로컬 full rerun(`d81a2ec` 코드 일치), docs-only checkout `f1e23c3` 로컬 full rerun(`0c15caf` 코드 일치), historical docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`까지 함께 유지한다
+- latest full rerun / earlier pre-rerun spot checks / historical reference 세부 결과는 아래 `선별 검증 + Gate G provenance 메모` 섹션에 정리돼 있다
 
 ### 1. 문서/CI 정합성
 - docs/script 변경도 APK workflow에 포함되도록 정리됨
@@ -94,8 +94,14 @@
 
 ## 선별 검증 + Gate G provenance 메모
 
-최근 문서화된 current app-code snapshot targeted recheck와 historical full Gate G provenance 메모
-- current app-code snapshot targeted recheck (`610a6aa`, numbers / home flow / design-system / parent-summary spot checks, full Gate G 재실행 아님)
+최근 문서화된 latest full Gate G provenance와 earlier/historical verification 메모
+- latest full Gate G 로컬 rerun (`7487a97` docs-only HEAD, app code matched `610a6aa`)
+  - `./scripts/prepare_assets.sh` => succeeded
+  - `/home/openc/sdk/flutter/bin/flutter pub get` => succeeded
+  - full `/home/openc/sdk/flutter/bin/flutter test` => `00:39 +275: All tests passed!`
+  - full `/home/openc/sdk/flutter/bin/flutter analyze` => `No issues found! (ran in 5.0s)`
+  - `/home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64` => `build/app/outputs/flutter-apk/app-release.apk` (18.5MB / `18538008` bytes)
+- same app-code snapshot `610a6aa` earlier pre-rerun targeted recheck (numbers / home flow / design-system / parent-summary spot checks, full Gate G 전에 남겨둔 기록)
   - `./scripts/prepare_assets.sh` => succeeded
   - `/home/openc/sdk/flutter/bin/flutter test test/features/numbers` => passed
   - `/home/openc/sdk/flutter/bin/flutter test test/widget_test.dart` => passed
@@ -232,7 +238,7 @@ artifact
 ## 다음 작업자가 바로 이어갈 포인트
 
 우선순위 추천
-1. historical full Gate G rerun reference는 docs-only HEAD `9d4c035` / code snapshot `d81a2ec`다. latest live app-code snapshot `610a6aa`에는 avatar runtime photo flow와 audio-service follow-up(`19a6f1d`, `610a6aa`)가 이미 들어와 있고 이번 slice는 targeted app-code recheck와 docs provenance refresh까지만 반영했다. latest app-code snapshot 기준 fresh full Gate G rerun은 아직 pending이므로, 다음 작업도 아래 남은 확장 후보를 작은 slice로 이어가면 된다.
+1. latest live app-code snapshot `610a6aa`는 verified docs-only HEAD `7487a97` full Gate G rerun으로 A-G까지 재검증 완료 상태다. 이 handoff는 그 rerun provenance를 기록한 docs slice이며, older historical refs(`9d4c035`, `f1e23c3`, `1523559`)도 아래에 유지했다. 다음 작업은 아래 남은 확장 후보를 작은 slice로 이어가면 된다.
 
 남은 확장 후보
 - richer reward / 효과음 / 배경음악 polish
