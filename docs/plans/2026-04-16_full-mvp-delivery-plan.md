@@ -16,12 +16,15 @@
 현재 큐 기준 상태
 - 우선순위 A-F 범위는 live repo와 targeted tests/문서 정합성 기준으로 완료 상태
 - F — docs cleanup 완료. README / handoff / plan 상태 wording 정합성까지 live repo 기준으로 반영됨
-- G — final integration gate 완료. docs-only HEAD `1523559`에서 Gate G를 실행했고, 앱 코드는 마지막 코드 커밋 `5696c1f` (`fix(ui): remove tap cooldown analyze blocker`) 이후 변경되지 않았음
+- current HEAD에는 replay-reward parent-summary follow-up이 반영돼 있으며, `progress_store.dart`는 lesson별 `mistakeReplayCount`와 앱 전체 `replayRewardStickerCount`를 저장하고 `avatar_setup_screen.dart` 보호자 요약은 오답 다시 보기 횟수/다시 풀기 보상 합계를 chip으로 노출하며 recent reward callout은 latest reward kind에 따라 일반/replay copy를 노출함
+- G — final integration gate는 docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`에서 완료된 historical evidence임
 - provenance 메모: `c5879e9`에서 `./scripts/prepare_assets.sh` 후 full `/home/openc/sdk/flutter/bin/flutter test`가 `00:32 +227: All tests passed!`로 끝났고, 이후 검증 기준 코드 스냅샷은 `5696c1f`로 이동했다. 이 코드 스냅샷에서는 `/home/openc/sdk/flutter/bin/flutter test test/app/ui/tap_cooldown_test.dart` => `00:00 +9: All tests passed!`, `/home/openc/sdk/flutter/bin/flutter analyze lib/app/ui/tap_cooldown.dart test/app/ui/tap_cooldown_test.dart` => `No issues found!`를 선별 재확인한 뒤, docs-only HEAD `1523559`에서 `./scripts/prepare_assets.sh` + `flutter pub get` + full `flutter test` (`00:33 +236: All tests passed!`) + full `flutter analyze` (`No issues found!`) + release build (`build/app/outputs/flutter-apk/app-release.apk`, 16.8MB) + GitHub Actions run `24617840783` / artifact `kids-play-app-arm64-v8a-release` 확인까지 완료했다
-- 따라서 현재 queue에는 필수 마감 게이트가 남아 있지 않고, 다음 run은 아래 확장 후보 중 하나를 작은 slice로 선택하면 된다
+- current HEAD replay-reward targeted verification:
+  - `/home/openc/sdk/flutter/bin/flutter test test/app/services/progress_store_test.dart test/features/avatar/presentation/avatar_setup_screen_test.dart test/features/lesson/application/quiz_controller_test.dart` => `00:05 +33: All tests passed!`
+  - `/home/openc/sdk/flutter/bin/flutter analyze lib/app/services/progress_store.dart lib/features/avatar/presentation/avatar_setup_screen.dart test/app/services/progress_store_test.dart test/features/avatar/presentation/avatar_setup_screen_test.dart test/features/lesson/application/quiz_controller_test.dart` => `No issues found!`
+- 따라서 historical full-gate provenance는 유지되지만, current HEAD에는 아직 같은 범위의 full Gate G 재실행 기록이 없다. 다음 run은 아래 남은 확장 후보를 작은 slice로 선택하거나, fresh release handoff가 필요하면 current HEAD에서 Gate G를 다시 돌리면 된다
 
 남은 확장 후보
-- 오답 다시 풀기 결과를 별도 통계/보상과 연결
 - 실제 표정 사진 업로드/크롭
 - richer reward / 효과음 / 배경음악 polish
 
@@ -86,7 +89,7 @@
 - home/category/hub garage UI 정리 완료
 - 기본 summary/reward 흐름 정리 완료
 - docs cleanup 완료
-- docs-only HEAD `1523559`에서 Gate G를 완료했고, 앱 코드는 마지막 코드 커밋 `5696c1f` 이후 변경되지 않은 상태에서 full `flutter test` / full `flutter analyze` / release build / Actions artifact 확인까지 마감함
+- docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`에서 Gate G를 완료한 historical provenance가 있고, 이후 main에는 replay-reward parent-summary follow-up이 landed했다
 
 ## Verification approach
 
@@ -98,7 +101,7 @@
 
 ### Gate G — final integration checklist
 
-이 게이트는 docs-only HEAD `1523559`에서 완료됐다. 실행 순서는 README / `handoff.md` / `docs/local-dev-setup.md` / `.github/workflows/build-apk.yml` 와 같은 순서(`./scripts/prepare_assets.sh` → `/home/openc/sdk/flutter/bin/flutter pub get` → `flutter test` → `flutter analyze` → release APK build)였고, 앱 코드는 마지막 코드 커밋 `5696c1f` 이후 변경되지 않았다.
+이 게이트는 docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`에서 완료된 historical record다. 실행 순서는 README / `handoff.md` / `docs/local-dev-setup.md` / `.github/workflows/build-apk.yml` 와 같은 순서(`./scripts/prepare_assets.sh` → `/home/openc/sdk/flutter/bin/flutter pub get` → `flutter test` → `flutter analyze` → release APK build)였다. 이후 main에는 replay-reward parent-summary follow-up이 추가됐고, current HEAD에는 아직 같은 범위의 full Gate G 재실행 기록이 없다.
 
 ```bash
 cd /home/openc/kids-play-app
@@ -110,6 +113,7 @@ cd /home/openc/kids-play-app
 ```
 
 - 완료 기록: docs-only HEAD `1523559`에서 위 순서의 명령이 모두 성공했고, GitHub Actions run `24617840783` / artifact `kids-play-app-arm64-v8a-release` 확인까지 끝났다.
+- current HEAD 관련 replay-reward 선별 재확인: `/home/openc/sdk/flutter/bin/flutter test test/app/services/progress_store_test.dart test/features/avatar/presentation/avatar_setup_screen_test.dart test/features/lesson/application/quiz_controller_test.dart` => `00:05 +33: All tests passed!`, `/home/openc/sdk/flutter/bin/flutter analyze lib/app/services/progress_store.dart lib/features/avatar/presentation/avatar_setup_screen.dart test/app/services/progress_store_test.dart test/features/avatar/presentation/avatar_setup_screen_test.dart test/features/lesson/application/quiz_controller_test.dart` => `No issues found!`
 
 ## Release handoff expectation
 

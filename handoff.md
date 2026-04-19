@@ -33,12 +33,12 @@
 - compact landscape 대응 + 회귀 테스트
 - toddler-safe tap cooldown / 즉시 피드백 오버레이
 - 음성 cue / 다시 듣기 버튼
-- shared_preferences 기반 progress / settings / sticker 저장
+- shared_preferences 기반 progress / settings / sticker 저장, lesson별 오답 다시 풀기 횟수 / 다시 풀기 보상 스티커 합계 추적
 - 보호자 메뉴의 진행 요약, 음성/효과 토글, 세트별 진도 조절, 오답 다시 풀기, 오답 비우기, 세트별 수동 해금, 앱 종료/리셋
+- 보호자 진행 요약에서 오답 다시 보기 횟수, 다시 풀기 보상 합계 chip, 최근 보상 callout(최근 보상이 replay reward면 전용 copy) 노출
 - GitHub Actions APK 빌드
 
 아직 남은 확장 후보
-- 오답 다시 풀기 결과를 별도 통계/보상과 연결
 - 실제 표정 사진 업로드/크롭 파이프라인
 - richer reward / 효과음 / 배경음악 polish
 
@@ -47,8 +47,13 @@
 ## 현재 큐 기준 상태
 
 ### queue 기준 상태
-- A-F 범위(숫자 feature/라우팅, home/category 연결, design-system theme/button/panel 정리, hero/home/category 리디자인, 보호자 summary/settings/retry/unlock 흐름, README/handoff/plan 문서 정합성 cleanup)는 live repo 기준으로 완료 상태이며, 코드 관련 핵심 흐름은 선별 테스트로 다시 확인된 상태다
-- Gate G 최종 통합 게이트는 docs-only HEAD `1523559`에서 완료됐다. 앱 코드는 마지막 코드 커밋 `5696c1f` (`fix(ui): remove tap cooldown analyze blocker`) 이후 바뀌지 않았고, 이 기준에서 `./scripts/prepare_assets.sh` → `flutter pub get` → full `flutter test` (`00:33 +236: All tests passed!`) → full `flutter analyze` (`No issues found!`) → arm64 release build (`build/app/outputs/flutter-apk/app-release.apk`, 16.8MB) → GitHub Actions run `24617840783` / artifact `kids-play-app-arm64-v8a-release` 확인까지 끝났다
+- A-F 범위(숫자 feature/라우팅, home/category 연결, design-system theme/button/panel 정리, hero/home/category 리디자인, 보호자 summary/settings/retry/unlock 흐름, README/handoff/plan 문서 정합성 cleanup)는 live repo 기준으로 완료 상태이며, 현재 HEAD에는 replay-reward parent-summary follow-up도 포함된다
+- Gate G 최종 통합 게이트는 docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`에서 완료된 과거 기록이다
+- 현재 HEAD 기준으로 `progress_store.dart`는 lesson별 `mistakeReplayCount`와 앱 전체 `replayRewardStickerCount`를 저장하고, `avatar_setup_screen.dart` 보호자 요약은 해당 집계를 summary chip으로 노출하며 recent reward callout은 latest reward kind에 따라 일반/replay copy를 보여준다
+- 현재 HEAD에서 다시 확인된 검증은 replay-reward 범위 targeted test/analyze뿐이다
+  - `/home/openc/sdk/flutter/bin/flutter test test/app/services/progress_store_test.dart test/features/avatar/presentation/avatar_setup_screen_test.dart test/features/lesson/application/quiz_controller_test.dart` => `00:05 +33: All tests passed!`
+  - `/home/openc/sdk/flutter/bin/flutter analyze lib/app/services/progress_store.dart lib/features/avatar/presentation/avatar_setup_screen.dart test/app/services/progress_store_test.dart test/features/avatar/presentation/avatar_setup_screen_test.dart test/features/lesson/application/quiz_controller_test.dart` => `No issues found!`
+- 따라서 full Gate G provenance는 historical evidence로만 유지되고, current HEAD에는 아직 같은 범위의 full gate 재실행 기록이 없다
 
 ### 1. 문서/CI 정합성
 - docs/script 변경도 APK workflow에 포함되도록 정리됨
@@ -72,6 +77,7 @@
 - 소리 설정 제공
 - 세트별 진도 앞뒤 조절 제공
 - 세트별 오답 다시 풀기 제공
+- 오답 다시 풀기 누적 횟수 / 다시 풀기 보상 합계 저장 및 보호자 요약 노출
 - 세트별 최근 오답 비우기 제공
 - 세트별 수동 해금 제공
 - 앱 종료/리셋 최소 운영 기능 제공
@@ -107,7 +113,7 @@
     ```
   - 결과: `./scripts/prepare_assets.sh` succeeded
   - 결과: `00:32 +227: All tests passed!`
-- 이후 코드 변경
+- historical Gate G 전 마지막 code-snapshot provenance
   - `5696c1f` `fix(ui): remove tap cooldown analyze blocker`
   - 변경 파일: `lib/app/ui/tap_cooldown.dart`, `test/app/ui/tap_cooldown_test.dart`
 - `5696c1f` 기준 코드 스냅샷 targeted verification
@@ -115,8 +121,18 @@
   - 결과: `00:00 +9: All tests passed!`
   - `/home/openc/sdk/flutter/bin/flutter analyze lib/app/ui/tap_cooldown.dart test/app/ui/tap_cooldown_test.dart`
   - 결과: `No issues found!`
+- 이후 replay-reward parent-summary 관련 follow-up code landed
+  - `06d5098` `feat: preserve replay reward lesson stats`
+  - `109ba9e` `feat(parent): track mistake replay sessions`
+  - `0c15caf` `feat(parent): surface replay reward totals`
+- current HEAD replay-reward targeted verification
+  - `/home/openc/sdk/flutter/bin/flutter test test/app/services/progress_store_test.dart test/features/avatar/presentation/avatar_setup_screen_test.dart test/features/lesson/application/quiz_controller_test.dart`
+  - 결과: `00:05 +33: All tests passed!`
+  - `/home/openc/sdk/flutter/bin/flutter analyze lib/app/services/progress_store.dart lib/features/avatar/presentation/avatar_setup_screen.dart test/app/services/progress_store_test.dart test/features/avatar/presentation/avatar_setup_screen_test.dart test/features/lesson/application/quiz_controller_test.dart`
+  - 결과: `No issues found!`
+- current HEAD에는 아직 같은 범위의 full Gate G 재실행 기록이 없다
 
-완료된 최종 통합 확인 (docs-only HEAD `1523559`, 앱 코드는 `5696c1f` 이후 변경 없음)
+과거 최종 통합 확인 (docs-only HEAD `1523559`, 검증 대상 코드 스냅샷 `5696c1f`)
 - `./scripts/prepare_assets.sh` + `/home/openc/sdk/flutter/bin/flutter pub get` 성공
 - full `/home/openc/sdk/flutter/bin/flutter test` => `00:33 +236: All tests passed!`
 - full `/home/openc/sdk/flutter/bin/flutter analyze` => `No issues found!`
@@ -189,10 +205,9 @@ artifact
 ## 다음 작업자가 바로 이어갈 포인트
 
 우선순위 추천
-1. Gate G는 완료됐다. 다음 run은 아래 확장 후보 중 하나를 작은 slice로 선택해서 진행하면 된다.
+1. historical Gate G provenance는 이미 있다. 현재 HEAD는 replay-reward follow-up에 대한 targeted verification만 기록돼 있으니, 다음 run은 아래 남은 확장 후보를 작은 slice로 진행하거나 fresh release handoff가 필요하면 current HEAD에서 full Gate G를 다시 돌리는 편이 안전하다.
 
-Gate G 이후 확장 후보
-- 오답 다시 풀기 결과를 별도 통계/보상과 연결
+남은 확장 후보
 - 실제 표정 사진 업로드/크롭
 - richer reward / 효과음 / 배경음악 polish
 
