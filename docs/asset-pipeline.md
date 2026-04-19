@@ -1,7 +1,9 @@
 # Asset pipeline guide
 
-이 문서는 현재 레포에서 실제로 사용하는 asset pipeline을 정리한 운영 가이드다.
-앱 코드와 Flutter 번들은 `assets/generated/`만 바라보고, `scripts/prepare_assets.sh`가 `assets/public/`와 선택적인 `assets/local_private/`를 합쳐 최종 자산을 만든다.
+이 문서는 현재 레포에서 실제로 사용하는 build-time asset pipeline을 정리한 운영 가이드다.
+Flutter 번들과 build-time asset 참조는 `assets/generated/` 기준으로 맞추고, `scripts/prepare_assets.sh`가 `assets/public/`와 선택적인 `assets/local_private/`를 합쳐 최종 자산을 만든다.
+
+> 런타임 avatar photo carve-out: 부모 설정 화면의 5개 표정 사진은 이 build-time asset pipeline과 별개다. `main.dart`는 `LocalAvatarPhotoRepository(getApplicationSupportDirectory)`를 주입하고, import/crop 결과 파일은 app-private root 아래 `avatar_photos/<expression>.png` 경로 규칙으로 저장한다. 메타데이터는 shared_preferences key `avatar_photos_v1`에 저장되며, `AvatarFaceImage`/hero 렌더는 configured expression priority에서 찾은 runtime file을 우선 보고 없으면 `assets/generated/images/hero/hero_face.png` 경로의 bundled/generated hero face asset으로 fallback 한다. 따라서 runtime avatar photos를 `assets/public/`, `assets/local_private/`, `assets/generated/`에 넣거나 `prepare_assets.sh`가 관리한다고 가정하지 않는다.
 
 ## 현재 디렉터리 계약
 
@@ -30,7 +32,7 @@ assets/
 
 ### `assets/generated/`
 - prepare step가 매번 다시 만드는 최종 결과물이다.
-- Flutter `pubspec.yaml`과 앱 코드가 참조해야 하는 경로는 이쪽뿐이다.
+- Flutter `pubspec.yaml`과 build-time asset 참조 경로는 이쪽 기준으로 맞춘다.
 - clean checkout 직후에는 필요한 하위 디렉터리가 아직 없을 수 있으므로, asset 구조를 바꿨거나 새 clone이라면 먼저 prepare step를 실행한다.
 
 ## 실제 prepare script
@@ -68,6 +70,19 @@ fi
 3. `assets/public/` 전체를 `assets/generated/`로 복사한다.
 4. `assets/local_private/`가 있으면 같은 경로의 파일을 overlay 한다.
 5. private overlay 단계는 `--delete`를 쓰지 않으므로, private 쪽은 public 기본 자산을 선택적으로 덮어쓰는 용도다.
+
+## Runtime avatar photo carve-out
+
+build-time asset pipeline과 별도로, 부모 설정의 avatar photo upload/crop flow는 아래 계약을 사용한다.
+
+- source import: `ImagePickerAvatarPhotoPicker.pickFromGallery()`
+- crop UI: `AvatarCropScreen` (`crop_your_image` 기반 정사각형 crop)
+- file storage: `LocalAvatarPhotoRepository(getApplicationSupportDirectory)`
+- relative file names: `avatar_photos/<expression>.png`
+- metadata store: `AvatarPhotoStore.storageKey == 'avatar_photos_v1'`
+- hero/avatar rendering fallback: configured expression priority에서 찾은 runtime file 우선, 없으면 `assets/generated/images/hero/hero_face.png`
+
+즉, avatar photo는 **런타임 app-private 파일**이고 build-time asset 입력(`public`, `local_private`)이나 build-time 출력(`generated`)이 아니다.
 
 ## 복사해서 바로 쓸 수 있는 실행 예시
 
@@ -117,6 +132,6 @@ flutter:
 1. 기본 자산은 `assets/public/` 아래에 둔다.
 2. 머신 전용 민감 자산은 `assets/local_private/` 아래의 같은 상대 경로에 둔다.
 3. `./scripts/prepare_assets.sh`를 실행해 `assets/generated/`를 다시 만든다.
-4. 코드와 `pubspec.yaml`은 계속 `assets/generated/...`만 참조한다.
+4. 코드와 `pubspec.yaml`은 build-time asset을 참조할 때 계속 `assets/generated/...` 경로를 사용한다.
 
-핵심은 **입력 경로(`public`, `local_private`)와 런타임 경로(`generated`)를 분리**하는 것이다. 이렇게 두면 현재처럼 manifest + hero 이미지 중심의 최소 자산 세트로도 앱 계약을 유지할 수 있고, 이후 categories/audio placeholder나 private override를 추가할 때도 코드 경로를 바꿀 필요가 없다.
+핵심은 **입력 경로(`public`, `local_private`)와 앱이 읽는 build-time 출력 경로(`generated`)를 분리**하는 것이다. 이렇게 두면 현재처럼 manifest + hero 이미지 중심의 최소 자산 세트로도 앱 계약을 유지할 수 있고, 이후 categories/audio placeholder나 private override를 추가할 때도 코드 경로를 바꿀 필요가 없다. 별도의 runtime avatar photo는 위 carve-out처럼 app-private 파일로 다룬다.

@@ -37,8 +37,9 @@ java -version
 ## 이 repo에서 기억할 점
 
 - `scripts/prepare_assets.sh` 는 `assets/public/` 와 선택적 `assets/local_private/` 를 합쳐 `assets/generated/` 를 다시 만든다.
-- 앱 코드에서는 `assets/generated/` 기준 경로만 참조한다.
+- build-time asset 경로는 `assets/generated/` 기준으로 참조한다.
 - 민감 자산은 `assets/local_private/` 에 두고, public/placeholder 자산만 git 에 유지한다.
+- 부모 설정의 avatar photo upload/crop 는 `getApplicationSupportDirectory()/avatar_photos/*.png` 아래 app-private runtime 파일 + `avatar_photos_v1` metadata 를 사용하므로 `prepare_assets.sh` 대상이 아니다.
 - 자산이 바뀌었거나 `assets/` / `scripts/prepare_assets.sh` 관련 변경을 pull 했다면, 이 repo의 표준 순서와 CI 순서에 맞춰 `test`, `analyze`, `build` 전에 먼저 `./scripts/prepare_assets.sh` 를 실행한다. 필요하면 같은 흐름에서 `pub get` 전에 함께 실행해도 된다.
 
 ## 현재 머신에서 바로 쓰는 명령

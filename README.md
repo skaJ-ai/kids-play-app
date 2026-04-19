@@ -14,14 +14,9 @@
 
 ## 현재 상태
 
-- 우선순위 큐 A-G 범위는 live repo 기준으로 완료 상태이며, 최신 code-changing commit은 `d81a2ec`(`feat(lesson): route generic learn prompts through audio service`)입니다.
-- `0c15caf`까지 반영된 replay-reward 보호자 요약 흐름 위에, `d81a2ec`는 `generic_learn_screen.dart`의 일반 학습 prompt를 audio service로 연결했습니다.
-- 최신 full Gate G provenance는 docs-only HEAD `9d4c035` 로컬 full rerun으로 갱신됐습니다. 이 HEAD의 변경 파일은 `README.md`, `handoff.md`, `docs/plans/2026-04-16_full-mvp-delivery-plan.md`뿐이어서 검증된 앱 코드는 latest code-changing commit `d81a2ec`와 동일합니다.
-- 최신 로컬 full rerun 결과 (`9d4c035` docs-only HEAD, 검증된 앱 코드는 `d81a2ec`와 동일):
-  - `./scripts/prepare_assets.sh` + `/home/openc/sdk/flutter/bin/flutter pub get` 성공
-  - full `/home/openc/sdk/flutter/bin/flutter test` => `00:34 +253: All tests passed!`
-  - full `/home/openc/sdk/flutter/bin/flutter analyze` => `No issues found! (ran in 2.1s)`
-  - `/home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64` => `build/app/outputs/flutter-apk/app-release.apk` (16.8MB / `16774218` bytes)
+- 우선순위 큐 A-G 범위는 historical full Gate G provenance 기준으로 완료 상태입니다. full rerun reference는 docs-only HEAD `9d4c035`이고, 당시 검증된 앱 코드 스냅샷은 `d81a2ec`였습니다.
+- live repo HEAD는 이후 `19a6f1d`(이번 docs refresh의 기준점)까지 전진했고, 그 사이 avatar runtime photo snapshot/file flow와 hero fallback chain(`2c78d5f`~`faff2ce`)이 반영됐습니다.
+- 이번 docs refresh에서는 current live repo HEAD `19a6f1d`에서 avatar/hero runtime photo slice만 선별 재확인했습니다. 자세한 targeted verification 기록은 아래 `테스트 / 최종 검증` 섹션과 `handoff.md`에 남겨뒀습니다.
 - 추가 provenance 참고
   - docs-only checkout `f1e23c3` fresh local rerun: 당시 checkout의 앱 코드는 `0c15caf`와 동일했습니다.
   - historical artifact-backed record: docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`, GitHub Actions run `24617840783`, artifact `kids-play-app-arm64-v8a-release`.
@@ -30,6 +25,9 @@
 
 이미 구현된 것
 - hero → home → category hub의 garage flow
+- 보호자 메뉴의 5개 표정 카드에서 갤러리 사진 가져오기 + 정사각형 크롭 + 표정별 저장/지우기
+- avatar photo metadata는 별도 `avatar_photos_v1` key에 저장되고, crop 결과 파일은 앱 전용 경로(`getApplicationSupportDirectory()/avatar_photos/<expression>.png`)에 저장
+- 히어로 얼굴은 저장된 smile/neutral 런타임 사진이 있으면 우선 사용하고, 없으면 `assets/generated/images/hero/hero_face.png` 경로의 bundled/generated hero face asset으로 fallback
 - 홈/카테고리 허브에서 한글 / 알파벳 / 숫자 3개 카테고리 배우기 / 퀴즈 라우팅 완료
 - 한글 / 알파벳 / 숫자 다중 세트 학습 카드
 - 한글 / 알파벳 / 숫자 다중 세트 4지선다 퀴즈
@@ -44,7 +42,6 @@
 - GitHub Actions APK 빌드 파이프라인
 
 다음 확장 후보
-- 실제 표정 사진 업로드/크롭 파이프라인
 - richer reward / 효과음 / 배경음악 polish
 
 ## 현재 앱 흐름
@@ -73,9 +70,13 @@ cd "$REPO_ROOT"
 
 ### 테스트 / 최종 검증
 현재 기준
-- A-G 범위는 live repo 기준으로 완료 상태이며, 최신 code-changing commit은 `d81a2ec`입니다.
-- 최신 full Gate G rerun은 docs-only HEAD `9d4c035`에서 실행됐고, 이 HEAD의 변경은 `README.md`, `handoff.md`, `docs/plans/2026-04-16_full-mvp-delivery-plan.md`뿐이라 검증된 앱 코드는 `d81a2ec`와 동일합니다.
-- 최신 로컬 full rerun 결과 (`9d4c035` docs-only HEAD, 검증된 앱 코드는 `d81a2ec`와 동일):
+- historical full Gate G rerun reference는 docs-only HEAD `9d4c035`이고, 당시 검증된 앱 코드 스냅샷은 `d81a2ec`였습니다.
+- current live repo HEAD at this docs refresh는 `19a6f1d`입니다. 이 docs-only update는 full rerun을 다시 주장하지 않고, avatar/hero runtime photo slice만 선별 재확인했습니다.
+- current live repo targeted avatar/hero verification (`19a6f1d`):
+  - `./scripts/prepare_assets.sh` + `/home/openc/sdk/flutter/bin/flutter pub get` 성공
+  - targeted `/home/openc/sdk/flutter/bin/flutter test test/features/avatar/application/avatar_photo_service_test.dart test/features/avatar/data/avatar_photo_store_test.dart test/features/avatar/data/local_avatar_photo_repository_test.dart test/features/avatar/presentation/avatar_crop_screen_test.dart test/features/avatar/presentation/avatar_setup_screen_test.dart test/features/avatar/presentation/widgets/avatar_face_image_test.dart test/features/hero/presentation/hero_screen_test.dart` => passed
+  - targeted `/home/openc/sdk/flutter/bin/flutter analyze lib/features/avatar lib/features/hero/presentation/hero_screen.dart test/features/avatar test/features/hero/presentation/hero_screen_test.dart` => clean (`No issues found!`)
+- historical full Gate G rerun (`9d4c035`, 당시 검증된 앱 코드는 `d81a2ec`와 동일):
   - `./scripts/prepare_assets.sh` + `/home/openc/sdk/flutter/bin/flutter pub get` 성공
   - full `/home/openc/sdk/flutter/bin/flutter test` => `00:34 +253: All tests passed!`
   - full `/home/openc/sdk/flutter/bin/flutter analyze` => `No issues found! (ran in 2.1s)`
@@ -106,7 +107,7 @@ cd "$REPO_ROOT"
 "$FLUTTER_BIN" build apk --release --target-platform android-arm64
 ```
 
-- 아래 명령 블록은 `docs/local-dev-setup.md` 및 `.github/workflows/build-apk.yml` 과 같은 순서의 재현용 체크리스트입니다. 최신 기준 full rerun provenance는 docs-only HEAD `9d4c035`(검증된 앱 코드는 `d81a2ec`와 동일)이고, 그 이전 로컬 rerun은 docs-only checkout `f1e23c3`(검증된 앱 코드는 `0c15caf`와 동일)입니다. historical artifact-backed 기준은 docs-only HEAD `1523559` / code snapshot `5696c1f`입니다.
+- 아래 명령 블록은 `docs/local-dev-setup.md` 및 `.github/workflows/build-apk.yml` 과 같은 순서의 재현용 체크리스트입니다. historical full rerun reference는 docs-only HEAD `9d4c035`(당시 검증된 앱 코드는 `d81a2ec`)이고, 이번 docs refresh의 current live repo targeted avatar/hero recheck는 `19a6f1d` 기준입니다. 그 이전 로컬 rerun은 docs-only checkout `f1e23c3`(검증된 앱 코드는 `0c15caf`와 동일)이며, historical artifact-backed 기준은 docs-only HEAD `1523559` / code snapshot `5696c1f`입니다.
 
 ## APK 확인 방법
 
@@ -122,6 +123,7 @@ GitHub Actions
 - assets/public: git에 커밋하는 placeholder / 안전 자산
 - assets/local_private: gitignore되는 실제 얼굴/민감 자산
 - assets/generated: 앱이 실제로 읽는 최종 자산 폴더
+- runtime avatar photos: 보호자 표정 카드가 저장하는 앱 전용 파일(`getApplicationSupportDirectory()/avatar_photos/*.png`) + `avatar_photos_v1` metadata. build-time asset 폴더와 별도
 
 자산 준비
 ```bash
@@ -132,12 +134,13 @@ cd "$REPO_ROOT"
 ./scripts/prepare_assets.sh
 ```
 
-이 머신에서는 위처럼 repo root(`/home/openc/kids-play-app`)를 기준으로 실행한다. 다른 머신도 같은 순서로 자신의 checkout root에서 실행하면 된다.
+이 머신에서는 위처럼 repo root(`/home/openc/kids-play-app`)를 기준으로 실행한다. 다른 머신도 같은 순서로 자신의 checkout root에서 실행하면 된다. `./scripts/prepare_assets.sh`는 build-time asset만 준비하며, runtime avatar photo 파일은 복사/삭제하지 않는다.
 
 ## 참고 문서
 
 - handoff: `handoff.md`
 - 구현 계획: `docs/plans/2026-04-16_full-mvp-delivery-plan.md`
+- avatar photo status: `docs/plans/2026-04-19_avatar-photo-upload-crop-plan.md`
 - 자산 파이프라인: `docs/asset-pipeline.md`
 - 히어로 얼굴 자산 가이드: `docs/hero-face-asset-spec.md`
 - 로컬 개발 환경: `docs/local-dev-setup.md`

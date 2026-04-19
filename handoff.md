@@ -20,12 +20,16 @@
 - remote: `git@github.com:skaJ-ai/kids-play-app.git`
 
 대표 기능 커밋 예시
-- `ea8ff71` `feat(parent): add manual lesson unlock flow`
-- `00ec1dc` `feat(content): add multi-lesson curriculum flow`
+- `2a71734` `feat(avatar): add gallery pick and crop flow`
+- `faff2ce` `feat(hero): use saved avatar photo fallback chain`
+- `19a6f1d` `feat(lesson): route quiz prompt replay through audio service`
 
 현재 이미 동작하는 것
 - landscape 고정 + immersive full-screen
 - hero / home / category hub garage flow
+- 보호자 메뉴의 5개 표정 카드에서 갤러리 사진 가져오기 + 정사각형 크롭 + 표정별 저장/지우기
+- avatar photo metadata는 별도 `avatar_photos_v1` key에 저장되고, crop 결과 파일은 앱 전용 경로(`getApplicationSupportDirectory()/avatar_photos/<expression>.png`)에 저장
+- 히어로 얼굴은 저장된 smile/neutral 런타임 사진이 있으면 우선 사용하고, 없으면 `assets/generated/images/hero/hero_face.png` 경로의 bundled/generated hero face asset으로 fallback
 - 홈 / 카테고리 허브에서 한글 / 알파벳 / 숫자 3개 카테고리 배우기/퀴즈 라우팅 완료
 - 한글 / 알파벳 / 숫자 다중 세트 학습
 - 한글 / 알파벳 / 숫자 다중 세트 퀴즈
@@ -39,7 +43,6 @@
 - GitHub Actions APK 빌드
 
 아직 남은 확장 후보
-- 실제 표정 사진 업로드/크롭 파이프라인
 - richer reward / 효과음 / 배경음악 polish
 
 ---
@@ -47,10 +50,11 @@
 ## 현재 큐 기준 상태
 
 ### queue 기준 상태
-- A-G 범위(숫자 feature/라우팅, home/category 연결, design-system theme/button/panel 정리, hero/home/category 리디자인, 보호자 summary/settings/retry/unlock 흐름, README/handoff/plan 문서 정합성 cleanup, final Gate G rerun)는 live repo 기준으로 완료 상태이며, 최신 앱 코드 스냅샷은 `d81a2ec`다
-- 최신 full Gate G provenance는 docs-only HEAD `9d4c035` 로컬 full rerun이다. 이 HEAD의 변경은 `README.md`, `handoff.md`, `docs/plans/2026-04-16_full-mvp-delivery-plan.md`뿐이어서 검증된 앱 코드는 latest code-changing commit `d81a2ec`와 동일하다
+- A-G 범위(숫자 feature/라우팅, home/category 연결, design-system theme/button/panel 정리, hero/home/category 리디자인, 보호자 summary/settings/retry/unlock 흐름, README/handoff/plan 문서 정합성 cleanup, final Gate G rerun)는 historical full Gate G provenance 기준으로 완료 상태다. full rerun reference는 docs-only HEAD `9d4c035`이고, 당시 검증된 앱 코드 스냅샷은 `d81a2ec`였다
+- live repo HEAD는 이번 docs refresh 시점 기준 `19a6f1d`이며, 그 사이 avatar photo snapshot store / runtime file repository / gallery pick+crop / expression cards / hero fallback chain(`2c78d5f`~`faff2ce`)이 이미 반영돼 있다
+- 이번 docs-only slice는 `19a6f1d` 전체 Gate G를 다시 주장하지 않고, 아래에 적은 avatar/hero runtime photo 관련 targeted verification만 재확인했다
 - historical provenance는 docs-only checkout `f1e23c3` 로컬 full rerun(`0c15caf` 코드 일치)과 historical docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`까지 함께 유지한다
-- 최신 rerun / historical rerun / artifact-backed reference 세부 결과는 아래 `선별 검증 + Gate G provenance 메모` 섹션에 정리돼 있다
+- current targeted recheck / historical full rerun / artifact-backed reference 세부 결과는 아래 `선별 검증 + Gate G provenance 메모` 섹션에 정리돼 있다
 
 ### 1. 문서/CI 정합성
 - docs/script 변경도 APK workflow에 포함되도록 정리됨
@@ -88,7 +92,11 @@
 ## 선별 검증 + Gate G provenance 메모
 
 최근 문서화된 선별 재확인 기록과 full Gate G provenance 메모
-- 최신 Gate G 로컬 full rerun (`9d4c035` docs-only HEAD, 검증된 앱 코드는 `d81a2ec`와 동일)
+- current live repo avatar/hero runtime photo targeted verification (`19a6f1d`)
+  - `./scripts/prepare_assets.sh` + `/home/openc/sdk/flutter/bin/flutter pub get` 성공
+  - targeted `/home/openc/sdk/flutter/bin/flutter test test/features/avatar/application/avatar_photo_service_test.dart test/features/avatar/data/avatar_photo_store_test.dart test/features/avatar/data/local_avatar_photo_repository_test.dart test/features/avatar/presentation/avatar_crop_screen_test.dart test/features/avatar/presentation/avatar_setup_screen_test.dart test/features/avatar/presentation/widgets/avatar_face_image_test.dart test/features/hero/presentation/hero_screen_test.dart` => passed
+  - targeted `/home/openc/sdk/flutter/bin/flutter analyze lib/features/avatar lib/features/hero/presentation/hero_screen.dart test/features/avatar test/features/hero/presentation/hero_screen_test.dart` => clean (`No issues found!`)
+- historical full Gate G 로컬 rerun (`9d4c035` docs-only HEAD, 당시 검증된 앱 코드는 `d81a2ec`와 동일)
   - `./scripts/prepare_assets.sh` + `/home/openc/sdk/flutter/bin/flutter pub get` 성공
   - full `/home/openc/sdk/flutter/bin/flutter test` => `00:34 +253: All tests passed!`
   - full `/home/openc/sdk/flutter/bin/flutter analyze` => `No issues found! (ran in 2.1s)`
@@ -163,11 +171,13 @@ artifact name (when workflow passes)
 - `assets/public`
 - `assets/local_private`
 - `assets/generated`
+- app-private runtime avatar photos: `getApplicationSupportDirectory()/avatar_photos/*.png` + `avatar_photos_v1` metadata
 
 규칙
-- 앱은 `assets/generated`만 읽는다.
+- build-time asset 경로는 `assets/generated` 기준으로 읽는다.
 - 빌드/실행 전에 `./scripts/prepare_assets.sh`를 실행한다.
 - 실제 얼굴/민감 자산은 `assets/local_private`에 둔다.
+- 보호자 표정 카드가 저장하는 runtime avatar photo는 build-time asset pipeline 바깥에 두며, `prepare_assets.sh`가 복사/삭제하지 않는다.
 
 예시 private 자산
 - `/home/openc/kids-play-app/assets/local_private/images/hero/hero_face.png`
@@ -216,10 +226,9 @@ artifact
 ## 다음 작업자가 바로 이어갈 포인트
 
 우선순위 추천
-1. 최신 full Gate G rerun은 docs-only HEAD `9d4c035`에서 확보됐고, 해당 rerun이 검증한 앱 코드는 latest code-changing commit `d81a2ec`와 동일하다. 따라서 다음 작업은 아래 남은 확장 후보를 작은 slice로 바로 이어가면 된다.
+1. historical full Gate G rerun reference는 docs-only HEAD `9d4c035` / code snapshot `d81a2ec`다. current live repo HEAD `19a6f1d`에는 avatar runtime photo flow가 이미 들어와 있고 이번 slice에서는 targeted avatar/hero verification만 다시 확인했으니, 다음 작업도 아래 남은 확장 후보를 작은 slice로 이어가면 된다.
 
 남은 확장 후보
-- 실제 표정 사진 업로드/크롭
 - richer reward / 효과음 / 배경음악 polish
 
 주의
