@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kids_play_app/app/ui/play_prompt_panel.dart';
+import 'package:kids_play_app/app/ui/toy_button.dart';
 
 void main() {
   testWidgets(
     'renders the regular prompt layout with replay copy and target badge',
     (WidgetTester tester) async {
+      final previousHitTestWarningShouldBeFatal =
+          WidgetController.hitTestWarningShouldBeFatal;
+      addTearDown(() {
+        WidgetController.hitTestWarningShouldBeFatal =
+            previousHitTestWarningShouldBeFatal;
+      });
+      WidgetController.hitTestWarningShouldBeFatal = true;
+
       var replayCount = 0;
 
       await tester.pumpWidget(
@@ -35,7 +44,7 @@ void main() {
       expect(find.text('숫자 다섯'), findsOneWidget);
       expect(find.text('5'), findsOneWidget);
 
-      await tester.tap(find.byIcon(Icons.volume_up_rounded));
+      await tester.tap(find.byType(ToyButton));
       await tester.pump();
 
       expect(replayCount, 1);
