@@ -6,8 +6,7 @@ import 'package:kids_play_app/app/services/app_services.dart';
 import 'package:kids_play_app/app/services/progress_store.dart';
 import 'package:kids_play_app/app/services/speech_cue_service.dart';
 import 'package:kids_play_app/app/ui/kid_theme.dart';
-import 'package:kids_play_app/app/ui/toy_button.dart';
-import 'package:kids_play_app/app/ui/toy_panel.dart';
+import 'package:kids_play_app/app/ui/mascot_view.dart';
 import 'package:kids_play_app/features/lesson/data/lesson_content_loader.dart';
 import 'package:kids_play_app/features/lesson/domain/lesson.dart';
 import 'package:kids_play_app/features/lesson/domain/lesson_category.dart';
@@ -15,112 +14,13 @@ import 'package:kids_play_app/features/lesson/presentation/generic_learn_screen.
 
 void main() {
   testWidgets(
-    'queues prompt playback through audio service with stable prompt metadata',
+    'tapping the glyph card plays prompt audio with stable metadata',
     (WidgetTester tester) async {
       final audio = _RecordingAudioService();
       final speech = _RecordingSpeechCueService();
 
       await tester.pumpWidget(
         _wrapWithServices(
-          audioService: audio,
-          speechCueService: speech,
-          child: GenericLearnScreen(
-            loader: _FakeLessonLoader(_lesson),
-            category: alphabetLessonCategory,
-            lessonId: _lesson.id,
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('에이, A a'), findsOneWidget);
-      expect(audio.played, hasLength(1));
-      final cue = audio.played.single;
-      expect(cue, isA<PromptCue>());
-      final promptCue = cue as PromptCue;
-      expect(
-        promptCue.ref.assetPath,
-        'assets/generated/audio/voice/prompts/alphabet/alphabet_letters_1_a_a.mp3',
-      );
-      expect(promptCue.ref.fallbackText, '에이, A a');
-      expect(speech.spoken, isEmpty);
-    },
-  );
-
-  testWidgets(
-    'falls back to item index metadata when a symbol normalizes to an empty slug',
-    (WidgetTester tester) async {
-      final audio = _RecordingAudioService();
-      final speech = _RecordingSpeechCueService();
-
-      await tester.pumpWidget(
-        _wrapWithServices(
-          audioService: audio,
-          speechCueService: speech,
-          child: GenericLearnScreen(
-            loader: _FakeLessonLoader(_nonAsciiLesson),
-            category: alphabetLessonCategory,
-            lessonId: _nonAsciiLesson.id,
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(audio.played, hasLength(1));
-      final cue = audio.played.single as PromptCue;
-      expect(
-        cue.ref.assetPath,
-        'assets/generated/audio/voice/prompts/alphabet/alphabet_symbols_1_item_1.mp3',
-      );
-      expect(cue.ref.fallbackText, '기역, ㄱ');
-      expect(speech.spoken, isEmpty);
-    },
-  );
-
-  testWidgets(
-    'suppresses replay prompt playback after voice prompts are disabled',
-    (WidgetTester tester) async {
-      final audio = _RecordingAudioService();
-      final speech = _RecordingSpeechCueService();
-      final progressStore = MemoryProgressStore();
-
-      await tester.pumpWidget(
-        _wrapWithServices(
-          progressStore: progressStore,
-          audioService: audio,
-          speechCueService: speech,
-          child: GenericLearnScreen(
-            loader: _FakeLessonLoader(_lesson),
-            category: alphabetLessonCategory,
-            lessonId: _lesson.id,
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(audio.played, hasLength(1));
-      expect(speech.spoken, isEmpty);
-
-      await progressStore.setVoicePromptsEnabled(false);
-      await tester.tap(find.widgetWithText(ToyButton, '다시'));
-      await tester.pumpAndSettle();
-
-      expect(audio.played, hasLength(1));
-      expect(speech.spoken, isEmpty);
-    },
-  );
-
-  testWidgets(
-    'suppresses queued prompt playback when voice prompts start disabled',
-    (WidgetTester tester) async {
-      final audio = _RecordingAudioService();
-      final speech = _RecordingSpeechCueService();
-
-      await tester.pumpWidget(
-        _wrapWithServices(
-          progressStore: MemoryProgressStore(
-            const AppProgressSnapshot(voicePromptsEnabled: false),
-          ),
           audioService: audio,
           speechCueService: speech,
           child: GenericLearnScreen(
@@ -133,58 +33,108 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(audio.played, isEmpty);
+
+      await tester.tap(find.byKey(const Key('learn-glyph-card')));
+      await tester.pumpAndSettle();
+
+      expect(audio.played, hasLength(1));
+      final cue = audio.played.single as PromptCue;
+      expect(
+        cue.ref.assetPath,
+        'assets/generated/audio/voice/prompts/alphabet/alphabet_letters_1_a_a.mp3',
+      );
+      expect(cue.ref.fallbackText, '에이, A a');
       expect(speech.spoken, isEmpty);
     },
   );
 
-  testWidgets('uses the warm toy panel tone for the main symbol card', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(
-      _wrapWithServices(
-        child: GenericLearnScreen(
-          loader: _FakeLessonLoader(_lesson),
-          category: alphabetLessonCategory,
-          lessonId: _lesson.id,
+  testWidgets(
+    'falls back to item index metadata when a symbol normalizes to an empty slug',
+    (WidgetTester tester) async {
+      final audio = _RecordingAudioService();
+
+      await tester.pumpWidget(
+        _wrapWithServices(
+          audioService: audio,
+          child: GenericLearnScreen(
+            loader: _FakeLessonLoader(_nonAsciiLesson),
+            category: alphabetLessonCategory,
+            lessonId: _nonAsciiLesson.id,
+          ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    final symbolPanel = find.ancestor(
-      of: find.text('A a'),
-      matching: find.byWidgetPredicate(
-        (widget) => widget is ToyPanel && widget.tone == ToyPanelTone.warm,
-      ),
-    );
+      await tester.tap(find.byKey(const Key('learn-glyph-card')));
+      await tester.pumpAndSettle();
 
-    expect(symbolPanel, findsOneWidget);
-  });
+      final cue = audio.played.single as PromptCue;
+      expect(
+        cue.ref.assetPath,
+        'assets/generated/audio/voice/prompts/alphabet/alphabet_symbols_1_item_1.mp3',
+      );
+      expect(cue.ref.fallbackText, '기역, ㄱ');
+    },
+  );
 
-  testWidgets('uses the lilac toy panel tone for the hint callout', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(
-      _wrapWithServices(
-        child: GenericLearnScreen(
-          loader: _FakeLessonLoader(_lesson),
-          category: alphabetLessonCategory,
-          lessonId: _lesson.id,
+  testWidgets(
+    'suppresses prompt playback when voice prompts are disabled',
+    (WidgetTester tester) async {
+      final audio = _RecordingAudioService();
+
+      await tester.pumpWidget(
+        _wrapWithServices(
+          progressStore: MemoryProgressStore(
+            const AppProgressSnapshot(voicePromptsEnabled: false),
+          ),
+          audioService: audio,
+          child: GenericLearnScreen(
+            loader: _FakeLessonLoader(_lesson),
+            category: alphabetLessonCategory,
+            lessonId: _lesson.id,
+          ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    final hintPanel = find.ancestor(
-      of: find.text('천천히 해봐!'),
-      matching: find.byWidgetPredicate(
-        (widget) => widget is ToyPanel && widget.tone == ToyPanelTone.lilac,
-      ),
-    );
+      await tester.tap(find.byKey(const Key('learn-glyph-card')));
+      await tester.pumpAndSettle();
 
-    expect(hintPanel, findsOneWidget);
-    expect(find.text('에이를 크게 보고 소리를 따라 말해봐요'), findsOneWidget);
-  });
+      expect(audio.played, isEmpty);
+    },
+  );
+
+  testWidgets(
+    'tapping the glyph card switches the mascot to correct pose',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _wrapWithServices(
+          child: GenericLearnScreen(
+            loader: _FakeLessonLoader(_lesson),
+            category: alphabetLessonCategory,
+            lessonId: _lesson.id,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final initial = tester
+          .widget<MascotView>(find.byKey(const Key('learn-mascot')));
+      expect(initial.state, MascotState.idle);
+
+      await tester.tap(find.byKey(const Key('learn-glyph-card')));
+      await tester.pump();
+
+      final after = tester
+          .widget<MascotView>(find.byKey(const Key('learn-mascot')));
+      expect(after.state, MascotState.correct);
+
+      await tester.pump(const Duration(milliseconds: 950));
+      final reset = tester
+          .widget<MascotView>(find.byKey(const Key('learn-mascot')));
+      expect(reset.state, MascotState.idle);
+    },
+  );
 }
 
 const _lesson = Lesson(

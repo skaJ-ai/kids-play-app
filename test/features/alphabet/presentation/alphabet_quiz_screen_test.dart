@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kids_play_app/app/ui/kid_theme.dart';
+import 'package:kids_play_app/app/ui/mascot_view.dart';
 import 'package:kids_play_app/app/ui/toy_panel.dart';
 import 'package:kids_play_app/features/alphabet/data/alphabet_lesson_repository.dart';
 import 'package:kids_play_app/features/alphabet/presentation/alphabet_quiz_screen.dart';
@@ -38,7 +40,7 @@ void main() {
     expect(find.byKey(const Key('quiz-choice-D')), findsOneWidget);
   });
 
-  testWidgets('uses a warm toy panel tone for the compact alphabet prompt panel', (
+  testWidgets('renders the cream-warm mascot panel with signal light on a compact screen', (
     WidgetTester tester,
   ) async {
     tester.view.physicalSize = const Size(780, 360);
@@ -66,11 +68,12 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final promptPanel = tester.widget<ToyPanel>(
-      find.byKey(const Key('quiz-prompt-panel')),
+    final mascotPanel = tester.widget<ToyPanel>(
+      find.byKey(const Key('quiz-mascot-panel')),
     );
-
-    expect(promptPanel.tone, ToyPanelTone.warm);
+    expect(mascotPanel.backgroundColor, KidPalette.creamWarm);
+    expect(find.byKey(const Key('quiz-signal-light')), findsOneWidget);
+    expect(find.byKey(const Key('quiz-mascot')), findsOneWidget);
   });
 
   testWidgets('keeps all alphabet answer choices fully visible on a compact landscape screen', (
@@ -183,9 +186,13 @@ void main() {
 
     expect(summaryPanelFinder, findsOneWidget);
     expect(
-      tester.widget<ToyPanel>(summaryPanelFinder).tone,
-      ToyPanelTone.warm,
+      tester.widget<ToyPanel>(summaryPanelFinder).backgroundColor,
+      KidPalette.creamWarm,
     );
+    final summaryMascot = tester.widget<MascotView>(
+      find.byKey(const Key('quiz-summary-mascot')),
+    );
+    expect(summaryMascot.state, MascotState.missionClear);
   });
 
   testWidgets('shows an error message when the alphabet quiz fails to load', (
