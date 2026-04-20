@@ -21,6 +21,9 @@ class PlayChoiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final typography = theme.kidTypography;
+    final textTheme = theme.textTheme;
     final palette = _paletteFor(accentIndex);
 
     return Opacity(
@@ -55,9 +58,9 @@ class PlayChoiceCard extends StatelessWidget {
                   top: 16,
                   child: Text(
                     '콕!',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    style: typography.labelLarge.copyWith(
+                      fontSize: typography.titleSmall.fontSize,
                       color: KidPalette.white.withValues(alpha: 0.92),
-                      fontWeight: FontWeight.w900,
                     ),
                   ),
                 ),
@@ -66,12 +69,17 @@ class PlayChoiceCard extends StatelessWidget {
                     fit: BoxFit.scaleDown,
                     child: Text(
                       symbol,
-                      style: TextStyle(
-                        fontSize: compact ? 66 : 92,
-                        fontWeight: FontWeight.w900,
-                        height: 1,
-                        color: KidPalette.white,
-                      ),
+                      style:
+                          textTheme.displayLarge?.copyWith(
+                            fontSize: compact ? 66 : 92,
+                            height: 1,
+                            color: KidPalette.white,
+                          ) ??
+                          TextStyle(
+                            fontSize: compact ? 66 : 92,
+                            height: 1,
+                            color: KidPalette.white,
+                          ),
                     ),
                   ),
                 ),
