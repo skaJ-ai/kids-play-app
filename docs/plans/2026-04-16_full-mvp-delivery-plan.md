@@ -15,24 +15,24 @@
 - live repo follow-up으로 avatar runtime photo flow(`2c78d5f`~`faff2ce`), quiz prompt replay audio service(`19a6f1d`), numbers learn prompt audio service(`610a6aa`), bgm setting persistence(`e2f1ed5`), parent BGM toggle(`2450e81`), asset audio player wrapper groundwork(`58eecac`)까지 main에 반영됨
 
 현재 큐 기준 상태
-- latest full Gate G provenance는 verified docs-only HEAD `9df0082` fresh local rerun이며, `2450e81..9df0082` 사이 변경이 `README.md`, `handoff.md`, `docs/plans/2026-04-16_full-mvp-delivery-plan.md` 3개 문서뿐이었기 때문에 그때 다시 검증된 앱 코드는 `2450e81`였다
-- queue A-F의 앱 기능 + G full Gate G provenance freshness는 여전히 `2450e81` / `9df0082` baseline까지만 유지되며, current HEAD `58eecac`까지 fresh하다고 읽으면 안 된다
-- current live app-code snapshot은 `58eecac`(`feat(audio): add asset audio player wrapper`)이고, current-head full Gate G rerun은 아직 pending이다
+- latest full Gate G provenance는 verified docs-only HEAD `0eecf54` fresh local rerun이며, `58eecac..0eecf54` 사이 변경이 `README.md`, `handoff.md`, `docs/plans/2026-04-16_full-mvp-delivery-plan.md` 3개 문서뿐이었기 때문에 그때 다시 검증된 앱 코드는 `58eecac`였다
+- queue A-F의 앱 기능 + G full Gate G provenance는 이제 `58eecac` / `0eecf54` baseline까지 fresh하게 읽을 수 있다
+- current live app-code snapshot은 여전히 `58eecac`(`feat(audio): add asset audio player wrapper`)이고, latest full Gate G rerun이 이 app-code baseline을 다시 검증했다
 - `2450e81` 이후 live app-code delta는 asset-audio-player / audioplayers groundwork 1건뿐이다: `lib/app/audio/asset_audio_player.dart`, `lib/app/audio/audioplayers_asset_audio_player.dart`, `pubspec.yaml`, `pubspec.lock`, `test/app/audio/asset_audio_player_test.dart`
 - live repo에는 `AppProgressSnapshot.bgmEnabled` 기본값 true + persistence API, 보호자 화면의 분리된 배경 음악 설정 토글 UI(`progressStore.setBgmEnabled`)가 이미 반영돼 있고, `58eecac`은 그 위에 asset audio wrapper groundwork만 추가했다
 - runtime truth: `main.dart`는 아직 `audioService: TtsFallbackAudioService(speech: speech)`를 주입하고, `lib/app/audio/tts_fallback_audio_service.dart`는 non-prompt cue(배경 음악 포함)를 silence로 degrade하며 recorded playback / Phase 8이 아직 not wired라고 명시한다. 따라서 `58eecac`은 실제 BGM playback shipping이 아니라 wrapper groundwork다
-- current queue-head focused spot-check(`58eecac` follow-up):
+- live app-code focused verification(`58eecac` pre-rerun follow-up):
   - `./scripts/prepare_assets.sh` => succeeded
   - `/home/openc/sdk/flutter/bin/flutter test test/features/numbers` => `00:03 +28: All tests passed!`
   - `/home/openc/sdk/flutter/bin/flutter test test/app/audio/asset_audio_player_test.dart` => `00:00 +3: All tests passed!`
   - `/home/openc/sdk/flutter/bin/flutter analyze lib/app/audio/asset_audio_player.dart lib/app/audio/audioplayers_asset_audio_player.dart test/app/audio/asset_audio_player_test.dart` => `No issues found! (ran in 1.2s)`
-- latest full Gate G rerun 결과(`9df0082`, app code matched `2450e81`): full test `00:42 +279: All tests passed!`, full analyze `No issues found! (ran in 5.2s)`, release APK `build/app/outputs/flutter-apk/app-release.apk` (`18112444` bytes)
-- 이 plan refresh는 `58eecac` 이후 current live snapshot/provenance wording을 정리한 docs-only update다. fresh Gate G claim은 계속 `9df0082` / `2450e81`에 anchor해서 읽어야 하고, current HEAD `58eecac` 기준 full rerun 기록은 아직 없다
-- provenance 메모: historical progression은 `c5879e9`(README-only full test 재확인) → docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`(Gate G + historical GitHub Actions provenance) → docs-only checkout `f1e23c3` 로컬 full rerun(`0c15caf` 코드 일치) → docs-only HEAD `9d4c035` 로컬 full rerun(`d81a2ec` 코드 일치) → docs-only HEAD `7487a97` 로컬 full rerun(`610a6aa` 코드 일치) → docs-only HEAD `9df0082` 로컬 full rerun(`2450e81` 코드 일치) → current live app-code snapshot `58eecac`(focused verification only, fresh full Gate G pending) 순서로 누적됐다. 세부 명령 결과는 아래 Gate G checklist에 정리한다
+- latest full Gate G rerun 결과(`0eecf54`, app code matched `58eecac`): `./scripts/prepare_assets.sh` / `/home/openc/sdk/flutter/bin/flutter pub get` succeeded, full test `00:42 +282: All tests passed!`, full analyze `No issues found! (ran in 6.1s)`, release APK `build/app/outputs/flutter-apk/app-release.apk` (`18538312` bytes)
+- 이 plan refresh는 verified docs-only HEAD `0eecf54`에서 실행한 full Gate G provenance를 기록하는 later docs-only follow-up이다. fresh Gate G claim은 계속 `0eecf54` / `58eecac`에 anchor해서 읽어야 하고, 이보다 뒤의 docs-only commit 자체를 rerun checkout으로 읽으면 안 된다
+- provenance 메모: historical progression은 `c5879e9`(README-only full test 재확인) → docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`(Gate G + historical GitHub Actions provenance) → docs-only checkout `f1e23c3` 로컬 full rerun(`0c15caf` 코드 일치) → docs-only HEAD `9d4c035` 로컬 full rerun(`d81a2ec` 코드 일치) → docs-only HEAD `7487a97` 로컬 full rerun(`610a6aa` 코드 일치) → docs-only HEAD `9df0082` 로컬 full rerun(`2450e81` 코드 일치) → docs-only HEAD `0eecf54` 로컬 full rerun(`58eecac` 코드 일치) 순서로 누적됐다. 세부 명령 결과는 아래 Gate G checklist에 정리한다
 - `test/features/avatar/presentation/avatar_setup_screen_test.dart`에는 가장 헷갈린 세트 요약 렌더링 / `이 세트 다시 보기` quick retry와 함께 parent BGM toggle 케이스도 포함된다
 
 남은 확장 후보
-- richer reward / 녹음 효과음 / 자산 오디오 wrapper를 실제 playback(BGM 포함)에 연결 + polish
+- richer reward / recorded cue / 자산 오디오 wrapper 실제 playback(BGM 포함) wiring + polish
 
 ## Goal
 
@@ -97,7 +97,7 @@
 - parent settings의 bgmEnabled persistence + 배경 음악 설정 토글 UI follow-up이 live repo와 focused tests에 반영됨
 - `58eecac`에서 `AssetAudioPlayer` / `AudioplayersAssetAudioPlayer` groundwork와 targeted verification이 추가됐지만, main runtime playback wiring은 아직 pending임
 - docs cleanup 완료
-- docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`의 historical Gate G provenance, docs-only checkout `f1e23c3` 로컬 full rerun(`0c15caf` 코드 일치), docs-only HEAD `9d4c035` 로컬 full rerun(`d81a2ec` 코드 일치), docs-only HEAD `7487a97` 로컬 full rerun(`610a6aa` 코드 일치)까지 historical reference로 확보됐고, latest fresh rerun은 docs-only HEAD `9df0082`에서 app code `2450e81`를 다시 검증했다
+- docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`의 historical Gate G provenance, docs-only checkout `f1e23c3` 로컬 full rerun(`0c15caf` 코드 일치), docs-only HEAD `9d4c035` 로컬 full rerun(`d81a2ec` 코드 일치), docs-only HEAD `7487a97` 로컬 full rerun(`610a6aa` 코드 일치), docs-only HEAD `9df0082` 로컬 full rerun(`2450e81` 코드 일치)까지 historical reference로 확보됐고, latest fresh rerun은 docs-only HEAD `0eecf54`에서 app code `58eecac`를 다시 검증했다
 
 ## Verification approach
 
@@ -110,23 +110,30 @@
 ### Gate G — final integration checklist
 
 - 아래 provenance / spot-check 명령은 모두 repo root(`/home/openc/kids-play-app`) 기준이다.
-- 이 게이트의 historical provenance는 docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`, docs-only checkout `f1e23c3` 로컬 full rerun, docs-only HEAD `9d4c035` 로컬 full rerun, docs-only HEAD `7487a97` 로컬 full rerun까지 확보돼 있었다. latest full Gate G provenance는 verified docs-only HEAD `9df0082` fresh local rerun이고, `2450e81..9df0082`가 docs-only 범위였기 때문에 그 rerun이 다시 검증한 앱 코드는 `2450e81`과 동일했다. current live app-code snapshot은 현재 `58eecac`이므로 current-head fresh Gate G claim은 아직 없고, later docs-only refresh가 생겨도 latest fresh full Gate G claim은 계속 `9df0082` / `2450e81`에 anchor해서 읽어야 한다.
+- 이 게이트의 historical provenance는 docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`, docs-only checkout `f1e23c3` 로컬 full rerun, docs-only HEAD `9d4c035` 로컬 full rerun, docs-only HEAD `7487a97` 로컬 full rerun, docs-only HEAD `9df0082` 로컬 full rerun까지 확보돼 있었다. latest full Gate G provenance는 verified docs-only HEAD `0eecf54` fresh local rerun이고, `58eecac..0eecf54`가 docs-only 범위였기 때문에 그 rerun이 다시 검증한 앱 코드는 `58eecac`과 동일했다. later docs-only refresh가 생겨도 latest fresh full Gate G claim은 계속 `0eecf54` / `58eecac`에 anchor해서 읽어야 한다.
 
-- current queue-head incremental spot check (full Gate G 이전/병행에 남겨둔 focused verification)
+- current live app-code incremental spot check (`58eecac` pre-rerun follow-up focused verification)
   - `./scripts/prepare_assets.sh` => succeeded
   - `/home/openc/sdk/flutter/bin/flutter test test/features/numbers` => `00:03 +28: All tests passed!`
   - `/home/openc/sdk/flutter/bin/flutter test test/app/audio/asset_audio_player_test.dart` => `00:00 +3: All tests passed!`
   - `/home/openc/sdk/flutter/bin/flutter analyze lib/app/audio/asset_audio_player.dart lib/app/audio/audioplayers_asset_audio_player.dart test/app/audio/asset_audio_player_test.dart` => `No issues found! (ran in 1.2s)`
   - runtime note: `main.dart`는 아직 `audioService: TtsFallbackAudioService(speech: speech)`를 사용하고, non-prompt cue(BGM 포함)는 recorded playback / Phase 8 wiring 전까지 silence로 degrade된다
 
-- latest full Gate G rerun (`9df0082`, app code matched `2450e81` because `2450e81..9df0082` only touched docs)
+- latest full Gate G rerun (`0eecf54`, app code matched `58eecac` because `58eecac..0eecf54` only touched docs)
+  - `./scripts/prepare_assets.sh` => succeeded
+  - `/home/openc/sdk/flutter/bin/flutter pub get` => succeeded
+  - full `/home/openc/sdk/flutter/bin/flutter test` => `00:42 +282: All tests passed!`
+  - full `/home/openc/sdk/flutter/bin/flutter analyze` => `No issues found! (ran in 6.1s)`
+  - `/home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64` => `build/app/outputs/flutter-apk/app-release.apk` (18.5MB / `18538312` bytes)
+
+- previous full Gate G rerun (`9df0082`, app code matched `2450e81`)
   - `./scripts/prepare_assets.sh` => succeeded
   - `/home/openc/sdk/flutter/bin/flutter pub get` => succeeded
   - full `/home/openc/sdk/flutter/bin/flutter test` => `00:42 +279: All tests passed!`
   - full `/home/openc/sdk/flutter/bin/flutter analyze` => `No issues found! (ran in 5.2s)`
   - `/home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64` => `build/app/outputs/flutter-apk/app-release.apk` (18.1MB / `18112444` bytes)
 
-- previous full Gate G rerun (`7487a97`, app code matched `610a6aa`)
+- earlier full Gate G rerun (`7487a97`, app code matched `610a6aa`)
   - `./scripts/prepare_assets.sh` => succeeded
   - `/home/openc/sdk/flutter/bin/flutter pub get` => succeeded
   - full `/home/openc/sdk/flutter/bin/flutter test` => `00:39 +275: All tests passed!`
