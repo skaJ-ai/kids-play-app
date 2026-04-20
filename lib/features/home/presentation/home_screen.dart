@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/audio/audio_cue.dart';
+import '../../../app/services/app_services.dart';
 import '../../../app/ui/kid_theme.dart';
 import '../../../app/ui/playground_scaffold.dart';
 import '../../../app/ui/tap_cooldown.dart';
@@ -25,18 +27,57 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  late AppServices _services;
   Future<List<HomeCategory>>? _categoriesFuture;
+  bool _didQueueIntroPrompt = false;
+
+  String get _introPromptText => '오늘의 차고예요. 좋아하는 차고를 골라요.';
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _services = AppServicesScope.of(context);
     _categoriesFuture ??= _loadCategories();
+    _queueIntroPrompt();
   }
 
   Future<List<HomeCategory>> _loadCategories() {
     return (widget.catalogRepository ??
             HomeCatalogRepository(assetBundle: DefaultAssetBundle.of(context)))
         .loadCategories();
+  }
+
+  void _queueIntroPrompt() {
+    if (_didQueueIntroPrompt) {
+      return;
+    }
+    _didQueueIntroPrompt = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      _replayIntroPrompt();
+    });
+  }
+
+  Future<void> _replayIntroPrompt() async {
+    try {
+      final snapshot = await _services.progressStore.loadSnapshot();
+      if (!mounted || !snapshot.voicePromptsEnabled) {
+        return;
+      }
+
+      await _services.audioService.playPrompt(
+        AudioPromptRequest(
+          categoryId: 'home',
+          lessonId: 'garage',
+          symbol: '오늘의 차고',
+          fallbackText: _introPromptText,
+        ),
+      );
+    } catch (_) {
+      return;
+    }
   }
 
   void _retryLoad() {
@@ -67,13 +108,19 @@ class _HomeScreenState extends State<HomeScreen> {
                     compact: compact,
                   ),
                   const Spacer(),
-                  if (!compact)
+                  _ReplayPromptButton(
+                    compact: compact,
+                    onTap: _replayIntroPrompt,
+                  ),
+                  if (!compact) ...[
+                    const SizedBox(width: 10),
                     Text(
                       '천천히 고르고 출발',
                       style: theme.textTheme.titleSmall?.copyWith(
                         color: KidPalette.body,
                       ),
                     ),
+                  ],
                 ],
               ),
               SizedBox(height: compact ? 12 : 18),
@@ -157,6 +204,39 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+class _ReplayPromptButton extends StatelessWidget {
+  const _ReplayPromptButton({required this.compact, required this.onTap});
+
+  final bool compact;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        key: const Key('home-replay-prompt'),
+        borderRadius: BorderRadius.circular(compact ? 18 : 20),
+        onTap: onTap,
+        child: Container(
+          width: compact ? 44 : 48,
+          height: compact ? 44 : 48,
+          decoration: BoxDecoration(
+            color: KidPalette.white.withValues(alpha: 0.92),
+            borderRadius: BorderRadius.circular(compact ? 18 : 20),
+            boxShadow: KidShadows.button,
+          ),
+          child: Icon(
+            Icons.volume_up_rounded,
+            color: KidPalette.coralDark,
+            size: compact ? 22 : 24,
+          ),
+        ),
       ),
     );
   }
