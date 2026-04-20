@@ -158,6 +158,11 @@ void main() {
         snapshot.lastEarnedReward!.earnedAt.isAfter(completionFinishedAt),
         isFalse,
       );
+      expect(snapshot.rewardEvents, hasLength(1));
+      expect(
+        snapshot.rewardEvents.first.reward.id,
+        'alphabet:alphabet_letters_1',
+      );
     },
   );
 
