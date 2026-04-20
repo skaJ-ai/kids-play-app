@@ -30,6 +30,8 @@ class PlayPromptPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final typography = Theme.of(context).kidTypography;
+
     if (tight) {
       return ToyPanel(
         key: promptPanelKey,
@@ -46,9 +48,8 @@ class PlayPromptPanel extends StatelessWidget {
                     prompt,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    style: typography.titleMedium.copyWith(
                       color: KidPalette.navy,
-                      fontWeight: FontWeight.w900,
                     ),
                   ),
                 ),
@@ -81,9 +82,8 @@ class PlayPromptPanel extends StatelessWidget {
               displayName,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              style: typography.titleSmall.copyWith(
                 color: KidPalette.coralDark,
-                fontWeight: FontWeight.w900,
               ),
             ),
             const SizedBox(height: 10),
@@ -141,9 +141,8 @@ class PlayPromptPanel extends StatelessWidget {
                   ),
                   child: Text(
                     targetLabel,
-                    style: Theme.of(context).kidTypography.labelLarge.copyWith(
+                    style: typography.labelLarge.copyWith(
                       color: KidPalette.coralDark,
-                      fontWeight: FontWeight.w900,
                     ),
                   ),
                 ),
@@ -153,13 +152,8 @@ class PlayPromptPanel extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style:
-                      (compact
-                              ? Theme.of(context).textTheme.titleSmall
-                              : Theme.of(context).textTheme.titleMedium)
-                          ?.copyWith(
-                            color: KidPalette.coralDark,
-                            fontWeight: FontWeight.w900,
-                          ),
+                      (compact ? typography.titleSmall : typography.titleMedium)
+                          .copyWith(color: KidPalette.coralDark),
                 ),
                 SizedBox(height: compact ? 6 : 10),
                 Expanded(

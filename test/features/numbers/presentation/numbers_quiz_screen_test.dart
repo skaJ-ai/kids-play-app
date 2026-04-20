@@ -190,10 +190,7 @@ void main() {
 
       expect(
         badgeText.style,
-        customTypography.labelLarge.copyWith(
-          color: KidPalette.coralDark,
-          fontWeight: FontWeight.w900,
-        ),
+        customTypography.labelLarge.copyWith(color: KidPalette.coralDark),
       );
     },
   );

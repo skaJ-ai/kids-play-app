@@ -11,6 +11,14 @@ void main() {
     (WidgetTester tester) async {
       final baseTheme = buildKidTheme();
       final customTypography = KidTypographyTheme.defaults.copyWith(
+        labelLarge: const TextStyle(
+          fontSize: 19,
+          fontWeight: FontWeight.w300,
+          letterSpacing: 3.1,
+          height: 1.6,
+          fontStyle: FontStyle.italic,
+          color: Colors.pink,
+        ),
         bodyMedium: const TextStyle(
           fontSize: 27,
           fontWeight: FontWeight.w300,
@@ -29,16 +37,18 @@ void main() {
         ),
       );
 
-      await _pumpAudioPromptPanel(
-        tester,
-        compact: false,
-        theme: baseTheme.copyWith(
-          extensions: <ThemeExtension<dynamic>>[
-            baseTheme.kidLayout,
-            customTypography,
-          ],
-        ),
+      final theme = baseTheme.copyWith(
+        extensions: <ThemeExtension<dynamic>>[
+          baseTheme.kidLayout,
+          customTypography,
+        ],
       );
+
+      expect(theme.textTheme.labelLarge, baseTheme.textTheme.labelLarge);
+      expect(theme.textTheme.titleLarge, baseTheme.textTheme.titleLarge);
+      expect(theme.textTheme.bodyMedium, baseTheme.textTheme.bodyMedium);
+
+      await _pumpAudioPromptPanel(tester, compact: false, theme: theme);
 
       final badgeText = tester.widget<Text>(find.text('문제 듣기'));
       final titleText = tester.widget<Text>(find.text('하나'));
@@ -46,21 +56,49 @@ void main() {
 
       expect(
         badgeText.style,
-        customTypography.bodyMedium.copyWith(
-          color: KidPalette.coralDark,
-          fontWeight: FontWeight.w900,
-        ),
+        customTypography.labelLarge.copyWith(color: KidPalette.coralDark),
       );
       expect(
         titleText.style,
-        customTypography.titleLarge.copyWith(
-          color: KidPalette.navy,
-          fontWeight: FontWeight.w900,
-        ),
+        customTypography.titleLarge.copyWith(color: KidPalette.navy),
       );
       expect(
         subtitleText.style,
         customTypography.bodyMedium.copyWith(color: KidPalette.body),
+      );
+    },
+  );
+
+  testWidgets(
+    'uses kid typography titleMedium overrides for the compact title without extra heavy weight',
+    (WidgetTester tester) async {
+      final baseTheme = buildKidTheme();
+      final customTypography = KidTypographyTheme.defaults.copyWith(
+        titleMedium: const TextStyle(
+          fontSize: 23,
+          fontWeight: FontWeight.w300,
+          letterSpacing: 2.4,
+          height: 1.6,
+          fontStyle: FontStyle.italic,
+          color: Colors.orange,
+        ),
+      );
+      final theme = baseTheme.copyWith(
+        extensions: <ThemeExtension<dynamic>>[
+          baseTheme.kidLayout,
+          customTypography,
+        ],
+      );
+
+      expect(theme.textTheme.titleMedium, baseTheme.textTheme.titleMedium);
+
+      await _pumpAudioPromptPanel(tester, compact: true, theme: theme);
+
+      final titleText = tester.widget<Text>(find.text('하나'));
+
+      expect(
+        titleText.style,
+        customTypography.titleMedium.copyWith(color: KidPalette.navy),
       );
     },
   );

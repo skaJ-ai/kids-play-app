@@ -60,9 +60,8 @@ class AudioPromptPanel extends StatelessWidget {
                     badge,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: typography.bodyMedium.copyWith(
+                    style: typography.labelLarge.copyWith(
                       color: KidPalette.coralDark,
-                      fontWeight: FontWeight.w900,
                     ),
                   ),
                 ),
@@ -73,19 +72,14 @@ class AudioPromptPanel extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style:
                       (compact ? typography.titleMedium : typography.titleLarge)
-                          .copyWith(
-                            color: KidPalette.navy,
-                            fontWeight: FontWeight.w900,
-                          ),
+                          .copyWith(color: KidPalette.navy),
                 ),
                 SizedBox(height: compact ? 2 : 4),
                 Text(
                   subtitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: typography.bodyMedium.copyWith(
-                    color: KidPalette.body,
-                  ),
+                  style: typography.bodyMedium.copyWith(color: KidPalette.body),
                 ),
               ],
             ),
