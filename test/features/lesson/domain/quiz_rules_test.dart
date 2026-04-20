@@ -20,9 +20,9 @@ void main() {
 
   group('resolveQuizQuestions', () {
     final items = [
-      const LessonItem(symbol: 'A', label: '', hint: ''),
-      const LessonItem(symbol: 'B', label: '', hint: ''),
-      const LessonItem(symbol: 'C', label: '', hint: ''),
+      const LessonItem(symbol: 'A', display: '', spoken: '', hint: ''),
+      const LessonItem(symbol: 'B', display: '', spoken: '', hint: ''),
+      const LessonItem(symbol: 'C', display: '', spoken: '', hint: ''),
     ];
 
     test('returns the full deck when no mistake symbols are supplied', () {
@@ -65,11 +65,11 @@ void main() {
 
   group('buildChoices', () {
     final items = [
-      const LessonItem(symbol: 'A', label: '', hint: ''),
-      const LessonItem(symbol: 'B', label: '', hint: ''),
-      const LessonItem(symbol: 'C', label: '', hint: ''),
-      const LessonItem(symbol: 'D', label: '', hint: ''),
-      const LessonItem(symbol: 'E', label: '', hint: ''),
+      const LessonItem(symbol: 'A', display: '', spoken: '', hint: ''),
+      const LessonItem(symbol: 'B', display: '', spoken: '', hint: ''),
+      const LessonItem(symbol: 'C', display: '', spoken: '', hint: ''),
+      const LessonItem(symbol: 'D', display: '', spoken: '', hint: ''),
+      const LessonItem(symbol: 'E', display: '', spoken: '', hint: ''),
     ];
 
     test('returns exactly four choices including the answer', () {
@@ -88,7 +88,7 @@ void main() {
     });
 
     test('returns only the answer when no distractors exist', () {
-      final single = [const LessonItem(symbol: 'X', label: '', hint: '')];
+      final single = [const LessonItem(symbol: 'X', display: '', spoken: '', hint: '')];
       final choices = buildChoices(single, single.first, 0);
       expect(choices.map((c) => c.symbol), ['X']);
     });

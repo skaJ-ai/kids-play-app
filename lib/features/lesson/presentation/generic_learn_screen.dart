@@ -94,7 +94,7 @@ class _GenericLearnScreenState extends State<GenericLearnScreen> {
       AudioCueRef(
         assetPath:
             'assets/generated/audio/voice/prompts/${widget.category.id}/${widget.lessonId}_$slug.mp3',
-        fallbackText: item.label,
+        fallbackText: item.spoken,
       ),
     );
   }
@@ -218,7 +218,7 @@ class _GenericLearnScreenState extends State<GenericLearnScreen> {
                               child: FittedBox(
                                 fit: BoxFit.scaleDown,
                                 child: Text(
-                                  item.symbol,
+                                  item.display,
                                   style: Theme.of(context)
                                       .textTheme
                                       .displayLarge
@@ -240,7 +240,7 @@ class _GenericLearnScreenState extends State<GenericLearnScreen> {
                             children: [
                               AudioPromptPanel(
                                 badge: '이름 듣기',
-                                title: item.label,
+                                title: item.spoken,
                                 subtitle: compact
                                     ? widget.category.learnSubtitleCompact
                                     : '스피커를 누르면 이름을 다시 들을 수 있어요.',

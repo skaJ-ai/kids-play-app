@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../../../app/audio/audio_cue.dart';
 import '../../../app/services/app_services.dart';
 import '../../../app/services/progress_store.dart';
+import '../../rewards/application/reward_coordinator.dart';
 import '../domain/lesson.dart';
 import '../domain/lesson_category.dart';
 import '../domain/quiz_rules.dart';
@@ -20,11 +21,15 @@ class QuizController extends ChangeNotifier {
     required List<LessonItem> questions,
     required List<LessonItem> pool,
     this.isMistakeReplay = false,
+    RewardCoordinator? rewardCoordinator,
   }) : _services = services,
        _questions = questions,
-       _pool = pool;
+       _pool = pool,
+       _rewardCoordinator = rewardCoordinator ??
+           RewardCoordinator(progressStore: services.progressStore);
 
   final AppServices _services;
+  final RewardCoordinator _rewardCoordinator;
   final LessonCategoryConfig category;
   final String lessonId;
   final bool isMistakeReplay;
@@ -65,7 +70,7 @@ class QuizController extends ChangeNotifier {
       AudioCueRef(
         assetPath:
             'assets/generated/audio/voice/prompts/${category.id}/${lessonId}_quiz_$slug.mp3',
-        fallbackText: category.promptFor(question.symbol),
+        fallbackText: category.promptFor(question.spoken),
       ),
     );
   }
@@ -133,6 +138,12 @@ class QuizController extends ChangeNotifier {
           ? 1
           : 0;
 
+      await _rewardCoordinator.evaluate(
+        categoryId: category.id,
+        lessonId: lessonId,
+        correctCount: nextCorrectCount,
+        totalQuestions: totalQuestions,
+      );
       await _services.progressStore.recordCompletedQuiz(
         lessonId: progressLessonId,
         correctCount: nextCorrectCount,

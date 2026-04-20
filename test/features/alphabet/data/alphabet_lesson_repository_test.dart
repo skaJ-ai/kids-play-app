@@ -16,13 +16,15 @@ void main() {
               'title': '알파벳 1',
               'cards': [
                 {
-                  'symbol': 'A a',
-                  'label': '에이, A a',
+                  'symbol': 'A',
+                  'display': 'A',
+                  'spoken': '에이',
                   'hint': '에이를 크게 보고 소리를 따라 말해봐요',
                 },
                 {
-                  'symbol': 'B b',
-                  'label': '비, B b',
+                  'symbol': 'B',
+                  'display': 'B',
+                  'spoken': '비',
                   'hint': '비를 보며 입으로 비 하고 말해봐요',
                 },
               ],
@@ -37,9 +39,10 @@ void main() {
     expect(lesson.id, 'alphabet_letters_1');
     expect(lesson.title, '알파벳 1');
     expect(lesson.cards, hasLength(2));
-    expect(lesson.cards.first.symbol, 'A a');
-    expect(lesson.cards.first.label, '에이, A a');
-    expect(lesson.cards.last.symbol, 'B b');
+    expect(lesson.cards.first.symbol, 'A');
+    expect(lesson.cards.first.spoken, '에이');
+    expect(lesson.cards.first.display, 'A');
+    expect(lesson.cards.last.symbol, 'B');
   });
 
   test(
@@ -75,10 +78,34 @@ void main() {
       expect(cards, hasLength(greaterThanOrEqualTo(5)));
       expect(
         cards.take(5).map((card) => card['symbol']).toList(growable: false),
-        ['A a', 'B b', 'C c', 'D d', 'E e'],
+        ['A', 'B', 'C', 'D', 'E'],
       );
     },
   );
+
+  test(
+    'new manifest carries spoken field with single-word TTS input',
+    () async {
+      final generatedManifest = File(
+        'assets/generated/manifest/alphabet_lessons.json',
+      );
+      final generatedJson =
+          jsonDecode(await generatedManifest.readAsString())
+              as Map<String, dynamic>;
+
+      final firstLesson = (generatedJson['lessons'] as List<dynamic>)
+          .cast<Map<String, dynamic>>()
+          .firstWhere((lesson) => lesson['id'] == 'alphabet_letters_1');
+      final firstCard =
+          (firstLesson['cards'] as List<dynamic>).first
+              as Map<String, dynamic>;
+
+      // Spoken must be a single word so TTS doesn't read "에이, 에이 에이".
+      expect(firstCard['spoken'], '에이');
+      expect(firstCard.containsKey('label'), isFalse);
+    },
+  );
+
   test('loads all alphabet lessons from manifest json in order', () async {
     final repository = AlphabetLessonRepository(
       assetBundle: _FakeAssetBundle({
@@ -88,20 +115,20 @@ void main() {
               'id': 'alphabet_letters_1',
               'title': '알파벳 1',
               'cards': [
-                {'symbol': 'A a', 'label': '에이, A a', 'hint': 'A를 말해봐요'},
-                {'symbol': 'B b', 'label': '비, B b', 'hint': 'B를 말해봐요'},
-                {'symbol': 'C c', 'label': '씨, C c', 'hint': 'C를 말해봐요'},
-                {'symbol': 'D d', 'label': '디, D d', 'hint': 'D를 말해봐요'},
+                {'symbol': 'A', 'display': 'A', 'spoken': '에이', 'hint': 'A를 말해봐요'},
+                {'symbol': 'B', 'display': 'B', 'spoken': '비', 'hint': 'B를 말해봐요'},
+                {'symbol': 'C', 'display': 'C', 'spoken': '씨', 'hint': 'C를 말해봐요'},
+                {'symbol': 'D', 'display': 'D', 'spoken': '디', 'hint': 'D를 말해봐요'},
               ],
             },
             {
               'id': 'alphabet_letters_2',
               'title': '알파벳 2',
               'cards': [
-                {'symbol': 'F f', 'label': '에프, F f', 'hint': 'F를 말해봐요'},
-                {'symbol': 'G g', 'label': '지, G g', 'hint': 'G를 말해봐요'},
-                {'symbol': 'H h', 'label': '에이치, H h', 'hint': 'H를 말해봐요'},
-                {'symbol': 'I i', 'label': '아이, I i', 'hint': 'I를 말해봐요'},
+                {'symbol': 'F', 'display': 'F', 'spoken': '에프', 'hint': 'F를 말해봐요'},
+                {'symbol': 'G', 'display': 'G', 'spoken': '지', 'hint': 'G를 말해봐요'},
+                {'symbol': 'H', 'display': 'H', 'spoken': '에이치', 'hint': 'H를 말해봐요'},
+                {'symbol': 'I', 'display': 'I', 'spoken': '아이', 'hint': 'I를 말해봐요'},
               ],
             },
           ],
@@ -115,7 +142,7 @@ void main() {
       'alphabet_letters_1',
       'alphabet_letters_2',
     ]);
-    expect(lessons[1].cards.first.symbol, 'F f');
+    expect(lessons[1].cards.first.symbol, 'F');
   });
 
   test(

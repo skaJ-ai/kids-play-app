@@ -298,7 +298,7 @@ void main() {
 
       expect(find.byType(AlphabetLearnScreen), findsOneWidget);
       expect(find.text('알파벳 학습'), findsOneWidget);
-      expect(find.text('에프, F f'), findsOneWidget);
+      expect(find.text('에프'), findsOneWidget);
     },
   );
 
@@ -347,7 +347,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('알파벳 게임'), findsOneWidget);
-      expect(find.text("'F f' 글자를 찾아봐!"), findsOneWidget);
+      expect(find.text("'에프' 글자를 찾아봐!"), findsOneWidget);
     },
   );
 }
@@ -380,11 +380,11 @@ const Map<String, dynamic> _alphabetLessonOne = {
   'id': 'alphabet_letters_1',
   'title': '알파벳 1',
   'cards': [
-    {'symbol': 'A a', 'label': '에이, A a', 'hint': 'A를 천천히 말해봐요'},
-    {'symbol': 'B b', 'label': '비, B b', 'hint': 'B를 천천히 말해봐요'},
-    {'symbol': 'C c', 'label': '씨, C c', 'hint': 'C를 천천히 말해봐요'},
-    {'symbol': 'D d', 'label': '디, D d', 'hint': 'D를 천천히 말해봐요'},
-    {'symbol': 'E e', 'label': '이, E e', 'hint': 'E를 천천히 말해봐요'},
+    {'symbol': 'A', 'display': 'A', 'spoken': '에이', 'hint': 'A를 천천히 말해봐요'},
+    {'symbol': 'B', 'display': 'B', 'spoken': '비', 'hint': 'B를 천천히 말해봐요'},
+    {'symbol': 'C', 'display': 'C', 'spoken': '씨', 'hint': 'C를 천천히 말해봐요'},
+    {'symbol': 'D', 'display': 'D', 'spoken': '디', 'hint': 'D를 천천히 말해봐요'},
+    {'symbol': 'E', 'display': 'E', 'spoken': '이', 'hint': 'E를 천천히 말해봐요'},
   ],
 };
 
@@ -392,11 +392,11 @@ const Map<String, dynamic> _alphabetLessonTwo = {
   'id': 'alphabet_letters_2',
   'title': '알파벳 2',
   'cards': [
-    {'symbol': 'F f', 'label': '에프, F f', 'hint': 'F를 천천히 말해봐요'},
-    {'symbol': 'G g', 'label': '지, G g', 'hint': 'G를 천천히 말해봐요'},
-    {'symbol': 'H h', 'label': '에이치, H h', 'hint': 'H를 천천히 말해봐요'},
-    {'symbol': 'I i', 'label': '아이, I i', 'hint': 'I를 천천히 말해봐요'},
-    {'symbol': 'J j', 'label': '제이, J j', 'hint': 'J를 천천히 말해봐요'},
+    {'symbol': 'F', 'display': 'F', 'spoken': '에프', 'hint': 'F를 천천히 말해봐요'},
+    {'symbol': 'G', 'display': 'G', 'spoken': '지', 'hint': 'G를 천천히 말해봐요'},
+    {'symbol': 'H', 'display': 'H', 'spoken': '에이치', 'hint': 'H를 천천히 말해봐요'},
+    {'symbol': 'I', 'display': 'I', 'spoken': '아이', 'hint': 'I를 천천히 말해봐요'},
+    {'symbol': 'J', 'display': 'J', 'spoken': '제이', 'hint': 'J를 천천히 말해봐요'},
   ],
 };
 

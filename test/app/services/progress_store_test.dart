@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kids_play_app/app/services/progress_store.dart';
+import 'package:kids_play_app/features/rewards/domain/reward_models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_platform_interface.dart';
 
@@ -378,6 +379,91 @@ void main() {
       ]);
     },
   );
+
+  group('reward events', () {
+    final sampleReward = const Reward(
+      id: 'alphabet:alphabet_letters_1',
+      packId: 'alphabet_sticker_v1',
+      categoryId: 'alphabet',
+      lessonId: 'alphabet_letters_1',
+      label: '알파벳 1 자동차',
+      emoji: '🚗',
+    );
+
+    test('memory store appends events and ignores duplicates', () async {
+      final store = MemoryProgressStore();
+      final earnedAt = DateTime.utc(2026, 4, 20, 10);
+
+      await store.recordRewardEvent(
+        RewardEvent(
+          at: earnedAt,
+          lessonId: 'alphabet_letters_1',
+          reward: sampleReward,
+        ),
+      );
+      await store.recordRewardEvent(
+        RewardEvent(
+          at: earnedAt.add(const Duration(hours: 1)),
+          lessonId: 'alphabet_letters_1',
+          reward: sampleReward,
+        ),
+      );
+
+      final snapshot = await store.loadSnapshot();
+      expect(snapshot.rewardEvents, hasLength(1));
+      expect(snapshot.hasRewardFor(sampleReward.id), isTrue);
+      expect(snapshot.rewardEvents.first.at, earnedAt);
+    });
+
+    test('shared preferences store persists reward events across reads',
+        () async {
+      final preferences = await SharedPreferences.getInstance();
+      final store = SharedPreferencesProgressStore(preferences);
+      final earnedAt = DateTime.utc(2026, 4, 20, 11, 30);
+
+      await store.recordRewardEvent(
+        RewardEvent(
+          at: earnedAt,
+          lessonId: 'alphabet_letters_1',
+          reward: sampleReward,
+        ),
+      );
+
+      final replayStore = SharedPreferencesProgressStore(preferences);
+      final snapshot = await replayStore.loadSnapshot();
+
+      expect(snapshot.rewardEvents, hasLength(1));
+      expect(snapshot.rewardEvents.first.reward.emoji, '🚗');
+      expect(snapshot.rewardEvents.first.at, earnedAt);
+    });
+
+    test('snapshot skips malformed reward event entries', () {
+      final snapshot = AppProgressSnapshot.fromJson({
+        'rewardEvents': [
+          {
+            'at': 'not-a-date',
+            'lessonId': 'x',
+            'reward': {'id': 'x'},
+          },
+          {
+            'at': '2026-04-20T10:00:00Z',
+            'lessonId': 'alphabet_letters_1',
+            'reward': {
+              'id': 'alphabet:alphabet_letters_1',
+              'packId': 'alphabet_sticker_v1',
+              'categoryId': 'alphabet',
+              'lessonId': 'alphabet_letters_1',
+              'label': '알파벳 1 자동차',
+              'emoji': '🚗',
+            },
+          },
+        ],
+      });
+
+      expect(snapshot.rewardEvents, hasLength(1));
+      expect(snapshot.rewardEvents.first.reward.emoji, '🚗');
+    });
+  });
 }
 
 class _RejectingSharedPreferencesStore extends InMemorySharedPreferencesStore {
