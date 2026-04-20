@@ -54,11 +54,11 @@
 ### queue 기준 상태
 - latest full Gate G provenance는 verified docs-only HEAD `0eecf54` fresh local rerun이며, `58eecac..0eecf54` 사이 변경이 `README.md`, `handoff.md`, `docs/plans/2026-04-16_full-mvp-delivery-plan.md` 3개 문서뿐이었기 때문에 그때 다시 검증된 앱 코드는 `58eecac`였다
 - queue A-F의 앱 기능 + G full Gate G provenance는 이제 `58eecac` / `0eecf54` baseline까지 fresh하게 읽을 수 있다
-- current live app-code snapshot은 여전히 `58eecac`(`feat(audio): add asset audio player wrapper`)이고, latest full Gate G rerun이 이 app-code baseline을 다시 검증했다
-- `2450e81` 이후 live app-code delta는 asset-audio-player / audioplayers groundwork 1건뿐이다: `lib/app/audio/asset_audio_player.dart`, `lib/app/audio/audioplayers_asset_audio_player.dart`, `pubspec.yaml`, `pubspec.lock`, `test/app/audio/asset_audio_player_test.dart`
+- committed app-code snapshot은 여전히 `58eecac`(`feat(audio): add asset audio player wrapper`)이고, latest full Gate G rerun이 이 app-code baseline을 다시 검증했다
+- `2450e81` 이후 committed app-code delta는 asset-audio-player / audioplayers groundwork 1건뿐이다: `lib/app/audio/asset_audio_player.dart`, `lib/app/audio/audioplayers_asset_audio_player.dart`, `pubspec.yaml`, `pubspec.lock`, `test/app/audio/asset_audio_player_test.dart`
 - live repo에는 `AppProgressSnapshot.bgmEnabled` 기본값 true + persistence API, 보호자 화면의 분리된 배경 음악 설정 토글 UI(`progressStore.setBgmEnabled`), UI copy `배경 음악 켜짐/꺼짐`이 이미 반영돼 있고, `58eecac`은 그 위에 asset audio wrapper groundwork만 추가했다
 - runtime truth: `main.dart`는 아직 `audioService: TtsFallbackAudioService(speech: speech)`를 주입하고, `lib/app/audio/tts_fallback_audio_service.dart`는 non-prompt cue(배경 음악 포함)를 silence로 degrade하며 recorded playback / Phase 8이 아직 not wired라고 명시한다. 따라서 `58eecac`은 실제 BGM playback shipping이 아니라 wrapper groundwork다
-- live app-code focused verification(`58eecac` pre-rerun follow-up):
+- committed app-code focused verification(`58eecac` pre-rerun follow-up):
   - `./scripts/prepare_assets.sh` => succeeded
   - `/home/openc/sdk/flutter/bin/flutter test test/features/numbers` => `00:03 +28: All tests passed!`
   - `/home/openc/sdk/flutter/bin/flutter test test/app/audio/asset_audio_player_test.dart` => `00:00 +3: All tests passed!`
@@ -66,7 +66,7 @@
 - latest full Gate G rerun 결과(`0eecf54`, app code matched `58eecac`): `./scripts/prepare_assets.sh` / `/home/openc/sdk/flutter/bin/flutter pub get` succeeded, full test `00:42 +282: All tests passed!`, full analyze `No issues found! (ran in 6.1s)`, release APK `build/app/outputs/flutter-apk/app-release.apk` (`18538312` bytes)
 - 이 handoff refresh는 verified docs-only HEAD `0eecf54`에서 실행한 full Gate G provenance를 기록하는 later docs-only follow-up이다. 따라서 fresh Gate G claim은 `0eecf54` / `58eecac`에 anchor해서 읽고, 이보다 뒤의 docs-only commit 자체를 rerun checkout으로 읽으면 안 된다
 - historical provenance는 직전 docs-only HEAD `9df0082` 로컬 full rerun(`2450e81` 코드 일치), 그 이전 docs-only HEAD `7487a97` 로컬 full rerun(`610a6aa` 코드 일치), docs-only HEAD `9d4c035` 로컬 full rerun(`d81a2ec` 코드 일치), docs-only checkout `f1e23c3` 로컬 full rerun(`0c15caf` 코드 일치), historical docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`까지 함께 유지한다
-- latest full rerun / live app-code spot check / historical reference 세부 결과는 아래 `선별 검증 + Gate G provenance 메모` 섹션에 정리돼 있다
+- latest full rerun / committed app-code spot check / historical reference 세부 결과는 아래 `선별 검증 + Gate G provenance 메모` 섹션에 정리돼 있다
 
 ### 1. 문서/CI 정합성
 - docs/script 변경도 APK workflow에 포함되도록 정리됨
@@ -103,11 +103,11 @@
 
 ## 선별 검증 + Gate G provenance 메모
 
-최근 문서화된 live app-code spot check / latest full Gate G provenance / historical verification 메모
+최근 문서화된 committed app-code spot check / latest full Gate G provenance / historical verification 메모
 - 아래 provenance / spot-check 명령은 모두 repo root(`/home/openc/kids-play-app`) 기준이다
 - latest full Gate G provenance는 verified docs-only HEAD `0eecf54` rerun이며, `58eecac..0eecf54`가 docs-only 범위(`README.md`, `handoff.md`, `docs/plans/2026-04-16_full-mvp-delivery-plan.md`)였기 때문에 그 rerun이 다시 검증한 앱 코드는 `58eecac`과 동일하다
-- current live app-code snapshot은 여전히 `58eecac`(`feat(audio): add asset audio player wrapper`)이고, later docs-only refresh가 생겨도 fresh full Gate G claim은 계속 `0eecf54` / `58eecac`에 anchor해서 읽어야 한다
-- live app-code incremental spot-check(`58eecac` pre-rerun follow-up)
+- committed app-code snapshot은 여전히 `58eecac`(`feat(audio): add asset audio player wrapper`)이고, later docs-only refresh가 생겨도 fresh full Gate G claim은 계속 `0eecf54` / `58eecac`에 anchor해서 읽어야 한다
+- committed app-code incremental spot-check(`58eecac` pre-rerun follow-up)
   - `./scripts/prepare_assets.sh` => succeeded
   - `/home/openc/sdk/flutter/bin/flutter test test/features/numbers` => `00:03 +28: All tests passed!`
   - `/home/openc/sdk/flutter/bin/flutter test test/app/audio/asset_audio_player_test.dart` => `00:00 +3: All tests passed!`
