@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/audio/audio_cue.dart';
 import '../../../app/services/app_services.dart';
 import '../../../app/ui/audio_prompt_panel.dart';
 import '../../../app/ui/kid_theme.dart';
@@ -69,15 +70,22 @@ class _HangulLearnScreenState extends State<HangulLearnScreen> {
   }
 
   Future<void> _replayPrompt(HangulCard card) async {
-    await _speakIfEnabled(card.label);
+    await _playPromptIfEnabled(card);
   }
 
-  Future<void> _speakIfEnabled(String text) async {
+  Future<void> _playPromptIfEnabled(HangulCard card) async {
     final snapshot = await _services.progressStore.loadSnapshot();
     if (!snapshot.voicePromptsEnabled) {
       return;
     }
-    await _services.speechCueService.speak(text, locale: 'ko-KR');
+    await _services.audioService.playPrompt(
+      AudioPromptRequest(
+        categoryId: 'hangul',
+        lessonId: widget.lessonId,
+        symbol: card.symbol,
+        fallbackText: card.label,
+      ),
+    );
   }
 
   void _queuePrompt(HangulCard card) {

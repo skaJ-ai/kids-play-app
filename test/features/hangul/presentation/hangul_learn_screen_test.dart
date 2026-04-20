@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kids_play_app/app/audio/audio_cue.dart';
+import 'package:kids_play_app/app/audio/audio_service.dart';
 import 'package:kids_play_app/app/services/app_services.dart';
 import 'package:kids_play_app/app/services/progress_store.dart';
 import 'package:kids_play_app/app/services/speech_cue_service.dart';
@@ -93,6 +95,56 @@ void main() {
     expect(find.text('2 / 2'), findsOneWidget);
     expect(find.text('기역, ㄱ'), findsNothing);
   });
+
+  testWidgets(
+    'replays the current hangul learn prompt through the injected audio service',
+    (WidgetTester tester) async {
+      final repository = HangulLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          HangulLessonRepository.manifestPath: jsonEncode({
+            'lessons': [
+              {
+                'id': 'basic_consonants_1',
+                'title': '기본 자음 1',
+                'cards': [
+                  {'symbol': 'ㄱ', 'label': '기역, ㄱ', 'hint': '큰 카드로 기역을 천천히 봐요'},
+                  {'symbol': 'ㄴ', 'label': '니은, ㄴ', 'hint': '니은을 손가락으로 콕 눌러봐요'},
+                ],
+              },
+            ],
+          }),
+        }),
+      );
+      final audioService = _FakeAudioService();
+
+      await tester.pumpWidget(
+        _wrapWithServices(
+          progressStore: MemoryProgressStore(),
+          audioService: audioService,
+          child: HangulLearnScreen(
+            repository: repository,
+            lessonId: 'basic_consonants_1',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(audioService.promptCalls, hasLength(1));
+      expect(audioService.promptCalls.single.categoryId, 'hangul');
+      expect(audioService.promptCalls.single.lessonId, 'basic_consonants_1');
+      expect(audioService.promptCalls.single.symbol, 'ㄱ');
+      expect(audioService.promptCalls.single.fallbackText, '기역, ㄱ');
+
+      await tester.tap(find.byIcon(Icons.volume_up_rounded));
+      await tester.pumpAndSettle();
+
+      expect(audioService.promptCalls, hasLength(2));
+      expect(audioService.promptCalls.last.categoryId, 'hangul');
+      expect(audioService.promptCalls.last.lessonId, 'basic_consonants_1');
+      expect(audioService.promptCalls.last.symbol, 'ㄱ');
+      expect(audioService.promptCalls.last.fallbackText, '기역, ㄱ');
+    },
+  );
 
   testWidgets('keeps the learn screen stable on a compact landscape phone', (
     WidgetTester tester,
@@ -225,6 +277,7 @@ class _FakeAssetBundle extends CachingAssetBundle {
 
 Widget _wrapWithServices({
   required ProgressStore progressStore,
+  AudioService? audioService,
   required Widget child,
 }) {
   return MaterialApp(
@@ -232,8 +285,30 @@ Widget _wrapWithServices({
       services: AppServices(
         progressStore: progressStore,
         speechCueService: NoopSpeechCueService(),
+        audioService: audioService,
       ),
       child: child,
     ),
   );
+}
+
+class _FakeAudioService implements AudioService {
+  final List<AudioPromptRequest> promptCalls = <AudioPromptRequest>[];
+  final List<AudioCue> cueCalls = <AudioCue>[];
+  int stopCount = 0;
+
+  @override
+  Future<void> playPrompt(AudioPromptRequest request) async {
+    promptCalls.add(request);
+  }
+
+  @override
+  Future<void> playCue(AudioCue cue) async {
+    cueCalls.add(cue);
+  }
+
+  @override
+  Future<void> stop() async {
+    stopCount += 1;
+  }
 }
