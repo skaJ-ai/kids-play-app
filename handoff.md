@@ -20,9 +20,10 @@
 - remote: `git@github.com:skaJ-ai/kids-play-app.git`
 
 대표 기능 커밋 예시
-- `2a71734` `feat(avatar): add gallery pick and crop flow`
 - `faff2ce` `feat(hero): use saved avatar photo fallback chain`
 - `610a6aa` `fix(numbers): route learn prompts through audio service`
+- `e2f1ed5` `feat(audio): persist bgm setting`
+- `2450e81` `feat(audio): add parent bgm toggle`
 
 현재 이미 동작하는 것
 - landscape 고정 + immersive full-screen
@@ -37,27 +38,33 @@
 - compact landscape 대응 + 회귀 테스트
 - toddler-safe tap cooldown / 즉시 피드백 오버레이
 - 음성 cue / 다시 듣기 버튼
-- shared_preferences 기반 progress / settings / sticker 저장, lesson별 오답 다시 풀기 횟수 / 다시 풀기 보상 스티커 합계 추적
-- 보호자 메뉴의 진행 요약, 음성/효과 토글, 세트별 진도 조절, 오답 다시 풀기, 오답 비우기, 세트별 수동 해금, 앱 종료/리셋
+- shared_preferences 기반 progress / settings / sticker 저장, lesson별 오답 다시 풀기 횟수 / 다시 풀기 보상 스티커 합계 추적, `bgmEnabled` 기본값 true 저장/복원
+- 보호자 메뉴의 진행 요약, 음성/효과 토글, 배경 음악 설정 토글 UI, 세트별 진도 조절, 오답 다시 풀기, 오답 비우기, 세트별 수동 해금, 앱 종료/리셋
 - 보호자 진행 요약에서 최근 헷갈림 / 오답 다시 보기 집계 chip, 다시 풀기 보상 합계 chip, 최근 보상 callout(최근 보상이 replay reward면 전용 copy), 가장 헷갈린 세트 요약 callout(카테고리/세트 메타데이터 + `이 세트 다시 보기` quick retry) 노출
 - GitHub Actions APK 빌드
 
 아직 남은 확장 후보
-- richer reward / 효과음 / 배경음악 polish
+- richer reward / 녹음 효과음 / 배경음악 재생 연결 + polish
 
 ---
 
 ## 현재 큐 기준 상태
 
 ### queue 기준 상태
-- A-F 범위(숫자 feature/라우팅, home/category 연결, design-system theme/button/panel 정리, hero/home/category 리디자인, 보호자 summary/settings/retry/unlock 흐름, docs cleanup)는 latest live app-code snapshot `610a6aa`와 문서에 반영돼 있다
-- G는 docs-only HEAD `7487a97`에서 fresh full integration rerun(`./scripts/prepare_assets.sh` + `/home/openc/sdk/flutter/bin/flutter pub get` + full `flutter test` / `flutter analyze` / release build)으로 새로 재확인됐다
-- `7487a97`는 `610a6aa` 이후 README / handoff / plan docs만 바뀐 docs-only HEAD였으므로, 위 rerun은 latest live app-code snapshot `610a6aa`를 다시 검증했다
-- 따라서 queue A-G는 verified docs-only HEAD `7487a97` provenance를 근거로 latest live app-code snapshot `610a6aa` 기준 재검증 완료 상태다
-- 이 handoff 커밋 자체가 rerun을 실행한 HEAD라는 뜻은 아니며, verified docs-only HEAD `7487a97`에서 성공한 full Gate G provenance를 기록한 후속 docs-only refresh다
-- latest live app-code snapshot `610a6aa`에는 avatar runtime photo flow(`2c78d5f`~`faff2ce`), quiz prompt replay audio service(`19a6f1d`), numbers learn prompt audio service(`610a6aa`)가 반영돼 있다
+- latest full Gate G provenance는 docs-only HEAD `7487a97` fresh local rerun이며, 그때 다시 검증된 앱 코드는 `610a6aa`였다
+- queue A-F의 앱 기능 + G full Gate G provenance는 현재도 `610a6aa` / `7487a97` 기준으로 읽는 것이 맞다
+- current live app-code snapshot은 `2450e81`(`feat(audio): add parent bgm toggle`)이며, Gate G rerun 뒤 `e2f1ed5`(`feat(audio): persist bgm setting`)와 `2450e81` audio follow-up이 추가됐다
+- live repo에는 `AppProgressSnapshot.bgmEnabled` 기본값 true + persistence API, 보호자 화면의 분리된 배경 음악 설정 토글 UI(`progressStore.setBgmEnabled`), UI copy `배경 음악 켜짐/꺼짐`이 반영돼 있다
+- 현재 queue-head fresh pass 기록은 `./scripts/prepare_assets.sh`, `/home/openc/sdk/flutter/bin/flutter test test/features/numbers`, 그리고 아래 parent BGM follow-up targeted verification이다
+- parent BGM follow-up targeted verification:
+  - `/home/openc/sdk/flutter/bin/flutter test test/app/services/progress_store_test.dart --plain-name "memory progress store setBgmEnabled persists the flag and reset restores true"` => `00:00 +1: All tests passed!`
+  - `/home/openc/sdk/flutter/bin/flutter test test/app/services/progress_store_test.dart --plain-name "shared preferences progress store persists bgm across reload and reset restores true"` => `00:00 +1: All tests passed!`
+  - `/home/openc/sdk/flutter/bin/flutter test test/app/services/progress_store_test.dart --plain-name "snapshot json and copyWith preserve bgm and default missing payloads to true"` => `00:00 +1: All tests passed!`
+  - `/home/openc/sdk/flutter/bin/flutter test test/features/avatar/presentation/avatar_setup_screen_test.dart --plain-name "lets parent toggle background music separately"` => `00:01 +1: All tests passed!`
+- 따라서 queue A-G full rerun provenance는 아직 `610a6aa` 기준까지만 fresh하다. 이 handoff는 `2450e81`에 대한 fresh full Gate G rerun을 주장하지 않는다
+- 이 handoff는 verified docs-only HEAD `7487a97`에서 확보한 full Gate G provenance를 최신 queue-head 상태와 함께 좁게 기록한 docs-only refresh다
 - historical provenance는 docs-only HEAD `9d4c035` 로컬 full rerun(`d81a2ec` 코드 일치), docs-only checkout `f1e23c3` 로컬 full rerun(`0c15caf` 코드 일치), historical docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`까지 함께 유지한다
-- latest full rerun / earlier pre-rerun spot checks / historical reference 세부 결과는 아래 `선별 검증 + Gate G provenance 메모` 섹션에 정리돼 있다
+- latest full rerun / queue-head spot check / historical reference 세부 결과는 아래 `선별 검증 + Gate G provenance 메모` 섹션에 정리돼 있다
 
 ### 1. 문서/CI 정합성
 - docs/script 변경도 APK workflow에 포함되도록 정리됨
@@ -94,7 +101,16 @@
 
 ## 선별 검증 + Gate G provenance 메모
 
-최근 문서화된 latest full Gate G provenance와 earlier/historical verification 메모
+최근 문서화된 queue-head spot check / latest full Gate G provenance / historical verification 메모
+- 아래 provenance / spot-check 명령은 모두 repo root(`/home/openc/kids-play-app`) 기준이다
+- current live queue-head는 `2450e81`(`feat(audio): add parent bgm toggle`)이고, latest full Gate G provenance `7487a97` / `610a6aa`보다 앞서 있다
+- current queue-head fresh pass 기록
+  - `./scripts/prepare_assets.sh` => succeeded
+  - `/home/openc/sdk/flutter/bin/flutter test test/features/numbers` => passed
+  - `/home/openc/sdk/flutter/bin/flutter test test/app/services/progress_store_test.dart --plain-name "memory progress store setBgmEnabled persists the flag and reset restores true"` => `00:00 +1: All tests passed!`
+  - `/home/openc/sdk/flutter/bin/flutter test test/app/services/progress_store_test.dart --plain-name "shared preferences progress store persists bgm across reload and reset restores true"` => `00:00 +1: All tests passed!`
+  - `/home/openc/sdk/flutter/bin/flutter test test/app/services/progress_store_test.dart --plain-name "snapshot json and copyWith preserve bgm and default missing payloads to true"` => `00:00 +1: All tests passed!`
+  - `/home/openc/sdk/flutter/bin/flutter test test/features/avatar/presentation/avatar_setup_screen_test.dart --plain-name "lets parent toggle background music separately"` => `00:01 +1: All tests passed!`
 - latest full Gate G 로컬 rerun (`7487a97` docs-only HEAD, app code matched `610a6aa`)
   - `./scripts/prepare_assets.sh` => succeeded
   - `/home/openc/sdk/flutter/bin/flutter pub get` => succeeded
@@ -238,10 +254,10 @@ artifact
 ## 다음 작업자가 바로 이어갈 포인트
 
 우선순위 추천
-1. latest live app-code snapshot `610a6aa`는 verified docs-only HEAD `7487a97` full Gate G rerun으로 A-G까지 재검증 완료 상태다. 이 handoff는 그 rerun provenance를 기록한 docs slice이며, older historical refs(`9d4c035`, `f1e23c3`, `1523559`)도 아래에 유지했다. 다음 작업은 아래 남은 확장 후보를 작은 slice로 이어가면 된다.
+1. latest full Gate G provenance는 아직 `7487a97` / `610a6aa`다. live queue-head는 `2450e81`까지 올라와 있고 parent BGM setting follow-up(`e2f1ed5`, `2450e81`)은 코드/테스트/문서에 반영됐지만 fresh full Gate G rerun은 아직 아니다. 다음 작업은 이 전제를 유지하고 작은 audio polish slice를 이어가되, release 직전에는 queue-head 기준 full Gate G를 다시 돌리는 편이 안전하다.
 
 남은 확장 후보
-- richer reward / 효과음 / 배경음악 polish
+- richer reward / 녹음 효과음 / 배경음악 재생 연결 + polish
 
 주의
 - 이 앱은 데모가 아니라 실제 아이가 눌러보는 앱이다.

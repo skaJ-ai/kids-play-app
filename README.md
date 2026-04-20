@@ -14,10 +14,11 @@
 
 ## 현재 상태
 
-- latest full Gate G provenance는 docs-only HEAD `7487a97` fresh local rerun입니다. `7487a97`는 README / handoff / plan docs만 바뀐 docs-only HEAD였으므로, 이 rerun이 다시 검증한 앱 코드는 latest live app-code snapshot `610a6aa`(`fix(numbers): route learn prompts through audio service`)와 동일했습니다.
-- latest live app-code snapshot `610a6aa`에는 earlier full Gate G snapshot 이후 avatar runtime photo flow(`2c78d5f`~`faff2ce`), quiz prompt replay audio service(`19a6f1d`), numbers learn prompt audio service(`610a6aa`) follow-up이 반영돼 있습니다.
-- queue 관점에서는 A-F가 이미 latest live app-code snapshot / docs에 반영돼 있었고, verified docs-only HEAD `7487a97`에서 fresh full Gate G rerun이 성공하면서 latest live app-code snapshot `610a6aa` 기준 A-G가 재검증 완료 상태가 됐습니다.
-- 이 docs refresh는 새 docs commit 자체를 검증했다는 뜻이 아니라, verified docs-only HEAD `7487a97`에서 성공한 rerun provenance를 기록합니다.
+- latest full Gate G provenance는 docs-only HEAD `7487a97` fresh local rerun이며, 그때 다시 검증된 앱 코드는 `610a6aa`(`fix(numbers): route learn prompts through audio service`)였습니다.
+- current live app-code snapshot은 `2450e81`(`feat(audio): add parent bgm toggle`)이며, Gate G rerun 뒤 `e2f1ed5`(`feat(audio): persist bgm setting`)와 `2450e81` audio follow-up이 추가됐습니다.
+- `610a6aa` provenance 범위에는 avatar runtime photo flow(`2c78d5f`~`faff2ce`), quiz prompt replay audio service(`19a6f1d`), numbers learn prompt audio service(`610a6aa`) follow-up이 포함됩니다.
+- live repo에는 `AppProgressSnapshot.bgmEnabled` 기본값 true + persistence API, 보호자 화면의 분리된 배경 음악 설정 토글 UI(`progressStore.setBgmEnabled`), 관련 targeted test cases(`test/app/services/progress_store_test.dart`, `test/features/avatar/presentation/avatar_setup_screen_test.dart`)가 반영돼 있습니다.
+- 따라서 queue A-G full rerun provenance는 아직 `610a6aa` / `7487a97` 기준까지만 fresh합니다. 이 docs refresh는 `2450e81`에 대한 fresh full Gate G rerun을 뜻하지 않습니다.
 - 추가 provenance 참고
   - 이전 full Gate G rerun: docs-only HEAD `9d4c035`, 당시 검증된 앱 코드 스냅샷 `d81a2ec`
   - docs-only checkout `f1e23c3` fresh local rerun: 당시 checkout의 앱 코드는 `0c15caf`와 동일했습니다.
@@ -38,13 +39,13 @@
 - toddler-safe tap cooldown / 연타 방지
 - 정답/오답 즉시 피드백 오버레이
 - 음성 cue + 문제 다시 듣기 버튼
-- shared_preferences 기반 진도 / 오답 / 스티커 / 설정 저장, lesson별 오답 다시 풀기 횟수 / 다시 풀기 보상 스티커 합계 추적
-- 보호자 메뉴의 진행 요약, 음성/효과 토글, 세트별 진도 조절, 오답 다시 풀기, 오답 비우기, 세트별 수동 해금, 리셋, 종료
+- shared_preferences 기반 진도 / 오답 / 스티커 / 음성/효과/배경 음악 설정 저장, lesson별 오답 다시 풀기 횟수 / 다시 풀기 보상 스티커 합계 추적
+- 보호자 메뉴의 진행 요약, 음성/효과 토글, 배경 음악 설정 토글 UI, 세트별 진도 조절, 오답 다시 풀기, 오답 비우기, 세트별 수동 해금, 리셋, 종료
 - 보호자 진행 요약에서 최근 헷갈림 / 오답 다시 보기 집계 chip, 다시 풀기 보상 합계 chip, 최근 보상 callout(최근 보상이 replay reward면 전용 copy), 가장 헷갈린 세트 요약 callout(카테고리/세트 메타데이터 + `이 세트 다시 보기` quick retry)을 노출
 - GitHub Actions APK 빌드 파이프라인
 
 다음 확장 후보
-- richer reward / 효과음 / 배경음악 polish
+- richer reward / 녹음 효과음 / 배경음악 재생 연결 + polish
 
 ## 현재 앱 흐름
 
@@ -72,8 +73,16 @@ cd "$REPO_ROOT"
 
 ### 테스트 / 최종 검증
 현재 기준
-- latest full Gate G rerun reference는 docs-only HEAD `7487a97`입니다. `7487a97`는 docs-only HEAD였고, 이 rerun이 다시 검증한 앱 코드는 latest live app-code snapshot `610a6aa`와 동일했습니다.
-- 따라서 queue A-G는 verified docs-only HEAD `7487a97`에서 성공한 fresh full Gate G rerun을 근거로 latest live app-code snapshot `610a6aa` 기준 재검증 완료 상태입니다.
+- 아래 provenance / spot-check 명령은 모두 repo root(`/home/openc/kids-play-app`) 기준입니다.
+- latest full Gate G rerun reference는 docs-only HEAD `7487a97`이고, 이 rerun이 다시 검증한 앱 코드는 `610a6aa`와 동일했습니다.
+- current live app-code snapshot은 `2450e81`이며, Gate G rerun 뒤 `e2f1ed5` / `2450e81` audio follow-up이 추가됐습니다.
+- 따라서 queue A-G full rerun provenance는 아직 `610a6aa` 기준까지만 fresh합니다. 이 README는 `2450e81`에 대한 fresh full Gate G rerun을 주장하지 않습니다.
+- 현재 queue-head fresh pass 기록은 `./scripts/prepare_assets.sh`, `/home/openc/sdk/flutter/bin/flutter test test/features/numbers`, 그리고 아래 parent BGM follow-up targeted verification입니다.
+- parent BGM follow-up targeted verification:
+  - `/home/openc/sdk/flutter/bin/flutter test test/app/services/progress_store_test.dart --plain-name "memory progress store setBgmEnabled persists the flag and reset restores true"` => `00:00 +1: All tests passed!`
+  - `/home/openc/sdk/flutter/bin/flutter test test/app/services/progress_store_test.dart --plain-name "shared preferences progress store persists bgm across reload and reset restores true"` => `00:00 +1: All tests passed!`
+  - `/home/openc/sdk/flutter/bin/flutter test test/app/services/progress_store_test.dart --plain-name "snapshot json and copyWith preserve bgm and default missing payloads to true"` => `00:00 +1: All tests passed!`
+  - `/home/openc/sdk/flutter/bin/flutter test test/features/avatar/presentation/avatar_setup_screen_test.dart --plain-name "lets parent toggle background music separately"` => `00:01 +1: All tests passed!`
 - fresh full Gate G rerun (`7487a97`, app code matched `610a6aa`):
   - `./scripts/prepare_assets.sh` => succeeded
   - `/home/openc/sdk/flutter/bin/flutter pub get` => succeeded
@@ -111,7 +120,7 @@ cd "$REPO_ROOT"
 "$FLUTTER_BIN" build apk --release --target-platform android-arm64
 ```
 
-- 아래 명령 블록은 `docs/local-dev-setup.md` 및 `.github/workflows/build-apk.yml` 과 같은 순서의 Gate G 재현용 체크리스트입니다. latest full rerun reference는 docs-only HEAD `7487a97`(app code matched `610a6aa`)이고, 이전 로컬 full rerun은 docs-only HEAD `9d4c035`(검증된 앱 코드는 `d81a2ec`) 및 docs-only checkout `f1e23c3`(검증된 앱 코드는 `0c15caf`와 동일)입니다. historical artifact-backed 기준은 docs-only HEAD `1523559` / code snapshot `5696c1f`입니다.
+- 아래 명령 블록은 `docs/local-dev-setup.md` 및 `.github/workflows/build-apk.yml` 과 같은 순서의 Gate G 재현용 체크리스트입니다. latest full rerun reference는 docs-only HEAD `7487a97`(app code matched `610a6aa`)이고, current live queue-head는 `2450e81`까지 이동했습니다. 따라서 `e2f1ed5` / `2450e81` audio follow-up은 아래 full Gate G reference와 별개로 좁게 읽어야 합니다. 이전 로컬 full rerun은 docs-only HEAD `9d4c035`(검증된 앱 코드는 `d81a2ec`) 및 docs-only checkout `f1e23c3`(검증된 앱 코드는 `0c15caf`와 동일)입니다. historical artifact-backed 기준은 docs-only HEAD `1523559` / code snapshot `5696c1f`입니다.
 
 ## APK 확인 방법
 
