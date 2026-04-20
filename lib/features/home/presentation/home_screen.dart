@@ -5,6 +5,7 @@ import '../../../app/ui/playground_scaffold.dart';
 import '../../../app/ui/tap_cooldown.dart';
 import '../../../app/ui/toy_button.dart';
 import '../../../app/ui/toy_panel.dart';
+import '../../rewards/presentation/collection_screen.dart';
 import '../data/home_catalog_repository.dart';
 import 'category_hub_screen.dart';
 import 'home_category_config.dart';
@@ -45,6 +46,12 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  Future<void> _openCollection() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (_) => const CollectionScreen()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -67,6 +74,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     compact: compact,
                   ),
                   const Spacer(),
+                  _CollectionPill(
+                    compact: compact,
+                    onTap: _openCollection,
+                  ),
+                  SizedBox(width: compact ? 8 : 12),
                   if (!compact)
                     Text(
                       '천천히 고르고 출발',
@@ -288,6 +300,55 @@ class _CategoryCard extends StatelessWidget {
                   ],
                 ),
               ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CollectionPill extends StatelessWidget {
+  const _CollectionPill({required this.compact, required this.onTap});
+
+  final bool compact;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        key: const Key('home-collection-pill'),
+        borderRadius: BorderRadius.circular(999),
+        onTap: onTap,
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: compact ? 12 : 16,
+            vertical: compact ? 6 : 10,
+          ),
+          decoration: BoxDecoration(
+            color: KidPalette.white,
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: KidPalette.stroke),
+            boxShadow: KidShadows.buttonSoft,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.star_rounded,
+                color: KidPalette.coralDark,
+                size: compact ? 18 : 22,
+              ),
+              SizedBox(width: compact ? 4 : 6),
+              Text(
+                '스티커',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: KidPalette.navy,
+                      fontWeight: FontWeight.w900,
+                    ),
+              ),
             ],
           ),
         ),
