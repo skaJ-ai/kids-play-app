@@ -1246,6 +1246,7 @@ class KidTypographyTheme extends ThemeExtension<KidTypographyTheme> {
 
   static const defaults = KidTypographyTheme(
     headlineLarge: TextStyle(
+      fontFamily: 'KCCMurukmuruk',
       fontSize: 40,
       fontWeight: FontWeight.w800,
       letterSpacing: -1.0,
@@ -1253,6 +1254,7 @@ class KidTypographyTheme extends ThemeExtension<KidTypographyTheme> {
       height: 1.02,
     ),
     headlineMedium: TextStyle(
+      fontFamily: 'KCCMurukmuruk',
       fontSize: 32,
       fontWeight: FontWeight.w800,
       letterSpacing: -0.6,
@@ -1260,6 +1262,7 @@ class KidTypographyTheme extends ThemeExtension<KidTypographyTheme> {
       height: 1.08,
     ),
     headlineSmall: TextStyle(
+      fontFamily: 'KCCMurukmuruk',
       fontSize: 24,
       fontWeight: FontWeight.w700,
       letterSpacing: -0.3,
@@ -1267,6 +1270,7 @@ class KidTypographyTheme extends ThemeExtension<KidTypographyTheme> {
       height: 1.12,
     ),
     titleLarge: TextStyle(
+      fontFamily: 'KCCMurukmuruk',
       fontSize: 20,
       fontWeight: FontWeight.w700,
       letterSpacing: -0.2,
@@ -1274,6 +1278,7 @@ class KidTypographyTheme extends ThemeExtension<KidTypographyTheme> {
       height: 1.18,
     ),
     titleMedium: TextStyle(
+      fontFamily: 'KCCMurukmuruk',
       fontSize: 17,
       fontWeight: FontWeight.w700,
       letterSpacing: -0.1,
@@ -1281,6 +1286,7 @@ class KidTypographyTheme extends ThemeExtension<KidTypographyTheme> {
       height: 1.22,
     ),
     titleSmall: TextStyle(
+      fontFamily: 'KCCMurukmuruk',
       fontSize: 14,
       fontWeight: FontWeight.w600,
       letterSpacing: 0.02,
@@ -1288,24 +1294,28 @@ class KidTypographyTheme extends ThemeExtension<KidTypographyTheme> {
       height: 1.22,
     ),
     bodyLarge: TextStyle(
+      fontFamily: 'KCCMurukmuruk',
       fontSize: 16,
       fontWeight: FontWeight.w500,
       color: KidPalette.body,
       height: 1.38,
     ),
     bodyMedium: TextStyle(
+      fontFamily: 'KCCMurukmuruk',
       fontSize: 15,
       fontWeight: FontWeight.w400,
       color: KidPalette.body,
       height: 1.36,
     ),
     bodySmall: TextStyle(
+      fontFamily: 'KCCMurukmuruk',
       fontSize: 13,
       fontWeight: FontWeight.w400,
       color: KidPalette.body,
       height: 1.32,
     ),
     labelLarge: TextStyle(
+      fontFamily: 'KCCMurukmuruk',
       fontSize: 13,
       fontWeight: FontWeight.w700,
       letterSpacing: 0.08,
@@ -1313,6 +1323,7 @@ class KidTypographyTheme extends ThemeExtension<KidTypographyTheme> {
       height: 1.14,
     ),
     labelMedium: TextStyle(
+      fontFamily: 'KCCMurukmuruk',
       fontSize: 12,
       fontWeight: FontWeight.w600,
       letterSpacing: 0.05,
@@ -1320,6 +1331,7 @@ class KidTypographyTheme extends ThemeExtension<KidTypographyTheme> {
       height: 1.18,
     ),
     labelSmall: TextStyle(
+      fontFamily: 'KCCMurukmuruk',
       fontSize: 11,
       fontWeight: FontWeight.w600,
       letterSpacing: 0.05,
@@ -1493,8 +1505,9 @@ ThemeData buildKidTheme() {
   );
 
   const kidTypography = KidTypographyTheme.defaults;
-  final baseTextTheme = base.textTheme.copyWith(
+  final textTheme = base.textTheme.copyWith(
     displayLarge: const TextStyle(
+      fontFamily: 'KCCMurukmuruk',
       fontSize: 56,
       fontWeight: FontWeight.w800,
       letterSpacing: -1.6,
@@ -1514,8 +1527,6 @@ ThemeData buildKidTheme() {
     labelMedium: kidTypography.labelMedium,
     labelSmall: kidTypography.labelSmall,
   );
-
-  final textTheme = baseTextTheme.apply(fontFamily: 'KCCMurukmuruk');
 
   return base.copyWith(
     colorScheme: colorScheme,
