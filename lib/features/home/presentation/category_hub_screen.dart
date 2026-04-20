@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/audio/audio_cue.dart';
 import '../../../app/services/app_services.dart';
 import '../../../app/services/progress_store.dart';
 import '../../../app/ui/kid_theme.dart';
@@ -25,7 +26,9 @@ class CategoryHubScreen extends StatefulWidget {
 }
 
 class _CategoryHubScreenState extends State<CategoryHubScreen> {
+  late AppServices _services;
   Future<AppProgressSnapshot>? _rewardSnapshotFuture;
+  bool _didQueueIntroPrompt = false;
 
   HomeCategoryConfig get _config => HomeCategoryConfig.resolve(widget.category);
 
@@ -36,11 +39,59 @@ class _CategoryHubScreenState extends State<CategoryHubScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _services = AppServicesScope.of(context);
     _rewardSnapshotFuture ??= _loadRewardSnapshot();
+    _queueIntroPrompt();
   }
 
   Future<AppProgressSnapshot> _loadRewardSnapshot() {
-    return AppServicesScope.of(context).progressStore.loadSnapshot();
+    return _services.progressStore.loadSnapshot();
+  }
+
+  String get _introPromptText {
+    if (_supportsLearnMode && _supportsGameMode) {
+      return '${widget.category.label} 차고예요. 배우기나 퀴즈를 골라요.';
+    }
+    if (_supportsLearnMode) {
+      return '${widget.category.label} 차고예요. 배우기를 골라요.';
+    }
+    if (_supportsGameMode) {
+      return '${widget.category.label} 차고예요. 퀴즈를 골라요.';
+    }
+    return widget.category.description;
+  }
+
+  void _queueIntroPrompt() {
+    if (_didQueueIntroPrompt) {
+      return;
+    }
+    _didQueueIntroPrompt = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      _replayIntroPrompt();
+    });
+  }
+
+  Future<void> _replayIntroPrompt() async {
+    try {
+      final snapshot = await _services.progressStore.loadSnapshot();
+      if (!mounted || !snapshot.voicePromptsEnabled) {
+        return;
+      }
+
+      await _services.audioService.playPrompt(
+        AudioPromptRequest(
+          categoryId: _config.id,
+          lessonId: 'hub',
+          symbol: widget.category.label,
+          fallbackText: _introPromptText,
+        ),
+      );
+    } catch (_) {
+      return;
+    }
   }
 
   void _refreshRewardSnapshot() {
@@ -72,13 +123,19 @@ class _CategoryHubScreenState extends State<CategoryHubScreen> {
                     compact: compact,
                   ),
                   const Spacer(),
-                  if (!compact)
+                  _ReplayPromptButton(
+                    compact: compact,
+                    onTap: _replayIntroPrompt,
+                  ),
+                  if (!compact) ...[
+                    const SizedBox(width: 10),
                     Text(
                       _supportsGameMode ? '배우고 바로 출발!' : '천천히 둘러봐요',
                       style: theme.textTheme.titleSmall?.copyWith(
                         color: KidPalette.body,
                       ),
                     ),
+                  ],
                 ],
               ),
               SizedBox(height: compact ? 12 : 18),
@@ -254,6 +311,39 @@ String _recentRewardLabel(RecentReward reward) {
       return '스티커 ${reward.amount}개';
     default:
       return '${reward.amount}개';
+  }
+}
+
+class _ReplayPromptButton extends StatelessWidget {
+  const _ReplayPromptButton({required this.compact, required this.onTap});
+
+  final bool compact;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        key: const Key('category-hub-replay-prompt'),
+        borderRadius: BorderRadius.circular(compact ? 18 : 20),
+        onTap: onTap,
+        child: Container(
+          width: compact ? 44 : 48,
+          height: compact ? 44 : 48,
+          decoration: BoxDecoration(
+            color: KidPalette.white.withValues(alpha: 0.92),
+            borderRadius: BorderRadius.circular(compact ? 18 : 20),
+            boxShadow: KidShadows.button,
+          ),
+          child: Icon(
+            Icons.volume_up_rounded,
+            color: KidPalette.coralDark,
+            size: compact ? 22 : 24,
+          ),
+        ),
+      ),
+    );
   }
 }
 
