@@ -347,6 +347,113 @@ void main() {
   );
 
   testWidgets(
+    'renders calmer default typography for regular and compact labels',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _buildTestApp(
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ToyButton(
+                key: const Key('default-regular-typography-button'),
+                label: '놀이 시작',
+                icon: Icons.play_arrow_rounded,
+                onPressed: () {},
+              ),
+              const SizedBox(height: 12),
+              ToyButton(
+                key: const Key('default-compact-typography-button'),
+                label: '다음 단계',
+                icon: Icons.arrow_forward_rounded,
+                density: ToyButtonDensity.compact,
+                onPressed: () {},
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final regularLabelStyle = _buttonLabelStyle(
+        tester,
+        find.byKey(const Key('default-regular-typography-button')),
+        '놀이 시작',
+      );
+      final compactLabelStyle = _buttonLabelStyle(
+        tester,
+        find.byKey(const Key('default-compact-typography-button')),
+        '다음 단계',
+      );
+
+      expect(regularLabelStyle.fontWeight, FontWeight.w600);
+      expect(regularLabelStyle.letterSpacing, -0.15);
+      expect(regularLabelStyle.height, 1.16);
+      expect(compactLabelStyle.fontWeight, FontWeight.w600);
+      expect(compactLabelStyle.letterSpacing, -0.05);
+      expect(compactLabelStyle.height, 1.18);
+    },
+  );
+
+  testWidgets('renders softer default chrome for primary buttons', (
+    WidgetTester tester,
+  ) async {
+    const expectedPrimaryBorderAlpha = 0.12;
+    const expectedPrimaryIconChipAlpha = 0.14;
+    const expectedPrimaryIconChipBorderAlpha = 0.08;
+    const expectedPrimaryHighlightAlpha = 0.14;
+    const expectedPrimaryShadows = [
+      BoxShadow(color: Color(0x161B4FA7), blurRadius: 18, offset: Offset(0, 8)),
+      BoxShadow(color: Color(0x10182230), blurRadius: 6, offset: Offset(0, 2)),
+    ];
+    final button = find.byType(ToyButton);
+
+    await tester.pumpWidget(
+      _buildTestApp(
+        ToyButton(
+          label: '놀이 시작',
+          icon: Icons.play_arrow_rounded,
+          onPressed: () {},
+        ),
+      ),
+    );
+
+    final decoration = _buttonDecoration(tester, button);
+    final gradient = decoration.gradient! as LinearGradient;
+    final border = decoration.border! as Border;
+    final chipDecoration = _buttonIconChipDecoration(
+      tester,
+      button,
+      Icons.play_arrow_rounded,
+    );
+    final chipBorder = chipDecoration.border! as Border;
+    final highlight = tester.widget<Container>(_buttonHighlightFinder(button));
+    final highlightGradient =
+        (highlight.decoration! as BoxDecoration).gradient! as LinearGradient;
+    final label = tester.widget<Text>(find.text('놀이 시작'));
+    final icon = tester.widget<Icon>(find.byIcon(Icons.play_arrow_rounded));
+
+    expect(gradient.colors, const [KidPalette.blue, KidPalette.blueDark]);
+    expect(
+      border.top.color,
+      KidPalette.white.withValues(alpha: expectedPrimaryBorderAlpha),
+    );
+    expect(
+      chipDecoration.color,
+      KidPalette.white.withValues(alpha: expectedPrimaryIconChipAlpha),
+    );
+    expect(
+      chipBorder.top.color,
+      KidPalette.white.withValues(alpha: expectedPrimaryIconChipBorderAlpha),
+    );
+    expect(
+      highlightGradient.colors.first,
+      KidPalette.white.withValues(alpha: expectedPrimaryHighlightAlpha),
+    );
+    expect(decoration.boxShadow, expectedPrimaryShadows);
+    expect(label.style?.color, KidPalette.white);
+    expect(icon.color, KidPalette.white);
+  });
+
+  testWidgets(
     'keeps inherited titleLarge typography when custom layouts only override geometry',
     (WidgetTester tester) async {
       final baseTheme = buildKidTheme();
@@ -497,7 +604,10 @@ void main() {
       );
 
       expect(tightLabelStyle.fontSize, customLayout.button.tight.labelFontSize);
-      expect(tightLabelStyle.fontWeight, customTypography.titleSmall.fontWeight);
+      expect(
+        tightLabelStyle.fontWeight,
+        customTypography.titleSmall.fontWeight,
+      );
       expect(
         tightLabelStyle.letterSpacing,
         customTypography.titleSmall.letterSpacing,
@@ -1500,13 +1610,17 @@ void main() {
     },
   );
 
-  testWidgets('renders restrained default chrome for secondary buttons', (
+  testWidgets('renders softer default chrome for secondary buttons', (
     WidgetTester tester,
   ) async {
-    const expectedSecondaryBorderAlpha = 0.68;
-    const expectedSecondaryIconChipAlpha = 0.76;
-    const expectedSecondaryIconChipBorderAlpha = 0.56;
-    const expectedSecondaryHighlightAlpha = 0.08;
+    const expectedSecondaryBorderAlpha = 0.56;
+    const expectedSecondaryIconChipAlpha = 0.68;
+    const expectedSecondaryIconChipBorderAlpha = 0.44;
+    const expectedSecondaryHighlightAlpha = 0.05;
+    const expectedSecondaryShadows = [
+      BoxShadow(color: Color(0x0E182230), blurRadius: 14, offset: Offset(0, 6)),
+      BoxShadow(color: Color(0x06182230), blurRadius: 4, offset: Offset(0, 1)),
+    ];
     final button = find.byType(ToyButton);
 
     await tester.pumpWidget(
@@ -1546,15 +1660,13 @@ void main() {
     );
     expect(
       chipBorder.top.color,
-      KidPalette.stroke.withValues(
-        alpha: expectedSecondaryIconChipBorderAlpha,
-      ),
+      KidPalette.stroke.withValues(alpha: expectedSecondaryIconChipBorderAlpha),
     );
     expect(
       highlightGradient.colors.first,
       KidPalette.white.withValues(alpha: expectedSecondaryHighlightAlpha),
     );
-    expect(decoration.boxShadow, KidShadows.buttonSoft);
+    expect(decoration.boxShadow, expectedSecondaryShadows);
     expect(label.style?.color, KidPalette.navy);
     expect(icon.color, KidPalette.navy);
   });

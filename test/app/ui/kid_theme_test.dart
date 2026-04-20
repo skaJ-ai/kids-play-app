@@ -14,9 +14,9 @@ void main() {
     expect(layout.button.regular.iconChipSize, 34);
     expect(layout.button.regular.iconSize, 18);
     expect(layout.button.regular.labelFontSize, 18);
-    expect(layout.button.regular.labelFontWeight, FontWeight.w700);
-    expect(layout.button.regular.labelLetterSpacing, 0);
-    expect(layout.button.regular.labelHeight, 1.1);
+    expect(layout.button.regular.labelFontWeight, FontWeight.w600);
+    expect(layout.button.regular.labelLetterSpacing, -0.15);
+    expect(layout.button.regular.labelHeight, 1.16);
     expect(layout.button.regular.primaryBorderWidth, 1.2);
     expect(layout.button.regular.secondaryBorderWidth, 1.1);
     expect(layout.button.regular.iconChipBorderWidth, 1.0);
@@ -32,9 +32,9 @@ void main() {
     expect(layout.button.compact.iconChipSize, 30);
     expect(layout.button.compact.iconSize, 16);
     expect(layout.button.compact.labelFontSize, 16);
-    expect(layout.button.compact.labelFontWeight, FontWeight.w700);
-    expect(layout.button.compact.labelLetterSpacing, 0);
-    expect(layout.button.compact.labelHeight, 1.1);
+    expect(layout.button.compact.labelFontWeight, FontWeight.w600);
+    expect(layout.button.compact.labelLetterSpacing, -0.05);
+    expect(layout.button.compact.labelHeight, 1.18);
     expect(layout.button.compact.primaryBorderWidth, 1.1);
     expect(layout.button.compact.secondaryBorderWidth, 1.0);
     expect(layout.button.compact.iconChipBorderWidth, 0.9);
@@ -769,17 +769,47 @@ void main() {
     final layout = theme.extension<KidLayoutTheme>();
 
     expect(layout, isNotNull);
-    expect(layout!.chrome.button.primaryBorderAlpha, 0.16);
-    expect(layout.chrome.button.primaryIconChipAlpha, 0.18);
-    expect(layout.chrome.button.primaryIconChipBorderAlpha, 0.12);
-    expect(layout.chrome.button.primaryHighlightAlpha, 0.22);
+    expect(KidShadows.button, const [
+      BoxShadow(
+        color: Color(0x241B4FA7),
+        blurRadius: 24,
+        offset: Offset(0, 12),
+      ),
+      BoxShadow(color: Color(0x14182230), blurRadius: 10, offset: Offset(0, 4)),
+    ]);
+    expect(KidShadows.buttonSoft, const [
+      BoxShadow(color: Color(0x12182230), blurRadius: 18, offset: Offset(0, 8)),
+      BoxShadow(color: Color(0x08182230), blurRadius: 6, offset: Offset(0, 2)),
+    ]);
+    expect(layout!.chrome.button.primaryBorderAlpha, 0.12);
+    expect(layout.chrome.button.primaryIconChipAlpha, 0.14);
+    expect(layout.chrome.button.primaryIconChipBorderAlpha, 0.08);
+    expect(layout.chrome.button.primaryHighlightAlpha, 0.14);
     expect(layout.chrome.button.secondaryShellGradientStart, KidPalette.cream);
     expect(
       layout.chrome.button.secondaryShellGradientEnd,
       KidPalette.creamWarm,
     );
-    expect(layout.chrome.button.secondaryIconChipAlpha, 0.76);
-    expect(layout.chrome.button.secondaryHighlightAlpha, 0.08);
+    expect(layout.chrome.button.secondaryBorderAlpha, 0.56);
+    expect(layout.chrome.button.secondaryIconChipAlpha, 0.68);
+    expect(layout.chrome.button.secondaryIconChipBorderAlpha, 0.44);
+    expect(layout.chrome.button.secondaryHighlightAlpha, 0.05);
+    expect(layout.chrome.shadows.buttonPrimary, const [
+      BoxShadow(color: Color(0x161B4FA7), blurRadius: 18, offset: Offset(0, 8)),
+      BoxShadow(color: Color(0x10182230), blurRadius: 6, offset: Offset(0, 2)),
+    ]);
+    expect(
+      layout.chrome.shadows.buttonPrimary,
+      isNot(equals(KidShadows.button)),
+    );
+    expect(layout.chrome.shadows.buttonSecondary, const [
+      BoxShadow(color: Color(0x0E182230), blurRadius: 14, offset: Offset(0, 6)),
+      BoxShadow(color: Color(0x06182230), blurRadius: 4, offset: Offset(0, 1)),
+    ]);
+    expect(
+      layout.chrome.shadows.buttonSecondary,
+      isNot(equals(KidShadows.buttonSoft)),
+    );
     expect(layout.chrome.button.primaryDisabledGradientBlendAmount, 0.36);
     expect(layout.chrome.button.secondaryDisabledGradientBlendAmount, 0.16);
     expect(layout.chrome.button.disabledOpacity, 0.58);
@@ -810,8 +840,8 @@ void main() {
       layout.chrome.button.secondaryShellGradientEnd,
       KidPalette.creamWarm,
     );
-    expect(layout.chrome.button.secondaryBorderAlpha, 0.68);
-    expect(layout.chrome.button.secondaryIconChipBorderAlpha, 0.56);
+    expect(layout.chrome.button.secondaryBorderAlpha, 0.56);
+    expect(layout.chrome.button.secondaryIconChipBorderAlpha, 0.44);
 
     final preserved = layout.chrome.button.copyWith(primaryBorderAlpha: 0.44);
     const updated = KidButtonChromeTokens(
@@ -823,8 +853,8 @@ void main() {
 
     expect(preserved.secondaryShellGradientStart, KidPalette.cream);
     expect(preserved.secondaryShellGradientEnd, KidPalette.creamWarm);
-    expect(preserved.secondaryBorderAlpha, 0.68);
-    expect(preserved.secondaryIconChipBorderAlpha, 0.56);
+    expect(preserved.secondaryBorderAlpha, 0.56);
+    expect(preserved.secondaryIconChipBorderAlpha, 0.44);
     expect(
       layout.chrome.button.lerp(updated, 1).secondaryShellGradientStart,
       updatedStart,

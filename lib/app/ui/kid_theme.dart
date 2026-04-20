@@ -50,6 +50,16 @@ class KidShadows {
   ];
 }
 
+const List<BoxShadow> _toyButtonPrimaryShadows = [
+  BoxShadow(color: Color(0x161B4FA7), blurRadius: 18, offset: Offset(0, 8)),
+  BoxShadow(color: Color(0x10182230), blurRadius: 6, offset: Offset(0, 2)),
+];
+
+const List<BoxShadow> _toyButtonSecondaryShadows = [
+  BoxShadow(color: Color(0x0E182230), blurRadius: 14, offset: Offset(0, 6)),
+  BoxShadow(color: Color(0x06182230), blurRadius: 4, offset: Offset(0, 1)),
+];
+
 enum ToyButtonDensity { regular, compact, tight }
 
 enum ToyPanelDensity { regular, compact, tight }
@@ -367,23 +377,23 @@ class KidButtonChromeTokens {
     this.primaryShellGradientStart = KidPalette.blue,
     this.primaryShellGradientEnd = KidPalette.blueDark,
     this.primaryBorderColor = KidPalette.white,
-    this.primaryBorderAlpha = 0.16,
+    this.primaryBorderAlpha = 0.12,
     this.primaryIconChipColor = KidPalette.white,
-    this.primaryIconChipAlpha = 0.18,
+    this.primaryIconChipAlpha = 0.14,
     this.primaryIconChipBorderColor = KidPalette.white,
-    this.primaryIconChipBorderAlpha = 0.12,
-    this.primaryHighlightAlpha = 0.22,
+    this.primaryIconChipBorderAlpha = 0.08,
+    this.primaryHighlightAlpha = 0.14,
     this.primaryForegroundColor = KidPalette.white,
     this.primaryDisabledGradientBlendTargetColor = KidPalette.body,
     this.secondaryShellGradientStart = KidPalette.cream,
     this.secondaryShellGradientEnd = KidPalette.creamWarm,
     this.secondaryBorderColor = KidPalette.stroke,
-    this.secondaryBorderAlpha = 0.68,
+    this.secondaryBorderAlpha = 0.56,
     this.secondaryIconChipColor = KidPalette.white,
-    this.secondaryIconChipAlpha = 0.76,
+    this.secondaryIconChipAlpha = 0.68,
     this.secondaryIconChipBorderColor = KidPalette.stroke,
-    this.secondaryIconChipBorderAlpha = 0.56,
-    this.secondaryHighlightAlpha = 0.08,
+    this.secondaryIconChipBorderAlpha = 0.44,
+    this.secondaryHighlightAlpha = 0.05,
     this.secondaryForegroundColor = KidPalette.navy,
     this.secondaryDisabledGradientBlendTargetColor = KidPalette.body,
     this.primaryDisabledGradientBlendAmount = 0.36,
@@ -925,8 +935,8 @@ class KidPanelChromeTokens {
 @immutable
 class KidShadowTokens {
   KidShadowTokens({
-    List<BoxShadow> buttonPrimary = KidShadows.button,
-    List<BoxShadow> buttonSecondary = KidShadows.buttonSoft,
+    List<BoxShadow> buttonPrimary = _toyButtonPrimaryShadows,
+    List<BoxShadow> buttonSecondary = _toyButtonSecondaryShadows,
     List<BoxShadow>? panel,
     List<BoxShadow>? surfacePanel,
     List<BoxShadow>? airyPanel,
@@ -955,8 +965,8 @@ class KidShadowTokens {
        );
 
   const KidShadowTokens._({
-    this.buttonPrimary = KidShadows.button,
-    this.buttonSecondary = KidShadows.buttonSoft,
+    this.buttonPrimary = _toyButtonPrimaryShadows,
+    this.buttonSecondary = _toyButtonSecondaryShadows,
     this.surfacePanel = KidShadows.panel,
     this.airyPanel = KidShadows.panelAiry,
     this.warmPanel = KidShadows.panel,
@@ -1104,9 +1114,9 @@ class KidLayoutTheme extends ThemeExtension<KidLayoutTheme> {
         iconChipBorderWidth: 1.0,
         iconSize: 18,
         labelFontSize: 18,
-        labelFontWeight: FontWeight.w700,
-        labelLetterSpacing: 0,
-        labelHeight: 1.1,
+        labelFontWeight: FontWeight.w600,
+        labelLetterSpacing: -0.15,
+        labelHeight: 1.16,
         primaryBorderWidth: 1.2,
         secondaryBorderWidth: 1.1,
         radius: 24,
@@ -1124,9 +1134,9 @@ class KidLayoutTheme extends ThemeExtension<KidLayoutTheme> {
         iconChipBorderWidth: 0.9,
         iconSize: 16,
         labelFontSize: 16,
-        labelFontWeight: FontWeight.w700,
-        labelLetterSpacing: 0,
-        labelHeight: 1.1,
+        labelFontWeight: FontWeight.w600,
+        labelLetterSpacing: -0.05,
+        labelHeight: 1.18,
         primaryBorderWidth: 1.1,
         secondaryBorderWidth: 1.0,
         radius: 22,
