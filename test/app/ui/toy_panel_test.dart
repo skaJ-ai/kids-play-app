@@ -194,7 +194,7 @@ void main() {
 
   group('ToyPanel inset surface', () {
     testWidgets(
-      'uses the density inset radius with shared icon-tile chrome by default',
+      'uses the density inset radius with a dedicated inset surface shadow by default',
       (WidgetTester tester) async {
         const compactInsetRadius = 19.0;
         final defaults = KidLayoutTheme.defaults;
@@ -222,68 +222,173 @@ void main() {
         );
         expect(border.top.color, KidPalette.white.withValues(alpha: 0.72));
         expect(border.top.width, 1);
-        expect(decoration.boxShadow, KidShadows.panel);
+        expect(decoration.boxShadow, KidShadows.insetSurface);
       },
     );
 
-    testWidgets('reads inset surface chrome and shadow from kid theme tokens', (
-      WidgetTester tester,
-    ) async {
-      const customInsetSurfaceBackgroundColor = Color(0xFF4FD3F7);
-      const customInsetSurfaceBackgroundAlpha = 0.84;
-      const customInsetSurfaceBorderColor = Color(0xFF2A7FA9);
-      const customInsetSurfaceBorderAlpha = 0.61;
-      const customInsetSurfaceBorderWidth = 2.5;
-      const customInsetSurfaceShadows = [
-        BoxShadow(
-          color: Color(0x22112233),
-          blurRadius: 18,
-          offset: Offset(0, 9),
-        ),
-        BoxShadow(
-          color: Color(0x12000000),
-          blurRadius: 4,
-          offset: Offset(1, 2),
-        ),
-      ];
-      final customLayout = KidLayoutTheme.defaults.copyWith(
-        chrome: KidLayoutTheme.defaults.chrome.copyWith(
-          panel: KidLayoutTheme.defaults.chrome.panel.copyWith(
-            insetSurfaceBackgroundColor: customInsetSurfaceBackgroundColor,
-            insetSurfaceBackgroundAlpha: customInsetSurfaceBackgroundAlpha,
-            insetSurfaceBorderColor: customInsetSurfaceBorderColor,
-            insetSurfaceBorderAlpha: customInsetSurfaceBorderAlpha,
-            insetSurfaceBorderWidth: customInsetSurfaceBorderWidth,
+    testWidgets(
+      'inherits panel and surfacePanel shadow overrides when inset surface is not explicitly set',
+      (WidgetTester tester) async {
+        const customPanelShadows = [
+          BoxShadow(
+            color: Color(0x28112233),
+            blurRadius: 24,
+            offset: Offset(0, 14),
           ),
-          shadows: KidLayoutTheme.defaults.chrome.shadows.copyWith(
-            surfacePanel: customInsetSurfaceShadows,
+          BoxShadow(
+            color: Color(0x10000000),
+            blurRadius: 5,
+            offset: Offset(1, 2),
           ),
-        ),
-      );
+        ];
+        const customSurfacePanelShadows = [
+          BoxShadow(
+            color: Color(0x32112233),
+            blurRadius: 24,
+            offset: Offset(0, 12),
+          ),
+          BoxShadow(
+            color: Color(0x16000000),
+            blurRadius: 6,
+            offset: Offset(1, 3),
+          ),
+        ];
+        final panelTheme = buildKidTheme().copyWith(
+          extensions: [
+            KidLayoutTheme.defaults.copyWith(
+              chrome: KidLayoutTheme.defaults.chrome.copyWith(
+                shadows: KidLayoutTheme.defaults.chrome.shadows.copyWith(
+                  panel: customPanelShadows,
+                ),
+              ),
+            ),
+          ],
+        );
+        final surfacePanelTheme = buildKidTheme().copyWith(
+          extensions: [
+            KidLayoutTheme.defaults.copyWith(
+              chrome: KidLayoutTheme.defaults.chrome.copyWith(
+                shadows: KidLayoutTheme.defaults.chrome.shadows.copyWith(
+                  surfacePanel: customSurfacePanelShadows,
+                ),
+              ),
+            ),
+          ],
+        );
 
-      await _pumpToyPanelInsetSurface(
-        tester,
-        theme: buildKidTheme().copyWith(extensions: [customLayout]),
-      );
+        await _pumpToyPanelInsetSurface(tester, theme: panelTheme);
+        await tester.pumpAndSettle();
 
-      final decoration = _insetSurfaceDecoration(tester);
-      final border = decoration.border! as Border;
+        expect(_insetSurfaceDecoration(tester).boxShadow, customPanelShadows);
 
-      expect(
-        decoration.color,
-        customInsetSurfaceBackgroundColor.withValues(
-          alpha: customInsetSurfaceBackgroundAlpha,
-        ),
-      );
-      expect(
-        border.top.color,
-        customInsetSurfaceBorderColor.withValues(
-          alpha: customInsetSurfaceBorderAlpha,
-        ),
-      );
-      expect(border.top.width, customInsetSurfaceBorderWidth);
-      expect(decoration.boxShadow, customInsetSurfaceShadows);
-    });
+        await _pumpToyPanel(tester, theme: panelTheme);
+        await tester.pumpAndSettle();
+
+        expect(
+          _panelDecoration(tester, find.byType(ToyPanel)).boxShadow,
+          customPanelShadows,
+        );
+
+        await _pumpToyPanelInsetSurface(tester, theme: surfacePanelTheme);
+        await tester.pumpAndSettle();
+
+        expect(
+          _insetSurfaceDecoration(tester).boxShadow,
+          customSurfacePanelShadows,
+        );
+
+        await _pumpToyPanel(tester, theme: surfacePanelTheme);
+        await tester.pumpAndSettle();
+
+        expect(
+          _panelDecoration(tester, find.byType(ToyPanel)).boxShadow,
+          customSurfacePanelShadows,
+        );
+      },
+    );
+
+    testWidgets(
+      'reads a dedicated inset surface shadow from kid theme tokens',
+      (WidgetTester tester) async {
+        const customInsetSurfaceBackgroundColor = Color(0xFF4FD3F7);
+        const customInsetSurfaceBackgroundAlpha = 0.84;
+        const customInsetSurfaceBorderColor = Color(0xFF2A7FA9);
+        const customInsetSurfaceBorderAlpha = 0.61;
+        const customInsetSurfaceBorderWidth = 2.5;
+        const customSurfacePanelShadows = [
+          BoxShadow(
+            color: Color(0x32112233),
+            blurRadius: 24,
+            offset: Offset(0, 12),
+          ),
+          BoxShadow(
+            color: Color(0x16000000),
+            blurRadius: 6,
+            offset: Offset(1, 3),
+          ),
+        ];
+        const customInsetSurfaceShadows = [
+          BoxShadow(
+            color: Color(0x22112233),
+            blurRadius: 18,
+            offset: Offset(0, 9),
+          ),
+          BoxShadow(
+            color: Color(0x12000000),
+            blurRadius: 4,
+            offset: Offset(1, 2),
+          ),
+        ];
+        final theme = buildKidTheme().copyWith(
+          extensions: [
+            KidLayoutTheme.defaults.copyWith(
+              chrome: KidLayoutTheme.defaults.chrome.copyWith(
+                panel: KidLayoutTheme.defaults.chrome.panel.copyWith(
+                  insetSurfaceBackgroundColor:
+                      customInsetSurfaceBackgroundColor,
+                  insetSurfaceBackgroundAlpha:
+                      customInsetSurfaceBackgroundAlpha,
+                  insetSurfaceBorderColor: customInsetSurfaceBorderColor,
+                  insetSurfaceBorderAlpha: customInsetSurfaceBorderAlpha,
+                  insetSurfaceBorderWidth: customInsetSurfaceBorderWidth,
+                ),
+                shadows: KidLayoutTheme.defaults.chrome.shadows.copyWith(
+                  surfacePanel: customSurfacePanelShadows,
+                  insetSurface: customInsetSurfaceShadows,
+                ),
+              ),
+            ),
+          ],
+        );
+
+        await _pumpToyPanelInsetSurface(tester, theme: theme);
+
+        final decoration = _insetSurfaceDecoration(tester);
+        final border = decoration.border! as Border;
+
+        expect(
+          decoration.color,
+          customInsetSurfaceBackgroundColor.withValues(
+            alpha: customInsetSurfaceBackgroundAlpha,
+          ),
+        );
+        expect(
+          border.top.color,
+          customInsetSurfaceBorderColor.withValues(
+            alpha: customInsetSurfaceBorderAlpha,
+          ),
+        );
+        expect(border.top.width, customInsetSurfaceBorderWidth);
+        expect(decoration.boxShadow, customInsetSurfaceShadows);
+
+        await _pumpToyPanel(tester, theme: theme);
+
+        expect(
+          _panelDecoration(tester, find.byType(ToyPanel)).boxShadow,
+          customSurfacePanelShadows,
+        );
+      },
+    );
   });
 
   group('ToyPanel tone', () {

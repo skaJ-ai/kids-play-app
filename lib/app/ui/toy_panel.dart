@@ -161,7 +161,7 @@ class ToyPanelInsetSurface extends StatelessWidget {
               ),
           width: chromeTokens.insetSurfaceBorderWidth,
         ),
-        boxShadow: boxShadow ?? shadowTokens.surfacePanel,
+        boxShadow: boxShadow ?? shadowTokens.insetSurface,
       ),
       child: child,
     );

@@ -504,7 +504,7 @@ void main() {
   });
 
   test(
-    'KidShadowTokens exposes tone-aware defaults while preserving generic panel overrides',
+    'KidShadowTokens keeps calm inset defaults while inheriting legacy panel overrides when inset surface is unset',
     () {
       const genericPanelOverride = [
         BoxShadow(
@@ -524,14 +524,33 @@ void main() {
       expect(KidShadowTokens.defaults.airyPanel, KidShadows.panelAiry);
       expect(KidShadowTokens.defaults.warmPanel, KidShadows.panel);
       expect(KidShadowTokens.defaults.lilacPanel, KidShadows.panel);
+      expect(KidShadowTokens.defaults.insetSurface, KidShadows.insetSurface);
+      expect(KidShadows.insetSurface, hasLength(KidShadows.panel.length));
+      for (var i = 0; i < KidShadows.insetSurface.length; i += 1) {
+        expect(
+          KidShadows.insetSurface[i].blurRadius,
+          lessThan(KidShadows.panel[i].blurRadius),
+        );
+        expect(
+          KidShadows.insetSurface[i].offset.dy,
+          lessThan(KidShadows.panel[i].offset.dy),
+        );
+      }
 
-      final overridden = KidShadowTokens(panel: genericPanelOverride);
+      final constructed = KidShadowTokens(panel: genericPanelOverride);
+      final copied = KidShadowTokens.defaults.copyWith(
+        panel: genericPanelOverride,
+      );
+      final lerped = KidShadowTokens.defaults.lerp(constructed, 1);
 
-      expect(overridden.panel, genericPanelOverride);
-      expect(overridden.surfacePanel, genericPanelOverride);
-      expect(overridden.airyPanel, genericPanelOverride);
-      expect(overridden.warmPanel, genericPanelOverride);
-      expect(overridden.lilacPanel, genericPanelOverride);
+      expect(constructed.panel, genericPanelOverride);
+      expect(constructed.surfacePanel, genericPanelOverride);
+      expect(constructed.airyPanel, genericPanelOverride);
+      expect(constructed.warmPanel, genericPanelOverride);
+      expect(constructed.lilacPanel, genericPanelOverride);
+      expect(constructed.insetSurface, genericPanelOverride);
+      expect(copied.insetSurface, genericPanelOverride);
+      expect(lerped.insetSurface, genericPanelOverride);
     },
   );
 
@@ -554,9 +573,57 @@ void main() {
 
       expect(constructed.panel, surfaceOverride);
       expect(constructed.surfacePanel, surfaceOverride);
+      expect(constructed.insetSurface, surfaceOverride);
       expect(copied.panel, surfaceOverride);
       expect(copied.surfacePanel, surfaceOverride);
+      expect(copied.insetSurface, surfaceOverride);
       expect(lerped.panel, lerped.surfacePanel);
+      expect(lerped.surfacePanel.first, surfaceOverride.first);
+      expect(lerped.insetSurface.first, surfaceOverride.first);
+    },
+  );
+
+  test(
+    'KidShadowTokens keeps an explicit inset surface shadow taking precedence over panel fallbacks',
+    () {
+      const surfaceOverride = [
+        BoxShadow(
+          color: Color(0x22102030),
+          blurRadius: 19,
+          offset: Offset(0, 9),
+        ),
+      ];
+      const insetSurfaceOverride = [
+        BoxShadow(
+          color: Color(0x16102030),
+          blurRadius: 14,
+          offset: Offset(0, 6),
+        ),
+        BoxShadow(
+          color: Color(0x08000000),
+          blurRadius: 4,
+          offset: Offset(0, 2),
+        ),
+      ];
+
+      final constructed = KidShadowTokens(
+        surfacePanel: surfaceOverride,
+        insetSurface: insetSurfaceOverride,
+      );
+      final copied = KidShadowTokens.defaults.copyWith(
+        surfacePanel: surfaceOverride,
+        insetSurface: insetSurfaceOverride,
+      );
+      final lerped = KidShadowTokens.defaults.lerp(constructed, 1);
+
+      expect(constructed.insetSurface, insetSurfaceOverride);
+      expect(copied.insetSurface, insetSurfaceOverride);
+      expect(lerped.insetSurface, insetSurfaceOverride);
+      expect(constructed.panel, surfaceOverride);
+      expect(constructed.surfacePanel, surfaceOverride);
+      expect(copied.panel, surfaceOverride);
+      expect(copied.surfacePanel, surfaceOverride);
+      expect(lerped.panel.first, surfaceOverride.first);
       expect(lerped.surfacePanel.first, surfaceOverride.first);
     },
   );
@@ -583,10 +650,18 @@ void main() {
         offset: Offset(0, 9),
       ),
     ];
+    final replacementInsetSurface = <BoxShadow>[
+      const BoxShadow(
+        color: Color(0x12182230),
+        blurRadius: 12,
+        offset: Offset(0, 5),
+      ),
+    ];
     final copied = KidShadowTokens.defaults.copyWith(
       buttonPrimary: replacementPrimary,
       panel: replacementPanel,
       airyPanel: replacementAiryPanel,
+      insetSurface: replacementInsetSurface,
     );
 
     replacementPrimary.add(
@@ -608,6 +683,13 @@ void main() {
         color: Color(0x26182230),
         blurRadius: 6,
         offset: Offset(0, 3),
+      ),
+    );
+    replacementInsetSurface.add(
+      const BoxShadow(
+        color: Color(0x22182230),
+        blurRadius: 5,
+        offset: Offset(0, 2),
       ),
     );
 
@@ -639,12 +721,23 @@ void main() {
     expect(copied.airyPanel, replacementAiryPanel.take(1).toList());
     expect(copied.warmPanel, replacementPanel.take(1).toList());
     expect(copied.lilacPanel, replacementPanel.take(1).toList());
+    expect(copied.insetSurface, replacementInsetSurface.take(1).toList());
     expect(
       () => copied.buttonPrimary.add(
         const BoxShadow(
           color: Color(0x331B4FA7),
           blurRadius: 6,
           offset: Offset(0, 2),
+        ),
+      ),
+      throwsUnsupportedError,
+    );
+    expect(
+      () => copied.insetSurface.add(
+        const BoxShadow(
+          color: Color(0x32182230),
+          blurRadius: 4,
+          offset: Offset(0, 1),
         ),
       ),
       throwsUnsupportedError,
