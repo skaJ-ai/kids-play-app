@@ -24,6 +24,7 @@
 - `610a6aa` `fix(numbers): route learn prompts through audio service`
 - `e2f1ed5` `feat(audio): persist bgm setting`
 - `2450e81` `feat(audio): add parent bgm toggle`
+- `58eecac` `feat(audio): add asset audio player wrapper`
 
 현재 이미 동작하는 것
 - landscape 고정 + immersive full-screen
@@ -44,7 +45,7 @@
 - GitHub Actions APK 빌드
 
 아직 남은 확장 후보
-- richer reward / 녹음 효과음 / 배경음악 재생 연결 + polish
+- richer reward / 녹음 효과음 / 자산 오디오 wrapper를 실제 playback(BGM 포함)에 연결 + polish
 
 ---
 
@@ -52,17 +53,18 @@
 
 ### queue 기준 상태
 - latest full Gate G provenance는 verified docs-only HEAD `9df0082` fresh local rerun이며, `2450e81..9df0082` 사이 변경이 `README.md`, `handoff.md`, `docs/plans/2026-04-16_full-mvp-delivery-plan.md` 3개 문서뿐이었기 때문에 그때 다시 검증된 앱 코드는 `2450e81`였다
-- queue A-F의 앱 기능 + G full Gate G provenance는 현재 `2450e81` / `9df0082` 기준으로 fresh하게 읽을 수 있다
-- current live app-code snapshot은 `2450e81`(`feat(audio): add parent bgm toggle`)이며, latest full Gate G rerun이 이 app-code baseline을 다시 검증했다
-- live repo에는 `AppProgressSnapshot.bgmEnabled` 기본값 true + persistence API, 보호자 화면의 분리된 배경 음악 설정 토글 UI(`progressStore.setBgmEnabled`), UI copy `배경 음악 켜짐/꺼짐`이 반영돼 있다
-- current queue-head focused spot-check 기록에는 `./scripts/prepare_assets.sh`, `/home/openc/sdk/flutter/bin/flutter test test/features/numbers`, 그리고 아래 parent BGM follow-up targeted verification이 포함된다
-- parent BGM follow-up targeted verification:
-  - `/home/openc/sdk/flutter/bin/flutter test test/app/services/progress_store_test.dart --plain-name "memory progress store setBgmEnabled persists the flag and reset restores true"` => `00:00 +1: All tests passed!`
-  - `/home/openc/sdk/flutter/bin/flutter test test/app/services/progress_store_test.dart --plain-name "shared preferences progress store persists bgm across reload and reset restores true"` => `00:00 +1: All tests passed!`
-  - `/home/openc/sdk/flutter/bin/flutter test test/app/services/progress_store_test.dart --plain-name "snapshot json and copyWith preserve bgm and default missing payloads to true"` => `00:00 +1: All tests passed!`
-  - `/home/openc/sdk/flutter/bin/flutter test test/features/avatar/presentation/avatar_setup_screen_test.dart --plain-name "lets parent toggle background music separately"` => `00:01 +1: All tests passed!`
-- latest full Gate G rerun 결과(`9df0082`): full test `00:42 +279: All tests passed!`, full analyze `No issues found! (ran in 5.2s)`, release APK `build/app/outputs/flutter-apk/app-release.apk` (`18112444` bytes)
-- 이 handoff는 verified docs-only HEAD `9df0082`에서 실행한 full Gate G provenance를 기록하는 later docs-only refresh다. 따라서 fresh Gate G claim은 `9df0082`에 anchor해서 읽고, 이보다 뒤의 docs-only commit 자체를 rerun checkout으로 읽으면 안 된다
+- queue A-F의 앱 기능 + G full Gate G provenance freshness는 여전히 `2450e81` / `9df0082` baseline까지만 유지되며, current HEAD `58eecac`까지 fresh하다고 읽으면 안 된다
+- current live app-code snapshot은 `58eecac`(`feat(audio): add asset audio player wrapper`)이고, current-head full Gate G rerun은 아직 pending이다
+- `2450e81` 이후 live app-code delta는 asset-audio-player / audioplayers groundwork 1건뿐이다: `lib/app/audio/asset_audio_player.dart`, `lib/app/audio/audioplayers_asset_audio_player.dart`, `pubspec.yaml`, `pubspec.lock`, `test/app/audio/asset_audio_player_test.dart`
+- live repo에는 `AppProgressSnapshot.bgmEnabled` 기본값 true + persistence API, 보호자 화면의 분리된 배경 음악 설정 토글 UI(`progressStore.setBgmEnabled`), UI copy `배경 음악 켜짐/꺼짐`이 이미 반영돼 있고, `58eecac`은 그 위에 asset audio wrapper groundwork만 추가했다
+- runtime truth: `main.dart`는 아직 `audioService: TtsFallbackAudioService(speech: speech)`를 주입하고, `lib/app/audio/tts_fallback_audio_service.dart`는 non-prompt cue(배경 음악 포함)를 silence로 degrade하며 recorded playback / Phase 8이 아직 not wired라고 명시한다. 따라서 `58eecac`은 실제 BGM playback shipping이 아니라 wrapper groundwork다
+- current queue-head focused spot-check(`58eecac` follow-up):
+  - `./scripts/prepare_assets.sh` => succeeded
+  - `/home/openc/sdk/flutter/bin/flutter test test/features/numbers` => `00:03 +28: All tests passed!`
+  - `/home/openc/sdk/flutter/bin/flutter test test/app/audio/asset_audio_player_test.dart` => `00:00 +3: All tests passed!`
+  - `/home/openc/sdk/flutter/bin/flutter analyze lib/app/audio/asset_audio_player.dart lib/app/audio/audioplayers_asset_audio_player.dart test/app/audio/asset_audio_player_test.dart` => `No issues found! (ran in 1.2s)`
+- latest full Gate G rerun 결과(`9df0082`, app code matched `2450e81`): full test `00:42 +279: All tests passed!`, full analyze `No issues found! (ran in 5.2s)`, release APK `build/app/outputs/flutter-apk/app-release.apk` (`18112444` bytes)
+- 이 handoff refresh는 `58eecac` 이후 current live snapshot/provenance wording을 정리한 docs-only update다. fresh Gate G claim은 계속 `9df0082` / `2450e81`에 anchor해서 읽어야 하고, current HEAD `58eecac` 기준 full rerun 기록은 아직 없다
 - historical provenance는 직전 docs-only HEAD `7487a97` 로컬 full rerun(`610a6aa` 코드 일치), docs-only HEAD `9d4c035` 로컬 full rerun(`d81a2ec` 코드 일치), docs-only checkout `f1e23c3` 로컬 full rerun(`0c15caf` 코드 일치), historical docs-only HEAD `1523559` / 코드 스냅샷 `5696c1f`까지 함께 유지한다
 - latest full rerun / queue-head spot check / historical reference 세부 결과는 아래 `선별 검증 + Gate G provenance 메모` 섹션에 정리돼 있다
 
@@ -103,14 +105,16 @@
 
 최근 문서화된 queue-head spot check / latest full Gate G provenance / historical verification 메모
 - 아래 provenance / spot-check 명령은 모두 repo root(`/home/openc/kids-play-app`) 기준이다
-- current live queue-head app-code snapshot은 `2450e81`(`feat(audio): add parent bgm toggle`)이고, latest full Gate G provenance는 verified docs-only HEAD `9df0082` rerun으로 이 app-code baseline과 동일하다
-- current queue-head incremental spot-check 기록
+- latest full Gate G provenance는 여전히 verified docs-only HEAD `9df0082` rerun이며, `2450e81..9df0082`가 docs-only 범위였기 때문에 그 rerun이 다시 검증한 앱 코드는 `2450e81`과 동일하다
+- current live queue-head app-code snapshot은 `58eecac`(`feat(audio): add asset audio player wrapper`)이고, current HEAD 기준 fresh full Gate G rerun은 아직 없다
+- current queue-head incremental spot-check(`58eecac` follow-up)
   - `./scripts/prepare_assets.sh` => succeeded
-  - `/home/openc/sdk/flutter/bin/flutter test test/features/numbers` => passed
-  - `/home/openc/sdk/flutter/bin/flutter test test/app/services/progress_store_test.dart --plain-name "memory progress store setBgmEnabled persists the flag and reset restores true"` => `00:00 +1: All tests passed!`
-  - `/home/openc/sdk/flutter/bin/flutter test test/app/services/progress_store_test.dart --plain-name "shared preferences progress store persists bgm across reload and reset restores true"` => `00:00 +1: All tests passed!`
-  - `/home/openc/sdk/flutter/bin/flutter test test/app/services/progress_store_test.dart --plain-name "snapshot json and copyWith preserve bgm and default missing payloads to true"` => `00:00 +1: All tests passed!`
-  - `/home/openc/sdk/flutter/bin/flutter test test/features/avatar/presentation/avatar_setup_screen_test.dart --plain-name "lets parent toggle background music separately"` => `00:01 +1: All tests passed!`
+  - `/home/openc/sdk/flutter/bin/flutter test test/features/numbers` => `00:03 +28: All tests passed!`
+  - `/home/openc/sdk/flutter/bin/flutter test test/app/audio/asset_audio_player_test.dart` => `00:00 +3: All tests passed!`
+  - `/home/openc/sdk/flutter/bin/flutter analyze lib/app/audio/asset_audio_player.dart lib/app/audio/audioplayers_asset_audio_player.dart test/app/audio/asset_audio_player_test.dart` => `No issues found! (ran in 1.2s)`
+- runtime note
+  - `main.dart`는 아직 `audioService: TtsFallbackAudioService(speech: speech)`를 주입한다
+  - `lib/app/audio/tts_fallback_audio_service.dart`는 non-prompt cue(BGM 포함)를 silence로 degrade하며 recorded playback / Phase 8이 아직 not wired라고 적고 있다
 - latest full Gate G 로컬 rerun (`9df0082` docs-only HEAD, app code matched `2450e81` because `2450e81..9df0082` only touched docs)
   - `./scripts/prepare_assets.sh` => succeeded
   - `/home/openc/sdk/flutter/bin/flutter pub get` => succeeded
@@ -260,10 +264,10 @@ artifact
 ## 다음 작업자가 바로 이어갈 포인트
 
 우선순위 추천
-1. latest full Gate G provenance는 verified docs-only HEAD `9df0082` / app-code snapshot `2450e81`까지 fresh하다. 이후 코드 변경이 다시 쌓이기 전까지는 이 provenance를 기준으로 작은 audio polish slice를 이어가고, 다음 code-changing slice가 누적되면 release 직전이나 의미 있는 통합 시점에 새 queue-head 기준 full Gate G를 다시 돌리는 편이 안전하다.
+1. latest full Gate G provenance는 여전히 verified docs-only HEAD `9df0082` / app-code snapshot `2450e81`까지다. current live app-code snapshot은 `58eecac`으로 asset-audio-player groundwork만 focused verification된 상태이므로, 다음 code-changing slice를 이어가더라도 release 직전이나 의미 있는 통합 시점에는 `58eecac` 이후 baseline을 포함하는 새 queue-head 기준 full Gate G rerun이 필요하다.
 
 남은 확장 후보
-- richer reward / 녹음 효과음 / 배경음악 재생 연결 + polish
+- richer reward / 녹음 효과음 / 자산 오디오 wrapper를 실제 playback(BGM 포함)에 연결 + polish
 
 주의
 - 이 앱은 데모가 아니라 실제 아이가 눌러보는 앱이다.
