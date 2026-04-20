@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../features/rewards/domain/reward_models.dart';
+
 const rewardKindSticker = 'sticker';
 const rewardKindMistakeReplaySticker = 'mistakeReplaySticker';
 
@@ -75,6 +77,22 @@ RecentReward? _recentRewardFromJson(Object? json) {
   }
 }
 
+List<RewardEvent> _rewardEventsFromJson(Object? json) {
+  if (json is! List) {
+    return const [];
+  }
+  final events = <RewardEvent>[];
+  for (final entry in json) {
+    if (entry is! Map) continue;
+    try {
+      events.add(RewardEvent.fromJson(Map<String, dynamic>.from(entry)));
+    } catch (_) {
+      // skip malformed entries
+    }
+  }
+  return List.unmodifiable(events);
+}
+
 class LessonProgress {
   const LessonProgress({
     this.bestScore = 0,
@@ -140,6 +158,7 @@ class AppProgressSnapshot {
     this.bgmEnabled = true,
     this.unlockedLessonIds = const [],
     this.lessons = const {},
+    this.rewardEvents = const [],
   });
 
   factory AppProgressSnapshot.fromJson(Map<String, dynamic> json) {
@@ -169,6 +188,7 @@ class AppProgressSnapshot {
           LessonProgress.fromJson(value as Map<String, dynamic>),
         ),
       ),
+      rewardEvents: _rewardEventsFromJson(json['rewardEvents']),
     );
   }
 
@@ -181,9 +201,17 @@ class AppProgressSnapshot {
   final bool bgmEnabled;
   final List<String> unlockedLessonIds;
   final Map<String, LessonProgress> lessons;
+  final List<RewardEvent> rewardEvents;
 
   LessonProgress progressFor(String lessonId) {
     return lessons[lessonId] ?? const LessonProgress();
+  }
+
+  bool hasRewardFor(String rewardId) {
+    for (final event in rewardEvents) {
+      if (event.reward.id == rewardId) return true;
+    }
+    return false;
   }
 
   AppProgressSnapshot copyWith({
@@ -196,6 +224,7 @@ class AppProgressSnapshot {
     bool? bgmEnabled,
     List<String>? unlockedLessonIds,
     Map<String, LessonProgress>? lessons,
+    List<RewardEvent>? rewardEvents,
   }) {
     return AppProgressSnapshot(
       stickerCount: stickerCount ?? this.stickerCount,
@@ -212,6 +241,7 @@ class AppProgressSnapshot {
       bgmEnabled: bgmEnabled ?? this.bgmEnabled,
       unlockedLessonIds: unlockedLessonIds ?? this.unlockedLessonIds,
       lessons: lessons ?? this.lessons,
+      rewardEvents: rewardEvents ?? this.rewardEvents,
     );
   }
 
@@ -226,6 +256,9 @@ class AppProgressSnapshot {
       'effectsEnabled': effectsEnabled,
       'bgmEnabled': bgmEnabled,
       'unlockedLessonIds': unlockedLessonIds,
+      'rewardEvents': rewardEvents.map((event) => event.toJson()).toList(
+        growable: false,
+      ),
       'lessons': lessons.map((key, value) => MapEntry(key, value.toJson())),
     };
   }
@@ -242,6 +275,8 @@ abstract class ProgressStore {
     required String lessonId,
     required DateTime earnedAt,
   });
+
+  Future<void> recordRewardEvent(RewardEvent event);
 
   Future<void> recordLessonIndex({
     required String lessonId,
@@ -312,6 +347,14 @@ class MemoryProgressStore implements ProgressStore {
         lessonId: lessonId,
         earnedAt: earnedAt,
       ),
+    );
+  }
+
+  @override
+  Future<void> recordRewardEvent(RewardEvent event) async {
+    if (_snapshot.hasRewardFor(event.reward.id)) return;
+    _snapshot = _snapshot.copyWith(
+      rewardEvents: List.unmodifiable([..._snapshot.rewardEvents, event]),
     );
   }
 
@@ -418,6 +461,16 @@ class SharedPreferencesProgressStore implements ProgressStore {
   Future<void> addStickers(int count) async {
     await _mutate((snapshot) {
       return snapshot.copyWith(stickerCount: snapshot.stickerCount + count);
+    });
+  }
+
+  @override
+  Future<void> recordRewardEvent(RewardEvent event) async {
+    await _mutate((snapshot) {
+      if (snapshot.hasRewardFor(event.reward.id)) return snapshot;
+      return snapshot.copyWith(
+        rewardEvents: List.unmodifiable([...snapshot.rewardEvents, event]),
+      );
     });
   }
 
