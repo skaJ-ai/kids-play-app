@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kids_play_app/app/audio/audio_cue.dart';
+import 'package:kids_play_app/app/audio/audio_service.dart';
 import 'package:kids_play_app/app/services/app_services.dart';
 import 'package:kids_play_app/app/services/progress_store.dart';
 import 'package:kids_play_app/app/services/speech_cue_service.dart';
@@ -75,6 +77,47 @@ void main() {
     expect(find.text('3 / 5'), findsOneWidget);
     expect(find.text('에이, A a'), findsNothing);
   });
+
+  testWidgets(
+    'replays the current alphabet learn prompt through the injected audio service',
+    (WidgetTester tester) async {
+      final repository = AlphabetLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          AlphabetLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_alphabetLesson],
+          }),
+        }),
+      );
+      final audioService = _FakeAudioService();
+
+      await tester.pumpWidget(
+        _wrapWithServices(
+          progressStore: MemoryProgressStore(),
+          audioService: audioService,
+          child: AlphabetLearnScreen(
+            repository: repository,
+            lessonId: 'alphabet_letters_1',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(audioService.promptCalls, hasLength(1));
+      expect(audioService.promptCalls.single.categoryId, 'alphabet');
+      expect(audioService.promptCalls.single.lessonId, 'alphabet_letters_1');
+      expect(audioService.promptCalls.single.symbol, 'A a');
+      expect(audioService.promptCalls.single.fallbackText, '에이, A a');
+
+      await tester.tap(find.byIcon(Icons.volume_up_rounded));
+      await tester.pumpAndSettle();
+
+      expect(audioService.promptCalls, hasLength(2));
+      expect(audioService.promptCalls.last.categoryId, 'alphabet');
+      expect(audioService.promptCalls.last.lessonId, 'alphabet_letters_1');
+      expect(audioService.promptCalls.last.symbol, 'A a');
+      expect(audioService.promptCalls.last.fallbackText, '에이, A a');
+    },
+  );
 
   testWidgets(
     'keeps the alphabet learn screen stable on a compact landscape phone',
@@ -167,6 +210,7 @@ class _FakeAssetBundle extends CachingAssetBundle {
 
 Widget _wrapWithServices({
   required ProgressStore progressStore,
+  AudioService? audioService,
   required Widget child,
 }) {
   return MaterialApp(
@@ -174,8 +218,30 @@ Widget _wrapWithServices({
       services: AppServices(
         progressStore: progressStore,
         speechCueService: NoopSpeechCueService(),
+        audioService: audioService,
       ),
       child: child,
     ),
   );
+}
+
+class _FakeAudioService implements AudioService {
+  final List<AudioPromptRequest> promptCalls = <AudioPromptRequest>[];
+  final List<AudioCue> cueCalls = <AudioCue>[];
+  int stopCount = 0;
+
+  @override
+  Future<void> playPrompt(AudioPromptRequest request) async {
+    promptCalls.add(request);
+  }
+
+  @override
+  Future<void> playCue(AudioCue cue) async {
+    cueCalls.add(cue);
+  }
+
+  @override
+  Future<void> stop() async {
+    stopCount += 1;
+  }
 }
