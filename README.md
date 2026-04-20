@@ -14,23 +14,24 @@
 
 ## 현재 상태
 
-- latest full Gate G provenance는 fresh local rerun이 끝난 app-code snapshot `553ba58`(`feat(ui): calm toy panel inset surface shadow`)입니다.
-- docs-only commit `158b639`는 `553ba58` full Gate G rerun을 기록한 follow-up이었고, 이번 README refresh도 current live status를 맞추는 docs-only follow-up입니다.
-- current live app-code snapshot은 이번 docs-only refresh 직전의 latest app-code commit `2890df1`(`feat(ui): calm play choice card typography`)입니다. `553ba58` 이후 `b0adee3`(`feat(ui): calm toy button chrome`), `2c0d8c4`(`feat(ui): calm prompt panel typography`), `2890df1`(`feat(ui): calm play choice card typography`) calm UI follow-up이 추가로 landed했습니다.
-- 따라서 queue A-G / fresh full Gate G claim은 current repo HEAD 전체가 아니라 `553ba58`까지에만 적용됩니다. live repo 기준 완료 상태는 newer calm UI follow-up까지 live app code에 반영된 상태이며, current live snapshot `2890df1`은 핵심 선별 테스트로만 재확인됐고 fresh full Gate G rerun은 pending입니다.
-- current live snapshot `2890df1` focused verification only:
-  - `/home/openc/sdk/flutter/bin/flutter test test/features/numbers --reporter expanded` => `00:03 +36 All tests passed`
+- latest full Gate G provenance는 controller docs-only checkout `991c664`에서 fresh local rerun이 끝난 verified app-code snapshot `2890df1`(`feat(ui): calm play choice card typography`)입니다.
+- 검증 당시 controller repo는 전후 모두 clean 상태였고, `git diff --name-only 2890df1..991c664` 결과가 `README.md`, `docs/plans/2026-04-16_full-mvp-delivery-plan.md`, `handoff.md`뿐이어서 rerun 당시 앱 코드는 `2890df1`와 동일했습니다.
+- 이번 README refresh는 그 `991c664` controller rerun 결과를 기록하는 docs-only follow-up입니다.
+- `553ba58` 이후 `b0adee3`(`feat(ui): calm toy button chrome`), `2c0d8c4`(`feat(ui): calm prompt panel typography`), `2890df1`(`feat(ui): calm play choice card typography`) calm UI follow-up이 landed했고, latest full Gate G provenance는 이제 current app-code snapshot `2890df1`까지 갱신됐습니다.
+- `2890df1` pre-rerun focused verification history(첫 bullet은 full rerun 직전 queue head A spot-check로 다시 확인됨):
+  - `/home/openc/sdk/flutter/bin/flutter test test/features/numbers --reporter expanded` => `00:03 +36: All tests passed!`
   - `/home/openc/sdk/flutter/bin/flutter test test/features/home/presentation/category_lesson_picker_flow_test.dart --reporter expanded` => `00:02 +7 All tests passed`
   - `/home/openc/sdk/flutter/bin/flutter test test/app/ui --reporter expanded` => `00:09 +96 All tests passed`
   - `/home/openc/sdk/flutter/bin/flutter test test/features/hero/presentation/hero_screen_test.dart test/features/home/presentation/home_redesign_test.dart --reporter expanded` => `00:03 +19 All tests passed`
   - `/home/openc/sdk/flutter/bin/flutter test test/features/avatar/presentation/avatar_setup_screen_test.dart test/app/services/progress_store_test.dart --reporter expanded` => `00:06 +26 All tests passed`
 - current runtime은 여전히 `main.dart`에서 `audioService: TtsFallbackAudioService(speech: speech)`를 주입하고, `lib/app/audio/tts_fallback_audio_service.dart`는 prompt / success / error / reward cue를 TTS fallback으로 audible하게 유지하는 반면 `IdleAttractCue` / `BgmCue`는 recorded playback / BGM wiring 전까지 silence로 degrade합니다. 즉 wrapper groundwork 이후에도 실제 BGM playback shipping은 pending입니다.
-- fresh full Gate G rerun 결과(app-code HEAD `553ba58`): `./scripts/prepare_assets.sh` => succeeded, `/home/openc/sdk/flutter/bin/flutter pub get` => succeeded, full `/home/openc/sdk/flutter/bin/flutter test` => `00:42 +298: All tests passed!`, full `/home/openc/sdk/flutter/bin/flutter analyze` => `No issues found! (ran in 6.2s)`, `/home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64` => `build/app/outputs/flutter-apk/app-release.apk` (18.5MB / `18538312` bytes).
+- fresh full Gate G rerun 결과(controller checkout `991c664`; verified app-code snapshot `2890df1`): `./scripts/prepare_assets.sh` => succeeded, `/home/openc/sdk/flutter/bin/flutter pub get` => succeeded, full `/home/openc/sdk/flutter/bin/flutter test` => `00:43 +304: All tests passed!`, full `/home/openc/sdk/flutter/bin/flutter analyze` => `No issues found! (ran in 4.3s)`, `/home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64` => `build/app/outputs/flutter-apk/app-release.apk` (18.5MB / `18538312` bytes).
 - live repo에는 `AppProgressSnapshot.bgmEnabled` 기본값 true + persistence API, 보호자 화면의 분리된 배경 음악 설정 토글 UI(`progressStore.setBgmEnabled`), 관련 targeted test cases(`test/app/services/progress_store_test.dart`, `test/features/avatar/presentation/avatar_setup_screen_test.dart`)가 반영돼 있습니다.
 - 추가 provenance 참고
-  - latest full Gate G rerun: app-code HEAD `553ba58` (`feat(ui): calm toy panel inset surface shadow`)
-  - docs-only record for that rerun: `158b639`
-  - current live app-code snapshot: `2890df1` (`feat(ui): calm play choice card typography`) — focused verification only, fresh full Gate G rerun pending
+  - latest full Gate G rerun: docs-only checkout `991c664`, verified app-code snapshot `2890df1`
+  - current docs refresh: 위 rerun을 기록하는 docs-only follow-up
+  - previous full Gate G provenance: app-code HEAD `553ba58` (`feat(ui): calm toy panel inset surface shadow`)
+  - docs-only record for that previous rerun: `158b639`
   - 직전 full Gate G rerun: docs-only HEAD `0eecf54`, 당시 검증된 앱 코드는 `58eecac`
   - 그 이전 full Gate G rerun: docs-only HEAD `9df0082`, 당시 검증된 앱 코드는 `2450e81`
   - 그보다 이전 full Gate G rerun: docs-only HEAD `7487a97`, 당시 검증된 앱 코드는 `610a6aa`
@@ -88,22 +89,28 @@ cd "$REPO_ROOT"
 ### 테스트 / 최종 검증
 현재 기준
 - 아래 provenance / rerun 명령은 모두 repo root(`/home/openc/kids-play-app`) 기준입니다.
-- latest full Gate G rerun reference는 app-code snapshot `553ba58`(`feat(ui): calm toy panel inset surface shadow`)입니다. docs-only commit `158b639`는 그 full rerun을 기록한 follow-up이었고, 이번 README refresh도 current live status를 맞추는 docs-only follow-up입니다.
-- current live app-code snapshot은 이번 docs-only refresh 직전의 latest app-code commit `2890df1`이며, `553ba58` 이후 `b0adee3` / `2c0d8c4` / `2890df1` calm UI follow-up이 추가됐습니다. live repo 기준 완료 상태는 newer follow-up까지 live app code에 반영된 상태지만, current live snapshot `2890df1`은 아래 핵심 선별 테스트로만 재확인됐고 fresh full Gate G rerun은 pending입니다.
+- latest full Gate G rerun reference는 controller docs-only checkout `991c664`에서 수행된 fresh local rerun이며, verified app-code snapshot은 latest app-code commit `2890df1`(`feat(ui): calm play choice card typography`)입니다.
+- `991c664`는 docs-only checkout이었고, `git diff --name-only 2890df1..991c664` 결과는 `README.md`, `docs/plans/2026-04-16_full-mvp-delivery-plan.md`, `handoff.md`뿐이어서 rerun 당시 앱 코드는 `2890df1`와 동일했습니다.
 - current runtime note: `main.dart`는 아직 `audioService: TtsFallbackAudioService(speech: speech)`를 주입하고, `lib/app/audio/tts_fallback_audio_service.dart`는 prompt / success / error / reward cue를 TTS fallback으로 audible하게 유지하는 반면 `IdleAttractCue` / `BgmCue`는 recorded playback / BGM wiring 전까지 silence로 degrade합니다.
-- current live snapshot focused verification (full Gate G rerun 아님):
-  - `/home/openc/sdk/flutter/bin/flutter test test/features/numbers --reporter expanded` => `00:03 +36 All tests passed`
+- `2890df1` pre-rerun focused verification history (full Gate G 전에 남긴 기록; numbers spot-check는 rerun 직전에 재실행됨):
+  - `/home/openc/sdk/flutter/bin/flutter test test/features/numbers --reporter expanded` => `00:03 +36: All tests passed!`
   - `/home/openc/sdk/flutter/bin/flutter test test/features/home/presentation/category_lesson_picker_flow_test.dart --reporter expanded` => `00:02 +7 All tests passed`
   - `/home/openc/sdk/flutter/bin/flutter test test/app/ui --reporter expanded` => `00:09 +96 All tests passed`
   - `/home/openc/sdk/flutter/bin/flutter test test/features/hero/presentation/hero_screen_test.dart test/features/home/presentation/home_redesign_test.dart --reporter expanded` => `00:03 +19 All tests passed`
   - `/home/openc/sdk/flutter/bin/flutter test test/features/avatar/presentation/avatar_setup_screen_test.dart test/app/services/progress_store_test.dart --reporter expanded` => `00:06 +26 All tests passed`
-- fresh full Gate G rerun (app-code HEAD `553ba58`, `feat(ui): calm toy panel inset surface shadow`):
+- fresh full Gate G rerun (controller checkout `991c664`, verified app-code snapshot `2890df1`):
+  - `./scripts/prepare_assets.sh` => succeeded
+  - `/home/openc/sdk/flutter/bin/flutter pub get` => succeeded
+  - full `/home/openc/sdk/flutter/bin/flutter test` => `00:43 +304: All tests passed!`
+  - full `/home/openc/sdk/flutter/bin/flutter analyze` => `No issues found! (ran in 4.3s)`
+  - `/home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64` => `build/app/outputs/flutter-apk/app-release.apk` (18.5MB / `18538312` bytes)
+- previous full Gate G provenance (`158b639` docs-only record, app-code HEAD `553ba58`, `feat(ui): calm toy panel inset surface shadow`):
   - `./scripts/prepare_assets.sh` => succeeded
   - `/home/openc/sdk/flutter/bin/flutter pub get` => succeeded
   - full `/home/openc/sdk/flutter/bin/flutter test` => `00:42 +298: All tests passed!`
   - full `/home/openc/sdk/flutter/bin/flutter analyze` => `No issues found! (ran in 6.2s)`
   - `/home/openc/sdk/flutter/bin/flutter build apk --release --target-platform android-arm64` => `build/app/outputs/flutter-apk/app-release.apk` (18.5MB / `18538312` bytes)
-- previous full Gate G rerun (`0eecf54`, app code matched `58eecac` because `58eecac..0eecf54` only touched docs):
+- earlier full Gate G rerun (`0eecf54`, app code matched `58eecac` because `58eecac..0eecf54` only touched docs):
   - `./scripts/prepare_assets.sh` => succeeded
   - `/home/openc/sdk/flutter/bin/flutter pub get` => succeeded
   - full `/home/openc/sdk/flutter/bin/flutter test` => `00:42 +282: All tests passed!`
@@ -152,7 +159,7 @@ cd "$REPO_ROOT"
 "$FLUTTER_BIN" build apk --release --target-platform android-arm64
 ```
 
-- 아래 명령 블록은 `docs/local-dev-setup.md` 및 `.github/workflows/build-apk.yml` 과 같은 순서의 Gate G 재현용 체크리스트입니다. latest full rerun reference는 app-code snapshot `553ba58`(`feat(ui): calm toy panel inset surface shadow`)이고, docs-only commit `158b639`가 그 rerun 기록을 남겼습니다. 이번 README refresh는 current live app-code snapshot `2890df1` 상태를 맞추는 docs-only follow-up이며, current HEAD는 위 핵심 선별 테스트만 다시 돈 상태라 fresh full Gate G rerun이 아직 pending입니다. live runtime은 여전히 `TtsFallbackAudioService`를 통해 prompt / success / error / reward cue를 TTS fallback으로 재생하고 `IdleAttractCue` / `BgmCue`는 silence로 degrade합니다. 직전 로컬 full rerun은 docs-only HEAD `0eecf54`(app code matched `58eecac`)이고, 그 이전 로컬 full rerun은 docs-only HEAD `9df0082`(app code matched `2450e81`), docs-only HEAD `7487a97`(app code matched `610a6aa`), docs-only HEAD `9d4c035`(검증된 앱 코드는 `d81a2ec`), docs-only checkout `f1e23c3`(검증된 앱 코드는 `0c15caf`와 동일)입니다. historical artifact-backed 기준은 docs-only HEAD `1523559` / code snapshot `5696c1f`입니다.
+- 아래 명령 블록은 `docs/local-dev-setup.md` 및 `.github/workflows/build-apk.yml` 과 같은 순서의 Gate G 재현용 체크리스트입니다. latest full rerun reference는 controller docs-only checkout `991c664`에서 수행된 rerun이고, `git diff --name-only 2890df1..991c664`가 docs만 바꿨기 때문에 verified app-code snapshot은 `2890df1`입니다. 이번 README refresh는 그 rerun을 기록하는 docs-only follow-up입니다. live runtime은 여전히 `TtsFallbackAudioService`를 통해 prompt / success / error / reward cue를 TTS fallback으로 재생하고 `IdleAttractCue` / `BgmCue`는 silence로 degrade합니다. previous full provenance는 app-code snapshot `553ba58` + docs-only record `158b639`이고, 그 이전 로컬 full rerun은 docs-only HEAD `0eecf54`(app code matched `58eecac`), docs-only HEAD `9df0082`(app code matched `2450e81`), docs-only HEAD `7487a97`(app code matched `610a6aa`), docs-only HEAD `9d4c035`(검증된 앱 코드는 `d81a2ec`), docs-only checkout `f1e23c3`(검증된 앱 코드는 `0c15caf`와 동일)입니다. historical artifact-backed 기준은 docs-only HEAD `1523559` / code snapshot `5696c1f`입니다.
 
 ## APK 확인 방법
 
