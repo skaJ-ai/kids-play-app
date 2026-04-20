@@ -305,6 +305,39 @@ void main() {
   );
 
   testWidgets(
+    'updates the mounted replay session when mistake symbol order changes',
+    (WidgetTester tester) async {
+      final repository = NumbersLessonRepository(
+        assetBundle: _FakeAssetBundle({
+          NumbersLessonRepository.manifestPath: jsonEncode({
+            'lessons': [_numbersLesson],
+          }),
+        }),
+      );
+
+      Future<void> pumpWith(List<String> mistakeSymbols) {
+        return tester.pumpWidget(
+          MaterialApp(
+            home: NumbersQuizScreen(
+              repository: repository,
+              lessonId: 'numbers_count_1',
+              mistakeSymbols: mistakeSymbols,
+            ),
+          ),
+        );
+      }
+
+      await pumpWith(const ['2', '5']);
+      await tester.pumpAndSettle();
+      expect(find.text("'2' 숫자를 찾아봐!"), findsOneWidget);
+
+      await pumpWith(const ['5', '2']);
+      await tester.pumpAndSettle();
+      expect(find.text("'5' 숫자를 찾아봐!"), findsOneWidget);
+    },
+  );
+
+  testWidgets(
     'mistake replay completion preserves numbers lesson stats and records a replay sticker reward',
     (WidgetTester tester) async {
       final repository = NumbersLessonRepository(

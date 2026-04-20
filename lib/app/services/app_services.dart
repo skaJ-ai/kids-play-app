@@ -6,6 +6,7 @@ import 'package:kids_play_app/features/avatar/data/avatar_photo_store.dart';
 import 'package:kids_play_app/features/avatar/domain/avatar_photo_snapshot.dart';
 
 import '../audio/audio_service.dart';
+import '../audio/tts_fallback_audio_service.dart';
 import 'progress_store.dart';
 import 'speech_cue_service.dart';
 
@@ -27,7 +28,8 @@ class AppServices {
     return AppServices._(
       progressStore: progressStore,
       speechCueService: speechCueService,
-      audioService: audioService ?? NoopAudioService(),
+      audioService:
+          audioService ?? TtsFallbackAudioService(speech: speechCueService),
       avatarPhotoStore: resolvedAvatarPhotoStore,
       avatarPhotoRepository: resolvedAvatarPhotoRepository,
       avatarPhotoService:

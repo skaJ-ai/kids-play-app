@@ -256,6 +256,17 @@ abstract class ProgressStore {
     bool isMistakeReplay = false,
   });
 
+  Future<void> recordCompletedQuiz({
+    required String lessonId,
+    required int correctCount,
+    required int totalQuestions,
+    required List<String> recentMistakes,
+    int stickersEarned = 0,
+    DateTime? rewardEarnedAt,
+    String rewardKind = rewardKindSticker,
+    bool isMistakeReplay = false,
+  });
+
   Future<void> setVoicePromptsEnabled(bool enabled);
 
   Future<void> setEffectsEnabled(bool enabled);
@@ -329,25 +340,37 @@ class MemoryProgressStore implements ProgressStore {
     required List<String> recentMistakes,
     bool isMistakeReplay = false,
   }) async {
-    final current = _snapshot.progressFor(lessonId);
-    _snapshot = _snapshot.copyWith(
-      lessons: {
-        ..._snapshot.lessons,
-        lessonId: current.copyWith(
-          bestScore: isMistakeReplay
-              ? current.bestScore
-              : correctCount > current.bestScore
-              ? correctCount
-              : current.bestScore,
-          totalQuestions: isMistakeReplay
-              ? current.totalQuestions
-              : totalQuestions,
-          recentMistakes: _normalizedMistakes(recentMistakes),
-          mistakeReplayCount: isMistakeReplay
-              ? current.mistakeReplayCount + 1
-              : current.mistakeReplayCount,
-        ),
-      },
+    _snapshot = _snapshotWithQuizResult(
+      _snapshot,
+      lessonId: lessonId,
+      correctCount: correctCount,
+      totalQuestions: totalQuestions,
+      recentMistakes: recentMistakes,
+      isMistakeReplay: isMistakeReplay,
+    );
+  }
+
+  @override
+  Future<void> recordCompletedQuiz({
+    required String lessonId,
+    required int correctCount,
+    required int totalQuestions,
+    required List<String> recentMistakes,
+    int stickersEarned = 0,
+    DateTime? rewardEarnedAt,
+    String rewardKind = rewardKindSticker,
+    bool isMistakeReplay = false,
+  }) async {
+    _snapshot = _snapshotWithCompletedQuiz(
+      _snapshot,
+      lessonId: lessonId,
+      correctCount: correctCount,
+      totalQuestions: totalQuestions,
+      recentMistakes: recentMistakes,
+      stickersEarned: stickersEarned,
+      rewardEarnedAt: rewardEarnedAt,
+      rewardKind: rewardKind,
+      isMistakeReplay: isMistakeReplay,
     );
   }
 
@@ -465,25 +488,39 @@ class SharedPreferencesProgressStore implements ProgressStore {
     bool isMistakeReplay = false,
   }) async {
     await _mutate((snapshot) {
-      final current = snapshot.progressFor(lessonId);
-      return snapshot.copyWith(
-        lessons: {
-          ...snapshot.lessons,
-          lessonId: current.copyWith(
-            bestScore: isMistakeReplay
-                ? current.bestScore
-                : correctCount > current.bestScore
-                ? correctCount
-                : current.bestScore,
-            totalQuestions: isMistakeReplay
-                ? current.totalQuestions
-                : totalQuestions,
-            recentMistakes: _normalizedMistakes(recentMistakes),
-            mistakeReplayCount: isMistakeReplay
-                ? current.mistakeReplayCount + 1
-                : current.mistakeReplayCount,
-          ),
-        },
+      return _snapshotWithQuizResult(
+        snapshot,
+        lessonId: lessonId,
+        correctCount: correctCount,
+        totalQuestions: totalQuestions,
+        recentMistakes: recentMistakes,
+        isMistakeReplay: isMistakeReplay,
+      );
+    });
+  }
+
+  @override
+  Future<void> recordCompletedQuiz({
+    required String lessonId,
+    required int correctCount,
+    required int totalQuestions,
+    required List<String> recentMistakes,
+    int stickersEarned = 0,
+    DateTime? rewardEarnedAt,
+    String rewardKind = rewardKindSticker,
+    bool isMistakeReplay = false,
+  }) async {
+    await _mutate((snapshot) {
+      return _snapshotWithCompletedQuiz(
+        snapshot,
+        lessonId: lessonId,
+        correctCount: correctCount,
+        totalQuestions: totalQuestions,
+        recentMistakes: recentMistakes,
+        stickersEarned: stickersEarned,
+        rewardEarnedAt: rewardEarnedAt,
+        rewardKind: rewardKind,
+        isMistakeReplay: isMistakeReplay,
       );
     });
   }
@@ -533,7 +570,20 @@ class SharedPreferencesProgressStore implements ProgressStore {
   ) async {
     final snapshot = await loadSnapshot();
     final next = transform(snapshot);
-    await _preferences.setString(storageKey, jsonEncode(next.toJson()));
+    final encodedSnapshot = jsonEncode(next.toJson());
+
+    bool didSave;
+    try {
+      didSave = await _preferences.setString(storageKey, encodedSnapshot);
+    } catch (error, stackTrace) {
+      await _preferences.reload();
+      Error.throwWithStackTrace(error, stackTrace);
+    }
+
+    if (!didSave) {
+      await _preferences.reload();
+      throw StateError('Failed to save progress snapshot.');
+    }
   }
 }
 
@@ -550,6 +600,109 @@ bool _jsonBoolOrFalse(Object? value) {
     bool parsed => parsed,
     _ => false,
   };
+}
+
+AppProgressSnapshot _snapshotWithQuizResult(
+  AppProgressSnapshot snapshot, {
+  required String lessonId,
+  required int correctCount,
+  required int totalQuestions,
+  required List<String> recentMistakes,
+  bool isMistakeReplay = false,
+}) {
+  return snapshot.copyWith(
+    lessons: {
+      ...snapshot.lessons,
+      lessonId: _lessonProgressWithQuizResult(
+        snapshot.progressFor(lessonId),
+        correctCount: correctCount,
+        totalQuestions: totalQuestions,
+        recentMistakes: recentMistakes,
+        isMistakeReplay: isMistakeReplay,
+      ),
+    },
+  );
+}
+
+AppProgressSnapshot _snapshotWithCompletedQuiz(
+  AppProgressSnapshot snapshot, {
+  required String lessonId,
+  required int correctCount,
+  required int totalQuestions,
+  required List<String> recentMistakes,
+  int stickersEarned = 0,
+  DateTime? rewardEarnedAt,
+  String rewardKind = rewardKindSticker,
+  bool isMistakeReplay = false,
+}) {
+  if (stickersEarned < 0) {
+    throw ArgumentError.value(
+      stickersEarned,
+      'stickersEarned',
+      'must be greater than or equal to 0',
+    );
+  }
+  if (stickersEarned == 0 && rewardEarnedAt != null) {
+    throw ArgumentError.value(
+      rewardEarnedAt,
+      'rewardEarnedAt',
+      'must be null when no sticker reward is earned',
+    );
+  }
+  if (stickersEarned > 0 && rewardEarnedAt == null) {
+    throw ArgumentError.notNull('rewardEarnedAt');
+  }
+
+  final isReplayReward = rewardKind == rewardKindMistakeReplaySticker;
+
+  return snapshot.copyWith(
+    stickerCount: snapshot.stickerCount + stickersEarned,
+    replayRewardStickerCount: isReplayReward
+        ? snapshot.replayRewardStickerCount + stickersEarned
+        : snapshot.replayRewardStickerCount,
+    replayRewardStickerCountTracked: isReplayReward
+        ? true
+        : snapshot.replayRewardStickerCountTracked,
+    lastEarnedReward: stickersEarned == 0
+        ? _noRecentRewardChange
+        : RecentReward(
+            kind: rewardKind,
+            amount: stickersEarned,
+            lessonId: lessonId,
+            earnedAt: rewardEarnedAt!,
+          ),
+    lessons: {
+      ...snapshot.lessons,
+      lessonId: _lessonProgressWithQuizResult(
+        snapshot.progressFor(lessonId),
+        correctCount: correctCount,
+        totalQuestions: totalQuestions,
+        recentMistakes: recentMistakes,
+        isMistakeReplay: isMistakeReplay,
+      ),
+    },
+  );
+}
+
+LessonProgress _lessonProgressWithQuizResult(
+  LessonProgress current, {
+  required int correctCount,
+  required int totalQuestions,
+  required List<String> recentMistakes,
+  bool isMistakeReplay = false,
+}) {
+  return current.copyWith(
+    bestScore: isMistakeReplay
+        ? current.bestScore
+        : correctCount > current.bestScore
+        ? correctCount
+        : current.bestScore,
+    totalQuestions: isMistakeReplay ? current.totalQuestions : totalQuestions,
+    recentMistakes: _normalizedMistakes(recentMistakes),
+    mistakeReplayCount: isMistakeReplay
+        ? current.mistakeReplayCount + 1
+        : current.mistakeReplayCount,
+  );
 }
 
 List<String> _normalizedMistakes(List<String> mistakes) {

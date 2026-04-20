@@ -209,7 +209,7 @@ void main() {
     },
   );
 
-  test('skips speech when voice prompts are disabled', () async {
+  test('keeps feedback cues audible when voice prompts are disabled but effects stay on', () async {
     final speech = _RecordingSpeech();
     final controller = _buildController(
       initialSnapshot: const AppProgressSnapshot(voicePromptsEnabled: false),
@@ -217,7 +217,7 @@ void main() {
     );
 
     await controller.selectChoice(controller.currentQuestion);
-    expect(speech.spoken, isEmpty);
+    expect(speech.spoken, ['딩동댕']);
   });
 
   test(

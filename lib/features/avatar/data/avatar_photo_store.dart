@@ -29,6 +29,19 @@ class AvatarPhotoStore {
   }
 
   Future<void> saveSnapshot(AvatarPhotoSnapshot snapshot) async {
-    await _preferences.setString(storageKey, jsonEncode(snapshot.toJson()));
+    final encodedSnapshot = jsonEncode(snapshot.toJson());
+
+    bool didSave;
+    try {
+      didSave = await _preferences.setString(storageKey, encodedSnapshot);
+    } catch (error, stackTrace) {
+      await _preferences.reload();
+      Error.throwWithStackTrace(error, stackTrace);
+    }
+
+    if (!didSave) {
+      await _preferences.reload();
+      throw StateError('Failed to save avatar photo snapshot.');
+    }
   }
 }

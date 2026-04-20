@@ -12,6 +12,7 @@ class AudioPromptPanel extends StatelessWidget {
     required this.subtitle,
     required this.onReplay,
     this.compact = false,
+    this.panelKey,
   });
 
   final String badge;
@@ -19,12 +20,14 @@ class AudioPromptPanel extends StatelessWidget {
   final String subtitle;
   final VoidCallback onReplay;
   final bool compact;
+  final Key? panelKey;
 
   @override
   Widget build(BuildContext context) {
     final typography = Theme.of(context).kidTypography;
 
     return ToyPanel(
+      key: panelKey,
       tone: ToyPanelTone.warm,
       density: compact ? ToyPanelDensity.compact : ToyPanelDensity.regular,
       child: Row(

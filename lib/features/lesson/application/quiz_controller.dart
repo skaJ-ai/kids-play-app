@@ -112,12 +112,9 @@ class QuizController extends ChangeNotifier {
     _feedbackVisible = settings.effectsEnabled;
     _notify();
 
-    if (settings.voicePromptsEnabled) {
-      await _services.speechCueService.speak(
-        isCorrect ? '딩동댕' : '다시 해보자',
-        locale: 'ko-KR',
-        rate: 0.46,
-        pitch: isCorrect ? 1.08 : 0.94,
+    if (settings.effectsEnabled) {
+      await _services.audioService.play(
+        isCorrect ? const SuccessCue() : const ErrorCue(),
       );
     }
 
@@ -131,27 +128,31 @@ class QuizController extends ChangeNotifier {
     final isLastQuestion = _questionIndex == totalQuestions - 1;
     if (isLastQuestion) {
       final progressLessonId = category.progressIdFor(lessonId);
-      if (earnedSticker(nextCorrectCount, totalQuestions)) {
-        final completedAt = DateTime.now().toUtc();
-        await _services.progressStore.addStickers(1);
-        await _services.progressStore.recordRewardEarned(
-          kind: isMistakeReplay
-              ? rewardKindMistakeReplaySticker
-              : rewardKindSticker,
-          amount: 1,
-          lessonId: progressLessonId,
-          earnedAt: completedAt,
-        );
-      }
-      await _services.progressStore.recordQuizResult(
+      final completedAt = DateTime.now().toUtc();
+      final stickersEarned = earnedSticker(nextCorrectCount, totalQuestions)
+          ? 1
+          : 0;
+
+      await _services.progressStore.recordCompletedQuiz(
         lessonId: progressLessonId,
         correctCount: nextCorrectCount,
         totalQuestions: totalQuestions,
         recentMistakes: nextMistakes,
+        stickersEarned: stickersEarned,
+        rewardEarnedAt: stickersEarned > 0 ? completedAt : null,
+        rewardKind: isMistakeReplay
+            ? rewardKindMistakeReplaySticker
+            : rewardKindSticker,
         isMistakeReplay: isMistakeReplay,
       );
       if (_disposed) {
         return;
+      }
+      if (settings.effectsEnabled && stickersEarned > 0) {
+        await _services.audioService.play(RewardCue(AudioPackId(category.id)));
+        if (_disposed) {
+          return;
+        }
       }
       _feedbackVisible = false;
       _isResolvingChoice = false;

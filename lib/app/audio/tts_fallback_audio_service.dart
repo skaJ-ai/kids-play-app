@@ -2,10 +2,10 @@
 /// are still being produced.
 ///
 /// Plays recorded assets when available (via an asset-existence probe) and
-/// falls back to device TTS for [PromptCue]s. Non-prompt cues (success,
-/// error, reward, idle, bgm) degrade to silence when no recording is
-/// bundled — screens must always pair audio with visual feedback so silence
-/// never blocks the play flow.
+/// falls back to device TTS for prompt and child-facing feedback cues.
+/// Idle attract / BGM cues still degrade to silence until recorded assets
+/// land, but prompt / success / error / reward cues stay audible even when
+/// packaged recordings are missing.
 library;
 
 import 'dart:async';
@@ -51,8 +51,24 @@ class TtsFallbackAudioService implements AudioService {
         }
         await _speech.speak(ref.fallbackText);
       case SuccessCue():
+        await _speech.speak('딩동댕', locale: 'ko-KR', rate: 0.46, pitch: 1.08);
+        return;
       case ErrorCue():
+        await _speech.speak(
+          '다시 해보자',
+          locale: 'ko-KR',
+          rate: 0.46,
+          pitch: 0.94,
+        );
+        return;
       case RewardCue():
+        await _speech.speak(
+          '스티커 하나 획득!',
+          locale: 'ko-KR',
+          rate: 0.46,
+          pitch: 1.12,
+        );
+        return;
       case IdleAttractCue():
       case BgmCue():
         // No asset pipeline yet. Visual feedback at the call site covers the
