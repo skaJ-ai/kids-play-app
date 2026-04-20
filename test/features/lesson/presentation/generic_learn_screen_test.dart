@@ -193,7 +193,8 @@ const _lesson = Lesson(
   items: [
     LessonItem(
       symbol: 'A a',
-      label: '에이, A a',
+      display: 'A a',
+      spoken: '에이, A a',
       hint: '에이를 크게 보고 소리를 따라 말해봐요',
     ),
   ],
@@ -205,7 +206,8 @@ const _nonAsciiLesson = Lesson(
   items: [
     LessonItem(
       symbol: 'ㄱ',
-      label: '기역, ㄱ',
+      display: 'ㄱ',
+      spoken: '기역, ㄱ',
       hint: '기역 모양을 보고 이름을 따라 말해봐요',
     ),
   ],

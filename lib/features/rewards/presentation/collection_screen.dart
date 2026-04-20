@@ -287,10 +287,6 @@ Color _accentFor(String categoryId) {
   switch (categoryId) {
     case 'alphabet':
       return alphabetLessonCategory.accentColor;
-    case 'hangul':
-      return hangulLessonCategory.accentColor;
-    case 'numbers':
-      return numbersLessonCategory.accentColor;
     default:
       return KidPalette.body;
   }
