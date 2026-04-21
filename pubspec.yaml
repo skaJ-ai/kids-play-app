@@ -40,3 +40,13 @@ flutter:
     - family: KCCMurukmuruk
       fonts:
         - asset: assets/fonts/KCCMurukmuruk.ttf
+    - family: SUIT
+      fonts:
+        - asset: assets/fonts/SUIT-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/SUIT-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/SUIT-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/SUIT-Bold.ttf
+          weight: 700

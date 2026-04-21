@@ -122,10 +122,10 @@ void main() {
 
     expect(lerped.titleLarge.fontSize, closeTo(25, 0.001));
     expect(lerped.titleLarge.letterSpacing, closeTo(0.65, 0.001));
-    expect(lerped.titleLarge.height, closeTo(1.29, 0.001));
+    expect(lerped.titleLarge.height, closeTo(1.34, 0.001));
     expect(lerped.titleLarge.fontStyle, FontStyle.italic);
     expect(lerped.bodySmall.fontSize, closeTo(12.5, 0.001));
-    expect(lerped.bodySmall.height, closeTo(1.46, 0.001));
+    expect(lerped.bodySmall.height, closeTo(1.52, 0.001));
     expect(lerped.headlineLarge, KidTypographyTheme.defaults.headlineLarge);
     expect(lerped.labelMedium, KidTypographyTheme.defaults.labelMedium);
   });
@@ -941,25 +941,28 @@ void main() {
     final theme = buildKidTheme();
     final textTheme = theme.textTheme;
 
+    expect(textTheme.labelLarge?.fontFamily, 'SUIT');
     expect(textTheme.labelLarge?.fontSize, 13);
-    expect(textTheme.labelLarge?.fontWeight, FontWeight.w700);
-    expect(textTheme.labelLarge?.letterSpacing, 0.08);
+    expect(textTheme.labelLarge?.fontWeight, FontWeight.w600);
+    expect(textTheme.labelLarge?.letterSpacing, 0.02);
     expect(textTheme.labelLarge?.color, KidPalette.navy);
-    expect(textTheme.labelLarge?.height, 1.14);
+    expect(textTheme.labelLarge?.height, 1.22);
 
+    expect(textTheme.labelMedium?.fontFamily, 'SUIT');
     expect(textTheme.labelMedium?.fontSize, 12);
     expect(textTheme.labelMedium?.fontWeight, FontWeight.w600);
-    expect(textTheme.labelMedium?.letterSpacing, 0.05);
+    expect(textTheme.labelMedium?.letterSpacing, 0.02);
     expect(textTheme.labelMedium?.color, KidPalette.body);
-    expect(textTheme.labelMedium?.height, 1.18);
+    expect(textTheme.labelMedium?.height, 1.22);
 
+    expect(textTheme.labelSmall?.fontFamily, 'SUIT');
     expect(textTheme.labelSmall?.fontSize, 11);
     expect(textTheme.labelSmall?.fontWeight, FontWeight.w600);
-    expect(textTheme.labelSmall?.letterSpacing, 0.05);
+    expect(textTheme.labelSmall?.letterSpacing, 0.02);
     expect(textTheme.labelSmall?.color, KidPalette.body);
-    expect(textTheme.labelSmall?.height, 1.16);
+    expect(textTheme.labelSmall?.height, 1.2);
 
-    expect(textTheme.bodyMedium?.fontWeight, FontWeight.w400);
+    expect(textTheme.bodyMedium?.fontWeight, FontWeight.w500);
     expect(textTheme.bodySmall?.fontWeight, FontWeight.w400);
 
     expect(theme.chipTheme.labelStyle, textTheme.labelLarge);
