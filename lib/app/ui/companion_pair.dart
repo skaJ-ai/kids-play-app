@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../features/avatar/domain/avatar_expression.dart';
@@ -13,6 +16,7 @@ class CompanionPair extends StatefulWidget {
     this.onTap,
     this.avatarKey,
     this.mascotKey,
+    this.idleMotion,
   });
 
   final MascotState state;
@@ -21,13 +25,34 @@ class CompanionPair extends StatefulWidget {
   final Key? avatarKey;
   final Key? mascotKey;
 
+  /// Enables the idle breathe/tilt loops. When null, defaults to
+  /// [debugIdleMotionDefault] so widget tests can opt out globally without
+  /// touching every callsite.
+  final bool? idleMotion;
+
+  /// Global default for [idleMotion] when a call site leaves it unset.
+  /// Tests set this to false in `flutter_test_config.dart` to keep
+  /// `pumpAndSettle` from stalling on the perpetual breathe ticker.
+  static bool debugIdleMotionDefault = true;
+
   @override
   State<CompanionPair> createState() => _CompanionPairState();
 }
 
 class _CompanionPairState extends State<CompanionPair>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
+  static const _breatheAmplitudePx = 1.5;
+  static const _tiltAmplitudeRad = 2 * math.pi / 180;
+  static const _tiltMinGap = Duration(seconds: 11);
+  static const _tiltJitter = Duration(seconds: 3);
+
   late final AnimationController _bounce;
+  late final AnimationController _breathe;
+  late final AnimationController _tilt;
+  Timer? _tiltScheduler;
+  final _random = math.Random();
+
+  bool _idleEnabled = false;
 
   @override
   void initState() {
@@ -36,6 +61,20 @@ class _CompanionPairState extends State<CompanionPair>
       vsync: this,
       duration: const Duration(milliseconds: 260),
     );
+    _breathe = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2400),
+    );
+    _tilt = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncIdleLoops();
   }
 
   @override
@@ -46,12 +85,48 @@ class _CompanionPairState extends State<CompanionPair>
             widget.state == MascotState.missionClear)) {
       _bounce.forward(from: 0);
     }
+    _syncIdleLoops();
+  }
+
+  void _syncIdleLoops() {
+    final shouldRun =
+        widget.idleMotion ?? CompanionPair.debugIdleMotionDefault;
+    if (shouldRun == _idleEnabled) {
+      return;
+    }
+    _idleEnabled = shouldRun;
+    if (shouldRun) {
+      _breathe.repeat(reverse: true);
+      _scheduleNextTilt();
+    } else {
+      _breathe.stop();
+      _breathe.value = 0.5;
+      _tiltScheduler?.cancel();
+      _tiltScheduler = null;
+      _tilt.stop();
+      _tilt.value = 0;
+    }
   }
 
   @override
   void dispose() {
+    _tiltScheduler?.cancel();
     _bounce.dispose();
+    _breathe.dispose();
+    _tilt.dispose();
     super.dispose();
+  }
+
+  void _scheduleNextTilt() {
+    _tiltScheduler?.cancel();
+    final jitterMs = _random.nextInt(_tiltJitter.inMilliseconds);
+    _tiltScheduler = Timer(_tiltMinGap + Duration(milliseconds: jitterMs), () {
+      if (!mounted) return;
+      _tilt.forward(from: 0).whenComplete(() {
+        if (!mounted) return;
+        _scheduleNextTilt();
+      });
+    });
   }
 
   void _handleTap() {
@@ -79,11 +154,27 @@ class _CompanionPairState extends State<CompanionPair>
       behavior: HitTestBehavior.opaque,
       onTap: _handleTap,
       child: AnimatedBuilder(
-        animation: _bounce,
+        animation:
+            Listenable.merge([_bounce, _breathe, _tilt]),
         builder: (context, child) {
-          final t = _bounce.value;
-          final scale = 1 + 0.08 * (1 - (2 * t - 1).abs());
-          return Transform.scale(scale: scale, child: child);
+          final bounceT = _bounce.value;
+          final bounceScale = 1 + 0.08 * (1 - (2 * bounceT - 1).abs());
+
+          final breatheDy = _idleEnabled
+              ? (_breathe.value - 0.5) * 2 * _breatheAmplitudePx
+              : 0.0;
+
+          final tiltAngle = _idleEnabled
+              ? math.sin(_tilt.value * 2 * math.pi) * _tiltAmplitudeRad
+              : 0.0;
+
+          return Transform.translate(
+            offset: Offset(0, breatheDy),
+            child: Transform.rotate(
+              angle: tiltAngle,
+              child: Transform.scale(scale: bounceScale, child: child),
+            ),
+          );
         },
         child: SizedBox(
           width: mascotSize,
