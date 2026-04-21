@@ -31,7 +31,7 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(find.text('오늘은 어디로 달릴까?'), findsOneWidget);
-    expect(find.text('마음에 드는 차고를 누르고 놀이를 골라요.'), findsOneWidget);
+    expect(find.text('마음에 드는 차고를 누르고\u00A0놀이를 골라요.'), findsOneWidget);
     expect(find.text('놀이 고르기'), findsNWidgets(3));
     expect(find.text('차고 열기'), findsNothing);
     expect(find.text('바로 출발'), findsNothing);

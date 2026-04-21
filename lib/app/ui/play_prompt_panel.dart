@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 
 import 'audio_prompt_panel.dart';
@@ -44,9 +45,10 @@ class PlayPromptPanel extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: Text(
+                  child: AutoSizeText(
                     prompt,
                     maxLines: 1,
+                    minFontSize: 12,
                     overflow: TextOverflow.ellipsis,
                     style: typography.titleMedium.copyWith(
                       color: KidPalette.navy,

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/ui/kid_theme.dart';
@@ -135,7 +136,7 @@ class _HeroScreenState extends State<HeroScreen> {
                     ),
                     SizedBox(height: compact ? 6 : 10),
                     Text(
-                      '차 타고 출발!',
+                      '차 타고\u00A0출발!',
                       style:
                           (compact
                                   ? theme.textTheme.titleLarge
@@ -147,9 +148,10 @@ class _HeroScreenState extends State<HeroScreen> {
                       constraints: BoxConstraints(
                         maxWidth: compact ? 320 : 420,
                       ),
-                      child: Text(
-                        '한글 · 알파벳 · 숫자 놀이를 골라요.',
+                      child: AutoSizeText(
+                        '한글·알파벳·숫자 놀이를\u00A0골라요.',
                         maxLines: compact ? 1 : 2,
+                        minFontSize: 11,
                         overflow: TextOverflow.ellipsis,
                         style: compact
                             ? theme.textTheme.titleSmall
@@ -303,10 +305,13 @@ class _HeroScreenState extends State<HeroScreen> {
                         ),
                       ),
                       SizedBox(height: compact ? 12 : 18),
-                      Text(
-                        compact ? '웃으며 출발 준비!' : '웃는 얼굴로 오늘 놀이를 준비했어요.',
+                      AutoSizeText(
+                        compact
+                            ? '웃으며\u00A0출발 준비!'
+                            : '웃는 얼굴로 오늘\u00A0놀이를 준비했어요.',
                         textAlign: TextAlign.center,
                         maxLines: compact ? 1 : 2,
+                        minFontSize: 11,
                         overflow: TextOverflow.ellipsis,
                         style: compact
                             ? theme.textTheme.titleSmall

@@ -23,7 +23,7 @@ void main() {
       expect(find.byKey(const Key('hero-face-image')), findsOneWidget);
       expect(find.text('승원이의 빵빵 놀이터'), findsOneWidget);
       expect(find.text('오늘의 드라이브'), findsOneWidget);
-      expect(find.text('차 타고 출발!'), findsOneWidget);
+      expect(find.text('차 타고\u00A0출발!'), findsOneWidget);
       expect(find.text('놀이 시작'), findsOneWidget);
     },
   );
@@ -77,7 +77,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('오늘은 어디로 달릴까?'), findsOneWidget);
-      expect(find.text('마음에 드는 차고를 누르고 놀이를 골라요.'), findsOneWidget);
+      expect(find.text('마음에 드는 차고를 누르고\u00A0놀이를 골라요.'), findsOneWidget);
       expect(find.text('한글'), findsOneWidget);
       expect(find.text('알파벳'), findsOneWidget);
       expect(find.text('숫자'), findsOneWidget);

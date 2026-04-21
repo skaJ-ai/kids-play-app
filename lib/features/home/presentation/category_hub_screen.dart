@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/services/app_services.dart';
@@ -90,10 +91,11 @@ class _CategoryHubScreenState extends State<CategoryHubScreen> {
                     : theme.textTheme.headlineMedium,
               ),
               SizedBox(height: compact ? 6 : 10),
-              Text(
+              AutoSizeText(
                 _config.hubDescription,
                 textAlign: TextAlign.center,
                 maxLines: 2,
+                minFontSize: 11,
                 overflow: TextOverflow.ellipsis,
                 style: compact
                     ? theme.textTheme.titleSmall

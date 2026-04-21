@@ -36,7 +36,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('승원이의 빵빵 놀이터'), findsOneWidget);
-    expect(find.text('한글 · 알파벳 · 숫자 놀이를 골라요.'), findsOneWidget);
+    expect(find.text('한글·알파벳·숫자 놀이를\u00A0골라요.'), findsOneWidget);
     expect(find.text('놀이 시작'), findsOneWidget);
   });
 
@@ -53,14 +53,14 @@ void main() {
       await tester.pumpWidget(_buildHeroScreen());
       await tester.pumpAndSettle();
 
-      expect(find.text('웃는 얼굴로 오늘 놀이를 준비했어요.'), findsOneWidget);
+      expect(find.text('웃는 얼굴로 오늘\u00A0놀이를 준비했어요.'), findsOneWidget);
       expect(find.text('얼굴을 누르고 차고를 골라요.'), findsNothing);
 
       tester.view.physicalSize = const Size(780, 360);
       await tester.pumpWidget(_buildHeroScreen());
       await tester.pumpAndSettle();
 
-      expect(find.text('웃으며 출발 준비!'), findsOneWidget);
+      expect(find.text('웃으며\u00A0출발 준비!'), findsOneWidget);
       expect(find.text('얼굴 누르고 출발!'), findsNothing);
     },
   );
@@ -80,7 +80,7 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.text('승원이의 빵빵 놀이터'), findsOneWidget);
-      expect(find.text('한글 · 알파벳 · 숫자 놀이를 골라요.'), findsOneWidget);
+      expect(find.text('한글·알파벳·숫자 놀이를\u00A0골라요.'), findsOneWidget);
       expect(find.text('놀이 시작'), findsOneWidget);
     },
   );

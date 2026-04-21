@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 
 import 'kid_theme.dart';
@@ -66,18 +67,20 @@ class AudioPromptPanel extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: compact ? 6 : 8),
-                Text(
+                AutoSizeText(
                   title,
                   maxLines: compact ? 1 : 2,
+                  minFontSize: 12,
                   overflow: TextOverflow.ellipsis,
                   style:
                       (compact ? typography.titleMedium : typography.titleLarge)
                           .copyWith(color: KidPalette.navy),
                 ),
                 SizedBox(height: compact ? 2 : 4),
-                Text(
+                AutoSizeText(
                   subtitle,
                   maxLines: 1,
+                  minFontSize: 10,
                   overflow: TextOverflow.ellipsis,
                   style: typography.bodyMedium.copyWith(color: KidPalette.body),
                 ),

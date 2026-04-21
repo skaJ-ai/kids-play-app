@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kids_play_app/app/ui/audio_prompt_panel.dart';
@@ -51,8 +52,8 @@ void main() {
       await _pumpAudioPromptPanel(tester, compact: false, theme: theme);
 
       final badgeText = tester.widget<Text>(find.text('문제 듣기'));
-      final titleText = tester.widget<Text>(find.text('하나'));
-      final subtitleText = tester.widget<Text>(find.text('스피커를 눌러 다시 들어봐요.'));
+      final titleText = _autoSizeTextWithData(tester, '하나');
+      final subtitleText = _autoSizeTextWithData(tester, '스피커를 눌러 다시 들어봐요.');
 
       expect(
         badgeText.style,
@@ -94,7 +95,7 @@ void main() {
 
       await _pumpAudioPromptPanel(tester, compact: true, theme: theme);
 
-      final titleText = tester.widget<Text>(find.text('하나'));
+      final titleText = _autoSizeTextWithData(tester, '하나');
 
       expect(
         titleText.style,
@@ -161,6 +162,12 @@ void main() {
     expect(find.text('문제 듣기'), findsOneWidget);
     expect(find.text('하나'), findsOneWidget);
   });
+}
+
+AutoSizeText _autoSizeTextWithData(WidgetTester tester, String data) {
+  return tester.widget<AutoSizeText>(
+    find.byWidgetPredicate((widget) => widget is AutoSizeText && widget.data == data),
+  );
 }
 
 Future<void> _pumpAudioPromptPanel(

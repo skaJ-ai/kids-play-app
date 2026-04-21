@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/ui/kid_theme.dart';
@@ -118,10 +119,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     : theme.textTheme.headlineMedium,
               ),
               SizedBox(height: compact ? 6 : 10),
-              Text(
-                compact ? '좋아하는 차고를 콕 눌러요.' : '마음에 드는 차고를 누르고 놀이를 골라요.',
+              AutoSizeText(
+                compact
+                    ? '좋아하는 차고를\u00A0콕 눌러요.'
+                    : '마음에 드는 차고를 누르고\u00A0놀이를 골라요.',
                 textAlign: TextAlign.center,
                 maxLines: compact ? 1 : 2,
+                minFontSize: 11,
                 overflow: TextOverflow.ellipsis,
                 style: compact
                     ? theme.textTheme.titleSmall
