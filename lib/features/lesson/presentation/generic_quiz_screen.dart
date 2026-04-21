@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/services/app_services.dart';
 import '../../../app/ui/answer_feedback_overlay.dart';
+import '../../../app/ui/companion_pair.dart';
 import '../../../app/ui/kid_theme.dart';
 import '../../../app/ui/mascot_view.dart';
 import '../../../app/ui/playground_scaffold.dart';
@@ -378,10 +379,13 @@ class _QuizMascotPanel extends StatelessWidget {
               children: [
                 Expanded(
                   child: Center(
-                    child: MascotView(
-                      key: const Key('quiz-mascot'),
+                    child: CompanionPair(
+                      key: const Key('quiz-companion'),
+                      mascotKey: const Key('quiz-mascot'),
+                      avatarKey: const Key('quiz-avatar'),
                       state: mascotState,
                       size: mascotSize,
+                      onTap: onReplay,
                     ),
                   ),
                 ),

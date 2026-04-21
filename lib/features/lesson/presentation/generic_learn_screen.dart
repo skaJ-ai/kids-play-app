@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/audio/audio_cue.dart';
 import '../../../app/services/app_services.dart';
+import '../../../app/ui/companion_pair.dart';
 import '../../../app/ui/kid_theme.dart';
 import '../../../app/ui/mascot_view.dart';
 import '../../../app/ui/playground_scaffold.dart';
@@ -231,10 +232,13 @@ class _GenericLearnScreenState extends State<GenericLearnScreen> {
                             children: [
                               Expanded(
                                 child: Center(
-                                  child: MascotView(
-                                    key: const Key('learn-mascot'),
+                                  child: CompanionPair(
+                                    key: const Key('learn-companion'),
+                                    mascotKey: const Key('learn-mascot'),
+                                    avatarKey: const Key('learn-avatar'),
                                     state: _mascotState,
                                     size: mascotSize,
+                                    onTap: () => _onGlyphTap(item),
                                   ),
                                 ),
                               ),
