@@ -124,6 +124,12 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
         : _QuizChoiceFeedback.wrongTapped;
   }
 
+  bool _shouldHintPulse(QuizController controller, String symbol) {
+    return !controller.feedbackVisible &&
+        !controller.isResolvingChoice &&
+        controller.currentQuestion.symbol == symbol;
+  }
+
   @override
   Widget build(BuildContext context) {
     return PlaygroundScaffold(
@@ -324,6 +330,10 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
                                             controller,
                                             choices[i].symbol,
                                           ),
+                                          hintPulse: _shouldHintPulse(
+                                            controller,
+                                            choices[i].symbol,
+                                          ),
                                           onTap: () => controller
                                               .selectChoice(choices[i]),
                                         ),
@@ -350,6 +360,12 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
       ),
     );
   }
+}
+
+/// Test hook: flutter_test_config.dart disables the always-on hint pulse
+/// loop globally so `pumpAndSettle` does not stall on the ticker.
+void debugSetQuizChoiceHintPulseEnabled(bool enabled) {
+  _QuizChoiceTile.debugHintPulseEnabled = enabled;
 }
 
 class _QuizMascotPanel extends StatelessWidget {
@@ -480,6 +496,7 @@ class _QuizChoiceTile extends StatefulWidget {
     required this.compact,
     required this.disabled,
     required this.feedback,
+    required this.hintPulse,
   });
 
   final String symbol;
@@ -488,6 +505,12 @@ class _QuizChoiceTile extends StatefulWidget {
   final bool compact;
   final bool disabled;
   final _QuizChoiceFeedback feedback;
+  final bool hintPulse;
+
+  /// Global default for [hintPulse] loop. Tests set this to false in
+  /// `flutter_test_config.dart` so `pumpAndSettle` does not stall on the
+  /// always-on 1Hz ticker for the correct-answer tile.
+  static bool debugHintPulseEnabled = true;
 
   @override
   State<_QuizChoiceTile> createState() => _QuizChoiceTileState();
@@ -497,6 +520,7 @@ class _QuizChoiceTileState extends State<_QuizChoiceTile>
     with TickerProviderStateMixin {
   late final AnimationController _wrong;
   late final AnimationController _correct;
+  late final AnimationController _hint;
 
   @override
   void initState() {
@@ -509,6 +533,11 @@ class _QuizChoiceTileState extends State<_QuizChoiceTile>
       vsync: this,
       duration: const Duration(milliseconds: 260),
     );
+    _hint = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    _syncHintLoop();
   }
 
   @override
@@ -524,12 +553,29 @@ class _QuizChoiceTileState extends State<_QuizChoiceTile>
           break;
       }
     }
+    if (widget.hintPulse != oldWidget.hintPulse) {
+      _syncHintLoop();
+    }
+  }
+
+  void _syncHintLoop() {
+    final shouldRun =
+        widget.hintPulse && _QuizChoiceTile.debugHintPulseEnabled;
+    if (shouldRun) {
+      if (!_hint.isAnimating) {
+        _hint.repeat(reverse: true);
+      }
+    } else {
+      _hint.stop();
+      _hint.value = 0;
+    }
   }
 
   @override
   void dispose() {
     _wrong.dispose();
     _correct.dispose();
+    _hint.dispose();
     super.dispose();
   }
 
@@ -540,7 +586,7 @@ class _QuizChoiceTileState extends State<_QuizChoiceTile>
     return Opacity(
       opacity: widget.disabled ? 0.88 : 1,
       child: AnimatedBuilder(
-        animation: Listenable.merge([_wrong, _correct]),
+        animation: Listenable.merge([_wrong, _correct, _hint]),
         builder: (context, child) {
           // Wrong: 1.0→0.92→1.0 shrink over the full 220ms plus a 6px shake
           // that completes three cycles (sin 6π).
@@ -554,7 +600,17 @@ class _QuizChoiceTileState extends State<_QuizChoiceTile>
           final correctT = _correct.value;
           final correctScale = 1 + 0.08 * (1 - (2 * correctT - 1).abs());
 
-          final scale = wrongT > 0 ? wrongScale : correctScale;
+          // Hint: 1Hz 1.0↔1.04 breathe while awaiting the child's first tap.
+          // _hint is driven with reverse:true so value oscillates 0→1→0 over
+          // two seconds (two half-cycles × 1 s). Map value to a 1.0→1.04→1.0
+          // profile matching a 1 Hz pulse.
+          final hintScale = widget.hintPulse
+              ? 1 + 0.04 * _hint.value
+              : 1.0;
+
+          final scale = wrongT > 0
+              ? wrongScale
+              : (correctT > 0 ? correctScale : hintScale);
 
           return Transform.translate(
             offset: Offset(shakeDx, 0),
