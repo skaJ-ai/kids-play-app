@@ -55,10 +55,10 @@ class TtsFallbackAudioService implements AudioService {
         return;
       case ErrorCue():
         await _speech.speak(
-          '다시 해보자',
+          '어? 다시 해볼까?',
           locale: 'ko-KR',
           rate: 0.46,
-          pitch: 0.94,
+          pitch: 0.98,
         );
         return;
       case RewardCue():

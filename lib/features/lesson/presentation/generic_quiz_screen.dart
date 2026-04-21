@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../../app/services/app_services.dart';
@@ -110,6 +112,16 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
     return controller.feedbackCorrect
         ? SignalLightState.correct
         : SignalLightState.wrong;
+  }
+
+  _QuizChoiceFeedback _feedbackFor(QuizController controller, String symbol) {
+    if (!controller.feedbackVisible ||
+        controller.lastChoiceSymbol != symbol) {
+      return _QuizChoiceFeedback.none;
+    }
+    return controller.feedbackCorrect
+        ? _QuizChoiceFeedback.correctTapped
+        : _QuizChoiceFeedback.wrongTapped;
   }
 
   @override
@@ -308,6 +320,10 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
                                           accentIndex: i,
                                           disabled:
                                               controller.isResolvingChoice,
+                                          feedback: _feedbackFor(
+                                            controller,
+                                            choices[i].symbol,
+                                          ),
                                           onTap: () => controller
                                               .selectChoice(choices[i]),
                                         ),
@@ -453,7 +469,9 @@ class _SpeakerButton extends StatelessWidget {
   }
 }
 
-class _QuizChoiceTile extends StatelessWidget {
+enum _QuizChoiceFeedback { none, correctTapped, wrongTapped }
+
+class _QuizChoiceTile extends StatefulWidget {
   const _QuizChoiceTile({
     super.key,
     required this.symbol,
@@ -461,6 +479,7 @@ class _QuizChoiceTile extends StatelessWidget {
     required this.accentIndex,
     required this.compact,
     required this.disabled,
+    required this.feedback,
   });
 
   final String symbol;
@@ -468,64 +487,132 @@ class _QuizChoiceTile extends StatelessWidget {
   final int accentIndex;
   final bool compact;
   final bool disabled;
+  final _QuizChoiceFeedback feedback;
+
+  @override
+  State<_QuizChoiceTile> createState() => _QuizChoiceTileState();
+}
+
+class _QuizChoiceTileState extends State<_QuizChoiceTile>
+    with TickerProviderStateMixin {
+  late final AnimationController _wrong;
+  late final AnimationController _correct;
+
+  @override
+  void initState() {
+    super.initState();
+    _wrong = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 220),
+    );
+    _correct = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 260),
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant _QuizChoiceTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.feedback != oldWidget.feedback) {
+      switch (widget.feedback) {
+        case _QuizChoiceFeedback.wrongTapped:
+          _wrong.forward(from: 0);
+        case _QuizChoiceFeedback.correctTapped:
+          _correct.forward(from: 0);
+        case _QuizChoiceFeedback.none:
+          break;
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _wrong.dispose();
+    _correct.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final palette = _paletteFor(accentIndex);
+    final palette = _paletteFor(widget.accentIndex);
 
     return Opacity(
-      opacity: disabled ? 0.88 : 1,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(colors: palette),
-          borderRadius: BorderRadius.circular(compact ? 26 : 32),
-          boxShadow: KidShadows.button,
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: CooldownInkWell(
-            borderRadius: BorderRadius.circular(compact ? 26 : 32),
-            onTap: disabled ? null : onTap,
-            child: Stack(
-              children: [
-                Positioned(
-                  right: 16,
-                  top: 16,
-                  child: Container(
-                    width: compact ? 30 : 38,
-                    height: compact ? 30 : 38,
-                    decoration: BoxDecoration(
-                      color: KidPalette.white.withValues(alpha: 0.24),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
-                Positioned(
-                  left: 18,
-                  top: 16,
-                  child: Text(
-                    '콕!',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: KidPalette.white.withValues(alpha: 0.92),
-                          fontWeight: FontWeight.w900,
-                        ),
-                  ),
-                ),
-                Center(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      symbol,
-                      style: TextStyle(
-                        fontSize: compact ? 66 : 92,
-                        fontWeight: FontWeight.w900,
-                        height: 1,
-                        color: KidPalette.white,
+      opacity: widget.disabled ? 0.88 : 1,
+      child: AnimatedBuilder(
+        animation: Listenable.merge([_wrong, _correct]),
+        builder: (context, child) {
+          // Wrong: 1.0→0.92→1.0 shrink over the full 220ms plus a 6px shake
+          // that completes three cycles (sin 6π).
+          final wrongT = _wrong.value;
+          final wrongScale = 1 - 0.08 * (1 - (2 * wrongT - 1).abs());
+          final shakeDx = wrongT == 0 || wrongT == 1
+              ? 0.0
+              : math.sin(wrongT * 6 * math.pi) * 6.0;
+
+          // Correct: 1.0→1.08→1.0 bloom.
+          final correctT = _correct.value;
+          final correctScale = 1 + 0.08 * (1 - (2 * correctT - 1).abs());
+
+          final scale = wrongT > 0 ? wrongScale : correctScale;
+
+          return Transform.translate(
+            offset: Offset(shakeDx, 0),
+            child: Transform.scale(scale: scale, child: child),
+          );
+        },
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(colors: palette),
+            borderRadius: BorderRadius.circular(widget.compact ? 26 : 32),
+            boxShadow: KidShadows.button,
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: CooldownInkWell(
+              borderRadius: BorderRadius.circular(widget.compact ? 26 : 32),
+              onTap: widget.disabled ? null : widget.onTap,
+              child: Stack(
+                children: [
+                  Positioned(
+                    right: 16,
+                    top: 16,
+                    child: Container(
+                      width: widget.compact ? 30 : 38,
+                      height: widget.compact ? 30 : 38,
+                      decoration: BoxDecoration(
+                        color: KidPalette.white.withValues(alpha: 0.24),
+                        shape: BoxShape.circle,
                       ),
                     ),
                   ),
-                ),
-              ],
+                  Positioned(
+                    left: 18,
+                    top: 16,
+                    child: Text(
+                      '콕!',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            color: KidPalette.white.withValues(alpha: 0.92),
+                            fontWeight: FontWeight.w900,
+                          ),
+                    ),
+                  ),
+                  Center(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        widget.symbol,
+                        style: TextStyle(
+                          fontSize: widget.compact ? 66 : 92,
+                          fontWeight: FontWeight.w900,
+                          height: 1,
+                          color: KidPalette.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

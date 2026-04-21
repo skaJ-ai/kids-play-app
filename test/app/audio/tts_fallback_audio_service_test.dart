@@ -49,7 +49,7 @@ void main() {
       await service.play(const ErrorCue());
       await service.play(const RewardCue(AudioPackId('alphabet_v1')));
 
-      expect(speech.spoken, ['딩동댕', '다시 해보자', '스티커 하나 획득!']);
+      expect(speech.spoken, ['딩동댕', '어? 다시 해볼까?', '스티커 하나 획득!']);
     });
 
     test('idle attract and bgm cues stay silent until assets land', () async {

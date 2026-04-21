@@ -42,6 +42,7 @@ class QuizController extends ChangeNotifier {
   bool _feedbackVisible = false;
   bool _feedbackCorrect = false;
   bool _isResolvingChoice = false;
+  String? _lastChoiceSymbol;
   List<String> _recentMistakes = const [];
   bool _disposed = false;
 
@@ -54,6 +55,7 @@ class QuizController extends ChangeNotifier {
   bool get feedbackVisible => _feedbackVisible;
   bool get feedbackCorrect => _feedbackCorrect;
   bool get isResolvingChoice => _isResolvingChoice;
+  String? get lastChoiceSymbol => _lastChoiceSymbol;
   List<String> get recentMistakes => _recentMistakes;
 
   LessonItem get currentQuestion => _questions[_questionIndex];
@@ -114,6 +116,7 @@ class QuizController extends ChangeNotifier {
     _correctCount = nextCorrectCount;
     _recentMistakes = nextMistakes;
     _feedbackCorrect = isCorrect;
+    _lastChoiceSymbol = choice.symbol;
     _feedbackVisible = settings.effectsEnabled;
     _notify();
 
@@ -168,6 +171,7 @@ class QuizController extends ChangeNotifier {
       _feedbackVisible = false;
       _isResolvingChoice = false;
       _isComplete = true;
+      _lastChoiceSymbol = null;
       _notify();
       return;
     }
@@ -175,6 +179,7 @@ class QuizController extends ChangeNotifier {
     _questionIndex += 1;
     _feedbackVisible = false;
     _isResolvingChoice = false;
+    _lastChoiceSymbol = null;
     _notify();
   }
 
@@ -185,6 +190,7 @@ class QuizController extends ChangeNotifier {
     _feedbackVisible = false;
     _feedbackCorrect = false;
     _isResolvingChoice = false;
+    _lastChoiceSymbol = null;
     _recentMistakes = const [];
     _notify();
   }

@@ -16,6 +16,26 @@ class AnswerFeedbackOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Color background = correct ? KidPalette.mint : KidPalette.yellow;
+    final Color foreground =
+        correct ? KidPalette.mintDark : KidPalette.yellowDark;
+    final IconData icon = correct
+        ? Icons.emoji_events_rounded
+        : Icons.sentiment_satisfied_rounded;
+    final String copy = correct ? '딩동댕!' : '어? 다시 해볼까?';
+
+    // Asymmetry inverted: correct gets bolder chrome, wrong stays light/soft.
+    final double horizontalPad = correct
+        ? (compact ? 18 : 24)
+        : (compact ? 12 : 16);
+    final double verticalPad = correct
+        ? (compact ? 10 : 14)
+        : (compact ? 7 : 9);
+    final double iconSize = correct
+        ? (compact ? 24 : 30)
+        : (compact ? 20 : 24);
+    final double alpha = correct ? 0.94 : 0.72;
+
     return IgnorePointer(
       ignoring: true,
       child: Align(
@@ -31,31 +51,26 @@ class AnswerFeedbackOverlay extends StatelessWidget {
               padding: EdgeInsets.only(bottom: compact ? 10 : 18),
               child: Container(
                 padding: EdgeInsets.symmetric(
-                  horizontal: compact ? 14 : 18,
-                  vertical: compact ? 8 : 10,
+                  horizontal: horizontalPad,
+                  vertical: verticalPad,
                 ),
                 decoration: BoxDecoration(
-                  color: (correct ? KidPalette.mint : KidPalette.coral)
-                      .withValues(alpha: 0.82),
+                  color: background.withValues(alpha: alpha),
                   borderRadius: BorderRadius.circular(999),
-                  boxShadow: KidShadows.buttonSoft,
+                  boxShadow:
+                      correct ? KidShadows.button : KidShadows.buttonSoft,
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      correct
-                          ? Icons.check_circle_rounded
-                          : Icons.close_rounded,
-                      color: KidPalette.white,
-                      size: compact ? 22 : 26,
-                    ),
+                    Icon(icon, color: foreground, size: iconSize),
                     SizedBox(width: compact ? 6 : 8),
                     Text(
-                      correct ? '딩동댕!' : '다시 해보자!',
+                      copy,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            color: KidPalette.white,
-                            fontWeight: FontWeight.w900,
+                            color: foreground,
+                            fontWeight:
+                                correct ? FontWeight.w900 : FontWeight.w700,
                           ),
                     ),
                   ],
