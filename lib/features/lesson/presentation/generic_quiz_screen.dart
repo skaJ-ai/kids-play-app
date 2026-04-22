@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 
 import '../../../app/services/app_services.dart';
@@ -7,9 +5,9 @@ import '../../../app/ui/answer_feedback_overlay.dart';
 import '../../../app/ui/companion_pair.dart';
 import '../../../app/ui/kid_theme.dart';
 import '../../../app/ui/mascot_view.dart';
+import '../../../app/ui/play_choice_card.dart';
 import '../../../app/ui/playground_scaffold.dart';
 import '../../../app/ui/signal_light.dart';
-import '../../../app/ui/tap_cooldown.dart';
 import '../../../app/ui/toy_button.dart';
 import '../../../app/ui/toy_panel.dart';
 import '../application/quiz_controller.dart';
@@ -114,14 +112,17 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
         : SignalLightState.wrong;
   }
 
-  _QuizChoiceFeedback _feedbackFor(QuizController controller, String symbol) {
+  PlayChoiceCardFeedback _feedbackFor(
+    QuizController controller,
+    String symbol,
+  ) {
     if (!controller.feedbackVisible ||
         controller.lastChoiceSymbol != symbol) {
-      return _QuizChoiceFeedback.none;
+      return PlayChoiceCardFeedback.none;
     }
     return controller.feedbackCorrect
-        ? _QuizChoiceFeedback.correctTapped
-        : _QuizChoiceFeedback.wrongTapped;
+        ? PlayChoiceCardFeedback.correctTapped
+        : PlayChoiceCardFeedback.wrongTapped;
   }
 
   bool _shouldHintPulse(QuizController controller, String symbol) {
@@ -317,7 +318,7 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
                                         const NeverScrollableScrollPhysics(),
                                     children: [
                                       for (var i = 0; i < choices.length; i++)
-                                        _QuizChoiceTile(
+                                        PlayChoiceCard(
                                           key: Key(
                                             'quiz-choice-${choices[i].symbol}',
                                           ),
@@ -360,12 +361,6 @@ class _GenericQuizScreenState extends State<GenericQuizScreen> {
       ),
     );
   }
-}
-
-/// Test hook: flutter_test_config.dart disables the always-on hint pulse
-/// loop globally so `pumpAndSettle` does not stall on the ticker.
-void debugSetQuizChoiceHintPulseEnabled(bool enabled) {
-  _QuizChoiceTile.debugHintPulseEnabled = enabled;
 }
 
 class _QuizMascotPanel extends StatelessWidget {
@@ -482,211 +477,6 @@ class _SpeakerButton extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-enum _QuizChoiceFeedback { none, correctTapped, wrongTapped }
-
-class _QuizChoiceTile extends StatefulWidget {
-  const _QuizChoiceTile({
-    super.key,
-    required this.symbol,
-    required this.onTap,
-    required this.accentIndex,
-    required this.compact,
-    required this.disabled,
-    required this.feedback,
-    required this.hintPulse,
-  });
-
-  final String symbol;
-  final VoidCallback onTap;
-  final int accentIndex;
-  final bool compact;
-  final bool disabled;
-  final _QuizChoiceFeedback feedback;
-  final bool hintPulse;
-
-  /// Global default for [hintPulse] loop. Tests set this to false in
-  /// `flutter_test_config.dart` so `pumpAndSettle` does not stall on the
-  /// always-on 1Hz ticker for the correct-answer tile.
-  static bool debugHintPulseEnabled = true;
-
-  @override
-  State<_QuizChoiceTile> createState() => _QuizChoiceTileState();
-}
-
-class _QuizChoiceTileState extends State<_QuizChoiceTile>
-    with TickerProviderStateMixin {
-  late final AnimationController _wrong;
-  late final AnimationController _correct;
-  late final AnimationController _hint;
-
-  @override
-  void initState() {
-    super.initState();
-    _wrong = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 220),
-    );
-    _correct = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 260),
-    );
-    _hint = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    );
-    _syncHintLoop();
-  }
-
-  @override
-  void didUpdateWidget(covariant _QuizChoiceTile oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.feedback != oldWidget.feedback) {
-      switch (widget.feedback) {
-        case _QuizChoiceFeedback.wrongTapped:
-          _wrong.forward(from: 0);
-        case _QuizChoiceFeedback.correctTapped:
-          _correct.forward(from: 0);
-        case _QuizChoiceFeedback.none:
-          break;
-      }
-    }
-    if (widget.hintPulse != oldWidget.hintPulse) {
-      _syncHintLoop();
-    }
-  }
-
-  void _syncHintLoop() {
-    final shouldRun =
-        widget.hintPulse && _QuizChoiceTile.debugHintPulseEnabled;
-    if (shouldRun) {
-      if (!_hint.isAnimating) {
-        _hint.repeat(reverse: true);
-      }
-    } else {
-      _hint.stop();
-      _hint.value = 0;
-    }
-  }
-
-  @override
-  void dispose() {
-    _wrong.dispose();
-    _correct.dispose();
-    _hint.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = _paletteFor(widget.accentIndex);
-
-    return Opacity(
-      opacity: widget.disabled ? 0.88 : 1,
-      child: AnimatedBuilder(
-        animation: Listenable.merge([_wrong, _correct, _hint]),
-        builder: (context, child) {
-          // Wrong: 1.0→0.92→1.0 shrink over the full 220ms plus a 6px shake
-          // that completes three cycles (sin 6π).
-          final wrongT = _wrong.value;
-          final wrongScale = 1 - 0.08 * (1 - (2 * wrongT - 1).abs());
-          final shakeDx = wrongT == 0 || wrongT == 1
-              ? 0.0
-              : math.sin(wrongT * 6 * math.pi) * 6.0;
-
-          // Correct: 1.0→1.08→1.0 bloom.
-          final correctT = _correct.value;
-          final correctScale = 1 + 0.08 * (1 - (2 * correctT - 1).abs());
-
-          // Hint: 1Hz 1.0↔1.04 breathe while awaiting the child's first tap.
-          // _hint is driven with reverse:true so value oscillates 0→1→0 over
-          // two seconds (two half-cycles × 1 s). Map value to a 1.0→1.04→1.0
-          // profile matching a 1 Hz pulse.
-          final hintScale = widget.hintPulse
-              ? 1 + 0.04 * _hint.value
-              : 1.0;
-
-          final scale = wrongT > 0
-              ? wrongScale
-              : (correctT > 0 ? correctScale : hintScale);
-
-          return Transform.translate(
-            offset: Offset(shakeDx, 0),
-            child: Transform.scale(scale: scale, child: child),
-          );
-        },
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(colors: palette),
-            borderRadius: BorderRadius.circular(widget.compact ? 26 : 32),
-            boxShadow: KidShadows.button,
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: CooldownInkWell(
-              borderRadius: BorderRadius.circular(widget.compact ? 26 : 32),
-              onTap: widget.disabled ? null : widget.onTap,
-              child: Stack(
-                children: [
-                  Positioned(
-                    right: 16,
-                    top: 16,
-                    child: Container(
-                      width: widget.compact ? 30 : 38,
-                      height: widget.compact ? 30 : 38,
-                      decoration: BoxDecoration(
-                        color: KidPalette.white.withValues(alpha: 0.24),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    left: 18,
-                    top: 16,
-                    child: Text(
-                      '콕!',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            color: KidPalette.white.withValues(alpha: 0.92),
-                            fontWeight: FontWeight.w900,
-                          ),
-                    ),
-                  ),
-                  Center(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        widget.symbol,
-                        style: TextStyle(
-                          fontSize: widget.compact ? 66 : 92,
-                          fontWeight: FontWeight.w900,
-                          height: 1,
-                          color: KidPalette.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  List<Color> _paletteFor(int index) {
-    switch (index % 4) {
-      case 0:
-        return const [KidPalette.blue, KidPalette.blueDark];
-      case 1:
-        return const [KidPalette.coral, KidPalette.coralDark];
-      case 2:
-        return const [KidPalette.mint, KidPalette.mintDark];
-      default:
-        return const [KidPalette.lilac, Color(0xFFA28CF5)];
-    }
   }
 }
 

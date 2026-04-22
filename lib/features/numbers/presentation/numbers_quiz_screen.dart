@@ -36,6 +36,7 @@ class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
   bool _feedbackVisible = false;
   bool _feedbackCorrect = false;
   bool _isResolvingChoice = false;
+  String? _lastChoiceSymbol;
   String? _lastPromptKey;
 
   @override
@@ -67,6 +68,7 @@ class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
     _feedbackVisible = false;
     _feedbackCorrect = false;
     _isResolvingChoice = false;
+    _lastChoiceSymbol = null;
     _lastPromptKey = null;
   }
 
@@ -186,6 +188,7 @@ class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
                 _feedbackVisible = false;
                 _feedbackCorrect = false;
                 _isResolvingChoice = false;
+                _lastChoiceSymbol = null;
                 _lastPromptKey = null;
               }),
             );
@@ -353,6 +356,13 @@ class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
                                         compact: isCompact,
                                         accentIndex: i,
                                         disabled: _isResolvingChoice,
+                                        feedback: _feedbackFor(
+                                          choices[i].symbol,
+                                        ),
+                                        hintPulse: !_feedbackVisible &&
+                                            !_isResolvingChoice &&
+                                            question.symbol ==
+                                                choices[i].symbol,
                                         onTap: () =>
                                             _selectChoice(choice: choices[i]),
                                       ),
@@ -394,6 +404,7 @@ class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
 
     setState(() {
       _feedbackCorrect = result.isCorrect;
+      _lastChoiceSymbol = choice.symbol;
       _feedbackVisible = settings.effectsEnabled;
       _isResolvingChoice = true;
     });
@@ -452,7 +463,17 @@ class _NumbersQuizScreenState extends State<NumbersQuizScreen> {
       _session = nextSession;
       _feedbackVisible = false;
       _isResolvingChoice = false;
+      _lastChoiceSymbol = null;
     });
+  }
+
+  PlayChoiceCardFeedback _feedbackFor(String symbol) {
+    if (!_feedbackVisible || _lastChoiceSymbol != symbol) {
+      return PlayChoiceCardFeedback.none;
+    }
+    return _feedbackCorrect
+        ? PlayChoiceCardFeedback.correctTapped
+        : PlayChoiceCardFeedback.wrongTapped;
   }
 
   String _displayNameFor(NumbersCard question) {

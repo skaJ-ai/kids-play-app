@@ -37,6 +37,7 @@ class _HangulQuizScreenState extends State<HangulQuizScreen> {
   bool _feedbackVisible = false;
   bool _feedbackCorrect = false;
   bool _isResolvingChoice = false;
+  String? _lastChoiceSymbol;
   List<String> _recentMistakes = const [];
   String? _lastPromptKey;
 
@@ -66,6 +67,7 @@ class _HangulQuizScreenState extends State<HangulQuizScreen> {
       _feedbackVisible = false;
       _feedbackCorrect = false;
       _isResolvingChoice = false;
+      _lastChoiceSymbol = null;
       _recentMistakes = const [];
       _lastPromptKey = null;
       _lessonFuture = _loadLesson();
@@ -163,6 +165,7 @@ class _HangulQuizScreenState extends State<HangulQuizScreen> {
                 _feedbackVisible = false;
                 _feedbackCorrect = false;
                 _isResolvingChoice = false;
+                _lastChoiceSymbol = null;
                 _recentMistakes = const [];
                 _lastPromptKey = null;
               }),
@@ -326,6 +329,13 @@ class _HangulQuizScreenState extends State<HangulQuizScreen> {
                                         compact: isCompact,
                                         accentIndex: i,
                                         disabled: _isResolvingChoice,
+                                        feedback: _feedbackFor(
+                                          choices[i].symbol,
+                                        ),
+                                        hintPulse: !_feedbackVisible &&
+                                            !_isResolvingChoice &&
+                                            question.symbol ==
+                                                choices[i].symbol,
                                         onTap: () => _selectChoice(
                                           choice: choices[i],
                                           answer: question,
@@ -371,6 +381,7 @@ class _HangulQuizScreenState extends State<HangulQuizScreen> {
       _correctCount = nextCorrectCount;
       _recentMistakes = nextMistakes;
       _feedbackCorrect = isCorrect;
+      _lastChoiceSymbol = choice.symbol;
       _feedbackVisible = settings.effectsEnabled;
       _isResolvingChoice = true;
     });
@@ -421,6 +432,7 @@ class _HangulQuizScreenState extends State<HangulQuizScreen> {
         _feedbackVisible = false;
         _isResolvingChoice = false;
         _isComplete = true;
+        _lastChoiceSymbol = null;
       });
       return;
     }
@@ -432,7 +444,17 @@ class _HangulQuizScreenState extends State<HangulQuizScreen> {
       _questionIndex += 1;
       _feedbackVisible = false;
       _isResolvingChoice = false;
+      _lastChoiceSymbol = null;
     });
+  }
+
+  PlayChoiceCardFeedback _feedbackFor(String symbol) {
+    if (!_feedbackVisible || _lastChoiceSymbol != symbol) {
+      return PlayChoiceCardFeedback.none;
+    }
+    return _feedbackCorrect
+        ? PlayChoiceCardFeedback.correctTapped
+        : PlayChoiceCardFeedback.wrongTapped;
   }
 
   List<HangulCard> _buildChoices(
